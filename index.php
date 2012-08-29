@@ -141,11 +141,17 @@
                         <br />
                         Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.
                 </div> <!-- post Title -->
-                <div class="postLinks">
-                    <a href="#"><img src="/img/png/glyphicons_245_chat.png" /></a><a href="#"><img src="/img/png/glyphicons_152_new_window.png" /></a><a href="#"><img src="/img/png/glyphicons_397_rss.png" /></a>
-                    <span class="preComment">
-                        <a href="#"><img src="/img/png/glyphicons_309_comments.png" />&nbsp17</a><a href="#"><img src="/img/png/glyphicons_343_thumbs_up.png" />&nbsp;6</a>
-                    </span>
+                <div class="postActions">
+                        <ul class="postActionButtons">
+                            <li><a href="#"><i class="icons i-share"></i></a></li>
+                            <li><a href="#"><i class="icons i-subscribe"></i></a></li>
+                            <li><a href="#"><i class="icons i-like"></i></a></li>
+                        </ul>
+                        <ul class="postActionInfo">
+                            <li class="icons i-comments"><a href="#">1</a></li>
+                            <li class="icons i-subscribers"><a href="#">1</a></li>
+                            <li class="icons i-likes"><a href="#">67</a></li>
+                        </ul>
                 </div> <!-- post action links -->
                 <div class="indentedComment widgetOuterBox">
                     <ul class="commentList contentArea commentBG">
@@ -225,11 +231,17 @@
                         <a href="#">Luxurious Houses</a>, expensive villas, beach maisons in Dubai, Caribic, Hawai, Barbados, Europe, California and Florida ...
                     </p> <!-- post description -->
                 </article> <!-- post content -->
-                <div class="postLinks">
-                    <a href="#"><img src="/img/png/glyphicons_245_chat.png" /></a><a href="#"><img src="/img/png/glyphicons_152_new_window.png" /></a><a href="#"><img src="/img/png/glyphicons_397_rss.png" /></a>
-                    <span class="preComment">
-                        <a href="#"><img src="/img/png/glyphicons_309_comments.png" />&nbsp17</a><a href="#"><img src="/img/png/glyphicons_343_thumbs_up.png" />&nbsp;6</a>
-                    </span>
+                <div class="postActions">
+                        <ul class="postActionButtons">
+                            <li><a href="#"><i class="icons i-share"></i></a></li>
+                            <li><a href="#"><i class="icons i-subscribe"></i></a></li>
+                            <li><a href="#"><i class="icons i-like"></i></a></li>
+                        </ul>
+                        <ul class="postActionInfo">
+                            <li class="icons i-comments"><a href="#">1</a></li>
+                            <li class="icons i-subscribers"><a href="#">1</a></li>
+                            <li class="icons i-likes"><a href="#">67</a></li>
+                        </ul>
                 </div> <!-- post action links -->
                 <div class="indentedComment widgetOuterBox">
                     <ul class="commentList contentArea commentBG">
@@ -350,11 +362,17 @@
                     </div> <!-- post description -->
 <!--                            <p><span class="number" style="position:absolute;right:0;bottom:0">$1,525,000</span></p>-->
                 </article> <!-- post content -->
-                <div class="postLinks">
-                    <a href="#"><img src="/img/png/glyphicons_245_chat.png" /></a><a href="#"><img src="/img/png/glyphicons_152_new_window.png" /></a><a href="#"><img src="/img/png/glyphicons_397_rss.png" /></a>
-                    <span class="preComment">
-                        <a href="#"><img src="/img/png/glyphicons_309_comments.png" />&nbsp17</a><a href="#"><img src="/img/png/glyphicons_343_thumbs_up.png" />&nbsp;6</a>
-                    </span>
+                <div class="postActions">
+                        <ul class="postActionButtons">
+                            <li><a href="#"><i class="icons i-share"></i></a></li>
+                            <li><a href="#"><i class="icons i-subscribe"></i></a></li>
+                            <li><a href="#"><i class="icons i-like"></i></a></li>
+                        </ul>
+                        <ul class="postActionInfo">
+                            <li class="icons i-comments"><a href="#">1</a></li>
+                            <li class="icons i-subscribers"><a href="#">1</a></li>
+                            <li class="icons i-likes"><a href="#">67</a></li>
+                        </ul>
                 </div> <!-- post action links -->
                 <div class="indentedComment widgetOuterBox">
                     <ul class="commentList contentArea commentBG">
