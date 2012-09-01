@@ -1,8 +1,6 @@
 <?
 $domParts = explode('.', $_SERVER['HTTP_HOST']);
-
 $dom      = 'http://' . $domParts[1] . '.' . $domParts[2];
-echo $dom;
 ?>
 <!DOCTYPE html>
 <html>    
