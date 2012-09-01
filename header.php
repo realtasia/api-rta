@@ -1,6 +1,8 @@
 <?
 $domParts = explode('.', $_SERVER['SERVER_NAME']);
-$dom      = 'http://' . $domParts[1] . '.' . $domParts[2];
+$domain = preg_replace("/[^A-Za-z0-9?!]/",'',$domParts[1]);
+
+$dom      = 'http://' . $domain . '.' . $domParts[2];
 echo $dom;
 ?>
 <!DOCTYPE html>
