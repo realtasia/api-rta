@@ -128,8 +128,6 @@ BODY
 }
 /*[clearfix]*/.listing
 {
-	width: 554px;
-	=width: 555px;
 	height: 100%;
 }
 .contentBox .widgetOuterBox
@@ -171,7 +169,6 @@ BODY
 {
 	/*[disabled]left:180px;*/
 	height: auto;
-	width: 380px;
 	padding: 5px;
 	margin-left: 165px;
 	right: 0;
@@ -271,9 +268,8 @@ BODY
 	border: 1px solid #DEDEDE;
 	display: block;
 	height: 20px;
-	color: #858585;
-	right: 15px;
-	top: 17px;
+	right: 6px;
+	top: 34px;
 	/*+text-shadow:1px 1px #FFFFFF;*/
 	-moz-text-shadow: 1px 1px #FFFFFF;
 	-webkit-text-shadow: 1px 1px #FFFFFF;
@@ -306,18 +302,19 @@ BODY
 }
 /*[clearfix]*/UL.listingData
 {
-	margin-top: 15px;
+	margin-top: 5px;
 	padding: 5px 5px 5px 0;
 	margin-left: 0px;
-	margin-bottom: 5px;
+	margin-bottom: 30px;
 	height: 40px;
 }
 UL.listingData LI
 {
-	width: 110px;
-	float: left;
-	padding-left: 35px;
-	margin-right: 10px;
+	/*[disabled]width:95px;*/
+	/*[disabled]float:left;*/
+	/*[disabled]clear:left;*/
+	padding-left: 30px;
+	margin-right: 5px;
 	list-style: none;
 	min-height: 20px;
 	margin-bottom: 2px;
@@ -371,20 +368,10 @@ LI.bedrooms
 	text-align: left;
 	font-size: 0.9em;
 }
-.listing .postActions
+.postActions
 {
 	border-top: 1px solid #E2E3E4;
-	width: 551px;
-}
-.postActionButtons, .postActionInfo, .postComments, .commentInline
-{
-	list-style: none;
-	display: -moz-inline-stack;
-	display: inline-block;
-	vertical-align: top;
-	margin: 0;
-	zoom: 1;
-	=display: inline;
+	width: 100%;
 	position: relative;
 }
 .postActionButtons
@@ -402,19 +389,12 @@ LI.bedrooms
 }
 .listing .postActionInfo
 {
-	display: inline-block;
-	top: 10px;
-	position: relative;
+	top: 30px;
+	position: absolute;
 	right: 0;
-	width: 50%;
+	/*[disabled]width:50%;*/
 	text-align: right;
-	display: inline;
-	display: inline-block;
-	=right: -115px;
-	=top: -25px;
-	margin-left: 155px;
 	padding: 2px;
-	=margin-bottom: -20px;
 }
 .postActionButtons LI, .postActionInfo LI, .commentInline LI
 {
@@ -510,7 +490,6 @@ LI.postCommentLast
 }
 .listing .commentBody
 {
-	width: 385px;
 	min-height: 42px;
 	text-align: left;
 }
@@ -519,13 +498,18 @@ LI.postCommentLast
 	text-align: left;
 	display: block;
 }
-.commentActions
+LI.commentActions
 {
-	width: 60px;
-	padding: 0px;
+	width: auto;
+	padding: 2px 0px 0px 20px;
 	display: inline\0/;
 	display: inline-block;
-	margin-left: 10px;
+	position: absolute;
+	right: 1px;
+	top: -3px;
+	text-align: right;
+	height: 100%;
+	margin: 0px !important;
 }
 .commentActions I.icons
 {
@@ -537,7 +521,7 @@ LI.postCommentLast
 .commentBody P
 {
 	margin: 0px;
-	padding: 0px;
+	padding: 0px 0 0px 0px;
 	text-align: left;
 	color: #444;
 	line-height: 1.5;
@@ -545,7 +529,10 @@ LI.postCommentLast
 LI.commentTextarea
 {
 	border: 1px solid #DEDEDE;
-	width: 462px;
+	position: absolute;
+	/*[disabled]width:462px;*/
+	right: 5px;
+	left: 55px;
 	height: auto;
 	padding: 0;
 	margin: 4px 0px 0px 5px;

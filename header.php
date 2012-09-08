@@ -7,15 +7,16 @@ $dom      = 'http://' . $domParts[1] . '.' . $domParts[2];
     <head>
         <title>Aishwarya Rai</title>
         <!--[if IE]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
-        <link rel="stylesheet" type="text/css" href="<?php echo $dom?>/common/css/bootstrap.css" />        
+        <link rel="stylesheet" type="text/css" href="<?php echo $dom ?>/common/css/bootstrap.min.css" />        
         <link rel="stylesheet" type="text/css" href="/css/style.css" />
         <link rel="stylesheet" type="text/css" href="/css/bubbletip.css" />
         <link rel="stylesheet" type="text/css" href="/css/bubbletip-IE.css" />
         <link rel="stylesheet" type="text/css" href="/css/RTA.css" />
-        <script type="text/javascript" src="<?php echo $dom?>/common/js/jquery.min.js"></script>
-        <script type="text/javascript" src="<?php echo $dom?>/common/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="<?php echo $dom ?>/common/js/jquery.min.js"></script>
+        <script type="text/javascript" src="<?php echo $dom ?>/common/js/bootstrap.min.js"></script>
         <script type="text/javascript" src="/js/jQuery.bubbletip-1.1.0.js"></script>
         <script type="text/javascript" src="/js/dropdown.min.js"></script>
+        <script type="text/javascript" src="<?php echo $dom ?>/common/js/jquery.placeholder.min.js"></script>
         <title></title>
         <!--[if IE]>
         <link rel="stylesheet" type="text/css" href="/css/bubbletip-IE.css" />

@@ -14,19 +14,29 @@
         </div> <!--  introcontent -->
         <div class="outerBox">
             <div class="contentArea">
-                <h5>What's New?</h5>
                 <div id="statusFormTA">
-                    <textarea id="statusFormTextarea"></textarea>
+                    <textarea id="statusFormTextarea" placeholder="What's New"></textarea>
                 </div>
             </div>
         </div> <!--  status form -->
         <div id="theLoop">
-            <div class="dropdown" id="sortButtonDiv">
-                <a  class="dropdown-toggle" data-toggle="dropdown" href="#" id="sortButton">&nbsp;Sort&nbsp;<b class="caret"></b></a>
-                <ul class="dropdown-menu">
-                    <li><a href="#sortNewest" id="sortNewest">Newest</a></li>
-                    <li><a href="#sortPopular" id="sortPopular">Popular</a></li>
-                </ul>
+            <div class="dropdown" id="feedActionDiv">
+                
+                <div id="filterButtonDiv" class="dropdown">
+                    <a data-toggle="dropdown" class="dropdown-toggle" id="filterButton" href="#">Show:&nbsp;<span class="dropDownSelected">All</span>&nbsp;<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#sortNewest" id="sortNewest">Newest</a></li>
+                        <li><a href="#sortPopular" id="sortPopular">Popular</a></li>
+                    </ul>                    
+                </div>                
+                
+                <div id="sortButtonDiv" class="dropdown">
+                    <button data-toggle="dropdown" class="btn btn-small dropdown-toggle" id="sortButton">Sort:&nbsp;<span class="sortSelected">Popular</span>&nbsp;<span class="caret"></span></button>
+                    <ul class="dropdown-menu">
+                        <li><a href="#sortNewest" id="sortNewest">Newest</a></li>
+                        <li><a href="#sortPopular" id="sortPopular">Popular</a></li>
+                    </ul>                    
+                </div>
             </div> <!--  sort button & result count -->
             <article class="postFeed">
                 <div class="dropdown postSettings">
@@ -65,16 +75,16 @@
                     </p> <!-- post description -->
                 </article> <!-- post content -->
                 <div class="postActions">
-                        <ul class="postActionButtons">
-                            <li><a href="#"><i class="icons i-share"></i></a></li>
-                            <li><a href="#"><i class="icons i-subscribe"></i></a></li>
-                            <li><a href="#"><i class="icons i-like"></i></a></li>
-                        </ul>
-                        <ul class="postActionInfo">
-                            <li class="icons i-comments"><a href="#">1</a></li>
-                            <li class="icons i-subscribers"><a href="#">1</a></li>
-                            <li class="icons i-likes"><a href="#">67</a></li>
-                        </ul>
+                    <ul class="postActionButtons">
+                        <li><a href="#"><i class="icons i-share"></i></a></li>
+                        <li><a href="#"><i class="icons i-subscribe"></i></a></li>
+                        <li><a href="#"><i class="icons i-like"></i></a></li>
+                    </ul>
+                    <ul class="postActionInfo">
+                        <li class="icons i-comments"><a href="#">1</a></li>
+                        <li class="icons i-subscribers"><a href="#">1</a></li>
+                        <li class="icons i-likes"><a href="#">67</a></li>
+                    </ul>
                 </div> <!-- post action links -->
                 <div class="indentedComment widgetOuterBox">
                     <ul class="commentList contentArea commentBG">
@@ -113,7 +123,7 @@
                             </ul> <!-- comment inline -->
                         </li> <!-- comment -->
                         <li class="commentForm contentArea contentNoBottom commentBG">
-                            <textarea></textarea>
+                            <textarea placeholder="Write your comment"></textarea>
                         </li> <!-- comment form-->
                     </ul> <!-- comments -->
                 </div> <!-- comment OuterBox-->
@@ -142,16 +152,16 @@
                         Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.
                 </div> <!-- post Title -->
                 <div class="postActions">
-                        <ul class="postActionButtons">
-                            <li><a href="#"><i class="icons i-share"></i></a></li>
-                            <li><a href="#"><i class="icons i-subscribe"></i></a></li>
-                            <li><a href="#"><i class="icons i-like"></i></a></li>
-                        </ul>
-                        <ul class="postActionInfo">
-                            <li class="icons i-comments"><a href="#">1</a></li>
-                            <li class="icons i-subscribers"><a href="#">1</a></li>
-                            <li class="icons i-likes"><a href="#">67</a></li>
-                        </ul>
+                    <ul class="postActionButtons">
+                        <li><a href="#"><i class="icons i-share"></i></a></li>
+                        <li><a href="#"><i class="icons i-subscribe"></i></a></li>
+                        <li><a href="#"><i class="icons i-like"></i></a></li>
+                    </ul>
+                    <ul class="postActionInfo">
+                        <li class="icons i-comments"><a href="#">1</a></li>
+                        <li class="icons i-subscribers"><a href="#">1</a></li>
+                        <li class="icons i-likes"><a href="#">67</a></li>
+                    </ul>
                 </div> <!-- post action links -->
                 <div class="indentedComment widgetOuterBox">
                     <ul class="commentList contentArea commentBG">
@@ -190,7 +200,7 @@
                             </ul> <!-- comment inline -->
                         </li> <!-- comment -->
                         <li class="commentForm contentArea contentNoBottom commentBG">
-                            <textarea></textarea>
+                            <textarea placeholder="Write your comment"></textarea>
                         </li> <!-- comment form-->
                     </ul> <!-- comments -->
                 </div> <!-- comment OuterBox-->
@@ -232,16 +242,16 @@
                     </p> <!-- post description -->
                 </article> <!-- post content -->
                 <div class="postActions">
-                        <ul class="postActionButtons">
-                            <li><a href="#"><i class="icons i-share"></i></a></li>
-                            <li><a href="#"><i class="icons i-subscribe"></i></a></li>
-                            <li><a href="#"><i class="icons i-like"></i></a></li>
-                        </ul>
-                        <ul class="postActionInfo">
-                            <li class="icons i-comments"><a href="#">1</a></li>
-                            <li class="icons i-subscribers"><a href="#">1</a></li>
-                            <li class="icons i-likes"><a href="#">67</a></li>
-                        </ul>
+                    <ul class="postActionButtons">
+                        <li><a href="#"><i class="icons i-share"></i></a></li>
+                        <li><a href="#"><i class="icons i-subscribe"></i></a></li>
+                        <li><a href="#"><i class="icons i-like"></i></a></li>
+                    </ul>
+                    <ul class="postActionInfo">
+                        <li class="icons i-comments"><a href="#">1</a></li>
+                        <li class="icons i-subscribers"><a href="#">1</a></li>
+                        <li class="icons i-likes"><a href="#">67</a></li>
+                    </ul>
                 </div> <!-- post action links -->
                 <div class="indentedComment widgetOuterBox">
                     <ul class="commentList contentArea commentBG">
@@ -280,7 +290,7 @@
                             </ul> <!-- comment inline -->
                         </li> <!-- comment -->
                         <li class="commentForm contentArea contentNoBottom commentBG">
-                            <textarea></textarea>
+                            <textarea placeholder="Write your comment"></textarea>
                         </li> <!-- comment form-->
                     </ul> <!-- comments -->
                 </div> <!-- comment OuterBox-->
@@ -339,40 +349,46 @@
                 <div class="postTitle">
                     <a href="#">Pretty Gal</a> posted a listing for <b>Sale</b> in <a href="#">Lakepoint Condominium</a>
                 </div> <!-- post Title -->
-                <article class="postContent">
-                    <ul class="postThumbnail thumbnails">
-                        <li>
-                            <div href="#" class="thumbnail">
-                                <a href="#">
-                                    <img src="/img/prop1.jpg" style="width:120px;height:100px;" />
-                                </a>
-                                <span class="thumbLinks"><a href="#">5 Images</a> &middot; <a href="#">1 Video</a></span>
-                            </div>
-                        </li>
-                    </ul> <!-- post thumbnail -->
-                    <div class="thumbPostDesc">
-                        <div class="spanContentPrice"><span class="number" style="font-size:1.2em">$1,525,000</span></div>
-                        <div class="spanContentHeader"><span class="number">3</span> bdr, <span class="number">3</span> toilets, <span class="number">2,275</span> sqft <b>penthouse</b></div>
-                        <!--                                <ul>
-                                                            <li>2,275 sqft</li>
-                                                            <li>$419 psf</li>
-                                                            <li>Fully Furnished</li>
-                                                        </ul>-->
-                        <p class="spanContent">A wonderful home to come back to. Two balconies in this spacious unit, extending from the living area to the master bedroom. It also has 3 toilets and a utility room.</p>
-                    </div> <!-- post description -->
-<!--                            <p><span class="number" style="position:absolute;right:0;bottom:0">$1,525,000</span></p>-->
-                </article> <!-- post content -->
+                <div class="widgetOuterBox relative isListing">
+                    <article class="contentArea widgetContentBG listing relative">
+                        <div class="mainListingContent">
+                            <div class="listingLeft relative">
+                                <div class="thumbnail ">
+                                    <img src="/images/imphoto.jpg">
+                                </div>
+                                <span class="thumbInfo imgInfo"><a href="#">15</a></span>
+                                <span class="thumbInfo vidInfo"><a href="#">1</a></span>
+                            </div> <!-- listings thumbnail -->
+                            <div class="listingRight relative">
+                                <h3><a href="#">Carribean @ Keppel Bay</a></h3>
+                                <span class="price relative">
+                                    <span class="listingType">FOR<br />SALE</span>
+                                    $200,000,000
+                                </span>
+                                <ul class="listingData">
+                                    <li class="sqft">8,000 sqft</li>
+                                    <li class="bathrooms">3 toilets</li>
+                                    <li class="bedrooms">3 bedrooms</li>
+                                    <li class="proptype"></li>
+                                </ul>
+                                <p>
+                                    Need 1 Billion to vote for Palestine Google is having a vote on whether to name Israel or Palestine on its map on Google earth please vote for Palestine and share.
+                                </p>
+                            </div> <!-- listings content -->
+                        </div>
+                    </article>
+                </div>
                 <div class="postActions">
-                        <ul class="postActionButtons">
-                            <li><a href="#"><i class="icons i-share"></i></a></li>
-                            <li><a href="#"><i class="icons i-subscribe"></i></a></li>
-                            <li><a href="#"><i class="icons i-like"></i></a></li>
-                        </ul>
-                        <ul class="postActionInfo">
-                            <li class="icons i-comments"><a href="#">1</a></li>
-                            <li class="icons i-subscribers"><a href="#">1</a></li>
-                            <li class="icons i-likes"><a href="#">67</a></li>
-                        </ul>
+                    <ul class="postActionButtons">
+                        <li><a href="#"><i class="icons i-share"></i></a></li>
+                        <li><a href="#"><i class="icons i-subscribe"></i></a></li>
+                        <li><a href="#"><i class="icons i-like"></i></a></li>
+                    </ul>
+                    <ul class="postActionInfo">
+                        <li class="icons i-comments"><a href="#">1</a></li>
+                        <li class="icons i-subscribers"><a href="#">1</a></li>
+                        <li class="icons i-likes"><a href="#">67</a></li>
+                    </ul>
                 </div> <!-- post action links -->
                 <div class="indentedComment widgetOuterBox">
                     <ul class="commentList contentArea commentBG">
@@ -411,11 +427,12 @@
                             </ul> <!-- comment inline -->
                         </li> <!-- comment -->
                         <li class="commentForm contentArea commentBG">
-                            <textarea></textarea>
+                            <textarea placeholder="Write your comment"></textarea>
                         </li> <!-- comment form-->
                     </ul> <!-- comments -->
                 </div> <!-- comment OuterBox-->
             </article> <!--  listing -->
+
         </div> <!--  theLoop -->
     </div>
     <? include('rightbar.php') ?>
@@ -546,7 +563,10 @@
                         </div> <!-- listings thumbnail -->
                         <div class="listingRight relative">
                             <h3><a href="#">Carribean @ Keppel Bay</a></h3>
-                            <span class="price relative"><span class="listingType">FOR<br />SALE</span>$200,000,000</span>
+                            <span class="price relative">
+                                <span class="listingType">FOR<br />SALE</span>
+                                $200,000,000
+                            </span>
                             <ul class="listingData">
                                 <li class="sqft">8,000 sqft</li>
                                 <li class="bathrooms">3 toilets</li>
@@ -584,7 +604,7 @@
                                         <a class="commentAuthor" href="#">Susan Doyle</a>
                                         <p>
                                             Need 1 Billion to vote for Palestine Google is having a vote on whether to name israel or Palestine on its map on Google earth please vote for Palestine and share.
-                                            <div class="commentInfo"><span class="timeAgo">27 minutes ago</span></div>
+                                        <div class="commentInfo"><span class="timeAgo">27 minutes ago</span></div>
                                         </p>
 
                                     </li>
@@ -598,7 +618,7 @@
                                         <a class="commentAuthor" href="#">Susan Doyle</a>
                                         <p>
                                             Need 1 Billion to vote for Palestine Google.
-                                            <div class="commentInfo"><span class="timeAgo">27 minutes ago</span></div>
+                                        <div class="commentInfo"><span class="timeAgo">27 minutes ago</span></div>
                                         </p>
 
                                     </li>
@@ -668,7 +688,7 @@
                                         <a class="commentAuthor" href="#">Susan Doyle</a>
                                         <p>
                                             Need 1 Billion to vote for Palestine Google is having a vote on whether to name israel or Palestine on its map on Google earth please vote for Palestine and share.
-                                            <div class="commentInfo"><span class="timeAgo">27 minutes ago</span></div>
+                                        <div class="commentInfo"><span class="timeAgo">27 minutes ago</span></div>
                                         </p>
 
                                     </li>
@@ -683,7 +703,7 @@
                                         <a class="commentAuthor" href="#">Susan Doyle</a>
                                         <p>
                                             Need 1 Billion to vote for Palestine Google.
-                                            <div class="commentInfo"><span class="timeAgo">27 minutes ago</span></div>
+                                        <div class="commentInfo"><span class="timeAgo">27 minutes ago</span></div>
                                         </p>
 
                                     </li>
