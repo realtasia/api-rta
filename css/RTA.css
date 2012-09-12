@@ -5,7 +5,7 @@ Author     : jj
 Description:
 Purpose of the stylesheet follows.
 
-icons (i-)*/
+Common*/
 /*+clearfix {*/
 .listing:after, .mainListingContent:after, UL.listingData:after, .postedBy:after
 {
@@ -28,75 +28,6 @@ icons (i-)*/
 	-height: 1px;
 }
 /*+}*/
-.icons
-{
-	background: url("/images/csg-5024a4f39bd77.png") no-repeat top left;
-	display: block;
-}
-.icons.i-coBroke
-{
-	background-position: 0 0;
-	width: 24px;
-	height: 22px;
-	margin-top: -1px;
-}
-.icons.i-coBrokeActive
-{
-	background-position: -74px 0;
-	width: 24px;
-	height: 22px;
-	margin-top: -1px;
-}
-.icons.i-like
-{
-	background-position: -148px 0;
-	width: 20px;
-	height: 17px;
-}
-.icons.i-likeActive, .icons.i-like:hover
-{
-	background-position: -218px 0;
-	width: 20px;
-	height: 17px;
-}
-.icons.i-share
-{
-	background-position: -288px 0;
-	width: 30px;
-	height: 16px;
-	margin-top: 1px;
-}
-.icons.i-shareActive, .icons.i-share:hover
-{
-	background-position: -368px 0;
-	width: 30px;
-	height: 16px;
-}
-.icons.i-subscribe
-{
-	background-position: -448px 0;
-	width: 18px;
-	height: 17px;
-}
-.icons.i-subscribeActive, .icons.i-subscribe:hover
-{
-	background-position: -516px 0;
-	width: 18px;
-	height: 17px;
-}
-.icons.i-subscribers
-{
-	background: url("/images/subscribers.png") no-repeat -2% 5px;
-}
-.icons.i-comments
-{
-	background: url("/images/comments.png") no-repeat 0% 5px;
-}
-.icons.i-likes
-{
-	background: url("/images/likes.png") no-repeat 0px 4px;
-}
-/*Common*/
 BODY
 {
 	padding-top: 44px;
@@ -121,7 +52,6 @@ BODY
 }
 #resultCount
 {
-	width: 50%;
 	left: 0;
 	margin: -10px 0 0 5px;
 	padding: 0px;
@@ -138,7 +68,7 @@ BODY
 {
 	padding: 0px;
 	margin: 0px;
-	padding-bottom: 10px;
+	padding-bottom: 5px;
 	display: block;
 }
 .mainListingContent P
@@ -313,7 +243,7 @@ UL.listingData LI
 	/*[disabled]width:95px;*/
 	/*[disabled]float:left;*/
 	/*[disabled]clear:left;*/
-	padding-left: 30px;
+	padding-left: 22px;
 	margin-right: 5px;
 	list-style: none;
 	min-height: 20px;
@@ -322,7 +252,7 @@ UL.listingData LI
 }
 LI.sqft
 {
-	background: url("/images/sqft.png") no-repeat 5px;
+	background: url("/images/sqft.png") no-repeat;
 }
 LI.bathrooms
 {
@@ -335,7 +265,7 @@ LI.bedrooms
 /*[clearfix]*/.postedBy
 {
 	position: relative;
-	top: 0;
+	bottom: 0;
 	right: 25px;
 	min-width: 100%;
 	width: auto;
@@ -380,22 +310,6 @@ LI.bedrooms
 	left: 0;
 	margin: 0px;
 }
-.postActionButtons .i-like
-{
-	/*+placement:shift -8px 0px;*/
-	position: relative;
-	left: -8px;
-	top: 0px;
-}
-.listing .postActionInfo
-{
-	top: 30px;
-	position: absolute;
-	right: 0;
-	/*[disabled]width:50%;*/
-	text-align: right;
-	padding: 2px;
-}
 .postActionButtons LI, .postActionInfo LI, .commentInline LI
 {
 	list-style: none;
@@ -408,20 +322,13 @@ LI.bedrooms
 }
 .postActionButtons LI
 {
-	width: 18px;
-	padding: 3px;
-	margin: 5px;
-}
-.postActionInfo LI
-{
-	min-width: 31px;
-	padding: 0 3px 0 0;
-	padding-left: 13px;
+	padding: 3px 3px 0;
+	margin: 3px 3px 0;
 }
 .postActionInfo LI A
 {
-	padding: 0px;
-	margin: 0px;
+	padding: 0;
+	margin: 0 10px 0 0;
 	font-size: 0.9em;
 }
 /*comments*/
@@ -433,10 +340,11 @@ LI.bedrooms
 	height: 100%;
 	background-color: #F3F3F3;
 	margin: 0 auto;
+	border-right: 1px solid #E2E3E4;
 }
 .comments
 {
-	margin: 5px 0px 0px !important;
+	margin: 0px !important;
 	/*+box-shadow:none;*/
 	-moz-box-shadow: none;
 	-webkit-box-shadow: none;
@@ -501,15 +409,17 @@ LI.postCommentLast
 LI.commentActions
 {
 	width: auto;
-	padding: 2px 0px 0px 20px;
-	display: inline\0/;
+	min-width: 36px;
+	display: inline;
 	display: inline-block;
 	position: absolute;
 	right: 1px;
-	top: -3px;
-	text-align: right;
+	top: -2px;
+	text-align: left;
 	height: 100%;
 	margin: 0px !important;
+	line-height: 2;
+	font-size: 0.9em;
 }
 .commentActions I.icons
 {
@@ -526,11 +436,15 @@ LI.commentActions
 	color: #444;
 	line-height: 1.5;
 }
+.commentBody
+{
+	line-height: 1.5;
+	/*[disabled]max-width:300px;*/
+}
 LI.commentTextarea
 {
 	border: 1px solid #DEDEDE;
 	position: absolute;
-	/*[disabled]width:462px;*/
 	right: 5px;
 	left: 55px;
 	height: auto;

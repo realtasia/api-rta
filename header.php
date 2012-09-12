@@ -6,8 +6,8 @@ $dom      = 'http://' . $domParts[1] . '.' . $domParts[2];
 <html>    
     <head>
         <title>Aishwarya Rai</title>
-        <!--[if IE]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
         <link rel="stylesheet" type="text/css" href="<?php echo $dom ?>/common/css/bootstrap.min.css" />        
+        <link rel="stylesheet" type="text/css" href="/css/icons.css" />
         <link rel="stylesheet" type="text/css" href="/css/style.css" />
         <link rel="stylesheet" type="text/css" href="/css/bubbletip.css" />
         <link rel="stylesheet" type="text/css" href="/css/bubbletip-IE.css" />
@@ -17,7 +17,6 @@ $dom      = 'http://' . $domParts[1] . '.' . $domParts[2];
         <script type="text/javascript" src="/js/jQuery.bubbletip-1.1.0.js"></script>
         <script type="text/javascript" src="/js/dropdown.min.js"></script>
         <script type="text/javascript" src="<?php echo $dom ?>/common/js/jquery.placeholder.min.js"></script>
-        <title></title>
         <!--[if IE]>
         <link rel="stylesheet" type="text/css" href="/css/bubbletip-IE.css" />
         <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -27,9 +26,7 @@ $dom      = 'http://' . $domParts[1] . '.' . $domParts[2];
                 $('input, textarea').placeholder();
             });
         </script>        
-        <![endif]-->
-        <!--<link rel="stylesheet" type="text/css" href="/css/style.css" />-->        
-
+        <![endif]-->       
         <script type="text/javascript" src="/js/script.js"></script>		
     </head>
     <body>
@@ -45,11 +42,6 @@ $dom      = 'http://' . $domParts[1] . '.' . $domParts[2];
                         </ul>                       
                         <div class="nav-collapse">
                             <ul class="nav" id="mainNav">
-                                <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                                    <span class="icon-bar"></span>
-                                    <span class="icon-bar"></span>
-                                    <span class="icon-bar"></span>
-                                </a>                             
                                 <li class="dropdown accountBtnLi">
                                     <div class="dropdown" id="accountDiv">
                                         <img style="padding:2px;background-color: #bbb;vertical-align: bottom;line-height:normal;float: left;" src="/img/thumbs/1.jpg" width="35" height="35">
@@ -63,7 +55,6 @@ $dom      = 'http://' . $domParts[1] . '.' . $domParts[2];
                                             <li><a href="#navLogOut" id="navLogOut">Log Out</a></li>
                                         </ul>     
                                     </div>
-
                                 </li>
                             </ul>
                         </div><!-- /.nav-collapse -->

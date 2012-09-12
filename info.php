@@ -1,7 +1,7 @@
 <? include('header.php') ?>   
 <div id="container">
     <? include('leftbar.php') ?>
-    <div id="contentArea">
+    <div id="contentArea" class="centerContent">
         <div id="introContent">
             <h2>Aishwarya Rai</h2>
             <div class="pageInfo"><span class="pageType">Director, Regional Sales & Marketing</span> at <span class="parentDesc"><a href="#">DTZ Debenham Tie Leung</a></span></div>
@@ -14,27 +14,28 @@
         </div>
         <div class="infoContent">
             <h6 class="wrapperHeader"><img src="/img/png/glyphicons_352_nameplate.png" /><p>Personal & Contact Details</p></h6>
-            <ul class="infoLists">
-                <li><img src="/img/png/glyphicons_139_phone.png" width="8" /><p><b>Mobile:</b> +65 89259845 &middot; <b>Fax:</b> +65 68524563</li>
-                <li><img src="/img/png/glyphicons_399_e-mail.png" width="12" /><p><a href="mailto:aishwarya.rai@bollywoodstars.com">aishwarya.rai@bollywoodstars.com</a></p></li>
-                <li><img src="/img/png/glyphicons_278_birthday_cake.png" width="12" /><p>12th August 1978</p></li>
+            <ul class="infoLists">               
+                <li><p><span class="infoYear label">&nbsp;Mobile&nbsp;</span>+65 89259845</p></li>
+                <li><p><span class="infoYear label">&nbsp;Fax&nbsp;</span>+65 68524563</p></li>
+                <li><p><span class="infoYear label">&nbsp;Email&nbsp;</span><a href="mailto:aishwarya.rai@bollywoodstars.com">aishwarya.rai@bollywoodstars.com</a></p></li>                
+                <li><p><span class="infoYear label">&nbsp;Birthday&nbsp;</span>12th August 1978</p></li>                
             </ul>
         </div>
         <div class="infoContent">
             <h6 class="wrapperHeader"><img src="/img/png/glyphicons_332_certificate.png" /><p>Education & Certification</p></h6>
             <ul class="infoLists">
-                <li><p>2010 : MsC Real Estate Related Shit (NUS)</p></li>
-                <li><p>2008 : BsC Property Management (NUS)</p></li>
-                <li><p>2005 : Certificate in CEHA</p></li>
+                <li><p><span class="infoYear label label-info">&nbsp;2012&nbsp;</span>MsC Real Estate Related Shit (NUS)</p></li>
+                <li><p><span class="infoYear label">&nbsp;2009&nbsp;</span>BsC Property Management (NUS)</p></li>
+                <li><p><span class="infoYear label">&nbsp;2008&nbsp;</span>Certificate in CEHA</p></li>
             </ul>
         </div>
         <div class="infoContent">
             <h6 class="wrapperHeader"><img src="/img/png/glyphicons_074_cup.png" /><p>Awards & Achievements</p></h6>
             <ul class="infoLists">
-                <li><p>2011 : Top 10 Sales Director</p></li>
-                <li><p>2009 : Manager of the year</p></li>
-                <li><p>2007 : Top Rookie</p></li>
-                <li><p>2007 : Team Player Award</p></li>
+                <li><p><span class="infoYear label label-info">&nbsp;2012&nbsp;</span>Top 10 Sales Director</p></li>
+                <li><p><span class="infoYear label">&nbsp;2009&nbsp;</span>Manager of the year</p></li>
+                <li><p><span class="infoYear label">&nbsp;2008&nbsp;</span>Top Rookie</p></li>
+                <li><p><span class="infoYear label">&nbsp;2007&nbsp;</span>Team Player Award</p></li>
             </ul>
         </div>
         <div class="infoContent">
@@ -68,8 +69,9 @@
                 <ul class="thumbnails thumbnailGallery">
                     <?php
                     $a_rand = range(1, 14);
-                    for ($i = 1; $i <= 5; $i++) {
-                        $r = array_rand($a_rand);
+                    for ($i      = 1; $i <= 5; $i++)
+                    {
+                        $r    = array_rand($a_rand);
                         $rand = $a_rand[$r];
                         unset($a_rand[$r]);
                         ?>
@@ -87,8 +89,9 @@
                 </h5>        
                 <ul class="thumbnails thumbnailGallery">
                     <?php
-                    for ($i = 1; $i <= 5; $i++) {
-                        $r = array_rand($a_rand);
+                    for ($i    = 1; $i <= 5; $i++)
+                    {
+                        $r    = array_rand($a_rand);
                         $rand = $a_rand[$r];
                         unset($a_rand[$r]);
                         ?>

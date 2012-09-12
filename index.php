@@ -4,9 +4,11 @@
     <div id="contentArea" class="centerContent">
         <div id="introContent">
             <h2>Aishwarya Rai</h2>
-            <div class="pageInfo"><span class="pageType">Director, Regional Sales & Marketing</span> at <span class="parentDesc"><a href="#">DTZ Debenham Tie Leung</a></span></div>
-
-
+            <div class="pageInfo">
+                <span class="pageType">Director, Regional Sales & Marketing</span> at <span class="parentDesc">
+                    <a href="#">DTZ Debenham Tie Leung</a>
+                </span>
+            </div>
             <p>
                 <?= nl2br('Aishwarya Rai the Miss World stunning beauty queen is considered to be one of the beautiful actresses in the movie industry. She has done movies in languages like Hindi, Tamil, English and Bengali.
                             In the year 1994, she won the Miss World title and brought fame to her mother land.') ?>
@@ -20,27 +22,26 @@
             </div>
         </div> <!--  status form -->
         <div id="theLoop">
-            <div class="dropdown" id="feedActionDiv">
-                
+            <div id="feedActionDiv">                
                 <div id="filterButtonDiv" class="dropdown">
                     <a data-toggle="dropdown" class="dropdown-toggle" id="filterButton" href="#">Show:&nbsp;<span class="dropDownSelected">All</span>&nbsp;<span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                        <li><a href="#sortNewest" id="sortNewest">Newest</a></li>
-                        <li><a href="#sortPopular" id="sortPopular">Popular</a></li>
+                        <li><a href="#" id="filterAll">All</a></li>
+                        <li><a href="#" id="filterPopular">Published</a></li>
+                        <li><a href="#" id="filterDraft">Draft</a></li>
                     </ul>                    
                 </div>                
-                
                 <div id="sortButtonDiv" class="dropdown">
-                    <button data-toggle="dropdown" class="btn btn-small dropdown-toggle" id="sortButton">Sort:&nbsp;<span class="sortSelected">Popular</span>&nbsp;<span class="caret"></span></button>
+                    <a data-toggle="dropdown" class="btn btn-small dropdown-toggle" id="sortButton" href="#">Sort:&nbsp;<span class="sortSelected">Popular</span>&nbsp;<span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                        <li><a href="#sortNewest" id="sortNewest">Newest</a></li>
-                        <li><a href="#sortPopular" id="sortPopular">Popular</a></li>
+                        <li><a href="#" id="sortNewest">Newest</a></li>
+                        <li><a href="#" id="sortPopular">Popular</a></li>
                     </ul>                    
                 </div>
             </div> <!--  sort button & result count -->
-            <article class="postFeed">
-                <div class="dropdown postSettings">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><b class="icon-cog"></b></a>
+            <article class="postFeed editMode">
+                <div class="dropdown postSettings editBar">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"></a>
                     <ul class="dropdown-menu">
                         <li><a href="#">Hide Post</a></li>
                         <li><a href="#">UnSubscribe</a></li>
@@ -48,13 +49,13 @@
                         <li><a href="#">Report Post</a></li>
                     </ul>
                 </div> <!-- post settings -->
-                <ul class="feedProfileThumbs thumbnails">
-                    <li class="mediumNail">
+                <div class="feedProfileThumbs thumbnails">
+                    <span class="mediumNail">
                         <a href="#" class="thumbnail">
-                            <img src="/img/thumbs/1.jpg" alt="">
+                            <img src="/img/thumbs/1.jpg" alt="" />
                         </a>
-                    </li>
-                </ul> <!-- post profile thumb -->
+                    </span>
+                </div> <!-- post profile thumb -->
                 <div class="postTitle">
                     <a href="#">Aishwarya Rai</a> shared a link in <a href="#">Casa Pasir Ris</a> Lorem ipsum dolar shit I
                     <p>I think this is an awesome script!!</p>
@@ -76,14 +77,14 @@
                 </article> <!-- post content -->
                 <div class="postActions">
                     <ul class="postActionButtons">
-                        <li><a href="#"><i class="icons i-share"></i></a></li>
-                        <li><a href="#"><i class="icons i-subscribe"></i></a></li>
-                        <li><a href="#"><i class="icons i-like"></i></a></li>
+                        <li><a href="#"><i class="postActionsIcons i-share"></i></a></li>
+                        <li><a href="#"><i class="postActionsIcons i-subscribed"></i></a></li>
+                        <li><a href="#"><i class="postActionsIcons i-liked"></i></a></li>
                     </ul>
                     <ul class="postActionInfo">
-                        <li class="icons i-comments"><a href="#">1</a></li>
-                        <li class="icons i-subscribers"><a href="#">1</a></li>
-                        <li class="icons i-likes"><a href="#">67</a></li>
+                        <li><a href="#"><i class="postMini i-comments"></i>51</a></li>
+                        <li><a href="#"><i class="postMini i-subscribers"></i>215</a></li>
+                        <li><a href="#"><i class="postMini i-likes"></i>167</a></li>
                     </ul>
                 </div> <!-- post action links -->
                 <div class="indentedComment widgetOuterBox">
@@ -94,7 +95,7 @@
                                 <li class="commentBody">
                                     <a class="commentAuthor" href="#">Lottie Lot</a>
                                     <p>I think it is probably over-rated actually!</p>
-                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="icons i-likes commentActions"><a href="#">2</a></span></div>
+                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="postMini i-likes"></i>2</a></span></div>
                                 </li>
                             </ul> <!-- comment inline -->
                         </li> <!-- comment -->
@@ -106,7 +107,7 @@
                                     <p>
                                         I wouldn't know. I am a bimbo. What's a script?
                                     </p>
-                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="icons i-likes commentActions"><a href="#">2</a></span></div>
+                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="postMini i-likes"></i>2</a></span></div>
                                 </li>
                             </ul> <!-- comment inline -->
                         </li> <!-- comment -->
@@ -118,19 +119,24 @@
                                     <p>
                                         Need 1 Billion to vote for Palestine Google is having a vote on whether to name israel or Palestine on its map on Google earth please vote for Palestine and share.
                                     </p>
-                                    <div class="commentInfo"><span class="timeAgo">17 minutes ago</span>&nbsp;&middot;&nbsp;<span class="icons i-likes commentActions"><a href="#">2</a></span></div>
+                                    <div class="commentInfo"><span class="timeAgo">17 minutes ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="postMini i-likes"></i>2</a></span></div>
                                 </li>
                             </ul> <!-- comment inline -->
                         </li> <!-- comment -->
                         <li class="commentForm contentArea contentNoBottom commentBG">
-                            <textarea placeholder="Write your comment"></textarea>
-                        </li> <!-- comment form-->
+                            <ul class="commentInline">
+                                <li class="commentThumb"><img src="/images/commentImg.jpg" width="40" height="40" /></li>
+                                <li class="commentTextarea">
+                                    <textarea class="commentInput contentArea" placeholder="Your comment"></textarea>
+                                </li>
+                            </ul> <!-- comment inline -->                            
+                        </li> <!-- comment form-->                   
                     </ul> <!-- comments -->
                 </div> <!-- comment OuterBox-->
             </article> <!--  youtube -->
             <article class="postFeed">
                 <div class="dropdown postSettings">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><b class="icon-cog"></b></a>
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"></a>
                     <ul class="dropdown-menu">
                         <li><a href="#">Hide Post</a></li>
                         <li><a href="#">UnSubscribe</a></li>
@@ -138,13 +144,13 @@
                         <li><a href="#">Report Post</a></li>
                     </ul>
                 </div> <!-- post settings -->
-                <ul class="feedProfileThumbs thumbnails">
-                    <li class="mediumNail">
+                <div class="feedProfileThumbs thumbnails">
+                    <span class="mediumNail">
                         <a href="#" class="thumbnail">
                             <img src="/img/thumbs/1.jpg" alt="">
                         </a>
-                    </li>
-                </ul> <!-- post profile thumb -->
+                    </span>
+                </div> <!-- post profile thumb -->
                 <div class="postTitle">
                     <a href="#">Aishwarya Rai</a> wrote a post on her profile page
                     <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.
@@ -153,14 +159,14 @@
                 </div> <!-- post Title -->
                 <div class="postActions">
                     <ul class="postActionButtons">
-                        <li><a href="#"><i class="icons i-share"></i></a></li>
-                        <li><a href="#"><i class="icons i-subscribe"></i></a></li>
-                        <li><a href="#"><i class="icons i-like"></i></a></li>
+                        <li><a href="#"><i class="postActionsIcons i-share"></i></a></li>
+                        <li><a href="#"><i class="postActionsIcons i-subscribe"></i></a></li>
+                        <li><a href="#"><i class="postActionsIcons i-like"></i></a></li>
                     </ul>
                     <ul class="postActionInfo">
-                        <li class="icons i-comments"><a href="#">1</a></li>
-                        <li class="icons i-subscribers"><a href="#">1</a></li>
-                        <li class="icons i-likes"><a href="#">67</a></li>
+                        <li><a href="#"><i class="postMini i-comments"></i>51</a></li>
+                        <li><a href="#"><i class="postMini i-subscribers"></i>215</a></li>
+                        <li><a href="#"><i class="postMini i-likes"></i>167</a></li>
                     </ul>
                 </div> <!-- post action links -->
                 <div class="indentedComment widgetOuterBox">
@@ -171,7 +177,7 @@
                                 <li class="commentBody">
                                     <a class="commentAuthor" href="#">Lottie Lot</a>
                                     <p>I think it is probably over-rated actually!</p>
-                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="icons i-likes commentActions"><a href="#">2</a></span></div>
+                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="postMini i-likes"></i>2</a></span></div>
                                 </li>
                             </ul> <!-- comment inline -->
                         </li> <!-- comment -->
@@ -183,7 +189,7 @@
                                     <p>
                                         I wouldn't know. I am a bimbo. What's a script?
                                     </p>
-                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="icons i-likes commentActions"><a href="#">2</a></span></div>
+                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="postMini i-likes"></i>2</a></span></div>
                                 </li>
                             </ul> <!-- comment inline -->
                         </li> <!-- comment -->
@@ -195,19 +201,24 @@
                                     <p>
                                         Need 1 Billion to vote for Palestine Google is having a vote on whether to name israel or Palestine on its map on Google earth please vote for Palestine and share.
                                     </p>
-                                    <div class="commentInfo"><span class="timeAgo">17 minutes ago</span>&nbsp;&middot;&nbsp;<span class="icons i-likes commentActions"><a href="#">2</a></span></div>
+                                    <div class="commentInfo"><span class="timeAgo">17 minutes ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="postMini i-likes"></i>2</a></span></div>
                                 </li>
                             </ul> <!-- comment inline -->
                         </li> <!-- comment -->
                         <li class="commentForm contentArea contentNoBottom commentBG">
-                            <textarea placeholder="Write your comment"></textarea>
-                        </li> <!-- comment form-->
+                            <ul class="commentInline">
+                                <li class="commentThumb"><img src="/images/commentImg.jpg" width="40" height="40" /></li>
+                                <li class="commentTextarea">
+                                    <textarea class="commentInput contentArea" placeholder="Your comment"></textarea>
+                                </li>
+                            </ul> <!-- comment inline -->                            
+                        </li> <!-- comment form--> 
                     </ul> <!-- comments -->
                 </div> <!-- comment OuterBox-->
             </article> <!--  status -->
             <article class="postFeed">
                 <div class="dropdown postSettings">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><b class="icon-cog"></b></a>
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"></a>
                     <ul class="dropdown-menu">
                         <li><a href="#">Hide Post</a></li>
                         <li><a href="#">UnSubscribe</a></li>
@@ -215,13 +226,13 @@
                         <li><a href="#">Report Post</a></li>
                     </ul>
                 </div> <!-- post settings -->
-                <ul class="feedProfileThumbs thumbnails">
-                    <li class="mediumNail">
+                <div class="feedProfileThumbs thumbnails">
+                    <span class="mediumNail">
                         <a href="#" class="thumbnail">
-                            <img src="/img/thumbs/3.jpg" alt="">
+                            <img src="/img/thumbs/1.jpg" alt="">
                         </a>
-                    </li>
-                </ul> <!-- post profile thumb -->
+                    </span>
+                </div> <!-- post profile thumb -->
                 <div class="postTitle">
                     <a href="#">Pretty Gal</a> shared a link in <a href="#">Lakepoint Condominium</a>
                     <p>This is like a castle. Off the western coast on the U.S., I think</p>
@@ -243,14 +254,14 @@
                 </article> <!-- post content -->
                 <div class="postActions">
                     <ul class="postActionButtons">
-                        <li><a href="#"><i class="icons i-share"></i></a></li>
-                        <li><a href="#"><i class="icons i-subscribe"></i></a></li>
-                        <li><a href="#"><i class="icons i-like"></i></a></li>
+                        <li><a href="#"><i class="postActionsIcons i-share"></i></a></li>
+                        <li><a href="#"><i class="postActionsIcons i-subscribe"></i></a></li>
+                        <li><a href="#"><i class="postActionsIcons i-like"></i></a></li>
                     </ul>
                     <ul class="postActionInfo">
-                        <li class="icons i-comments"><a href="#">1</a></li>
-                        <li class="icons i-subscribers"><a href="#">1</a></li>
-                        <li class="icons i-likes"><a href="#">67</a></li>
+                        <li><a href="#"><i class="postMini i-comments"></i>51</a></li>
+                        <li><a href="#"><i class="postMini i-subscribers"></i>215</a></li>
+                        <li><a href="#"><i class="postMini i-likes"></i>167</a></li>
                     </ul>
                 </div> <!-- post action links -->
                 <div class="indentedComment widgetOuterBox">
@@ -261,7 +272,7 @@
                                 <li class="commentBody">
                                     <a class="commentAuthor" href="#">Lottie Lot</a>
                                     <p>I think it is probably over-rated actually!</p>
-                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="icons i-likes commentActions"><a href="#">2</a></span></div>
+                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="postMini i-commentLiked"></i>2</a></span></div>
                                 </li>
                             </ul> <!-- comment inline -->
                         </li> <!-- comment -->
@@ -273,7 +284,7 @@
                                     <p>
                                         I wouldn't know. I am a bimbo. What's a script?
                                     </p>
-                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="icons i-likes commentActions"><a href="#">2</a></span></div>
+                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="postMini i-likes"></i>2</a></span></div>
                                 </li>
                             </ul> <!-- comment inline -->
                         </li> <!-- comment -->
@@ -285,19 +296,24 @@
                                     <p>
                                         Need 1 Billion to vote for Palestine Google is having a vote on whether to name israel or Palestine on its map on Google earth please vote for Palestine and share.
                                     </p>
-                                    <div class="commentInfo"><span class="timeAgo">17 minutes ago</span>&nbsp;&middot;&nbsp;<span class="icons i-likes commentActions"><a href="#">2</a></span></div>
+                                    <div class="commentInfo"><span class="timeAgo">17 minutes ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="postMini i-likes"></i>2</a></span></div>
                                 </li>
                             </ul> <!-- comment inline -->
                         </li> <!-- comment -->
                         <li class="commentForm contentArea contentNoBottom commentBG">
-                            <textarea placeholder="Write your comment"></textarea>
-                        </li> <!-- comment form-->
+                            <ul class="commentInline">
+                                <li class="commentThumb"><img src="/images/commentImg.jpg" width="40" height="40" /></li>
+                                <li class="commentTextarea">
+                                    <textarea class="commentInput contentArea" placeholder="Your comment"></textarea>
+                                </li>
+                            </ul> <!-- comment inline -->                            
+                        </li> <!-- comment form--> 
                     </ul> <!-- comments -->
                 </div> <!-- comment OuterBox-->
             </article> <!--  yotube -->
             <article class="postFeed">
                 <div class="dropdown postSettings">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><b class="icon-cog"></b></a>
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"></a>
                     <ul class="dropdown-menu">
                         <li><a href="#">Hide Post</a></li>
                         <li><a href="#">UnSubscribe</a></li>
@@ -305,13 +321,13 @@
                         <li><a href="#">Report Post</a></li>
                     </ul>
                 </div> <!-- post settings -->
-                <ul class="feedProfileThumbs thumbnails">
-                    <li class="mediumNail">
+                <div class="feedProfileThumbs thumbnails">
+                    <span class="mediumNail">
                         <a href="#" class="thumbnail">
-                            <img src="/img/thumbs/7.jpg" alt="">
+                            <img src="/img/thumbs/1.jpg" alt="">
                         </a>
-                    </li>
-                </ul> <!-- post profile thumb -->
+                    </span>
+                </div> <!-- post profile thumb -->
                 <div class="postTitle">
                     <a href="#">Sweet Stuff</a> wrote a testimonial about <a href="#">Jason Nathan</a>
                     <p><?= nl2br("<blockquote class='triangle-border left'><p class='limitLines testimonial'>When I relocated to Singapore I looked at the services provided by a multitude of real estate agents and sadly found most of them lacking in a service-minded approach to the task. Jason proved to be the real exception to the rule.
@@ -324,14 +340,18 @@
 
                                 In short, if you are looking for a reliable, amiable and partner-friendly real estate agent, then Jason would be your man in Singapore! I am available for any futher information needed.</p></blockquote>") ?></p>
                 </div> <!-- post Title -->
-                <div class="postLinks">
-                    <a href="#"><img src="/img/png/glyphicons_343_thumbs_up.png" />&nbsp;6</a>
-                    <span class="preComment"></span>
+                <div class="postActions">
+                    <ul class="postActionButtons">
+                        <li><a href="#"><i class="postActionsIcons i-like"></i></a></li>
+                    </ul>
+                    <ul class="postActionInfo">
+                        <li><a href="#"><i class="postMini i-likes"></i>167</a></li>
+                    </ul>
                 </div> <!-- post action links -->
             </article> <!--  testimonial -->
             <article class="postFeed">
                 <div class="dropdown postSettings">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><b class="icon-cog"></b></a>
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"></a>
                     <ul class="dropdown-menu">
                         <li><a href="#">Hide Post</a></li>
                         <li><a href="#">UnSubscribe</a></li>
@@ -339,13 +359,13 @@
                         <li><a href="#">Report Post</a></li>
                     </ul>
                 </div> <!-- post settings -->
-                <ul class="feedProfileThumbs thumbnails">
-                    <li class="mediumNail">
+                <div class="feedProfileThumbs thumbnails">
+                    <span class="mediumNail">
                         <a href="#" class="thumbnail">
-                            <img src="/img/thumbs/3.jpg" alt="">
+                            <img src="/img/thumbs/1.jpg" alt="">
                         </a>
-                    </li>
-                </ul> <!-- post profile thumb -->
+                    </span>
+                </div> <!-- post profile thumb -->
                 <div class="postTitle">
                     <a href="#">Pretty Gal</a> posted a listing for <b>Sale</b> in <a href="#">Lakepoint Condominium</a>
                 </div> <!-- post Title -->
@@ -380,14 +400,14 @@
                 </div>
                 <div class="postActions">
                     <ul class="postActionButtons">
-                        <li><a href="#"><i class="icons i-share"></i></a></li>
-                        <li><a href="#"><i class="icons i-subscribe"></i></a></li>
-                        <li><a href="#"><i class="icons i-like"></i></a></li>
+                        <li><a href="#"><i class="postActionsIcons i-share"></i></a></li>
+                        <li><a href="#"><i class="postActionsIcons i-subscribe"></i></a></li>
+                        <li><a href="#"><i class="postActionsIcons i-like"></i></a></li>
                     </ul>
                     <ul class="postActionInfo">
-                        <li class="icons i-comments"><a href="#">1</a></li>
-                        <li class="icons i-subscribers"><a href="#">1</a></li>
-                        <li class="icons i-likes"><a href="#">67</a></li>
+                        <li><a href="#"><i class="postMini i-comments"></i>51</a></li>
+                        <li><a href="#"><i class="postMini i-subscribers"></i>215</a></li>
+                        <li><a href="#"><i class="postMini i-likes"></i>167</a></li>
                     </ul>
                 </div> <!-- post action links -->
                 <div class="indentedComment widgetOuterBox">
@@ -398,7 +418,7 @@
                                 <li class="commentBody">
                                     <a class="commentAuthor" href="#">Lottie Lot</a>
                                     <p>I think it is probably over-rated actually!</p>
-                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="icons i-likes commentActions"><a href="#">2</a></span></div>
+                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="postMini i-likes"></i>2</a></span></div>
                                 </li>
                             </ul> <!-- comment inline -->
                         </li> <!-- comment -->
@@ -410,7 +430,7 @@
                                     <p>
                                         I wouldn't know. I am a bimbo. What's a script?
                                     </p>
-                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="icons i-likes commentActions"><a href="#">2</a></span></div>
+                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="postMini i-commentLiked"></i>2</a></span></div>
                                 </li>
                             </ul> <!-- comment inline -->
                         </li> <!-- comment -->
@@ -422,17 +442,21 @@
                                     <p>
                                         Need 1 Billion to vote for Palestine Google is having a vote on whether to name israel or Palestine on its map on Google earth please vote for Palestine and share.
                                     </p>
-                                    <div class="commentInfo"><span class="timeAgo">17 minutes ago</span>&nbsp;&middot;&nbsp;<span class="icons i-likes commentActions"><a href="#">2</a></span></div>
+                                    <div class="commentInfo"><span class="timeAgo">17 minutes ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="postMini i-likes"></i>2</a></span></div>
                                 </li>
                             </ul> <!-- comment inline -->
                         </li> <!-- comment -->
-                        <li class="commentForm contentArea commentBG">
-                            <textarea placeholder="Write your comment"></textarea>
-                        </li> <!-- comment form-->
+                        <li class="commentForm contentArea contentNoBottom commentBG">
+                            <ul class="commentInline">
+                                <li class="commentThumb"><img src="/images/commentImg.jpg" width="40" height="40" /></li>
+                                <li class="commentTextarea">
+                                    <textarea class="commentInput contentArea" placeholder="Your comment"></textarea>
+                                </li>
+                            </ul> <!-- comment inline -->                            
+                        </li> <!-- comment form--> 
                     </ul> <!-- comments -->
                 </div> <!-- comment OuterBox-->
             </article> <!--  listing -->
-
         </div> <!--  theLoop -->
     </div>
     <? include('rightbar.php') ?>
@@ -446,7 +470,6 @@
             <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</p>
         </div>
     </div> <!-- intro content -->
-
     <div class="outerBox centerWidth relative" style="margin-top:10px;">
         <div class="contentArea contentBox">
             <form class="member" accept-charset="utf-8" id="filterform" method="GET" action="/members">
@@ -577,22 +600,22 @@
                                 Need 1 Billion to vote for Palestine Google is having a vote on whether to name Israel or Palestine on its map on Google earth please vote for Palestine and share.
                             </p>
                         </div> <!-- listings content -->
-                    </div>
-                    <div class="postActions">
                         <ul class="postedBy">
                             <li class="postedByLabel">Posted by:</li>
                             <li class="postedByThumb"><a href="#"><img src="/images/posterImg.jpg"/></a></li>
                             <li class="postedByName"><a href="#">Natalie Scott</a></li>
                         </ul>
+                    </div> <!-- main listing content -->
+                    <div class="postActions">
                         <ul class="postActionButtons">
-                            <li><a href="#"><i class="icons i-share"></i></a></li>
-                            <li><a href="#"><i class="icons i-subscribe"></i></a></li>
-                            <li><a href="#"><i class="icons i-like"></i></a></li>
+                            <li><a href="#"><i class="postActionsIcons i-share"></i></a></li>
+                            <li><a href="#"><i class="postActionsIcons i-subscribe"></i></a></li>
+                            <li><a href="#"><i class="postActionsIcons i-like"></i></a></li>
                         </ul>
                         <ul class="postActionInfo">
-                            <li class="icons i-comments"><a href="#">1</a></li>
-                            <li class="icons i-subscribers"><a href="#">1</a></li>
-                            <li class="icons i-likes"><a href="#">67</a></li>
+                            <li><a href="#"><i class="postMini i-comments"></i>51</a></li>
+                            <li><a href="#"><i class="postMini i-subscribers"></i>215</a></li>
+                            <li><a href="#"><i class="postMini i-likes"></i>167</a></li>
                         </ul>
                     </div> <!-- postActions -->
                     <div class="widgetOuterBox relative comments">
@@ -608,7 +631,7 @@
                                         </p>
 
                                     </li>
-                                    <li class="icons i-likes commentActions"><a href="#">2</a></li>
+                                    <li class="commentActions"><a href="#"><i class="postMini i-likes"></i></a></li>
                                 </ul>
                             </li> <!-- comment -->
                             <li class="contentArea commentBG">
@@ -622,7 +645,7 @@
                                         </p>
 
                                     </li>
-                                    <li class="icons i-likes commentActions"><a href="#">7</a></li>
+                                    <li class="commentActions"><a href="#"><i class="postMini i-likes"></i>1</a></li>
                                 </ul>
 
                             </li> <!-- comment -->
@@ -630,7 +653,7 @@
                                 <ul class="commentInline">
                                     <li class="commentThumb"><img src="/images/commentImg.jpg" width="42" height="42" /></li>
                                     <li class="commentTextarea">
-                                        <textarea class="commentInput contentArea" placeholder="Write your comment"></textarea>
+                                        <textarea class="commentInput contentArea" placeholder="Your comment"></textarea>
                                     </li>
                                 </ul>
                             </li> <!-- comment -->
@@ -661,22 +684,22 @@
                                 Need 1 Billion to vote for Palestine Google is having a vote on whether to name Israel or Palestine on its map on Google earth please vote for Palestine and share.
                             </p>
                         </div> <!-- listings content -->
-                    </div>
-                    <div class="postActions">
                         <ul class="postedBy">
                             <li class="postedByLabel">Posted by:</li>
                             <li class="postedByThumb"><a href="#"><img src="/images/posterImg.jpg"/></a></li>
                             <li class="postedByName"><a href="#">Natalie Scott</a></li>
-                        </ul>
+                        </ul>                         
+                    </div> <!-- main listing content -->
+                    <div class="postActions">
                         <ul class="postActionButtons">
-                            <li><a href="#"><i class="icons i-share"></i></a></li>
-                            <li><a href="#"><i class="icons i-subscribe"></i></a></li>
-                            <li><a href="#"><i class="icons i-like"></i></a></li>
+                            <li><a href="#"><i class="postActionsIcons i-share"></i></a></li>
+                            <li><a href="#"><i class="postActionsIcons i-subscribed"></i></a></li>
+                            <li><a href="#"><i class="postActionsIcons i-liked"></i></a></li>
                         </ul>
                         <ul class="postActionInfo">
-                            <li class="icons i-comments"><a href="#">1</a></li>
-                            <li class="icons i-subscribers"><a href="#">1</a></li>
-                            <li class="icons i-likes"><a href="#">67</a></li>
+                            <li><a href="#"><i class="postMini i-comments"></i>51</a></li>
+                            <li><a href="#"><i class="postMini i-subscribers"></i>215</a></li>
+                            <li><a href="#"><i class="postMini i-likes"></i>167</a></li>
                         </ul>
                     </div> <!-- postActions -->
                     <div class="widgetOuterBox relative comments">
@@ -692,7 +715,7 @@
                                         </p>
 
                                     </li>
-                                    <li class="icons i-likes commentActions"><a href="#">2</a></li>
+                                    <li class="commentActions"><a href="#"><i class="postMini i-likes"></i>167</a></li>
                                 </ul>
 
                             </li> <!-- comment -->
@@ -707,7 +730,7 @@
                                         </p>
 
                                     </li>
-                                    <li class="icons i-likes commentActions"><a href="#">7</a></li>
+                                    <li class="commentActions"><a href="#"><i class="postMini i-likes"></i>3</a></li>
                                 </ul>
 
                             </li> <!-- comment -->
@@ -715,7 +738,7 @@
                                 <ul class="commentInline">
                                     <li class="commentThumb"><img src="/images/commentImg.jpg" width="42" height="42" /></li>
                                     <li class="commentTextarea">
-                                        <textarea class="commentInput contentArea" placeholder="Write your comment"></textarea>
+                                        <textarea class="commentInput contentArea" placeholder="Your comment"></textarea>
                                     </li>
                                 </ul>
                             </li> <!-- comment -->

@@ -1,0 +1,133 @@
+/*[fmt]0000-000A*/
+/*
+Document   : icons
+Created on : Sep 12, 2012, 7:50:34 PM
+Author     : jj
+Description:
+Definition of All Icons.
+
+Directory Icon Sprite*/
+.directoryIcons{background:url("/images/sprites/directoryIcons.png") no-repeat top left;display:inline-block;min-width:20px;min-height:21px;margin-top:1px;margin-right:0.3em;line-height:14px;vertical-align:top;}
+.directoryIcons.i-listingsDirectory{background-position:0 0;width:20px;height:21px;}
+.directoryIcons.i-locationsDirectory{background-position:-25px 0;width:20px;height:21px;}
+.directoryIcons.i-map{background-position:-50px 0;width:55px;height:26px;}
+.directoryIcons.i-mapHover{background-position:-110px 0;width:55px;height:26px;}
+.directoryIcons.i-membersDirectory{background-position:-170px 0;width:20px;height:21px;}
+/*Post (Mini) Icon Sprite*/
+.postMini{background:url("/images/sprites/postMini.png") no-repeat top left;display:inline-block;min-width:14px;min-height:14px;margin-top:1px;margin-right:0.3em;line-height:14px;vertical-align:top;}
+.postMini.i-bathrooms{background-position:0 0;width:18px;height:18px;}
+.postMini.i-bedrooms{background-position:-23px 0;width:18px;height:18px;}
+.postMini.i-commentLiked{background-position:-46px 0;width:15px;height:15px;}
+.postMini.i-commentUnlike{background-position:-66px 0;width:15px;height:15px;}
+.postMini.i-comments{background-position:-86px 0;width:15px;height:15px;}
+.postMini.i-commentsHover{background-position:-106px 0;width:15px;height:15px;}
+.postMini.i-images{background-position:-126px 0;width:15px;height:15px;}
+.postMini.i-likes{background-position:-146px 0;width:15px;height:15px;}
+.postMini.i-likesHover{background-position:-166px 0;width:15px;height:15px;}
+.postMini.i-sqft{background-position:-186px 0;width:18px;height:18px;}
+.postMini.i-subscribers{background-position:-209px 0;width:15px;height:15px;}
+.postMini.i-subscribersHover{background-position:-229px 0;width:15px;height:15px;}
+.postMini.i-videos{background-position:-249px 0;width:15px;height:15px;}
+/*Post (Actions) Icon Sprite*/
+.postActionsIcons{background:url("/images/sprites/postActions.png") no-repeat top left;display:inline;display:block;display:inline-block;}
+.postActionsIcons.i-coBroke{background-position:0 0;width:20px;height:18px;}
+.postActionsIcons.i-coBrokeActive{background-position:-25px 0;width:20px;height:18px;}
+.postActionsIcons.i-like{background-position:-50px 0;width:20px;height:18px;}
+.postActionsIcons.i-likeHover{background-position:-75px 0;width:20px;height:18px;}
+.postActionsIcons.i-liked{background-position:-100px 0;width:20px;height:18px;}
+.postActionsIcons.i-share{background-position:-125px 0;width:20px;height:20px;}
+.postActionsIcons.i-shareHover{background-position:-150px 0;width:20px;height:20px;}
+.postActionsIcons.i-subscribe{background-position:-175px 0;width:20px;height:20px;}
+.postActionsIcons.i-subscribeHover{background-position:-200px 0;width:20px;height:20px;}
+.postActionsIcons.i-subscribed{background-position:-225px 0;width:20px;height:20px;}
+.postActionsIcons.i-unlike{background-position:-250px 0;width:20px;height:18px;}
+.postActionsIcons.i-unsubscribe{background-position:-275px 0;width:20px;height:20px;}
+/*Sidebar Icon Sprite*/
+.sidebar{background:url("/images/sprites/sidebar.png") no-repeat top left;display:inline-block;min-width:15px;min-height:14px;margin-top:1px;margin-right:0.3em;line-height:14px;vertical-align:top;}
+.sidebar.i-event{ background-position: 0 0; width: 16px; height: 16px; } 
+.sidebar.i-eventActive{ background-position: -21px 0; width: 16px; height: 16px; } 
+.sidebar.i-feed{ background-position: -42px 0; width: 16px; height: 17px; } 
+.sidebar.i-feedHover{ background-position: -63px 0; width: 16px; height: 17px; } 
+.sidebar.i-info{ background-position: -84px 0; width: 16px; height: 16px; } 
+.sidebar.i-infoHover{ background-position: -105px 0; width: 16px; height: 16px; } 
+.sidebar.i-listings{ background-position: -126px 0; width: 16px; height: 16px; } 
+.sidebar.i-listingsHover{ background-position: -147px 0; width: 16px; height: 16px; } 
+.sidebar.i-status{ background-position: -168px 0; width: 16px; height: 16px; } 
+.sidebar.i-statusHover{ background-position: -189px 0; width: 16px; height: 16px; } 
+.sidebar.i-subscribers{ background-position: -210px 0; width: 15px; height: 16px; } 
+.sidebar.i-subscribersHover{ background-position: -230px 0; width: 15px; height: 16px; } 
+.sidebar.i-testimonial{ background-position: -250px 0; width: 16px; height: 14px; } 
+.sidebar.i-testimonialHover{ background-position: -271px 0; width: 16px; height: 14px; }
+/*Header Icon Sprite*/
+.headerIcons{background:url("/images/sprites/headerIcons.png") no-repeat top left;display:inline-block;min-width:34px;min-height:34px;margin-top:1px;margin-right:0.3em;line-height:14px;vertical-align:top;}
+.headerIcons.i-inbox{background-position:0 0;width:34px;height:34px;}
+.headerIcons.i-inboxActive{background-position:-39px 0;width:34px;height:34px;}
+.headerIcons.i-inboxHover{background-position:-78px 0;width:34px;height:34px;}
+.headerIcons.i-notification{background-position:-117px 0;width:34px;height:34px;}
+.headerIcons.i-notificationActive{background-position:-156px 0;width:34px;height:34px;}
+.headerIcons.i-notificationHover{background-position:-195px 0;width:34px;height:34px;}
+.headerIcons.i-settings{background-position:-234px 0;width:34px;height:34px;}
+.headerIcons.i-settingsHover{background-position:-273px 0;width:34px;height:34px;}
+/*Social Icon Sprite*/
+.social{background:url("/images/sprites/social.png") no-repeat top left;display:inline-block;min-width:24px;min-height:24px;margin-top:1px;margin-right:0.3em;line-height:14px;vertical-align:top;}
+.social.i-libFB{background-position:0 0;width:24px;height:24px;}
+.social.i-libFlickr{background-position:-29px 0;width:24px;height:24px;}
+.social.i-libPicasa{background-position:-58px 0;width:24px;height:24px;}
+.social.i-libRTA{background-position:-87px 0;width:24px;height:24px;}
+.social.i-libYT{background-position:-116px 0;width:24px;height:24px;}
+.social.i-profileFB{background-position:-145px 0;width:24px;height:24px;}
+.social.i-profileFlickr{background-position:-174px 0;width:24px;height:24px;}
+.social.i-profileGplus{background-position:-203px 0;width:24px;height:24px;}
+.social.i-profilePicasa{background-position:-232px 0;width:23px;height:24px;}
+.social.i-profileSkype{background-position:-260px 0;width:24px;height:24px;}
+.social.i-profileSocl{background-position:-289px 0;width:24px;height:24px;}
+.social.i-profileTwitter{background-position:-318px 0;width:24px;height:24px;}
+.social.i-profileYT{background-position:-347px 0;width:24px;height:24px;}
+/*Large Icon Sprite*/
+.largeIcons{background:url("/images/sprites/largeIcons.png") no-repeat top left;display:inline-block;min-width:95px;min-height:91px;margin-top:1px;margin-right:0.3em;line-height:14px;vertical-align:top;}
+.largeIcons.i-avatar{background-position:0 0;width:95px;height:91px;}
+.largeIcons.i-avatarTransparent{background-position:-100px 0;width:95px;height:91px;}
+.largeIcons.i-estate{background-position:-200px 0;width:99px;height:93px;}
+.largeIcons.i-hdb{background-position:-304px 0;width:99px;height:93px;}
+.largeIcons.i-landed{background-position:-408px 0;width:99px;height:93px;}
+.largeIcons.i-privateApt{background-position:-512px 0;width:99px;height:93px;}
+.largeIcons.i-servicedApt{background-position:-616px 0;width:99px;height:93px;}
+/*Form Icon Sprite*/
+.formIcons{background:url("/images/sprites/formIcons.png") no-repeat top left;display:inline-block;min-width:20px;min-height:21px;margin-top:1px;margin-right:0.3em;line-height:14px;vertical-align:top;}
+.formIcons.i-approve{background-position:0 0;width:27px;height:25px;}
+.formIcons.i-approveHover{background-position:-32px 0;width:28px;height:25px;}
+.formIcons.i-archive{background-position:-65px 0;width:25px;height:22px;}
+.formIcons.i-archiveHover{background-position:-95px 0;width:25px;height:22px;}
+.formIcons.i-edit{background-position:-125px 0;width:21px;height:20px;}
+.formIcons.i-editDone{background-position:-151px 0;width:20px;height:20px;}
+.formIcons.i-meesageNewHover{background-position:-176px 0;width:28px;height:25px;}
+.formIcons.i-messageNew{background-position:-209px 0;width:28px;height:25px;}
+.formIcons.i-messageRead{background-position:-242px 0;width:25px;height:28px;}
+.formIcons.i-messageReadHover{background-position:-272px 0;width:25px;height:28px;}
+.formIcons.i-reputation{background-position:-302px 0;width:21px;height:18px;}
+.formIcons.i-settingsClose{background-position:-328px 0;width:24px;height:23px;}
+.formIcons.i-settingsPrivacy{background-position:-357px 0;width:27px;height:21px;}
+.formIcons.i-settingsSocial{background-position:-389px 0;width:27px;height:23px;}
+.formIcons.i-settingsSubscriptions{background-position:-421px 0;width:27px;height:22px;}
+.formIcons.i-trash{background-position:-453px 0;width:25px;height:28px;}
+.formIcons.i-trashHover{background-position:-483px 0;width:25px;height:28px;}
+.formIcons.i-unapprove{background-position:-513px 0;width:28px;height:25px;}
+.formIcons.i-unapproveHover{background-position:-546px 0;width:28px;height:25px;}
+/*Listing Creation Icon Sprite*/
+.listingCreation{background:url("/images/sprites/listingCreation.png") no-repeat top left;display:inline-block;min-width:30px;min-height:30px;margin-top:1px;margin-right:0.3em;line-height:14px;vertical-align:top;}
+.listingCreation.i-addEvent{background-position:0 0;width:45px;height:40px;}
+.listingCreation.i-addEventHover{background-position:-50px 0;width:45px;height:40px;}
+.listingCreation.i-addMedia{background-position:-100px 0;width:45px;height:40px;}
+.listingCreation.i-addMediaHover{background-position:-150px 0;width:45px;height:40px;}
+.listingCreation.i-back{background-position:-200px 0;width:30px;height:30px;}
+.listingCreation.i-backHover{background-position:-235px 0;width:30px;height:30px;}
+.listingCreation.i-cancel{background-position:-270px 0;width:30px;height:30px;}
+.listingCreation.i-cancelHover{background-position:-305px 0;width:30px;height:30px;}
+.listingCreation.i-draft{background-position:-340px 0;width:30px;height:30px;}
+.listingCreation.i-draftHover{background-position:-375px 0;width:30px;height:30px;}
+.listingCreation.i-forward{background-position:-410px 0;width:30px;height:30px;}
+.listingCreation.i-nextHover{background-position:-445px 0;width:30px;height:30px;}
+.listingCreation.i-publish{background-position:-480px 0;width:30px;height:30px;}
+.listingCreation.i-publishHover{background-position:-515px 0;width:30px;height:30px;}
+.listingCreation.i-reset{background-position:-550px 0;width:30px;height:30px;}
+.listingCreation.i-resetHover{background-position:-585px 0;width:30px;height:30px;}
