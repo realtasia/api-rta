@@ -1,52 +1,41 @@
-jQuery(document).ready(function($){
-    limitLines($('.limitLines'), 4);
-    $('.postSettings').hide();
-    $('.postFeed').hover(function(){
-        $(this).find('.postSettings').fadeIn()
-        }, function(){
-        $(this).find('.postSettings').fadeOut()
-        });
-		
-});
-
 function CurrentUser(){
-    
+
 }
 
 function User (){
-    
+
 }
 
 function Like(){
-    
+
 }
 
 function Subscribe(){
-    
+
 }
 
 function Comment(){
-    
+
 }
 
 function Post(){
-    
+
 }
 
 function Testimonial(){
-    
+
 }
 
 function Listing(){
-    
+
 }
 
 function Upload(){
-    
+
 }
 
 function Tag(){
-    
+
 }
 
 
@@ -61,19 +50,19 @@ function limitLines(e, lines) {
     }
     //alert("Height : " + originalHeight + "  LineHeight:" + lineHeight)
     e.css({
-        height : lines * lineHeight, 
+        height : lines * lineHeight,
         overflow:'hidden'
     });
-                
+
     a.attr({
-        href : '#', 
-        'class' : 'readMore', 
+        href : '#',
+        'class' : 'readMore',
         'onclick' : 'javascript: showMore(jQuery(this), ' + originalHeight + ');return false;'
     });
-    a.html('read more &hellip;');                
-                
+    a.html('read more &hellip;');
+
     e.after(jQuery('<div>').append(a.clone()).remove().html());
-                
+
 }
 function showMore(e, originalHeight){
     e.prev().css({
@@ -82,3 +71,103 @@ function showMore(e, originalHeight){
     e.remove();
     return false;
 }
+
+
+
+
+
+
+
+jQuery(document).ready(function($){
+    $.expr[':'].isIconClass = function(obj){
+        return (/\bi-/).test(obj.className);
+    };
+    limitLines($('.limitLines'), 4);
+    $('.postSettings').hide();
+    $('.postFeed').hover(function(){
+        $(this).find('.postSettings').fadeIn()
+    }, function(){
+        $(this).find('.postSettings').fadeOut()
+    });
+
+    $('#cancelSearch').click(function(e){
+        e.preventDefault();
+        $('#drop-down-filter').slideUp();
+    });
+    $('#searchInput').focus(function(e){
+        e.preventDefault();
+        $('#drop-down-filter').slideDown();
+    });
+    $('*[class^="i-"]').hover(function(){
+        console.log($(this).attr('class'))
+    });
+
+    var isHovering = false;
+
+    $("*:isIconClass").on({
+
+        mouseenter: function(){
+            var icon = $(this);
+            if(!isHovering){ 
+                isHovering = true;               
+                
+                if(!icon.hasClass('Active') || !icon.hasClass('Deactive')){
+                    icon.addClass('Hover');
+                }
+                
+                if(icon.hasClass('Active')){
+                    icon.removeClass('Active').removeClass('Hover').addClass('Deactive');
+                }                
+            }
+            
+            return false;
+        },
+
+        mouseleave: function(){
+            isHovering = false;
+            var icon = $(this);
+            icon.removeClass('Hover'); 
+            if(icon.hasClass('Deactive')){
+                icon.removeClass('Deactive').removeClass('Hover').addClass('Active');
+            } 
+            return false;
+
+        }
+    }).parent('a').on({
+        mouseenter: function(){
+            var icon = $(this).find('i');
+            
+            if(!isHovering){
+                isHovering = true;
+            
+                if(icon.hasClass('Active')){
+                    icon.removeClass('Active').removeClass('Hover').addClass('Deactive');
+                }
+                
+                if(!icon.hasClass('Active') || !icon.hasClass('Deactive')){
+                    icon.addClass('Hover');
+                }
+            }
+            return false;
+        }, //notice the comma..
+
+        mouseleave: function(){
+            var icon = $(this).find('i');
+            isHovering = false;
+
+            icon.removeClass('Hover'); 
+
+            if(icon.hasClass('Deactive')){
+                icon.removeClass('Deactive').removeClass('Hover').addClass('Active');
+            }
+            return false;
+        }
+
+    });
+
+    $(window).bind('load', function() {
+        $('#tips').bubbletip($('<div><h1>This is TIP</h1></div>'), {
+            bindHide:false
+        });
+    });
+})

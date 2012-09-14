@@ -7,7 +7,7 @@ Purpose of the stylesheet follows.
 
 Common*/
 /*+clearfix {*/
-.listing:after, .mainListingContent:after, UL.listingData:after, .postedBy:after
+.listing:after, .mainListingContent:after, UL.listingData:after, .postedBy:after, .formContainer:after
 {
 	content: ".";
 	display: block;
@@ -16,11 +16,11 @@ Common*/
 	visibility: hidden;
 	font-size: 0;
 }
-.listing, .mainListingContent, UL.listingData, .postedBy
+.listing, .mainListingContent, UL.listingData, .postedBy, .formContainer
 {
 	display: inline-block;
 }
-.listing, .mainListingContent, UL.listingData, .postedBy
+.listing, .mainListingContent, UL.listingData, .postedBy, .formContainer
 {
 /*\*/
 	display: block;
@@ -31,7 +31,44 @@ Common*/
 BODY
 {
 	padding-top: 44px;
-	background: #FFF;
+	background: #FDFDFD;
+}
+/*StatusBox*/
+.newPostButtons, .newPostMediaButtons
+{
+	height: 20px;
+	padding-top: 4px;
+	padding-left: 5px;
+}
+.newPostMediaButtons
+{
+	position: relative;
+	right: 70px;
+	bottom: 4px;
+	text-align: right;
+	padding-bottom: 2px;
+}
+.newPostButtons LI A, .newPostMediaButtons LI A
+{
+	padding: 2px;
+}
+#newPostArea
+{
+	position: relative;
+	padding: 5px;
+}
+#newPostArea BUTTON
+{
+	width: 54px;
+	display: block;
+	position: absolute;
+	right: 10px;
+	bottom: 7px;
+	/*+border-radius:2px;*/
+	-moz-border-radius: 2px;
+	-webkit-border-radius: 2px;
+	-khtml-border-radius: 2px;
+	border-radius: 2px;
 }
 /*post*/
 .relative
@@ -117,8 +154,8 @@ BODY
 	border: 1px solid #D6D6D6;
 	background-color: #E6E6E6;
 	display: block;
-	width: 56px;
-	padding: 0 0 2px 21px;
+	width: 44%;
+	padding: 2px;
 	/*+placement:float-left 0px 0px;*/
 	float: left;
 	position: relative;
@@ -133,23 +170,11 @@ BODY
 	-o-box-shadow: inset 0 1px #EBECEC;
 	box-shadow: inset 0 1px #EBECEC;
 }
-.imgInfo
-{
-	background: #E6E6E6 url("/images/images.gif") no-repeat 3px;
-	/*+placement:shift 0px 0px;*/
-	position: relative;
-	left: 0px;
-	top: 0px;
-}
-.vidInfo
-{
-	background: #E6E6E6 url("/images/videos.gif") no-repeat 4px;
-}
 .thumbInfo A
 {
 	color: #6A6340;
 	font-size: 0.8em;
-	/*[disabled]font-family:Helvetica;*/
+	font-family: Helvetica;
 	/*+text-shadow:1px 1px #FFFFFF;*/
 	-moz-text-shadow: 1px 1px #FFFFFF;
 	-webkit-text-shadow: 1px 1px #FFFFFF;
@@ -243,7 +268,6 @@ UL.listingData LI
 	/*[disabled]width:95px;*/
 	/*[disabled]float:left;*/
 	/*[disabled]clear:left;*/
-	padding-left: 22px;
 	margin-right: 5px;
 	list-style: none;
 	min-height: 20px;
@@ -310,7 +334,7 @@ LI.bedrooms
 	left: 0;
 	margin: 0px;
 }
-.postActionButtons LI, .postActionInfo LI, .commentInline LI
+.postActionButtons LI, .postActionInfo LI, .commentInline LI, .newPostButtons LI, .newPostMediaButtons LI
 {
 	list-style: none;
 	display: -moz-inline-stack;
@@ -458,7 +482,7 @@ TEXTAREA.commentInput
 	background-color: transparent;
 	width: 100%;
 	height: 26px;
-	padding: 0;
+	padding: 0 0 0 2px;
 	margin: 0;
 	border-bottom: 1px solid #E2E3E4;
 	-moz-outline: none;
@@ -481,13 +505,78 @@ TEXTAREA.commentInput:focus
 	box-shadow: none;
 	-moz-transition: none;
 }
-/*Search Filter Area*/
+/*Search Filter Area
+Form Container*/
+/*[clearfix]*/.formContainer
+{
+	position: relative;
+	padding: 10px 0;
+	margin: 0px;
+}
+.formContainer LABEL, .formContainer INPUT, .formContainer SELECT, .formContainer BUTTON
+{
+	font-size: 0.9em;
+	padding: 3px 1px 3px 0;
+	margin: 3px 0;
+	=display: inline;
+	display: block;
+	display: inline-block;
+}
+.formContainer LABEL
+{
+	margin: 1px 0;
+	text-align: right;
+}
+.containerLeft, .containerRight
+{
+	width: 49.5%;
+	position: relative;
+	=display: inline;
+	display: block;
+	display: inline-block;
+}
+.containerLeft
+{
+	left: 0;
+}
+.containerLeft LABEL
+{
+	width: 66px;
+}
+.containerRight LABEL
+{
+	width: 49px;
+}
+.formContainer .full, .formContainer .half
+{
+	left: 0;
+	/*[disabled]padding:0px;*/
+	/*[disabled]margin:0;*/
+	height: auto;
+}
+.full
+{
+	max-width: 65.5%;
+}
+.half
+{
+	max-width: 35%;
+}
+.containerRight
+{
+	right: 0;
+}
+.formButtons
+{
+	text-align: right;
+	margin-top: 10px;
+	margin-bottom: -10px;
+}
 .filterBox
 {
-	height: 105px;
 	position: relative;
 	/*[empty]margin-top:;*/
-	padding-top: 15px;
+	padding-top: 0;
 }
 .filterContentBG
 {
@@ -534,80 +623,18 @@ TEXTAREA.commentInput:focus
 	border-width: 1px;
 	border-top: none;
 	top: -1px;
-	left: -18px;
 	position: relative;
 	z-index: 1;
 	margin-bottom: 0px;
 }
 #slidePriceLabel
 {
-	text-align: justify;
+	text-align: center;
 	color: #9B9999;
 	font-size: 0.9em;
 	padding-top: 2px;
-}
-.dd-options LI
-{
-	height: 26px;
-}
-.dd-options LI A
-{
-	height: 23px;
-	padding: 3px 0px 0 3px;
-}
-.formTable
-{
-	width: 100%;
-	margin: 0;
-}
-.formTable LI.rows
-{
-	list-style: none;
-	/*+placement:float-left 0px 0px;*/
-	float: left;
-	position: relative;
-	left: 0px;
-	top: 0px;
-	margin: 3px 0;
-}
-.formTable LI.formButtons
-{
-	list-style: none;
-	/*+placement:float-left 0px 0px;*/
-	float: left;
-	position: relative;
-	left: 0px;
-	top: 0px;
-	margin: 10px 0;
-	width: 100%;
-	text-align: right;
-}
-.formTable LI.formButtons BUTTON
-{
-	font-size: 0.85em;
-	color: #8F8F8F;
-	padding-top: 0;
-	margin-right: 3px;
-}
-.formTable LI.halfForm
-{
-	width: 49%;
-}
-.formTable LABEL.formDesc
-{
-	display: block;
-	width: 100px;
-	left: 0;
-	padding: 2px;
-	color: #858484;
-	/*+text-shadow:1px 1px 1px #FFFFFF;*/
-	-moz-text-shadow: 1px 1px 1px #FFFFFF;
-	-webkit-text-shadow: 1px 1px 1px #FFFFFF;
-	-o-text-shadow: 1px 1px 1px #FFFFFF;
-	text-shadow: 1px 1px 1px #FFFFFF;
-	font-size: 90%;
-	clear: none;
-	float: left;
+	width: 64.5%;
+	display: inline-block;
 }
 BUTTON#mapBtn
 {
@@ -621,164 +648,46 @@ BUTTON#mapBtn IMG
 	padding-left: 2px;
 	=padding-top: 2px;
 }
-/*SELECT*/
-.dd-select
+/*Profile Listings*/
+.profileListings #wraparound
 {
-	border-radius: 2px;
-	border: 1px solid transparent;
-	border-top-color: #E2E2E2;
-	position: relative;
-	cursor: pointer;
-	margin: 0px;
-	height: 23px;
-}
-.dd-desc
-{
-	color: #AAA;
-	display: block;
-	overflow: hidden;
-	font-weight: normal;
-	line-height: 1.4em;
-}
-.dd-selected
-{
-	overflow: hidden;
-	display: block;
-	padding: 10px;
-	font-weight: bold;
-}
-.dd-pointer
-{
-	width: 0;
-	height: 0;
-	position: absolute;
-	right: 10px;
-	top: 50%;
-	margin-top: -3px;
-}
-.dd-pointer-down
-{
-	border: 5px solid transparent;
-	border-top: 5px solid #000;
-}
-.dd-pointer-up
-{
-	border: 5px solid transparent !important;
-	border-bottom: 5px solid #000 !important;
-	margin-top: -8px;
-}
-.dd-options
-{
-	border: 1px solid #E2E2E2;
-	border-top: none;
-	list-style: none;
-	box-shadow: 0px 1px 5px #DDD;
-	display: none;
-	position: absolute;
-	z-index: 2000;
+	color: #6A6340;
 	margin: 0;
-	padding: 0;
-	background: #FFF;
-}
-.dd-option
-{
-	padding: 10px;
-	display: block;
-	border-bottom: 1px solid #DDD;
-	overflow: hidden;
-	text-decoration: none;
-	color: #333;
-	cursor: pointer;
-	-webkit-transition: all 0.25s ease-in-out;
-	-moz-transition: all 0.25s ease-in-out;
-	-o-transition: all 0.25s ease-in-out;
-	-ms-transition: all 0.25s ease-in-out;
-}
-.dd-options > LI:last-child > .dd-option
-{
-	border-bottom: none;
-}
-.dd-option:hover
-{
-	background: #F3F3F3;
-	color: #000;
-}
-.dd-selected-description-truncated
-{
-	text-overflow: ellipsis;
-	white-space: nowrap;
-}
-.dd-option-selected
-{
-	background: #F6F6F6;
-}
-.dd-option-image, .dd-selected-image
-{
-	vertical-align: middle;
-	float: left;
-	margin-right: 5px;
-	max-width: 64px;
-}
-.dd-image-right
-{
-	float: right;
-	margin-right: 15px;
-	margin-left: 5px;
-}
-.dd-container
-{
 	position: relative;
 }
-.dd-selected-text
+.profileListings #wraparound:after
 {
-	font-weight: bold;
+	border-right: 0 none;
+	right: -1px;
 }
-LI.span4.hasLabel DIV.dd-container
+.profileListings #wraparound:before, .profileListings #wraparound:after
 {
-	left: 100px;
-}
-LI.span3.hasLabel DIV.dd-container
-{
-	left: 80px;
-}
-LI.span3.hasLabel
-{
-	left: 0;
-}
-LI.span1.noLabel
-{
-	left: -35px;
-}
-.dd-select LABEL
-{
-	line-height: 0;
-	left: 0;
-	margin: 0px;
-	font-size: 88%;
-}
-.dd-select A.dd-selected
-{
-	line-height: 0;
-	color: #BDB7B7;
-	margin: 0px;
-	left: 0;
+	border-top: 0 none;
+	bottom: -11px;
+	content: " ";
 	position: absolute;
-	padding-left: 2px;
 }
-LABEL.dd-option-text
+.profileListings #wraparound:before
 {
-	font-size: 88%;
+	border-left: 0 none;
+	left: -1px;
 }
-SPAN.dd-pointer.dd-pointer-down, SPAN.dd-pointer.dd-pointer-up
+.profileListings #wraparound:before, .profileListings #wraparound:after
 {
-	background: transparent url("/images/selectArrow.gif") no-repeat right;
-	width: 35px;
-	height: 25px;
-	border: none;
+	border-top: 0 none;
+	bottom: -11px;
+	content: " ";
 	position: absolute;
-	top: 2px;
-	right: 0;
-	border-width: 0 !important;
-	margin-top: -3px;
-	margin-top: -2px\0/;
+}
+.profileListings #drop-down-filter
+{
+	border-radius: 0 0 2px 2px;
+	border-style: solid;
+	border-width: 1px;
+	border-top: none;
+	top: -1px;
+	left: 0;
+	position: relative;
+	z-index: 1;
+	margin-bottom: 0px;
 }

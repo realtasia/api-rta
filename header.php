@@ -1,6 +1,7 @@
 <?php
 $domParts = explode('.', $_SERVER['HTTP_HOST']);
-$dom      = 'http://' . $domParts[1] . '.' . $domParts[2];
+$root     = $domParts[1] . '.' . $domParts[2];
+$dom      = 'http://' . $root;
 ?>
 <!DOCTYPE html>
 <html>    
@@ -15,8 +16,9 @@ $dom      = 'http://' . $domParts[1] . '.' . $domParts[2];
         <script type="text/javascript" src="<?php echo $dom ?>/common/js/jquery.min.js"></script>
         <script type="text/javascript" src="<?php echo $dom ?>/common/js/bootstrap.min.js"></script>
         <script type="text/javascript" src="/js/jQuery.bubbletip-1.1.0.js"></script>
-        <script type="text/javascript" src="/js/dropdown.min.js"></script>
+        <script type="text/javascript" src="/js/dropdown.min.js"></script>        
         <script type="text/javascript" src="<?php echo $dom ?>/common/js/jquery.placeholder.min.js"></script>
+        <script type="text/javascript" src="/js/script.js"></script>        
         <!--[if IE]>
         <link rel="stylesheet" type="text/css" href="/css/bubbletip-IE.css" />
         <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -35,13 +37,15 @@ $dom      = 'http://' . $domParts[1] . '.' . $domParts[2];
                 <div class="navbar-inner">                    
                     <div class="container">
                         <ul class="nav" style="padding:0;margin:0 auto;text-align:center;display:block;" id="pageNavigation">
-                            <li id="realtLogo"><a style="margin:0;padding:0;"><img src="/img/realtlogo6.png" /></a></li>
+                            <li id="realtLogo"><a style="margin:0;padding:0;" href="http://rta.<?=$root?>"><img src="/img/realtlogo6.png" /></a></li>
                             <li class="menuItem leftMenuItem"><a href="#navPeople" id="navPeople">People</a></li>
                             <li class="menuItem leftMenuItem rightMenuItem"><a href="#navLocations" id="navLocations">Locations</a></li>
-                            <li class="menuItem rightMenuItem"><a href="#navLocations" id="navListings">Listings</a></li>                         
+                            <li class="menuItem rightMenuItem"><a href="/listings.php" id="navListings">Listings</a></li>                         
                         </ul>                       
-                        <div class="nav-collapse">
+                        
                             <ul class="nav" id="mainNav">
+                                <li><a href="#"><i class="headerIcons i-notificationActive"></i></a></li>
+                                <li><a href="#"><i class="headerIcons i-inboxActive"></i></a></li>
                                 <li class="dropdown accountBtnLi">
                                     <div class="dropdown" id="accountDiv">
                                         <img style="padding:2px;background-color: #bbb;vertical-align: bottom;line-height:normal;float: left;" src="/img/thumbs/1.jpg" width="35" height="35">
@@ -57,7 +61,7 @@ $dom      = 'http://' . $domParts[1] . '.' . $domParts[2];
                                     </div>
                                 </li>
                             </ul>
-                        </div><!-- /.nav-collapse -->
+                        
                     </div>
                 </div><!-- /navbar-inner -->
             </div>

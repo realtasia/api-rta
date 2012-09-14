@@ -20,7 +20,7 @@
                         </ul>
                     </li>                                              
                     <li class="nav-header">Activity</li>
-                    <li><a href="/listings.php"><i class="sidebar i-listings"></i>&nbsp;Listings&nbsp;<span class="badge">78</span></a></li>
+                    <li><a href="/profilelistings.php"><i class="sidebar i-listings"></i>&nbsp;Listings&nbsp;<span class="badge">78</span></a></li>
                     <li class="dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="sidebar i-subscribers"></i>&nbsp;Subscriptions&nbsp;<b class="caret"></b><span class="badge">14</span></a>
                         <ul class="dropdown-menu">

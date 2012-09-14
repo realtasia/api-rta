@@ -14,11 +14,21 @@
                             In the year 1994, she won the Miss World title and brought fame to her mother land.') ?>
             </p>
         </div> <!--  introcontent -->
-        <div class="outerBox">
-            <div class="contentArea">
+        <div class="outerBox rounded">
+            <div class="contentArea widgetContentBG rounded" id="newPostArea">
+                <ul class="newPostButtons">
+                    <li><a href="#"><i class="postMini i-postStatus"></i></a></li>
+                    <li><a href="#"><i class="postMini i-postTestimonial"></i></a></li>
+                </ul>
                 <div id="statusFormTA">
-                    <textarea id="statusFormTextarea" placeholder="What's New"></textarea>
+                    <button class="close" type="button">&times;</button>
+                    <textarea id="statusFormTextarea" class="rounded" placeholder="What's New"></textarea>
                 </div>
+                <ul class="newPostMediaButtons">
+                    <li><a href="#"><i class="postMini i-postImages"></i></a></li>
+                    <li><a href="#"><i class="postMini i-postVideo"></i></a></li>
+                </ul>
+                <button class="btn btn-info relative">Share</button>
             </div>
         </div> <!--  status form -->
         <div id="theLoop">
@@ -78,8 +88,8 @@
                 <div class="postActions">
                     <ul class="postActionButtons">
                         <li><a href="#"><i class="postActionsIcons i-share"></i></a></li>
-                        <li><a href="#"><i class="postActionsIcons i-subscribed"></i></a></li>
-                        <li><a href="#"><i class="postActionsIcons i-liked"></i></a></li>
+                        <li><a href="#"><i class="postActionsIcons i-subscribe Active"></i></a></li>
+                        <li><a href="#"><i class="postActionsIcons i-like Active"></i></a></li>
                     </ul>
                     <ul class="postActionInfo">
                         <li><a href="#"><i class="postMini i-comments"></i>51</a></li>
@@ -95,19 +105,7 @@
                                 <li class="commentBody">
                                     <a class="commentAuthor" href="#">Lottie Lot</a>
                                     <p>I think it is probably over-rated actually!</p>
-                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="postMini i-likes"></i>2</a></span></div>
-                                </li>
-                            </ul> <!-- comment inline -->
-                        </li> <!-- comment -->
-                        <li class="contentArea commentBG">
-                            <ul class="commentInline">
-                                <li class="commentThumb"><img src="/img/thumbs/2.jpg" width="40" height="40" /></li>
-                                <li class="commentBody">
-                                    <a class="commentAuthor" href="#">Lottie Lot</a>
-                                    <p>
-                                        I wouldn't know. I am a bimbo. What's a script?
-                                    </p>
-                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="postMini i-likes"></i>2</a></span></div>
+                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><i class="postMini i-likes"></i><a href="#">2</a></span></div>
                                 </li>
                             </ul> <!-- comment inline -->
                         </li> <!-- comment -->
@@ -119,7 +117,7 @@
                                     <p>
                                         Need 1 Billion to vote for Palestine Google is having a vote on whether to name israel or Palestine on its map on Google earth please vote for Palestine and share.
                                     </p>
-                                    <div class="commentInfo"><span class="timeAgo">17 minutes ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="postMini i-likes"></i>2</a></span></div>
+                                    <div class="commentInfo"><span class="timeAgo">17 minutes ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><i class="postMini i-likes"></i><a href="#">2</a></span></div>
                                 </li>
                             </ul> <!-- comment inline -->
                         </li> <!-- comment -->
@@ -177,7 +175,7 @@
                                 <li class="commentBody">
                                     <a class="commentAuthor" href="#">Lottie Lot</a>
                                     <p>I think it is probably over-rated actually!</p>
-                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="postMini i-likes"></i>2</a></span></div>
+                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><i class="postMini i-likes"></i><a href="#">2</a></span></div>
                                 </li>
                             </ul> <!-- comment inline -->
                         </li> <!-- comment -->
@@ -189,19 +187,7 @@
                                     <p>
                                         I wouldn't know. I am a bimbo. What's a script?
                                     </p>
-                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="postMini i-likes"></i>2</a></span></div>
-                                </li>
-                            </ul> <!-- comment inline -->
-                        </li> <!-- comment -->
-                        <li class="contentArea commentBG">
-                            <ul class="commentInline">
-                                <li class="commentThumb"><img src="/images/commentImg.jpg" width="40" height="40" /></li>
-                                <li class="commentBody">
-                                    <a class="commentAuthor" href="#">Susan Doyle</a>
-                                    <p>
-                                        Need 1 Billion to vote for Palestine Google is having a vote on whether to name israel or Palestine on its map on Google earth please vote for Palestine and share.
-                                    </p>
-                                    <div class="commentInfo"><span class="timeAgo">17 minutes ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="postMini i-likes"></i>2</a></span></div>
+                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><i class="postMini i-likes"></i><a href="#">2</a></span></div>
                                 </li>
                             </ul> <!-- comment inline -->
                         </li> <!-- comment -->
@@ -272,19 +258,7 @@
                                 <li class="commentBody">
                                     <a class="commentAuthor" href="#">Lottie Lot</a>
                                     <p>I think it is probably over-rated actually!</p>
-                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="postMini i-commentLiked"></i>2</a></span></div>
-                                </li>
-                            </ul> <!-- comment inline -->
-                        </li> <!-- comment -->
-                        <li class="contentArea commentBG">
-                            <ul class="commentInline">
-                                <li class="commentThumb"><img src="/img/thumbs/2.jpg" width="40" height="40" /></li>
-                                <li class="commentBody">
-                                    <a class="commentAuthor" href="#">Lottie Lot</a>
-                                    <p>
-                                        I wouldn't know. I am a bimbo. What's a script?
-                                    </p>
-                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="postMini i-likes"></i>2</a></span></div>
+                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="postMini i-commentLike Active"></i>2</a></span></div>
                                 </li>
                             </ul> <!-- comment inline -->
                         </li> <!-- comment -->
@@ -349,6 +323,7 @@
                     </ul>
                 </div> <!-- post action links -->
             </article> <!--  testimonial -->
+            
             <article class="postFeed">
                 <div class="dropdown postSettings">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"></a>
@@ -376,8 +351,8 @@
                                 <div class="thumbnail ">
                                     <img src="/images/imphoto.jpg">
                                 </div>
-                                <span class="thumbInfo imgInfo"><a href="#">15</a></span>
-                                <span class="thumbInfo vidInfo"><a href="#">1</a></span>
+                                <span class="thumbInfo"><a href="#"><i class="postMini i-images"></i>15 images</a></span>
+                                <span class="thumbInfo"><a href="#"><i class="postMini i-videos"></i>1 video</a></span>
                             </div> <!-- listings thumbnail -->
                             <div class="listingRight relative">
                                 <h3><a href="#">Carribean @ Keppel Bay</a></h3>
@@ -397,7 +372,7 @@
                             </div> <!-- listings content -->
                         </div>
                     </article>
-                </div>
+                </div> <!-- post content -->
                 <div class="postActions">
                     <ul class="postActionButtons">
                         <li><a href="#"><i class="postActionsIcons i-share"></i></a></li>
@@ -412,16 +387,6 @@
                 </div> <!-- post action links -->
                 <div class="indentedComment widgetOuterBox">
                     <ul class="commentList contentArea commentBG">
-                        <li class="commentBG">
-                            <ul class="commentInline">
-                                <li class="commentThumb"><img src="/img/thumbs/1.jpg" width="40" height="40" /></li>
-                                <li class="commentBody">
-                                    <a class="commentAuthor" href="#">Lottie Lot</a>
-                                    <p>I think it is probably over-rated actually!</p>
-                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="postMini i-likes"></i>2</a></span></div>
-                                </li>
-                            </ul> <!-- comment inline -->
-                        </li> <!-- comment -->
                         <li class="contentArea commentBG">
                             <ul class="commentInline">
                                 <li class="commentThumb"><img src="/img/thumbs/2.jpg" width="40" height="40" /></li>
@@ -430,7 +395,7 @@
                                     <p>
                                         I wouldn't know. I am a bimbo. What's a script?
                                     </p>
-                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="postMini i-commentLiked"></i>2</a></span></div>
+                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="postMini i-commentLike Active"></i>2</a></span></div>
                                 </li>
                             </ul> <!-- comment inline -->
                         </li> <!-- comment -->
@@ -462,346 +427,7 @@
     <? include('rightbar.php') ?>
 </div>
 
-
-<div class="centerContent relative">
-    <div class="outerBox centerWidth relative">
-        <div class="contentArea introBox widgetContentBG relative">
-            <h2 id="introHeader">Listings Directory</h2>
-            <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</p>
-        </div>
-    </div> <!-- intro content -->
-    <div class="outerBox centerWidth relative" style="margin-top:10px;">
-        <div class="contentArea contentBox">
-            <form class="member" accept-charset="utf-8" id="filterform" method="GET" action="/members">
-                <div id="wraparound" class="outerBox relative">
-                    <div id="search-wrap" class="filterContentBG contentArea contentNoBottom">
-                        <div class="inputFill" style="height:29px;width:290px;">
-                            <div class="inputFill" style="height:29px;width:220px;float:left">
-                                <input type="text" id="searchInput" style="width:218px;" placeholder="Search Listings" />
-                            </div>
-                            <button type="submit" class="btn" style="width:70px;margin:0;height:28px;">Search</button>
-                        </div>
-                        <button class="btnRound" id="mapBtn"><img src="/images/map.png" /></button>
-                    </div>
-                </div> <!-- SEARCH BOX -->
-                <div style="display:none;" id="drop-down-filter" class="centerWidthWide outerBox relative shadow">
-                    <div class="filterBox filterContentBG contentArea contentNoTop">
-                        <ul class="formTable">
-                            <li class="span4 hasLabel rows">
-                                <label class="formDesc">Property Type</label>
-                                <select id="propType">
-                                    <option></option>
-                                    <option>Residential Apartments</option>
-                                    <option>Residential Landed</option>
-                                    <option>HDB</option>
-                                </select>
-                            </li> <!-- SELECT PROPTYPE -->
-                            <li class="span3 hasLabel rows">
-                                <label class="formDesc">Size (sq ft)</label>
-                                <select id="sizeFrom">
-                                    <option></option>
-                                    <option>1</option>
-                                    <option>2</option>
-                                    <option>3</option>
-                                    <option>4</option>
-                                    <option>5</option>
-                                    <option>6</option>
-                                    <option>7</option>
-                                    <option>8</option>
-                                    <option>9</option>
-                                    <option>10</option>
-                                </select>
-                            </li> <!-- SELECT SIZE FROM -->
-                            <li class="span1 noLabel rows">
-                                <select id="sizeTo">
-                                    <option></option>
-                                    <option>1</option>
-                                    <option>2</option>
-                                    <option>3</option>
-                                    <option>4</option>
-                                    <option>5</option>
-                                    <option>6</option>
-                                    <option>7</option>
-                                    <option>8</option>
-                                    <option>9</option>
-                                    <option>10</option>
-                                </select>
-                            </li> <!-- SELECT SIZE TO -->
-                            <li class="span4 hasLabel rows">
-                                <label class="formDesc">Price Range</label>
-                                <label id="slidePriceLabel">$700,000 - $1,000,000</label>
-                            </li> <!-- PRICE LABEL -->
-                            <li class="span3 hasLabel rows">
-                                <label class="formDesc">Bedrooms</label>
-                                <select id="roomsFrom">
-                                    <option>STUDIO</option>
-                                    <option>2</option>
-                                    <option>3</option>
-                                    <option>4</option>
-                                    <option>5</option>
-                                    <option>6</option>
-                                    <option>7</option>
-                                    <option>8</option>
-                                    <option>9</option>
-                                    <option>10</option>
-                                </select>
-                            </li> <!-- SELECT ROOMS FROM -->
-                            <li class="span1 noLabel rows">
-                                <select id="roomsTo">
-                                    <option></option>
-                                    <option>STUDIO</option>
-                                    <option>2</option>
-                                    <option>3</option>
-                                    <option>4</option>
-                                    <option>5</option>
-                                    <option>6</option>
-                                    <option>7</option>
-                                    <option>8</option>
-                                    <option>9</option>
-                                    <option>10</option>
-                                </select>
-                            </li> <!-- SELECT ROOMS TO -->
-                            <li class="formButtons">
-                                <button class="btnRound" id="resetSearch">Reset</button>
-                                <button class="btnRound" id="cancelSearch">Close</button>
-                                <button class="btnRound" id="doSearch">Go</button>
-                            </li> <!-- SEARCH FORM BUTTONS -->
-                        </ul>
-                    </div>
-                </div>
-                <input type="hidden" value="c6d6581afc6dda3ec151f8353a96a8d1ca3d865e" name="token">
-            </form> <!-- SEARCH AREA -->
-            <div id="sortBox">
-                <div class="relative" id="resultCount"><h3><small>534 results found</small><span> in Properties for Sale</span></h3></div>
-            </div> <!--  sort button & result count -->
-            <div class="widgetOuterBox relative">
-                <article class="contentArea widgetContentBG listing relative">
-                    <div class="mainListingContent">
-                        <div class="listingLeft relative">
-                            <div class="thumbnail ">
-                                <img src="/images/imphoto.jpg">
-                            </div>
-                            <span class="thumbInfo imgInfo"><a href="#">15 images</a></span>
-                            <span class="thumbInfo vidInfo"><a href="#">1 video</a></span>
-                        </div> <!-- listings thumbnail -->
-                        <div class="listingRight relative">
-                            <h3><a href="#">Carribean @ Keppel Bay</a></h3>
-                            <span class="price relative">
-                                <span class="listingType">FOR<br />SALE</span>
-                                $200,000,000
-                            </span>
-                            <ul class="listingData">
-                                <li class="sqft">8,000 sqft</li>
-                                <li class="bathrooms">3 toilets</li>
-                                <li class="bedrooms">3 bedrooms</li>
-                                <li class="proptype"></li>
-                            </ul>
-                            <p>
-                                Need 1 Billion to vote for Palestine Google is having a vote on whether to name Israel or Palestine on its map on Google earth please vote for Palestine and share.
-                            </p>
-                        </div> <!-- listings content -->
-                        <ul class="postedBy">
-                            <li class="postedByLabel">Posted by:</li>
-                            <li class="postedByThumb"><a href="#"><img src="/images/posterImg.jpg"/></a></li>
-                            <li class="postedByName"><a href="#">Natalie Scott</a></li>
-                        </ul>
-                    </div> <!-- main listing content -->
-                    <div class="postActions">
-                        <ul class="postActionButtons">
-                            <li><a href="#"><i class="postActionsIcons i-share"></i></a></li>
-                            <li><a href="#"><i class="postActionsIcons i-subscribe"></i></a></li>
-                            <li><a href="#"><i class="postActionsIcons i-like"></i></a></li>
-                        </ul>
-                        <ul class="postActionInfo">
-                            <li><a href="#"><i class="postMini i-comments"></i>51</a></li>
-                            <li><a href="#"><i class="postMini i-subscribers"></i>215</a></li>
-                            <li><a href="#"><i class="postMini i-likes"></i>167</a></li>
-                        </ul>
-                    </div> <!-- postActions -->
-                    <div class="widgetOuterBox relative comments">
-                        <ul class="postComments contentArea">
-                            <li class="commentBG">
-                                <ul class="commentInline">
-                                    <li class="commentThumb"><img src="/images/commentImg.jpg" width="42" height="42" /></li>
-                                    <li class="commentBody">
-                                        <a class="commentAuthor" href="#">Susan Doyle</a>
-                                        <p>
-                                            Need 1 Billion to vote for Palestine Google is having a vote on whether to name israel or Palestine on its map on Google earth please vote for Palestine and share.
-                                        <div class="commentInfo"><span class="timeAgo">27 minutes ago</span></div>
-                                        </p>
-
-                                    </li>
-                                    <li class="commentActions"><a href="#"><i class="postMini i-likes"></i></a></li>
-                                </ul>
-                            </li> <!-- comment -->
-                            <li class="contentArea commentBG">
-                                <ul class="commentInline">
-                                    <li class="commentThumb"><img src="/images/commentImg.jpg" width="42" height="42" /></li>
-                                    <li class="commentBody">
-                                        <a class="commentAuthor" href="#">Susan Doyle</a>
-                                        <p>
-                                            Need 1 Billion to vote for Palestine Google.
-                                        <div class="commentInfo"><span class="timeAgo">27 minutes ago</span></div>
-                                        </p>
-
-                                    </li>
-                                    <li class="commentActions"><a href="#"><i class="postMini i-likes"></i>1</a></li>
-                                </ul>
-
-                            </li> <!-- comment -->
-                            <li class="contentArea commentBG contentNoBottom">
-                                <ul class="commentInline">
-                                    <li class="commentThumb"><img src="/images/commentImg.jpg" width="42" height="42" /></li>
-                                    <li class="commentTextarea">
-                                        <textarea class="commentInput contentArea" placeholder="Your comment"></textarea>
-                                    </li>
-                                </ul>
-                            </li> <!-- comment -->
-                        </ul>
-                    </div> <!-- comments -->
-                </article>
-            </div> <!-- listing -->
-            <div class="widgetOuterBox relative">
-                <article class="contentArea widgetContentBG listing relative">
-                    <div class="mainListingContent">
-                        <div class="listingLeft relative">
-                            <div class="thumbnail ">
-                                <img src="/images/imphoto.jpg">
-                            </div>
-                            <span class="thumbInfo imgInfo"><a href="#">15 images</a></span>
-                            <span class="thumbInfo vidInfo"><a href="#">1 video</a></span>
-                        </div> <!-- listings thumbnail -->
-                        <div class="listingRight relative">
-                            <h3><a href="#">Carribean @ Keppel Bay</a></h3>
-                            <span class="price relative"><span class="listingType">FOR<br />SALE</span>$200,000,000</span>
-                            <ul class="listingData">
-                                <li class="sqft">8,000 sqft</li>
-                                <li class="bathrooms">3 toilets</li>
-                                <li class="bedrooms">3 bedrooms</li>
-                                <li class="proptype"></li>
-                            </ul>
-                            <p>
-                                Need 1 Billion to vote for Palestine Google is having a vote on whether to name Israel or Palestine on its map on Google earth please vote for Palestine and share.
-                            </p>
-                        </div> <!-- listings content -->
-                        <ul class="postedBy">
-                            <li class="postedByLabel">Posted by:</li>
-                            <li class="postedByThumb"><a href="#"><img src="/images/posterImg.jpg"/></a></li>
-                            <li class="postedByName"><a href="#">Natalie Scott</a></li>
-                        </ul>                         
-                    </div> <!-- main listing content -->
-                    <div class="postActions">
-                        <ul class="postActionButtons">
-                            <li><a href="#"><i class="postActionsIcons i-share"></i></a></li>
-                            <li><a href="#"><i class="postActionsIcons i-subscribed"></i></a></li>
-                            <li><a href="#"><i class="postActionsIcons i-liked"></i></a></li>
-                        </ul>
-                        <ul class="postActionInfo">
-                            <li><a href="#"><i class="postMini i-comments"></i>51</a></li>
-                            <li><a href="#"><i class="postMini i-subscribers"></i>215</a></li>
-                            <li><a href="#"><i class="postMini i-likes"></i>167</a></li>
-                        </ul>
-                    </div> <!-- postActions -->
-                    <div class="widgetOuterBox relative comments">
-                        <ul class="postComments contentArea">
-                            <li class="commentBG">
-                                <ul class="commentInline">
-                                    <li class="commentThumb"><img src="/images/commentImg.jpg" width="42" height="42" /></li>
-                                    <li class="commentBody">
-                                        <a class="commentAuthor" href="#">Susan Doyle</a>
-                                        <p>
-                                            Need 1 Billion to vote for Palestine Google is having a vote on whether to name israel or Palestine on its map on Google earth please vote for Palestine and share.
-                                        <div class="commentInfo"><span class="timeAgo">27 minutes ago</span></div>
-                                        </p>
-
-                                    </li>
-                                    <li class="commentActions"><a href="#"><i class="postMini i-likes"></i>167</a></li>
-                                </ul>
-
-                            </li> <!-- comment -->
-                            <li class="contentArea commentBG">
-                                <ul class="commentInline">
-                                    <li class="commentThumb"><img src="/images/commentImg.jpg" width="42" height="42" /></li>
-                                    <li class="commentBody">
-                                        <a class="commentAuthor" href="#">Susan Doyle</a>
-                                        <p>
-                                            Need 1 Billion to vote for Palestine Google.
-                                        <div class="commentInfo"><span class="timeAgo">27 minutes ago</span></div>
-                                        </p>
-
-                                    </li>
-                                    <li class="commentActions"><a href="#"><i class="postMini i-likes"></i>3</a></li>
-                                </ul>
-
-                            </li> <!-- comment -->
-                            <li class="contentArea commentBG contentNoBottom">
-                                <ul class="commentInline">
-                                    <li class="commentThumb"><img src="/images/commentImg.jpg" width="42" height="42" /></li>
-                                    <li class="commentTextarea">
-                                        <textarea class="commentInput contentArea" placeholder="Your comment"></textarea>
-                                    </li>
-                                </ul>
-                            </li> <!-- comment -->
-                        </ul>
-                    </div> <!-- comments -->
-                </article>
-            </div> <!-- listing -->
-        </div>
-    </div>
-</div>
-
 <a href="#" style="display:block;width:50px;border:1px solid #ddd;margin:0 150px auto;text-align: left" id="tips">TIPS</a>
-<script type="text/javascript">
-    jQuery(document).ready(function($){
-        $('#cancelSearch').click(function(e){e.preventDefault();$('#drop-down-filter').slideUp();})
-        $('#searchInput').focus(function(e){e.preventDefault();$('#drop-down-filter').slideDown();})
-        $('#propType').ddslick({
-            width:180,
-            selectText: "",
-            background : "transparent url('/images/selectBG.gif') repeat-x" ,
-            onSelected: function(selectedData){
-                //callback function: do something with selectedData;
-            }
-        });
-        $('#sizeFrom').ddslick({
-            width:100,
-            selectText: "",
-            background : "transparent url('/images/selectBG.gif') repeat-x" ,
-            onSelected: function(selectedData){
-                //callback function: do something with selectedData;
-            }
-        });
-        $('#sizeTo').ddslick({
-            width:100,
-            selectText: "",
-            background : "transparent url('/images/selectBG.gif') repeat-x" ,
-            onSelected: function(selectedData){
-                //callback function: do something with selectedData;
-            }
-        });
-        $('#roomsFrom').ddslick({
-            width:100,
-            selectText: "",
-            background : "transparent url('/images/selectBG.gif') repeat-x" ,
-            onSelected: function(selectedData){
-                //callback function: do something with selectedData;
-            }
-        });
-        $('#roomsTo').ddslick({
-            width:100,
-            selectText: "",
-            background : "transparent url('/images/selectBG.gif') repeat-x" ,
-            onSelected: function(selectedData){
-                //callback function: do something with selectedData;
-            }
-        });
-        $(window).bind('load', function() {
-            $('#tips').bubbletip($('<div><h1>This is TIP</h1></div>'), {bindHide:false});
-        });
-    })
-</script>
-
-
 <footer id="footer"></footer>
 </body>
 </html>
