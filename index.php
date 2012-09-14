@@ -49,8 +49,8 @@
                     </ul>                    
                 </div>
             </div> <!--  sort button & result count -->
-            <article class="postFeed editMode">
-                <div class="dropdown postSettings editBar">
+            <article class="postFeed">
+                <div class="dropdown postSettings">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"></a>
                     <ul class="dropdown-menu">
                         <li><a href="#">Hide Post</a></li>
@@ -361,10 +361,10 @@
                                     $200,000,000
                                 </span>
                                 <ul class="listingData">
-                                    <li class="sqft">8,000 sqft</li>
-                                    <li class="bathrooms">3 toilets</li>
-                                    <li class="bedrooms">3 bedrooms</li>
-                                    <li class="proptype"></li>
+                                    <li><i class="postMini i-sqft"></i>8,000 sqft</li>
+                                    <li><i class="postMini i-bathrooms"></i>3 toilets</li>
+                                    <li><i class="postMini i-bedrooms"></i>3 bedrooms</li>
+                                    <li></li>
                                 </ul>
                                 <p>
                                     Need 1 Billion to vote for Palestine Google is having a vote on whether to name Israel or Palestine on its map on Google earth please vote for Palestine and share.

@@ -7,7 +7,7 @@ Purpose of the stylesheet follows.
 
 Common*/
 /*+clearfix {*/
-.listing:after, .mainListingContent:after, UL.listingData:after, .postedBy:after, .formContainer:after
+.listing:after, .mainListingContent:after, UL.listingData:after, .postedBy:after, .formContainer:after, .containerLeft:after, .containerRight:after
 {
 	content: ".";
 	display: block;
@@ -16,11 +16,11 @@ Common*/
 	visibility: hidden;
 	font-size: 0;
 }
-.listing, .mainListingContent, UL.listingData, .postedBy, .formContainer
+.listing, .mainListingContent, UL.listingData, .postedBy, .formContainer, .containerLeft, .containerRight
 {
 	display: inline-block;
 }
-.listing, .mainListingContent, UL.listingData, .postedBy, .formContainer
+.listing, .mainListingContent, UL.listingData, .postedBy, .formContainer, .containerLeft, .containerRight
 {
 /*\*/
 	display: block;
@@ -274,18 +274,6 @@ UL.listingData LI
 	margin-bottom: 2px;
 	color: #2691D4;
 }
-LI.sqft
-{
-	background: url("/images/sqft.png") no-repeat;
-}
-LI.bathrooms
-{
-	background: url("/images/bathrooms.png") no-repeat 1px;
-}
-LI.bedrooms
-{
-	background: url("/images/bedrooms.png") no-repeat 1px;
-}
 /*[clearfix]*/.postedBy
 {
 	position: relative;
@@ -506,46 +494,174 @@ TEXTAREA.commentInput:focus
 	-moz-transition: none;
 }
 /*Search Filter Area
-Form Container*/
+Search Box Area*/
+#search-wrap .btn-group
+{
+	position: relative;
+	left: 220px;
+	top: -28px;
+	width: 112px;
+}
+.listingsSearch .btn-group A
+{
+	text-transform: uppercase;
+	font-size: 0.85em;
+}
+.listingsSearch .btn-group .btn, .listingsSearch .btn-group .btn:first-child
+{
+	top: 0;
+	text-transform: uppercase;
+	font-size: 0.8em;
+	/*+border-radius:1px;*/
+	-moz-border-radius: 1px;
+	-webkit-border-radius: 1px;
+	-khtml-border-radius: 1px;
+	border-radius: 1px;
+	background: #EEEEEE;
+/*Old browsers
+IE9 SVG, needs conditional override of 'filter' to 'none'*/
+	background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIwJSIgeTI9IjEwMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2VlZWVlZSIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNjY2NjY2MiIHN0b3Atb3BhY2l0eT0iMSIvPgogIDwvbGluZWFyR3JhZGllbnQ+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0idXJsKCNncmFkLXVjZ2ctZ2VuZXJhdGVkKSIgLz4KPC9zdmc+);
+	background: -moz-linear-gradient(top, #eeeeee 0%, #cccccc 100%);
+/*FF3.6+*/
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#eeeeee), color-stop(100%,#cccccc));
+/*Chrome,Safari4+*/
+	background: -webkit-linear-gradient(top, #eeeeee 0%,#cccccc 100%);
+/*Chrome10+,Safari5.1+*/
+	background: -o-linear-gradient(top, #eeeeee 0%,#cccccc 100%);
+/*Opera 11.10+*/
+	background: -ms-linear-gradient(top, #eeeeee 0%,#cccccc 100%);
+/*IE10+*/
+	background: linear-gradient(to bottom, #eeeeee 0%,#cccccc 100%);
+/*W3C*/
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eeeeee', endColorstr='#cccccc',GradientType=0 );
+/*IE6-8*/
+	padding: 5px;
+}
+/*Form Container*/
 /*[clearfix]*/.formContainer
 {
 	position: relative;
-	padding: 10px 0;
+	padding: 0;
 	margin: 0px;
 }
-.formContainer LABEL, .formContainer INPUT, .formContainer SELECT, .formContainer BUTTON
+.formContainer LABEL, .formContainer INPUT, .formContainer SELECT, .formContainer BUTTON, .formContainer BUTTON
 {
-	font-size: 0.9em;
+	font-size: 0.95em;
 	padding: 3px 1px 3px 0;
 	margin: 3px 0;
 	=display: inline;
 	display: block;
 	display: inline-block;
+	font-family: Arial;
+	/*+text-shadow:none;*/
+	-moz-text-shadow: none;
+	-webkit-text-shadow: none;
+	-o-text-shadow: none;
+	text-shadow: none;
 }
 .formContainer LABEL
 {
 	margin: 1px 0;
 	text-align: right;
 }
-.containerLeft, .containerRight
+.formContainer .btn-toolbar
 {
-	width: 49.5%;
+	margin: 0;
+	padding: 0px;
+	height: 30px;
+	position: relative;
+	top: 0;
+}
+.formContainer .btn-toolbar .btn, .formContainer .btn-toolbar .btn:first-child
+{
+	padding: 0 5px;
+	height: 29px;
+	background: #FFFFFF;
+/*Old browsers*/
+	background: -moz-linear-gradient(top, #ffffff 34%, #eaeaea 100%);
+/*FF3.6+*/
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(34%,#ffffff), color-stop(100%,#eaeaea));
+/*Chrome,Safari4+*/
+	background: -webkit-linear-gradient(top, #ffffff 34%,#eaeaea 100%);
+/*Chrome10+,Safari5.1+*/
+	background: -o-linear-gradient(top, #ffffff 34%,#eaeaea 100%);
+/*Opera 11.10+*/
+	background: -ms-linear-gradient(top, #ffffff 34%,#eaeaea 100%);
+/*IE10+*/
+	background: linear-gradient(to bottom, #ffffff 34%,#eaeaea 100%);
+/*W3C*/
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#eaeaea',GradientType=0 );
+/*IE6-9*/
+	border: 1px solid #DFDFDF;
+	color: #8A8A8A;
+}
+.containerLeft .btn-toolbar
+{
+	margin: 0;
+	height: 30px;
+	position: relative;
+	top: 0;
+	float: right;
+}
+/*[clearfix]*/.containerLeft, .containerRight
+{
+	width: 48%;
 	position: relative;
 	=display: inline;
 	display: block;
 	display: inline-block;
+	top: 0;
+	margin: 0px;
+	padding: 0px;
 }
 .containerLeft
 {
 	left: 0;
+	margin-right: 1%;
 }
-.containerLeft LABEL
+.containerLeft .leftNudge
 {
-	width: 66px;
+	margin-left: 10px;
+	margin-right: -5px;
+	padding-right: 0px;
+	padding-left: 0px;
+}
+.containerLeft LABEL, .containerLeft INPUT
+{
+	/*[disabled]width:66px;*/
+	float: left;
+	margin: 3px 0 0px 5px;
+}
+.containerLeft INPUT
+{
+	width: 41%;
+	padding-left: 2px;
+	margin-top: 3px;
+	margin-right: 0px;
+	/*+border-radius:1px;*/
+	-moz-border-radius: 1px;
+	-webkit-border-radius: 1px;
+	-khtml-border-radius: 1px;
+	border-radius: 1px;
+	height: 24px;
+	background: transparent url('/images/searchInputBG.gif') repeat-x;
+	border: 0 none;
+	padding-top: 2px;
+	padding-bottom: 4px;
+}
+.formContainer .half
+{
+	width: 80px;
 }
 .containerRight LABEL
 {
-	width: 49px;
+	float: left;
+	margin: 5px 5px 0px;
+}
+.containerRight
+{
+	margin-left: 1%;
+	right: 0;
 }
 .formContainer .full, .formContainer .half
 {
@@ -562,15 +678,20 @@ Form Container*/
 {
 	max-width: 35%;
 }
-.containerRight
-{
-	right: 0;
-}
 .formButtons
 {
 	text-align: right;
-	margin-top: 10px;
-	margin-bottom: -10px;
+	margin: 10px 0px -15px;
+}
+.formButtons A
+{
+	text-align: center;
+	padding: 2px 0px 2px 5px;
+	/*+border-radius:2px;*/
+	-moz-border-radius: 2px;
+	-webkit-border-radius: 2px;
+	-khtml-border-radius: 2px;
+	border-radius: 2px;
 }
 .filterBox
 {

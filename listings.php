@@ -1,4 +1,4 @@
-<? include('header.php') ?>   
+<? include('header.php') ?>
 <div id="container">
     <? //include('leftbar.php') ?>
     <div class="centerContent relative">
@@ -10,99 +10,145 @@
         </div> <!-- intro content -->
         <div class="outerBox centerWidth relative" style="margin-top:10px;">
             <div class="contentArea contentBox">
-                <form class="member" accept-charset="utf-8" id="filterform" method="GET" action="/members">
+                <form class="listingsSearch" accept-charset="utf-8" id="filterform" method="GET" action="/members">
                     <div id="wraparound" class="outerBox relative">
                         <div id="search-wrap" class="filterContentBG contentArea contentNoBottom">
-                            <div class="inputFill" style="height:29px;width:290px;">
+                            <div class="inputFill" style="height:29px;width:312px;">
                                 <div class="inputFill" style="height:29px;width:220px;float:left">
                                     <input type="text" id="searchInput" style="width:218px;" placeholder="Search Listings" />
+                                    <div class="btn-group">
+                                        <button class="btn btn-small ">Rent & Sale</button>
+                                        <button class="btn btn-small dropdown-toggle" data-toggle="dropdown">
+                                            <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a>Rent & Sale</a></li>
+                                            <li><a>Rent</a></li>
+                                            <li><a>Sale</a></li>
+                                        </ul>
+                                    </div>
                                 </div>
-                                <button type="submit" class="btn" style="width:70px;margin:0;height:28px;">Search</button>
+                                <!--                                <button type="submit" class="btn" style="width:70px;margin:0;height:28px;">Search</button>-->
                             </div>
                             <button class="btnReset directoryIcons i-map" id="mapBtn"></button>
                         </div>
                     </div> <!-- SEARCH BOX -->
-                    <div style="display:none;" id="drop-down-filter" class="centerWidth outerBox relative shadow">                        
+                    <div style="display:none;" id="drop-down-filter" class="centerWidth outerBox relative shadow">
                         <div class="filterBox filterContentBG contentArea contentNoTop">
                             <div class="formContainer">
                                 <div class="containerLeft">
-                                    <label>Property Type</label>
-                                    <select class="full" id="propType">
-                                        <option></option> 
-                                        <option>Residential Apartments</option>
-                                        <option>Residential Landed</option>
-                                        <option>HDB</option>
-                                    </select>
+                                    <div class="btn-toolbar">
+                                        <div class="btn-group">
+                                            <button class="btn btn-mini ">Residential Apartments</button>
+                                            <button class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
+                                                <span class="caret"></span>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a>All Residential</a></li>
+                                                <li><a>HDB</a></li>
+                                                <li><a>Residential Apartments</a></li>
+                                                <li><a>Residential Landed</a></li>
+                                                <li><a>Residential Serviced</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="containerRight">
-                                    <label>Size (sqft)</label>
-                                    <select id="sizeFrom" class="half">
-                                        <option></option>
-                                        <option>1</option>
-                                        <option>2</option>
-                                        <option>3</option>
-                                        <option>4</option>
-                                        <option>5</option>
-                                        <option>6</option>
-                                        <option>7</option>
-                                        <option>8</option>
-                                        <option>9</option>
-                                        <option>10</option>
-                                    </select>
-                                    <select id="sizeTo" class="half">
-                                        <option></option>
-                                        <option>1</option>
-                                        <option>2</option>
-                                        <option>3</option>
-                                        <option>4</option>
-                                        <option>5</option>
-                                        <option>6</option>
-                                        <option>7</option>
-                                        <option>8</option>
-                                        <option>9</option>
-                                        <option>10</option>
-                                    </select>                            
+                                    <div class="btn-toolbar">
+                                        <div class="btn-group">
+                                            <button class="btn btn-mini half">500 sqft</button>
+                                                <button class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
+                                                <span class="caret"></span>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a>500 sqft</a></li>
+                                                <li><a>1000 sqft</a></li>
+                                                <li><a>2000 sqft</a></li>
+                                                <li><a>3000 sqft</a></li>
+                                                <li><a>4000 sqft</a></li>
+                                                <li><a>5000 sqft</a></li>
+                                                <li><a>6000 sqft</a></li>
+                                                <li><a>7000 sqft</a></li>
+                                                <li><a>8000 sqft</a></li>
+                                                <li><a>9000 sqft</a></li>
+                                            </ul>
+                                            <label>&mdash;</label>
+                                            <button class="btn btn-mini half">> 9000 sqft</button>
+                                            <button class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
+                                                <span class="caret"></span>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a>500 sqft</a></li>
+                                                <li><a>1000 sqft</a></li>
+                                                <li><a>2000 sqft</a></li>
+                                                <li><a>3000 sqft</a></li>
+                                                <li><a>4000 sqft</a></li>
+                                                <li><a>5000 sqft</a></li>
+                                                <li><a>6000 sqft</a></li>
+                                                <li><a>7000 sqft</a></li>
+                                                <li><a>8000 sqft</a></li>
+                                                <li><a>> 9000 sqft</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="containerLeft">
-                                    <label>Price Range</label>
-                                    <label id="slidePriceLabel">$700,000 - $1,000,000</label>
+                                    <div class="btn-toolbar">
+                                        <div class="btn-group leftNudge">
+                                            <input placeholder="S$1,500"/>
+                                            <label>&mdash;</label>
+                                            <input placeholder="S$2 million"/>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="containerRight">
-                                    <label>Bedrooms</label>
-                                    <select class="half" id="roomsFrom">
-                                        <option>STUDIO</option>
-                                        <option>2</option>
-                                        <option>3</option>
-                                        <option>4</option>
-                                        <option>5</option>
-                                        <option>6</option>
-                                        <option>7</option>
-                                        <option>8</option>
-                                        <option>9</option>
-                                        <option>10</option>
-                                    </select>
-                                    <select class="half" id="roomsTo">
-                                        <option>STUDIO</option>
-                                        <option>2</option>
-                                        <option>3</option>
-                                        <option>4</option>
-                                        <option>5</option>
-                                        <option>6</option>
-                                        <option>7</option>
-                                        <option>8</option>
-                                        <option>9</option>
-                                        <option>10</option>
-                                    </select>                            
+                                    <div class="btn-toolbar">
+                                        <div class="btn-group">
+                                            <button class="btn btn-mini half">STUDIO</button>
+                                            <button class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
+                                                <span class="caret"></span>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a>STUDIO</a></li>
+                                                <li><a>1 Room</a></li>
+                                                <li><a>2 Rooms</a></li>
+                                                <li><a>3 Rooms</a></li>
+                                                <li><a>4 Rooms</a></li>
+                                                <li><a>5 Rooms</a></li>
+                                                <li><a>6 Rooms</a></li>
+                                                <li><a>7 Rooms</a></li>
+                                                <li><a>8 Rooms</a></li>
+                                                <li><a>9 Rooms</a></li>
+                                            </ul>
+                                            <label>&mdash;</label>
+                                            <button class="btn btn-mini half">9 Rooms</button>
+                                            <button class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
+                                                <span class="caret"></span>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a>STUDIO</a></li>
+                                                <li><a>1 Room</a></li>
+                                                <li><a>2 Rooms</a></li>
+                                                <li><a>3 Rooms</a></li>
+                                                <li><a>4 Rooms</a></li>
+                                                <li><a>5 Rooms</a></li>
+                                                <li><a>6 Rooms</a></li>
+                                                <li><a>7 Rooms</a></li>
+                                                <li><a>8 Rooms</a></li>
+                                                <li><a>9 Rooms</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="containerLeft"></div>
                                 <div class="containerRight">
                                     <div class="formButtons">
-                                        <button class="btnRound btnReset" id="resetSearch">Reset</button>
-                                        <button class="btnRound btnReset" id="cancelSearch">Close</button>
-                                        <button class="btnRound btnReset" id="doSearch">Go</button>
+                                        <a class="btn" id="resetSearch"><i class="listingCreation i-reset"></i></a>
+                                        <a class="btn" id="cancelSearch"><i class="listingCreation i-cancel"></i></a>
+                                        <a class="btn" id="doSearch"><i class="listingCreation i-publish"></i></a>                                        
                                     </div> <!-- SEARCH FORM BUTTONS -->
                                 </div>
-                            </div>                            
+                            </div>
                         </div>
                     </div>
                     <input type="hidden" value="c6d6581afc6dda3ec151f8353a96a8d1ca3d865e" name="token">
@@ -127,10 +173,10 @@
                                     $200,000,000
                                 </span>
                                 <ul class="listingData">
-                                    <li class="sqft"><i class="postMini i-sqft"></i>8,000 sqft</li>
-                                    <li class="bathrooms"><i class="postMini i-bathrooms"></i>3 toilets</li>
-                                    <li class="bedrooms"><i class="postMini i-bedrooms"></i>3 bedrooms</li>
-                                    <li class="proptype"></li>
+                                    <li><i class="postMini i-sqft"></i>8,000 sqft</li>
+                                    <li><i class="postMini i-bathrooms"></i>3 toilets</li>
+                                    <li><i class="postMini i-bedrooms"></i>3 bedrooms</li>
+                                    <li></li>
                                 </ul>
                                 <p>
                                     Need 1 Billion to vote for Palestine Google is having a vote on whether to name Israel or Palestine on its map on Google earth please vote for Palestine and share.
@@ -211,10 +257,10 @@
                                 <h3><a href="#">Carribean @ Keppel Bay</a></h3>
                                 <span class="price relative"><span class="listingType">FOR<br />SALE</span>$200,000,000</span>
                                 <ul class="listingData">
-                                    <li class="sqft"><i class="postMini i-sqft"></i>8,000 sqft</li>
-                                    <li class="bathrooms"><i class="postMini i-bathrooms"></i>3 toilets</li>
-                                    <li class="bedrooms"><i class="postMini i-bedrooms"></i>3 bedrooms</li>
-                                    <li class="proptype"></li>
+                                    <li><i class="postMini i-sqft"></i>8,000 sqft</li>
+                                    <li><i class="postMini i-bathrooms"></i>3 toilets</li>
+                                    <li><i class="postMini i-bedrooms"></i>3 bedrooms</li>
+                                    <li></li>
                                 </ul>
                                 <p>
                                     Need 1 Billion to vote for Palestine Google is having a vote on whether to name Israel or Palestine on its map on Google earth please vote for Palestine and share.
@@ -224,7 +270,7 @@
                                 <li class="postedByLabel">Posted by:</li>
                                 <li class="postedByThumb"><a href="#"><img src="/images/posterImg.jpg"/></a></li>
                                 <li class="postedByName"><a href="#">Natalie Scott</a></li>
-                            </ul>                         
+                            </ul>
                         </div> <!-- main listing content -->
                         <div class="postActions">
                             <ul class="postActionButtons">

@@ -13,7 +13,7 @@
                     <li><a href="/index.php" id="sidenavFeed"><i class="sidebar i-feed"></i> Feed</a></li>
                     <li><a href="/info.php" id="sidenavInfo"><i class="sidebar i-info"></i> Info</a></li>
                     <li class="dropdown">
-                        <a class="dropdown-toggle" data-toggle="dropdown" href="/testimonials.php"><i class="sidebar i-testimonial"></i>&nbsp;Testimonials&nbsp;<b class="caret"></b><span class="badge">4</span></a>
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="sidebar i-testimonial"></i>&nbsp;Testimonials&nbsp;<b class="caret"></b><span class="badge">4</span></a>
                         <ul class="dropdown-menu">
                             <li><a href="/testimonialsReceived.php" id="sidenavTestimonialReceived">Received</a></li>
                             <li><a href="/testimonialsWritten.php" id="sidenavTestimonialWritten">Written</a></li>

@@ -102,7 +102,7 @@ Directory Icon Sprite*/
 .largeIcons.i-servicedApt{background-position:-616px 0;width:99px;height:93px;}
 /*Form Icon Sprite*/
 .formIcons{background:url("/images/sprites/formIcons.png") no-repeat top left;display:inline-block;min-width:20px;min-height:21px;margin-top:1px;margin-right:0.3em;line-height:14px;vertical-align:top;}
-.formIcons.i-approve{background-position:0 0;width:27px;height:25px;}
+.formIcons.i-approve{background-position:0px 0;width:27px;height:25px;}
 .formIcons.i-approve.Hover{background-position:-32px 0;width:28px;height:25px;}
 .formIcons.i-archive{background-position:-65px 0;width:25px;height:22px;}
 .formIcons.i-archive.Hover{background-position:-95px 0;width:25px;height:22px;}

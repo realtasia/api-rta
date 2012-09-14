@@ -83,8 +83,14 @@ jQuery(document).ready(function($){
         return (/\bi-/).test(obj.className);
     };
     limitLines($('.limitLines'), 4);
-    $('.postSettings').hide();
-    $('.postFeed').hover(function(){
+    
+    var unApproved = $(".unApproved");
+    
+    unApproved.children().fadeTo('fast', 0.6);
+    unApproved.children('.postActions').hide();
+
+    $('.postFeed:not(".editMode")').children('.postSettings').hide();
+    $('.postFeed:not(".editMode")').hover(function(){
         $(this).find('.postSettings').fadeIn()
     }, function(){
         $(this).find('.postSettings').fadeOut()
