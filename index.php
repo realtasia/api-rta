@@ -82,7 +82,7 @@
                         </li>
                     </ul> <!-- post thumbnail -->
                     <p class="thumbPostDesc">
-                        <a href="#">This will run the script from an online directory</a> (a.k.a. folder). Alternatively you can download [Ref 3] the files choosing the latest version � 2.1(beta4) at the time of writing � and unzip them. You will find a directory 'ie7' and a sub directory 'src'. Both contain essentially the same files.
+                        <a href="#">This will run the script from an online directory</a> (a.k.a. folder). Alternatively you can download [Ref 3] the files choosing the latest version ï¿½ 2.1(beta4) at the time of writing ï¿½ and unzip them. You will find a directory 'ie7' and a sub directory 'src'. Both contain essentially the same files.
                     </p> <!-- post description -->
                 </article> <!-- post content -->
                 <div class="postActions">
@@ -323,7 +323,7 @@
                     </ul>
                 </div> <!-- post action links -->
             </article> <!--  testimonial -->
-            
+
             <article class="postFeed">
                 <div class="dropdown postSettings">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"></a>
@@ -423,11 +423,198 @@
                 </div> <!-- comment OuterBox-->
             </article> <!--  listing -->
         </div> <!--  theLoop -->
-    </div>
+
+
+
+        <div class="row" style="margin-top:200px">
+            <div class="span8">
+                <a href="#" class="tipsTest">Company Hover</a>
+                <div class="hoverCard regular" style="display:none">
+                    <div class="hoverCard contentArea">
+                        <div style="clear: both;">
+                            <div class="hoverCard contentLeft"><img src="http://images.sg.ippstatic.com/agencies/806.jpg" /></div>
+                            <div class="hoverCard contentRight">
+                                <h5><a href="#" class="hoverCard header">ERA Real Estate</a></h5>
+                                <span class="hoverCard subHeader">Current Members in RealtAsia <a>87</a></span>
+                                <a href="#"class="hoverCard detail"><i class="postMini i-images"></i>5852 523 651D</a>
+                                <a href="#"class="hoverCard detail"><i class="postMini i-images"></i>+65 [REDACTED]</a>
+                                <a href="#"class="hoverCard detail"><i class="postMini i-images"></i>tan.hwee.peng@yahoo.com.sg</a>                    
+                            </div>
+                        </div>
+                        <div class="postActions">
+                            <ul class="postActionButtons">
+                                <li><a href="#"><i class="postActionsIcons i-subscribe"></i></a></li>
+                                <li><a href="#"><i class="postActionsIcons i-like"></i></a></li>
+                            </ul>
+                            <ul class="postActionInfo">
+                                <li><a href="#"><i class="postMini i-subscribers"></i>215</a></li>
+                                <li><a href="#"><i class="postMini i-likes"></i>167</a></li>
+                            </ul>
+                        </div> <!-- post action links -->        
+
+                    </div>
+                </div>        
+            </div>    
+        </div>      
+        <div class="row" style="margin-top:200px">
+            <div class="span8">
+                <a href="#" class="tipsTest">Profile Hover</a>
+                <div class="hoverCard regular" style="display:none">
+                    <div class="hoverCard contentArea">
+                        <div class="hoverCard contentLeft"><img src="http://images.sg.ippstatic.com/agents/7175_19031224.jpg" /></div>
+                        <div class="hoverCard contentRight">
+                            <h5><a href="#" class="hoverCard header">Tan Hwee Pheng</a></h5>
+                            <span class="hoverCard subHeader">Associate Director at <a>Tan Hwee Pheng & Associates</a></span>
+                            <a href="#"class="hoverCard detail"><i class="postMini i-images"></i>+65 [REDACTED]</a>
+                            <a href="mailto:tan.hwee.peng@yahoo.com.sg"class="hoverCard detail"><i class="postMini i-images"></i>tan.hwee.peng@yahoo.com.sg</a>
+                        </div>
+                        <div class="postActions">
+                            <ul class="postActionButtons">
+                                <li><a href="#"><i class="postActionsIcons i-subscribe"></i></a></li>
+                                <li><a href="#"><i class="postActionsIcons i-like"></i></a></li>
+                            </ul>
+                            <ul class="postActionInfo">
+                                <li><a href="#"><i class="postMini i-subscribers"></i>215</a></li>
+                                <li id="tanLikes"><a href="#" class="tipsLike"><i class="postMini i-likes"></i>167</a></li>
+                            </ul>
+                        </div> <!-- post action links -->        
+                    </div>
+                </div>        
+            </div>    
+        </div>           
+        <div class="row" style="margin-top:200px">
+            <div class="span8">
+                <a href="#" class="tipsTest">Location Hover</a>
+                <div class="hoverCard regular" style="display:none">
+                    <div class="hoverCard contentArea">
+                        <div class="hoverCard contentLeft"><i class="largeIcons i-hdb"></i></div>
+                        <div class="hoverCard contentRight">
+                            <h5><a href="#" class="hoverCard header">Jurong West HDB</a></h5>
+                            <span class="hoverCard subHeader">Part of the <a>Jurong Estate</a></span>
+                            <h6>Latest Pictures</h6>
+                            <ul class="thumbnails">
+                                <li class="span1"><a href="#" class="thumbnail"><img src="http://placehold.it/35/000/fff" alt=""></a></li>
+                                <li class="span1"><a href="#" class="thumbnail"><img src="http://placehold.it/35/ff00ff/fff" alt=""></a></li>
+                                <li class="span1"><a href="#" class="thumbnail"><img src="http://placehold.it/35/00ff00/fff" alt=""></a></li>
+                                <li class="span1"><a href="#" class="thumbnail"><img src="http://placehold.it/35/0000ff/fff" alt=""></a></li>
+                            </ul>                            
+                        </div>
+                        <div class="postActions">
+                            <ul class="postActionButtons">
+                                <li><a href="#"><i class="postActionsIcons i-subscribe"></i></a></li>
+                                <li><a href="#"><i class="postActionsIcons i-like"></i></a></li>
+                            </ul>
+                            <ul class="postActionInfo">
+                                <li><a href="#"><i class="postMini i-subscribers"></i>215</a></li>
+                                <li><a href="#"><i class="postMini i-likes"></i>167</a></li>
+                            </ul>
+                        </div> <!-- post action links -->        
+                    </div>
+                </div>        
+            </div>    
+        </div> 
+        <div class="row" style="margin-top:150px">
+            <div class="span8">
+                <a href="#" class="tipsTest tipsLeft">Event Hover</a>
+                <div class="hoverCard large" style="display:none">
+                    <div class="hoverCard contentArea">
+                        <div class="hoverCard contentLeft">
+                            <h5><a href="#" class="hoverCard header">15 Cuscaden Ave Open House</a></h5>
+                            <div style="margin-top:10px">
+                                <div class="withLabel"><label class="label label-inverse">Type</label><p>Open House (Sale)</p></div>
+                                <div class="withLabel"><label class="label label-inverse">Date</label><p>December 28th, 2012</p></div>
+                                <div class="withLabel"><label class="label label-inverse">Time</label><p>All day from 8am</p></div>
+                                <div class="withLabel"><label class="label label-inverse">Cost</label><p>NA</p></div>
+                                <div class="withLabel"><label class="label label-inverse">Location</label><p>15 Cuscaden Avenue (Courtyard)</p></div>
+                                <div class="withLabel"><label class="label label-inverse">Description</label><p>Come by and see what this property is all about. Finger food, snacks & drinks provided</p></div>                                
+                            </div>
+                        </div>                        
+                        <div class="hoverCard contentRight"><img src="http://placehold.it/90/0000ff/fff" alt=""></div>
+                        <div class="postActions">
+                            <ul class="postActionButtons">
+                                <li><a href="#"><i class="postActionsIcons i-subscribe"></i></a></li>
+                                <li><a href="#"><i class="postActionsIcons i-like"></i></a></li>
+                            </ul>
+                            <ul class="postActionInfo">
+                                <li><a href="#"><i class="postMini i-subscribers"></i>215</a></li>
+                                <li><a href="#"><i class="postMini i-likes"></i>167</a></li>
+                            </ul>
+                        </div> <!-- post action links -->        
+                    </div>
+                </div>        
+            </div>    
+        </div>         
+        <div class="row" style="margin-top:150px">
+            <div class="span8">
+                <a href="#" class="tipsTest tipsRight">Likes Hover</a>
+                <div class="hoverCard regular tipsLikeContent" style="display:none">                    
+                    <div class="hoverCard contentArea">
+                        <h4 style="margin-bottom:10px;">People who like <a href="#" class="hoverCard header">Tan Hwee Pheng</a></h4>
+                        <ul class="membersList contentArea">
+                            <li class="contentArea">
+                                <ul class="membersInline"><li class="commentThumb"><img src="http://placehold.it/40/000/fff" /></li><li class="commentBody"><h5><a class="commentAuthor" href="#">Susan Lim</a></h5></li></ul> <!-- comment inline -->
+                            </li> <!-- comment -->
+                            <li class="contentArea">
+                                <ul class="membersInline"><li class="commentThumb"><img src="http://placehold.it/40/000/fff" /></li><li class="commentBody"><h5><a class="commentAuthor" href="#">Jerry Lee Sim Kok</a></h5></li></ul> <!-- comment inline -->
+                            </li> <!-- comment -->
+                            <li class="contentArea">
+                                <ul class="membersInline"><li class="commentThumb"><img src="http://placehold.it/40/000/fff" /></li><li class="commentBody"><h5><a class="commentAuthor" href="#">Jerry Lee Sim Kok</a></h5></li></ul> <!-- comment inline -->
+                            </li> <!-- comment -->
+                            <li class="contentArea">
+                                <ul class="membersInline"><li class="commentThumb"><img src="http://placehold.it/40/000/fff" /></li><li class="commentBody"><h5><a class="commentAuthor" href="#">Jerry Lee Sim Kok</a></h5></li></ul> <!-- comment inline -->
+                            </li> <!-- comment -->
+                            <li class="contentArea">
+                                <ul class="membersInline"><li class="commentThumb"><img src="http://placehold.it/40/000/fff" /></li><li class="commentBody"><h5><a class="commentAuthor" href="#">Jerry Lee Sim Kok</a></h5></li></ul> <!-- comment inline -->
+                            </li> <!-- comment -->
+                            <li class="contentArea">
+                                <ul class="membersInline"><li class="commentThumb"><img src="http://placehold.it/40/000/fff" /></li><li class="commentBody"><h5><a class="commentAuthor" href="#">Jerry Lee Sim Kok Smith & Wesson</a></h5></li></ul> <!-- comment inline -->
+                            </li> <!-- comment -->
+                            <li class="contentArea">
+                                <ul class="membersInline"><li class="commentThumb"><img src="http://placehold.it/40/000/fff" /></li><li class="commentBody"><h5><a class="commentAuthor" href="#">Jerry Lee Sim Kok</a></h5></li></ul> <!-- comment inline -->
+                            </li> <!-- comment -->                        
+                        </ul> <!-- comments -->                               
+                    </div>
+                </div>           
+            </div>           
+        </div>  
+        <div class="row" style="margin-top:150px">
+            <div class="span8">
+                <a href="#" class="tipsTest tipsLeft">Subscribers Hover</a>
+                <div class="hoverCard regular" style="display:none">                    
+                    <div class="hoverCard contentArea">
+                        <h4 style="margin-bottom:10px;">People subscribed to <a href="#" class="hoverCard header">Tan Hwee Pheng</a></h4>
+                        <ul class="membersList contentArea">
+                            <li class="contentArea">
+                                <ul class="membersInline"><li class="commentThumb"><img src="http://placehold.it/40/000/fff" /></li><li class="commentBody"><h5><a class="commentAuthor" href="#">Susan Lim</a></h5></li></ul> <!-- comment inline -->
+                            </li> <!-- comment -->
+                            <li class="contentArea">
+                                <ul class="membersInline"><li class="commentThumb"><img src="http://placehold.it/40/000/fff" /></li><li class="commentBody"><h5><a class="commentAuthor" href="#">Jerry Lee Sim Kok</a></h5></li></ul> <!-- comment inline -->
+                            </li> <!-- comment -->
+                            <li class="contentArea">
+                                <ul class="membersInline"><li class="commentThumb"><img src="http://placehold.it/40/000/fff" /></li><li class="commentBody"><h5><a class="commentAuthor" href="#">Jerry Lee Sim Kok</a></h5></li></ul> <!-- comment inline -->
+                            </li> <!-- comment -->
+                            <li class="contentArea">
+                                <ul class="membersInline"><li class="commentThumb"><img src="http://placehold.it/40/000/fff" /></li><li class="commentBody"><h5><a class="commentAuthor" href="#">Jerry Lee Sim Kok</a></h5></li></ul> <!-- comment inline -->
+                            </li> <!-- comment -->
+                            <li class="contentArea">
+                                <ul class="membersInline"><li class="commentThumb"><img src="http://placehold.it/40/000/fff" /></li><li class="commentBody"><h5><a class="commentAuthor" href="#">Jerry Lee Sim Kok</a></h5></li></ul> <!-- comment inline -->
+                            </li> <!-- comment -->
+                            <li class="contentArea">
+                                <ul class="membersInline"><li class="commentThumb"><img src="http://placehold.it/40/000/fff" /></li><li class="commentBody"><h5><a class="commentAuthor" href="#">Jerry Lee Sim Kok Smith & Wesson</a></h5></li></ul> <!-- comment inline -->
+                            </li> <!-- comment -->
+                            <li class="contentArea">
+                                <ul class="membersInline"><li class="commentThumb"><img src="http://placehold.it/40/000/fff" /></li><li class="commentBody"><h5><a class="commentAuthor" href="#">Jerry Lee Sim Kok</a></h5></li></ul> <!-- comment inline -->
+                            </li> <!-- comment -->                        
+                        </ul> <!-- comments -->                               
+                    </div>
+                </div>           
+            </div>           
+        </div>         
+    </div>           
+
     <? include('rightbar.php') ?>
 </div>
 
-<a href="#" style="display:block;width:50px;border:1px solid #ddd;margin:0 150px auto;text-align: left" id="tips">TIPS</a>
 <footer id="footer"></footer>
 </body>
 </html>

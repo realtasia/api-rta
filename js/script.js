@@ -170,10 +170,26 @@ jQuery(document).ready(function($){
         }
 
     });
-
-    $(window).bind('load', function() {
-        $('#tips').bubbletip($('<div><h1>This is TIP</h1></div>'), {
-            bindHide:false
+    var tips = $('.tipsTest');        
+    tips.each(function(index) {
+        var direction = 'top';
+        if ($(this).hasClass('tipsRight')){
+            direction = 'right';
+        }
+        if ($(this).hasClass('tipsLeft')){
+            direction = 'left';
+        }     
+        if ($(this).hasClass('tipsBottom')){
+            direction = 'bottom';
+        }         
+        var tipContent = $(this).parent().find('.hoverCard');
+        return $(this).bubbletip(tipContent, {
+            bindHide:false,
+            deltaDirection:direction
         });
     });
-})
+   
+    
+    tips.mouseover();
+
+});
