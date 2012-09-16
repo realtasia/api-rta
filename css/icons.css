@@ -51,7 +51,7 @@ Directory Icon Sprite*/
 .postActionsIcons.i-like.Deactive{background-position:-250px 0;width:20px;height:18px;}
 .postActionsIcons.i-subscribe.Deactive{background-position:-275px 0;width:20px;height:20px;}
 /*Sidebar Icon Sprite*/
-.sidebar{background:url("/images/sprites/sidebar.png") no-repeat top left;display:inline-block;min-width:15px;min-height:14px;margin-top:1px;margin-right:0.3em;line-height:14px;vertical-align:top;}
+.sidebar{background:url("/images/sprites/sidebar.png") no-repeat top left;display:inline-block;min-width:15px;min-height:14px;margin-top:1px;margin-right:0.3em;vertical-align:top;}
 .sidebar.i-event{background-position:0 0;width:16px;height:16px;}
 .sidebar.i-event.Active{background-position:-21px 0;width:16px;height:16px;}
 .sidebar.i-feed{background-position:-42px 0;width:16px;height:17px;}

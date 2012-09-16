@@ -109,7 +109,6 @@ jQuery(document).ready(function($){
     });
 
     var isHovering = false;
-
     $("*:isIconClass").on({
 
         mouseenter: function(){

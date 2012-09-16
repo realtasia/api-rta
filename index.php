@@ -3,11 +3,11 @@
     <? include('leftbar.php') ?>
     <div id="contentArea" class="centerContent">
         <div id="introContent">
-            <h2>Aishwarya Rai</h2>
+            <h2>Alifah binte Abdul Salman</h2>
             <div class="pageInfo">
-                <span class="pageType">Director, Regional Sales & Marketing</span> at <span class="parentDesc">
+                <span class="pageType">Associate Director</span> at <span class="parentDesc">
                     <a href="#">DTZ Debenham Tie Leung</a>
-                </span>
+                </span>                
             </div>
             <p>
                 <?= nl2br('Aishwarya Rai the Miss World stunning beauty queen is considered to be one of the beautiful actresses in the movie industry. She has done movies in languages like Hindi, Tamil, English and Bengali.
@@ -82,7 +82,7 @@
                         </li>
                     </ul> <!-- post thumbnail -->
                     <p class="thumbPostDesc">
-                        <a href="#">This will run the script from an online directory</a> (a.k.a. folder). Alternatively you can download [Ref 3] the files choosing the latest version ï¿½ 2.1(beta4) at the time of writing ï¿½ and unzip them. You will find a directory 'ie7' and a sub directory 'src'. Both contain essentially the same files.
+                        <a href="#">This will run the script from an online directory</a> (a.k.a. folder). Alternatively you can download [Ref 3] the files choosing the latest version Ã¯Â¿Â½ 2.1(beta4) at the time of writing Ã¯Â¿Â½ and unzip them. You will find a directory 'ie7' and a sub directory 'src'. Both contain essentially the same files.
                     </p> <!-- post description -->
                 </article> <!-- post content -->
                 <div class="postActions">
@@ -519,14 +519,14 @@
                 <div class="hoverCard large" style="display:none">
                     <div class="hoverCard contentArea">
                         <div class="hoverCard contentLeft">
-                            <h5><a href="#" class="hoverCard header">15 Cuscaden Ave Open House</a></h5>
+                            <h5><a href="#" class="hoverCard header"><i class="sidebar i-event Active"></i>15 Cuscaden Ave Open House</a></h5>
                             <div style="margin-top:10px">
-                                <div class="withLabel"><label class="label label-inverse">Type</label><p>Open House (Sale)</p></div>
-                                <div class="withLabel"><label class="label label-inverse">Date</label><p>December 28th, 2012</p></div>
-                                <div class="withLabel"><label class="label label-inverse">Time</label><p>All day from 8am</p></div>
-                                <div class="withLabel"><label class="label label-inverse">Cost</label><p>NA</p></div>
-                                <div class="withLabel"><label class="label label-inverse">Location</label><p>15 Cuscaden Avenue (Courtyard)</p></div>
-                                <div class="withLabel"><label class="label label-inverse">Description</label><p>Come by and see what this property is all about. Finger food, snacks & drinks provided</p></div>                                
+                                <div class="withLabel"><label class="label">Type</label><p>Open House (Sale)</p></div>
+                                <div class="withLabel"><label class="label">Date</label><p>December 28th, 2012</p></div>
+                                <div class="withLabel"><label class="label">Time</label><p>All day from 8am</p></div>
+                                <div class="withLabel"><label class="label">Cost</label><p>NA</p></div>
+                                <div class="withLabel"><label class="label">Location</label><p>15 Cuscaden Avenue (Courtyard)</p></div>
+                                <div class="withLabel"><label class="label">Description</label><p>Come by and see what this property is all about. Finger food, snacks & drinks provided</p></div>                                
                             </div>
                         </div>                        
                         <div class="hoverCard contentRight"><img src="http://placehold.it/90/0000ff/fff" alt=""></div>
@@ -549,7 +549,7 @@
                 <a href="#" class="tipsTest tipsRight">Likes Hover</a>
                 <div class="hoverCard regular tipsLikeContent" style="display:none">                    
                     <div class="hoverCard contentArea">
-                        <h4 style="margin-bottom:10px;">People who like <a href="#" class="hoverCard header">Tan Hwee Pheng</a></h4>
+                        <h4 style="margin-bottom:10px;"><i class="postMini i-likes"></i>People who like <a href="#" class="hoverCard header">Tan Hwee Pheng</a></h4>
                         <ul class="membersList contentArea">
                             <li class="contentArea">
                                 <ul class="membersInline"><li class="commentThumb"><img src="http://placehold.it/40/000/fff" /></li><li class="commentBody"><h5><a class="commentAuthor" href="#">Susan Lim</a></h5></li></ul> <!-- comment inline -->
@@ -582,7 +582,7 @@
                 <a href="#" class="tipsTest tipsLeft">Subscribers Hover</a>
                 <div class="hoverCard regular" style="display:none">                    
                     <div class="hoverCard contentArea">
-                        <h4 style="margin-bottom:10px;">People subscribed to <a href="#" class="hoverCard header">Tan Hwee Pheng</a></h4>
+                        <h4 style="margin-bottom:10px;"><i class="sidebar i-subscribers"></i>People subscribed to <a href="#" class="hoverCard header">Tan Hwee Pheng</a></h4>
                         <ul class="membersList contentArea">
                             <li class="contentArea">
                                 <ul class="membersInline"><li class="commentThumb"><img src="http://placehold.it/40/000/fff" /></li><li class="commentBody"><h5><a class="commentAuthor" href="#">Susan Lim</a></h5></li></ul> <!-- comment inline -->
@@ -612,7 +612,7 @@
         </div>         
     </div>           
 
-    <? include('rightbar.php') ?>
+    <? include('rightbarMember.php') ?>
 </div>
 
 <footer id="footer"></footer>

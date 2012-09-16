@@ -7,7 +7,7 @@ Purpose of the stylesheet follows.
 
 Common*/
 /*+clearfix {*/
-.listing:after, .mainListingContent:after, UL.listingData:after, .postedBy:after, .formContainer:after, .containerLeft:after, .containerRight:after, .hoverCard.contentLeft:after, .hoverCard.contentRight:after, .hoverCard.contentArea:after, .hoverCard .thumbnails:after, .regular:after, .hoverCard .withLabel:after, .membersInline LI:after
+.listing:after, .mainListingContent:after, UL.listingData:after, .postedBy:after, .formContainer:after, .containerLeft:after, .containerRight:after, .hoverCard.contentArea:after, .hoverCard .thumbnails:after, .hoverCard.contentLeft:after, .hoverCard.contentRight:after, .hoverCard .withLabel:after, .regular:after, .membersInline LI:after
 {
 	content: ".";
 	display: block;
@@ -16,11 +16,11 @@ Common*/
 	visibility: hidden;
 	font-size: 0;
 }
-.listing, .mainListingContent, UL.listingData, .postedBy, .formContainer, .containerLeft, .containerRight, .hoverCard.contentLeft, .hoverCard.contentRight, .hoverCard.contentArea, .hoverCard .thumbnails, .regular, .hoverCard .withLabel, .membersInline LI
+.listing, .mainListingContent, UL.listingData, .postedBy, .formContainer, .containerLeft, .containerRight, .hoverCard.contentArea, .hoverCard .thumbnails, .hoverCard.contentLeft, .hoverCard.contentRight, .hoverCard .withLabel, .regular, .membersInline LI
 {
 	display: inline-block;
 }
-.listing, .mainListingContent, UL.listingData, .postedBy, .formContainer, .containerLeft, .containerRight, .hoverCard.contentLeft, .hoverCard.contentRight, .hoverCard.contentArea, .hoverCard .thumbnails, .regular, .hoverCard .withLabel, .membersInline LI
+.listing, .mainListingContent, UL.listingData, .postedBy, .formContainer, .containerLeft, .containerRight, .hoverCard.contentArea, .hoverCard .thumbnails, .hoverCard.contentLeft, .hoverCard.contentRight, .hoverCard .withLabel, .regular, .membersInline LI
 {
 /*\*/
 	display: block;
@@ -905,7 +905,7 @@ A.dropdown-toggle::after
 	color: #686868;
 	font-size: 0.9em;
 }
-.hoverCard.subHeader
+.hoverCard .subHeader
 {
 	color: #9B9999;
 	font-size: 0.9em;
@@ -913,7 +913,13 @@ A.dropdown-toggle::after
 	margin: 0;
 	line-height: 1;
 }
-.hoverCard.detail
+.hoverCard .header
+{
+	padding: 0;
+	margin: 0;
+	line-height: 1.5;
+}
+.hoverCard .detail
 {
 	color: #9B9999;
 	font-size: 0.9em;
@@ -932,7 +938,6 @@ A.dropdown-toggle::after
 	margin-left: 5px;
 	font-size: 0.95em;
 	line-height: 1.5;
-	border-bottom: 1px solid #E9EBEC;
 }
 .hoverCard .label
 {
@@ -944,8 +949,15 @@ A.dropdown-toggle::after
 	position: relative;
 	left: 0px;
 	top: 0px;
-	text-align: center;
+	text-align: right;
 	line-height: 1.5;
+	background: 0;
+	/*+text-shadow:none;*/
+	-moz-text-shadow: none;
+	-webkit-text-shadow: none;
+	-o-text-shadow: none;
+	text-shadow: none;
+	color: #2691D4;
 }
 /*[clearfix]*/.regular
 {

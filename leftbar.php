@@ -5,6 +5,9 @@
             <p id="barcodeProfile"><img src="/img/png/glyphicons_258_qrcode.png"/>&nbsp;&nbsp;Scan <a href="#">eContact Card</a>.</p>
         </div>
     </div>
+<!--    <div class="createListing">
+        <a href="#"><i class=" formIcons i-messageNew"></i>Create Listing</a>
+    </div>    -->
     <div class="outerBox">
         <div class="contentArea widgetContentBG">
             <div class="tabbable tabs-left">
@@ -33,4 +36,12 @@
             </div>
         </div>
     </div>
+    <div class="outerBox">
+        <div class="contentArea widgetContentBG sidebarActionButtons">
+            <a><i class="postActionsIcons i-subscribe"></i>Subscribe</a>
+            <a><i class="postActionsIcons i-like"></i>Like</a>
+        </div>
+    </div>
+<a style="display: block" href="/locationProfile.php">Location Profile</a>
+<a style="display: block" href="/companyProfile.php">Company Profile</a>
 </aside>   <!--  leftbar -->

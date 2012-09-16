@@ -29,8 +29,7 @@ $dom      = 'http://' . $root;
                 $('input, textarea').placeholder();
             });
         </script>        
-        <![endif]-->       
-        <script type="text/javascript" src="/js/script.js"></script>		
+        <![endif]-->
     </head>
     <body>
         <header id="header">
