@@ -3,16 +3,24 @@
     <? include('leftbar.php') ?>
     <div id="contentArea" class="centerContent">
         <div id="introContent">
-            <h2>Alifah binte Abdul Salman</h2>
+            <h2>Jurong West HDB</h2>
             <div class="pageInfo">
-                <span class="pageType">Associate Director</span> at <span class="parentDesc">
-                    <a href="#">DTZ Debenham Tie Leung</a>
-                </span>                
+                Part of the <span class="parentDesc"><a href="#">Jurong</a><span class="pageType"> Estate</span></span>
+                <div class="pageActions">
+                    <a class="pageActionsButton btn btn-mini"><i class="postActionsIcons i-subscribe"></i>Subscribe</a>
+                    <a class="pageActionsButton btn btn-mini"><i class="postActionsIcons i-like"></i>Like</a>                    
+                    <a class="moreLink">View More<i class="postMini i-edit"></i></a>
+                </div>
             </div>
-            <p>
-                <?= nl2br('Aishwarya Rai the Miss World stunning beauty queen is considered to be one of the beautiful actresses in the movie industry. She has done movies in languages like Hindi, Tamil, English and Bengali.
-                            In the year 1994, she won the Miss World title and brought fame to her mother land.') ?>
-            </p>
+            <h6>Latest Pictures</h6>
+            <ul class="thumbnails latestThumbsContainer">
+                <li class="latestThumbs"><div class="thumbnail"><a href="#"><img src="http://placehold.it/80" alt="image" /></div></a></li>
+                <li class="latestThumbs"><div class="thumbnail"><a href="#"><img src="http://placehold.it/80" alt="image" /></div></a></li>
+                <li class="latestThumbs"><div class="thumbnail"><a href="#"><img src="http://placehold.it/80" alt="image" /></div></a></li>
+                <li class="latestThumbs"><div class="thumbnail"><a href="#"><img src="http://placehold.it/80" alt="image" /></div></a></li>
+                <li class="latestThumbs"><div class="thumbnail"><a href="#"><img src="http://placehold.it/80" alt="image" /></div></a></li>
+                <li class="latestThumbs"><div class="thumbnail"><a href="#"><img src="http://placehold.it/80" alt="image" /></div></a></li>
+            </ul>
         </div> <!--  introcontent -->
         <div class="outerBox rounded">
             <div class="contentArea widgetContentBG rounded" id="newPostArea">

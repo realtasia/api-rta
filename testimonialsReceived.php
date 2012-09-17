@@ -192,7 +192,7 @@
             </article> <!--  trashed -->
         </div> <!--  theLoop -->
     </div>
-    <? include('rightbar.php') ?>
+    <? include('rightbarMember.php') ?>
 </div>
 <footer id="footer"></footer>
 </body>

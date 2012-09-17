@@ -15,7 +15,7 @@
                     $rand = $a_rand[$r] . $a_rand[$g] . $a_rand[$b];
                     $font = ($rand == 'ffffff') ? '000' : 'fff';
                     ?>
-                    <li class="smallNail"><div class="thumbnail"><a href="#"><img src="http://placehold.it/45" alt="image" /></div></a></li>
+                    <li class="smallNail"><div class="thumbnail"><a href="#"><img src="http://placehold.it/45" alt="image" /></a></div></li>
                     <?
                 }
                 ?>    
@@ -38,7 +38,7 @@
                     $rand = $a_rand[$r] . $a_rand[$g] . $a_rand[$b];
                     $font = ($rand == 'ffffff') ? '000' : 'fff';
                     ?>
-                    <li class="smallNail"><div class="thumbnail"><a href="#"><img src="http://placehold.it/45" alt="image" /></div></a></li>
+                    <li class="smallNail"><div class="thumbnail"><a href="#"><img src="http://placehold.it/45" alt="image" /></a></div></li>
                     <?
                 }
                 ?>    
@@ -60,7 +60,7 @@
                     $rand = $a_rand[$r] . $a_rand[$g] . $a_rand[$b];
                     $font = ($rand == 'ffffff') ? '000' : 'fff';
                     ?>
-                    <li class="smallNail"><div class="thumbnail"><a href="#"><img src="http://placehold.it/45" alt="image" /></div></a></li>
+                    <li class="smallNail"><div class="thumbnail"><a href="#"><img src="http://placehold.it/45" alt="image" /></a></div></li>
                     <?
                 }
                 ?>    

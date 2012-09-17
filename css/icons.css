@@ -139,3 +139,6 @@ Directory Icon Sprite*/
 .listingCreation.i-publish.Hover{background-position:-515px 0;width:30px;height:30px;}
 .listingCreation.i-reset{background-position:-550px 0;width:30px;height:30px;}
 .listingCreation.i-reset.Hover{background-position:-585px 0;width:30px;height:30px;}
+/*renegades*/
+.online{background:transparent url("/images/online.png") no-repeat;display:inline-block;width:14px;height:14px;}
+.offline{background:transparent url("/images/offline.png") no-repeat;width:14px;height:14px;display:inline-block;}
