@@ -1,25 +1,26 @@
 <?php
-$domParts = explode('.', $_SERVER['HTTP_HOST']);
-$root     = $domParts[1] . '.' . $domParts[2];
-$dom      = 'http://' . $root;
+$currentDom = $_SERVER['HTTP_HOST'];
+$domParts   = explode('.', $currentDom);
+$rootDomain = $domParts[1] . '.' . $domParts[2];
+$rootURL    = 'http://' . $rootDomain;
+$currentURL = 'http://' . $currentDom;
 ?>
 <!DOCTYPE html>
-<html>    
+<html>
     <head>
         <title>Aishwarya Rai</title>
         <meta charset="utf-8" />
-        <link rel="stylesheet" type="text/css" href="<?php echo $dom ?>/common/css/bootstrap.min.css" />        
+        <link rel="stylesheet" type="text/css" href="<?= $rootURL?>/common/css/bootstrap.min.css" />
         <link rel="stylesheet" type="text/css" href="/css/icons.css" />
         <link rel="stylesheet" type="text/css" href="/css/style.css" />
-        <link rel="stylesheet" type="text/css" href="/css/bubbletip.css" />
-        <link rel="stylesheet" type="text/css" href="/css/bubbletip-IE.css" />
         <link rel="stylesheet" type="text/css" href="/css/RTA.css" />
-        <script type="text/javascript" src="<?php echo $dom ?>/common/js/jquery.min.js"></script>
-        <script type="text/javascript" src="<?php echo $dom ?>/common/js/bootstrap.min.js"></script>
-        <script type="text/javascript" src="/js/jQuery.bubbletip-1.1.0.js"></script>
-        <script type="text/javascript" src="/js/dropdown.min.js"></script>        
-        <script type="text/javascript" src="<?php echo $dom ?>/common/js/jquery.placeholder.min.js"></script>
-        <script type="text/javascript" src="/js/script.js"></script>        
+        <script type="text/javascript" src="<?= $rootURL?>/common/js/jquery.min.js"></script>
+        <script type="text/javascript" src="<?= $rootURL?>/common/js/jquery-ui.min.js"></script>
+        <script type="text/javascript" src="<?= $rootURL?>/common/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="/js/dropdown.min.js"></script>
+        <script type="text/javascript" src="<?= $rootURL?>/common/js/jquery.placeholder.min.js"></script>
+        <script type="text/javascript" src="<?= $rootURL?>/common/js/jquery.qtip.min.js"></script>
+        <script type="text/javascript" src="/js/script.js"></script>
         <!--[if IE]>
         <link rel="stylesheet" type="text/css" href="/css/bubbletip-IE.css" />
         <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -28,21 +29,20 @@ $dom      = 'http://' . $root;
             jQuery(document).ready(function($){
                 $('input, textarea').placeholder();
             });
-        </script>        
+        </script>
         <![endif]-->
     </head>
     <body>
         <header id="header">
-            <div class="navbar navbar-fixed-top">
-                <div class="navbar-inner">                    
-                    <div class="container">
+            <section class="navbar navbar-fixed-top">
+                <div class="navbar-inner">
+                    <nav class="container">
                         <ul class="nav" style="padding:0;margin:0 auto;text-align:center;display:block;" id="pageNavigation">
-                            <li id="realtLogo"><a style="margin:0;padding:0;" href="http://rta.<?=$root?>"><img src="/img/realtlogo6.png" /></a></li>
-                            <li class="menuItem leftMenuItem"><a href="#navPeople" id="navPeople">People</a></li>
-                            <li class="menuItem leftMenuItem rightMenuItem"><a href="#navLocations" id="navLocations">Locations</a></li>
-                            <li class="menuItem rightMenuItem"><a href="/listings.php" id="navListings">Listings</a></li>                         
-                        </ul>                       
-                        
+                            <li id="realtLogo"><a style="margin:0;padding:0;" href="<?=$currentURL?>"><img src="/img/realtlogo6.png" /></a></li>
+                            <li class="menuItem leftMenuItem"><a href="/people.php" id="navPeople">People</a></li>
+                            <li class="menuItem leftMenuItem rightMenuItem"><a href="/locations.php" id="navLocations">Locations</a></li>
+                            <li class="menuItem rightMenuItem"><a href="/listings.php" id="navListings">Listings</a></li>
+                        </ul>
                             <ul class="nav" id="mainNav">
                                 <li><a href="#"><i class="headerIcons i-notificationActive"></i></a></li>
                                 <li><a href="#"><i class="headerIcons i-inboxActive"></i></a></li>
@@ -57,12 +57,12 @@ $dom      = 'http://' . $root;
                                             <li><a href="#navSettings" id="navSettings">Settings</a></li>
                                             <li class="divider"></li>
                                             <li><a href="#navLogOut" id="navLogOut">Log Out</a></li>
-                                        </ul>     
+                                        </ul>
                                     </div>
                                 </li>
                             </ul>
-                        
-                    </div>
+
+                    </nav>
                 </div><!-- /navbar-inner -->
-            </div>
+            </section>
         </header>

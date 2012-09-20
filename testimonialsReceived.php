@@ -1,8 +1,8 @@
 <? include('header.php') ?>
-<div id="container">
+<section id="container">
     <? include('leftbar.php') ?>
     <div id="contentArea" class="centerContent">
-        <div id="introContent">
+        <section id="introContent">
             <h2>Aishwarya Rai</h2>
             <div class="pageInfo">
                 <span class="pageType">Director, Regional Sales & Marketing</span> at <span class="parentDesc">
@@ -13,9 +13,9 @@
                 <?= nl2br('Aishwarya Rai the Miss World stunning beauty queen is considered to be one of the beautiful actresses in the movie industry. She has done movies in languages like Hindi, Tamil, English and Bengali.
                             In the year 1994, she won the Miss World title and brought fame to her mother land.') ?>
             </p>
-        </div> <!--  introcontent -->
+        </section> <!--  introcontent -->
         <div class="outerBox rounded" style="display:none;">
-            <div class="contentArea widgetContentBG rounded" id="newPostArea">
+            <section class="contentArea widgetContentBG rounded" id="newPostArea">
                 <ul class="newPostButtons">
                     <li><a href="#"><i class="postMini i-postStatus"></i></a></li>
                     <li><a href="#"><i class="postMini i-postTestimonial"></i></a></li>
@@ -29,10 +29,10 @@
                     <li><a href="#"><i class="postMini i-postVideo"></i></a></li>
                 </ul>
                 <button class="btn btn-info relative">Share</button>
-            </div>
+            </section>
         </div> <!--  status form -->
-        <div id="theLoop">
-            <div id="feedActionDiv">
+        <section id="theLoop">
+            <section id="feedActionDiv">
                 <div id="filterButtonDiv" class="dropdown">
                     <a data-toggle="dropdown" class="dropdown-toggle" id="filterButton" href="#">Show:&nbsp;<span class="dropDownSelected">All</span>&nbsp;<span class="caret"></span></a>
                     <ul class="dropdown-menu">
@@ -48,7 +48,7 @@
                         <li><a href="#" id="sortPopular">Popular</a></li>
                     </ul>
                 </div>
-            </div> <!--  sort button & result count -->
+            </section> <!--  sort button & result count -->
             <article class="postFeed editMode Approved infoBorderColor">
                 <div class="dropdown postSettings infoBorderColor infoBGColor">
                     <div class="containerLeft">
@@ -190,10 +190,10 @@
                     </ul>
                 </div> <!-- post action links -->
             </article> <!--  trashed -->
-        </div> <!--  theLoop -->
+        </section> <!--  theLoop -->
     </div>
     <? include('rightbarMember.php') ?>
-</div>
+</section>
 <footer id="footer"></footer>
 </body>
 </html>

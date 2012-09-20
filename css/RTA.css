@@ -7,7 +7,7 @@ Purpose of the stylesheet follows.
 
 Common*/
 /*+clearfix {*/
-.listing:after, .mainListingContent:after, UL.listingData:after, .postedBy:after, .formContainer:after, .containerLeft:after, .containerRight:after, .hoverCard.contentArea:after, .hoverCard .thumbnails:after, .hoverCard.contentLeft:after, .hoverCard.contentRight:after, .hoverCard .withLabel:after, .regular:after, .membersInline LI:after
+.statusRight:after, .listing:after, .mainListingContent:after, UL.listingData:after, .postedBy:after, .formContainer:after, .containerLeft:after, .containerRight:after, .large:after, .regular:after, .hoverCard .thumbnails:after, .hoverCard.contentLeft:after, .hoverCard.contentRight:after, .hoverCard .withLabel:after, .regular:after, .membersInline LI:after
 {
 	content: ".";
 	display: block;
@@ -16,11 +16,11 @@ Common*/
 	visibility: hidden;
 	font-size: 0;
 }
-.listing, .mainListingContent, UL.listingData, .postedBy, .formContainer, .containerLeft, .containerRight, .hoverCard.contentArea, .hoverCard .thumbnails, .hoverCard.contentLeft, .hoverCard.contentRight, .hoverCard .withLabel, .regular, .membersInline LI
+.statusRight, .listing, .mainListingContent, UL.listingData, .postedBy, .formContainer, .containerLeft, .containerRight, .large, .regular, .hoverCard .thumbnails, .hoverCard.contentLeft, .hoverCard.contentRight, .hoverCard .withLabel, .regular, .membersInline LI
 {
 	display: inline-block;
 }
-.listing, .mainListingContent, UL.listingData, .postedBy, .formContainer, .containerLeft, .containerRight, .hoverCard.contentArea, .hoverCard .thumbnails, .hoverCard.contentLeft, .hoverCard.contentRight, .hoverCard .withLabel, .regular, .membersInline LI
+.statusRight, .listing, .mainListingContent, UL.listingData, .postedBy, .formContainer, .containerLeft, .containerRight, .large, .regular, .hoverCard .thumbnails, .hoverCard.contentLeft, .hoverCard.contentRight, .hoverCard .withLabel, .regular, .membersInline LI
 {
 /*\*/
 	display: block;
@@ -37,8 +37,8 @@ BODY
 .newPostButtons, .newPostMediaButtons
 {
 	height: 20px;
-	padding-top: 4px;
-	padding-left: 5px;
+	padding-top: 2px;
+	padding-left: 4px;
 }
 .newPostMediaButtons
 {
@@ -52,23 +52,41 @@ BODY
 {
 	padding: 2px;
 }
-#newPostArea
+#newPostArea .close
 {
-	position: relative;
-	padding: 5px;
-}
-#newPostArea BUTTON
-{
-	width: 54px;
-	display: block;
-	position: absolute;
-	right: 10px;
-	bottom: 7px;
+	position: static;
 	/*+border-radius:2px;*/
 	-moz-border-radius: 2px;
 	-webkit-border-radius: 2px;
 	-khtml-border-radius: 2px;
 	border-radius: 2px;
+	bottom: 0;
+	padding: 2px;
+}
+#newPostArea
+{
+	position: relative;
+	padding: 0;
+}
+/*[clearfix]*/.statusRight
+{
+	position: relative;
+	width: 14px;
+	height: 20px;
+	position: absolute;
+	right: 9px;
+	top: 0;
+}
+.statusBoxExpand
+{
+	position: relative;
+	margin-bottom: 6px;
+}
+.statusBoxExpand BUTTON.btn
+{
+	position: absolute;
+	top: -3px;
+	right: 6px;
 }
 /*post*/
 .relative
@@ -852,9 +870,18 @@ A.dropdown-toggle::after
 {
 	padding: 20px 0;
 }
-/*[clearfix]*/.hoverCard.contentArea
+/*[clearfix]*/.large, .regular
 {
-	background-color: #FFF;
+	background-color: #D6D6D6;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	margin: 0;
+}
+.hoverCard.contentArea
+{
+	background-color: #FFFFFF;
 	top: 0;
 	bottom: 0;
 	left: 0;
@@ -869,8 +896,8 @@ A.dropdown-toggle::after
 }
 .hoverCard .thumbnails LI
 {
-	padding: 0;
-	margin: 0 1px 0 0;
+	margin: 0 10px 0 0;
+	width: 41px;
 }
 /*[clearfix]*/.hoverCard.contentLeft
 {
@@ -1017,4 +1044,56 @@ UL.membersList .contentArea
 	display: inline-block;
 	padding: 2px;
 	vertical-align: middle;
+}
+A.tipsTest
+{
+	text-align: center;
+	/*+placement:margin-auto 0px 0px;*/
+	margin-left: auto;
+	margin-right: auto;
+	position: relative;
+	left: 0px;
+	top: 0px;
+	border: 1px solid #9B9999;
+	padding: 5px;
+	background-color: #E6E6E6;
+	/*+border-radius:5px;*/
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	-khtml-border-radius: 5px;
+	border-radius: 5px;
+	/*+box-shadow:1px 1px 2px #9B9999;*/
+	-moz-box-shadow: 1px 1px 2px #9B9999;
+	-webkit-box-shadow: 1px 1px 2px #9B9999;
+	-o-box-shadow: 1px 1px 2px #9B9999;
+	box-shadow: 1px 1px 2px #9B9999;
+	/*+text-shadow:1px 1px 1px #FCFDFE;*/
+	-moz-text-shadow: 1px 1px 1px #FCFDFE;
+	-webkit-text-shadow: 1px 1px 1px #FCFDFE;
+	-o-text-shadow: 1px 1px 1px #FCFDFE;
+	text-shadow: 1px 1px 1px #FCFDFE;
+}
+.tipLinkContainer
+{
+	width: 100%;
+	/*+placement:margin-auto 0px 0px;*/
+	margin-left: auto;
+	margin-right: auto;
+	position: relative;
+	left: 0px;
+	top: 0px;
+	text-align: center;
+}
+HR.bolderLine
+{
+	border-top-color: #9B9999;
+}
+BODY .qtip .content
+{
+	padding: 0;
+	margin: 0;
+	height: 0;
+	min-height: 0;
+	width: 0;
+	min-width: 0;
 }

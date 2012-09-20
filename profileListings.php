@@ -1,8 +1,8 @@
 <? include('header.php') ?>
-<div id="container">
+<section id="container">
     <? include('leftbar.php') ?>
-    <div class="centerContent relative">
-        <div id="introContent">
+    <div id="contentArea" class="centerContent relative">
+        <section id="introContent">
             <h2>Aishwarya Rai</h2>
             <div class="pageInfo">
                 <span class="pageType">Director, Regional Sales & Marketing</span> at <span class="parentDesc">
@@ -13,7 +13,7 @@
                 <?= nl2br('Aishwarya Rai the Miss World stunning beauty queen is considered to be one of the beautiful actresses in the movie industry. She has done movies in languages like Hindi, Tamil, English and Bengali.
                             In the year 1994, she won the Miss World title and brought fame to her mother land.') ?>
             </p>
-        </div> <!--  introcontent -->       
+        </section> <!--  introcontent -->       
                 <form class="profileListings listingsSearch" accept-charset="utf-8" id="filterform" method="GET" action="/members">
                     <div id="wraparound" class="outerBox relative">
                         <div id="search-wrap" class="filterContentBG contentArea contentNoBottom">
@@ -157,8 +157,8 @@
                     </div>
                     <input type="hidden" value="c6d6581afc6dda3ec151f8353a96a8d1ca3d865e" name="token">
                 </form> <!-- SEARCH AREA -->        
-        <div id="theLoop">
-            <div id="feedActionDiv">                
+        <section id="theLoop">
+            <section id="feedActionDiv">                
                 <div id="filterButtonDiv" class="dropdown">
                     <a data-toggle="dropdown" class="dropdown-toggle" id="filterButton" href="#">Show:&nbsp;<span class="dropDownSelected">All</span>&nbsp;<span class="caret"></span></a>
                     <ul class="dropdown-menu">
@@ -174,7 +174,7 @@
                         <li><a href="#" id="sortPopular">Popular</a></li>
                     </ul>                    
                 </div>
-            </div> <!--  sort button & result count -->
+            </section> <!--  sort button & result count -->
             <article class="postFeed">
                 <div class="dropdown postSettings">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"></a>
@@ -271,12 +271,10 @@
                     </ul> <!-- comments -->
                 </div> <!-- comment OuterBox-->
             </article> <!--  listing -->
-        </div> <!--  theLoop -->
+        </section> <!--  theLoop -->
     </div>
     <? include('rightbar.php') ?>
-</div>
-
-<a href="#" style="display:block;width:50px;border:1px solid #ddd;margin:0 150px auto;text-align: left" id="tips">TIPS</a>
+</section>
 <footer id="footer"></footer>
 </body>
 </html>

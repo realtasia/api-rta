@@ -10,7 +10,7 @@
     </div>    -->
     <div class="outerBox">
         <div class="contentArea widgetContentBG">
-            <div class="tabbable tabs-left">
+            <nav class="tabbable tabs-left">
                 <ul class="nav nav-tabs">
                     <li class="nav-header">Profile</li>
                     <li><a href="/index.php" id="sidenavFeed"><i class="sidebar i-feed"></i> Feed</a></li>
@@ -33,7 +33,7 @@
                         </ul>
                     </li>                         
                 </ul>
-            </div>
+            </nav>
         </div>
     </div>
     <div class="outerBox">
@@ -44,4 +44,5 @@
     </div>
 <a style="display: block" href="/locationProfile.php">Location Profile</a>
 <a style="display: block" href="/companyProfile.php">Company Profile</a>
+<a style="display: block" href="/misc.php">Miscellaneous</a>
 </aside>   <!--  leftbar -->

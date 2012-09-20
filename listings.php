@@ -1,18 +1,18 @@
 <? include('header.php') ?>
-<div id="container">
+<section id="container">
     <? //include('leftbar.php') ?>
     <div class="centerContent relative">
         <div class="outerBox centerWidth relative">
-            <div class="contentArea introBox widgetContentBG relative">
+            <section class="contentArea introBox widgetContentBG relative">
                 <h2 id="introHeader"><i class="directoryIcons i-listingsDirectory"></i>Listings Directory</h2>
                 <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</p>
-            </div>
+            </section>
         </div> <!-- intro content -->
         <div class="outerBox centerWidth relative" style="margin-top:10px;">
             <div class="contentArea contentBox">
                 <form class="listingsSearch" accept-charset="utf-8" id="filterform" method="GET" action="/members">
                     <div id="wraparound" class="outerBox relative">
-                        <div id="search-wrap" class="filterContentBG contentArea contentNoBottom">
+                        <section id="search-wrap" class="filterContentBG contentArea contentNoBottom">
                             <div class="inputFill" style="height:29px;width:312px;">
                                 <div class="inputFill" style="height:29px;width:220px;float:left">
                                     <input type="text" id="searchInput" style="width:218px;" placeholder="Search Listings" />
@@ -31,10 +31,10 @@
                                 <!--                                <button type="submit" class="btn" style="width:70px;margin:0;height:28px;">Search</button>-->
                             </div>
                             <button class="btnReset directoryIcons i-map" id="mapBtn"></button>
-                        </div>
+                        </section>
                     </div> <!-- SEARCH BOX -->
                     <div style="display:none;" id="drop-down-filter" class="centerWidth outerBox relative shadow">
-                        <div class="filterBox filterContentBG contentArea contentNoTop">
+                        <section class="filterBox filterContentBG contentArea contentNoTop">
                             <div class="formContainer">
                                 <div class="containerLeft">
                                     <div class="btn-toolbar">
@@ -57,7 +57,7 @@
                                     <div class="btn-toolbar">
                                         <div class="btn-group">
                                             <button class="btn btn-mini half">500 sqft</button>
-                                                <button class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
+                                            <button class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
                                                 <span class="caret"></span>
                                             </button>
                                             <ul class="dropdown-menu">
@@ -149,13 +149,20 @@
                                     </div> <!-- SEARCH FORM BUTTONS -->
                                 </div>
                             </div>
-                        </div>
+                        </section>
                     </div>
                     <input type="hidden" value="c6d6581afc6dda3ec151f8353a96a8d1ca3d865e" name="token">
                 </form> <!-- SEARCH AREA -->
-                <div id="sortBox">
+                <section id="feedActionDiv">
                     <div class="relative" id="resultCount"><h3><small>534 results found</small><span> in Properties for Sale</span></h3></div>
-                </div> <!--  sort button & result count -->
+                    <div id="sortButtonDiv" class="dropdown">
+                        <a data-toggle="dropdown" class="btn btn-small dropdown-toggle" id="sortButton" href="#">Sort:&nbsp;<span class="sortSelected">Popular</span>&nbsp;<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" id="sortNewest">Newest</a></li>
+                            <li><a href="#" id="sortPopular">Popular</a></li>
+                        </ul>                    
+                    </div>                    
+                </section> <!--  sort button & result count -->
                 <div class="widgetOuterBox relative">
                     <article class="contentArea widgetContentBG listing relative">
                         <div class="mainListingContent">
@@ -331,8 +338,8 @@
             </div>
         </div>
     </div>
-
-    <? //include('rightbar.php') ?>
-    <footer id="footer"></footer>
+<? //include('rightbar.php') ?>    
+</section>
+<footer id="footer"></footer>
 </body>
 </html>
