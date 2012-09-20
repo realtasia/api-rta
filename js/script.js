@@ -205,7 +205,7 @@ jQuery(document).ready(function($){
             padding: 10,
             border: {
                 width: 1,
-                radius: 3,
+                radius: 1,
                 color: '#999'
             },
             tip: tooltip,
@@ -243,8 +243,8 @@ jQuery(document).ready(function($){
                     width: csswidth,
                     padding: 10,
                     border: {
-                        width: 1,
-                        radius: 3,
+                        width: 2,
+                        radius: 1,
                         color: '#999'
                     },
                     tip: direction.tooltip,
