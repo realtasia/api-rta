@@ -38,6 +38,162 @@ function Tag(){
 
 }
 
+var RTA = {
+    Utils : function(){
+        
+    },
+    Handlers : function(){
+        var DOM = $(document.body);
+        DOM.on("hover", ".navigationElement", function(event) {
+            event.stopPropagation();
+            var self = $(this);
+            console.log(!self.hasClass('active'))
+            if(!self.hasClass('active')){
+                if(self.find('a').hasClass('disabled')){
+                    self.removeClass('hovering');
+                }else{
+                    self.toggleClass('hovering');
+                }
+                
+            }
+            return true;
+        }).on("click", ".hasActiveState", function(event){
+            var self = $(this);
+            if(self.find('a').hasClass('disabled')){
+                self.removeClass('hovering');
+            }else{
+                $('.hasActiveState').each(function(index){
+                    $(this).removeClass('active').removeClass('hovering');
+                })                
+            }
+            self.addClass('active');
+        });
+    }
+}
+
+function MenuItem(label, css, state, callback){
+    var self  = this;
+    this.hovering = ko.observable(false);
+    this.active = ko.observable(false);
+    this.disabled = ko.observable(false);    
+    if(typeof state == 'object'){
+        for(var key in state){
+            if(typeof state[key] == 'function'){
+                self[key](state[key].call(this))
+            }
+            self[key](state[key])
+        }
+    }
+    this.css   = css || {
+        iconClass : ['icon'],
+        parentClass : null
+    };
+    this.label = label;
+    this.id    = 'RTA_MenuItem_' + label;
+    if(typeof callback == 'function'){
+        this.callback = callback;
+    }
+}
+
+function Library(){
+    var self  = this, icon = 'social i-';
+    
+    this.loadUpload = function(){
+        console.log(ko.contextFor(this));
+        return false;
+    };
+    this.loadRTA = function(){
+        //console.log(ko.contextFor(this));
+        return false;
+    }     
+    this.menu = [
+    new MenuItem('Realtasia', {
+        iconClass : icon + 'libRTA'
+    }, {}, this.loadRTA),
+    new MenuItem('Facebook', {
+        iconClass : icon + 'libFB'
+    }, {
+        disabled : true
+    }),
+    new MenuItem('YouTube', {
+        iconClass : icon + 'libYT'
+    }, {
+        disabled : true
+    }),
+    new MenuItem('Flickr', {
+        iconClass : icon + 'libFlickr'
+    }, {
+        disabled : true
+    }),
+    new MenuItem('Picasa', {
+        iconClass : icon + 'libRTA'
+    }, {
+        disabled : true
+    }),
+    new MenuItem('Upload', {
+        iconClass : icon + 'libRTA', 
+        parentClass : 'rightMenuItem'
+    }, {}, this.loadUpload),
+    ];
+
+
+
+}
+
+function CreateListing(){
+    var self  = this, icon = 'listingCreation i-', id    = 'RTA_MenuItem_';
+    
+    this.currentStep    = ko.observable(0);
+    this.totalSteps     = 5;
+    this.completedSteps = ko.observableArray();
+    this.isStepComplete = function(step){
+        if(step <= this.totalSteps){
+            var inArr = jQuery.inArray(step, this.completedSteps());
+            inArr =  inArr < 0 ? false : true;
+        }  
+        return false;
+    }
+    this.isListingStep = ko.computed(function(){
+        return this.currentStep() >=3
+    }, this)
+
+    this.goBack = function(){
+        
+        if(self.currentStep() - 1 >= 0){
+            self.currentStep(self.currentStep() - 1)
+        }        
+        return false;
+    };    
+    this.enableNext = function(){
+        console.log(self.isStepComplete(self.currentStep() + 1) && self.currentStep() == self.totalSteps)
+        return self.isStepComplete(self.currentStep() + 1) || self.currentStep() == self.totalSteps;
+    };
+    this.resetSteps = function(){
+        self.currentStep(0);
+        self.completedSteps.removeAll();
+        console.log(self.currentStep())
+        return false;
+    };
+    this.save = function(){
+        console.log(ko.contextFor(this));
+        return false;
+    };
+    this.publish = function(){
+        console.log(ko.contextFor(this));
+        return false;
+    }; 
+    this.cancel = function(){
+        console.log(ko.contextFor(this));
+        return false;
+    };
+    this.progressStep = function(){
+        var complete = self.currentStep() + 1;
+        if(complete <= self.totalSteps){
+            self.currentStep(complete);
+            self.completedSteps.push(complete);
+        }
+    }
+}
 
 
 
@@ -46,6 +202,17 @@ jQuery.fn.blindToggle = function(speed, easing, callback) {
     return this.animate({
         marginTop: parseInt(this.css('marginTop')) <0 ? 0 : -h
     }, speed, easing, callback);
+};
+
+ko.bindingHandlers['class'] = {
+    'update': function(element, valueAccessor) {
+        if (element['__ko__previousClassValue__']) {
+            ko.utils.toggleDomNodeCssClass(element, element['__ko__previousClassValue__'], false);
+        }
+        var value = ko.utils.unwrapObservable(valueAccessor());
+        ko.utils.toggleDomNodeCssClass(element, value, true);
+        element['__ko__previousClassValue__'] = value;
+    }
 };
 
 
@@ -81,18 +248,14 @@ function showMore(e, originalHeight){
     return false;
 }
 
-
-
-
-
-
-
 jQuery(document).ready(function($){
+    RTA.Handlers();
+    ko.applyBindings(new Library(), document.getElementById('mediaLibrary'));
+    ko.applyBindings(new CreateListing(), document.getElementById('listingCreationWizard'));
     $.expr[':'].isIconClass = function(obj){
         return (/\bi-/).test(obj.className);
     };
     limitLines($('.limitLines'), 4);
-
     var unApproved = $(".unApproved");
 
     unApproved.children().fadeTo('fast', 0.6);
@@ -113,73 +276,9 @@ jQuery(document).ready(function($){
         e.preventDefault();
         $('#drop-down-filter').slideDown();
     });
-    $('*[class^="i-"]').hover(function(){
-        console.log($(this).attr('class'))
-    });
 
-    var isHovering = false;
-    $("*:isIconClass").on({
-
-        mouseenter: function(){
-            var icon = $(this);
-            if(!isHovering){
-                isHovering = true;
-
-                if(!icon.hasClass('Active') || !icon.hasClass('Deactive')){
-                    icon.addClass('Hover');
-                }
-
-                if(icon.hasClass('Active')){
-                    icon.removeClass('Active').removeClass('Hover').addClass('Deactive');
-                }
-            }
-
-            return false;
-        },
-
-        mouseleave: function(){
-            isHovering = false;
-            var icon = $(this);
-            icon.removeClass('Hover');
-            if(icon.hasClass('Deactive')){
-                icon.removeClass('Deactive').removeClass('Hover').addClass('Active');
-            }
-            return false;
-
-        }
-    }).parent('a').on({
-        mouseenter: function(){
-            var icon = $(this).find('i');
-
-            if(!isHovering){
-                isHovering = true;
-
-                if(icon.hasClass('Active')){
-                    icon.removeClass('Active').removeClass('Hover').addClass('Deactive');
-                }
-
-                if(!icon.hasClass('Active') || !icon.hasClass('Deactive')){
-                    icon.addClass('Hover');
-                }
-            }
-            return false;
-        }, //notice the comma..
-
-        mouseleave: function(){
-            var icon = $(this).find('i');
-            isHovering = false;
-
-            icon.removeClass('Hover');
-
-            if(icon.hasClass('Deactive')){
-                icon.removeClass('Deactive').removeClass('Hover').addClass('Active');
-            }
-            return false;
-        }
-
-    });
     var tips = $('.tipsTest');
-    
+
     function qtipStyle(position, cssClass){
         var tooltip = 'bottom', width = 330;
         switch(position){
@@ -191,15 +290,15 @@ jQuery(document).ready(function($){
                 break;
             case 'right':
                 tooltip = 'left';
-                break;                
+                break;
         }
-        
-        tooltip += 'Middle';  
-        
+
+        tooltip += 'Middle';
+
         if((typeof cssClass == 'string' && cssClass.length > 0) && cssClass == 'large'){
             width = 420;
         }
-        
+
         return {
             width: width,
             padding: 10,
@@ -215,7 +314,7 @@ jQuery(document).ready(function($){
             name: 'light' // Inherit the rest of the attributes from the preset dark style
         }
     }
-    
+
     //$.fn.qtip.styles.regular = new qtipStyle(position, 'regular');
     var rtaSlider = {
         display : function(obj, direction){

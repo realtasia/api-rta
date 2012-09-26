@@ -7,7 +7,7 @@ Purpose of the stylesheet follows.
 
 Common*/
 /*+clearfix {*/
-.statusRight:after, .listing:after, .mainListingContent:after, UL.listingData:after, .postedBy:after, .formContainer:after, .containerLeft:after, .containerRight:after, .large:after, .regular:after, .hoverCard .thumbnails:after, .hoverCard.contentLeft:after, .hoverCard.contentRight:after, .hoverCard .withLabel:after, .regular:after, .membersInline LI:after
+.statusRight:after, .listing:after, .mainListingContent:after, UL.listingData:after, .postedBy:after, .formContainer:after, .containerLeft:after, .containerRight:after, .large:after, .regular:after, .hoverCard .thumbnails:after, .hoverCard.contentLeft:after, .hoverCard.contentRight:after, .hoverCard .withLabel:after, .regular:after, .membersInline LI:after, .hoverCard .thumbnail:after
 {
 	content: ".";
 	display: block;
@@ -16,11 +16,11 @@ Common*/
 	visibility: hidden;
 	font-size: 0;
 }
-.statusRight, .listing, .mainListingContent, UL.listingData, .postedBy, .formContainer, .containerLeft, .containerRight, .large, .regular, .hoverCard .thumbnails, .hoverCard.contentLeft, .hoverCard.contentRight, .hoverCard .withLabel, .regular, .membersInline LI
+.statusRight, .listing, .mainListingContent, UL.listingData, .postedBy, .formContainer, .containerLeft, .containerRight, .large, .regular, .hoverCard .thumbnails, .hoverCard.contentLeft, .hoverCard.contentRight, .hoverCard .withLabel, .regular, .membersInline LI, .hoverCard .thumbnail
 {
 	display: inline-block;
 }
-.statusRight, .listing, .mainListingContent, UL.listingData, .postedBy, .formContainer, .containerLeft, .containerRight, .large, .regular, .hoverCard .thumbnails, .hoverCard.contentLeft, .hoverCard.contentRight, .hoverCard .withLabel, .regular, .membersInline LI
+.statusRight, .listing, .mainListingContent, UL.listingData, .postedBy, .formContainer, .containerLeft, .containerRight, .large, .regular, .hoverCard .thumbnails, .hoverCard.contentLeft, .hoverCard.contentRight, .hoverCard .withLabel, .regular, .membersInline LI, .hoverCard .thumbnail
 {
 /*\*/
 	display: block;
@@ -893,6 +893,10 @@ A.dropdown-toggle::after
 {
 	padding: 0;
 	margin: 0;
+}
+/*[clearfix]*/.hoverCard .thumbnail
+{
+	/*[empty]height:;*/
 }
 .hoverCard .thumbnails LI
 {

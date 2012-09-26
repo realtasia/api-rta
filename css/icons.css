@@ -68,29 +68,27 @@ Directory Icon Sprite*/
 .sidebar.i-testimonial.Hover{background-position:-271px 0;width:16px;height:14px;}
 /*Header Icon Sprite*/
 .headerIcons{background:url("/images/sprites/headerIcons.png") no-repeat top left;display:inline-block;min-width:34px;min-height:34px;margin-top:1px;margin-right:0.3em;line-height:14px;vertical-align:top;}
-.headerIcons.i-inbox{background-position:0 0;width:34px;height:34px;}
-.headerIcons.i-inbox.Active{background-position:-39px 0;width:34px;height:34px;}
-.headerIcons.i-inbox.Hover{background-position:-78px 0;width:34px;height:34px;}
-.headerIcons.i-notification{background-position:-117px 0;width:34px;height:34px;}
-.headerIcons.i-notification.Active{background-position:-156px 0;width:34px;height:34px;}
-.headerIcons.i-notification.Hover{background-position:-195px 0;width:34px;height:34px;}
+.headerIcons.i-inbox{background-position:-39px 0;width:34px;height:34px;}
+.hovering .headerIcons.i-inbox{background-position:-78px 0;width:34px;height:34px;}
+.headerIcons.i-notification{background-position:-156px 0;width:34px;height:34px;}
+.hovering .headerIcons.i-notification{background-position:-195px 0;width:34px;height:34px;}
 .headerIcons.i-settings{background-position:-234px 0;width:34px;height:34px;}
 .headerIcons.i-settings.Hover{background-position:-273px 0;width:34px;height:34px;}
 /*Social Icon Sprite*/
 .social{background:url("/images/sprites/social.png") no-repeat top left;display:inline-block;min-width:24px;min-height:24px;margin-top:1px;margin-right:0.3em;line-height:14px;vertical-align:top;}
 .social.i-libFB{background-position:0 0;width:24px;height:24px;}
+.hovering .social.i-libFB{background-position:-145px 0;width:24px;height:24px;}
 .social.i-libFlickr{background-position:-29px 0;width:24px;height:24px;}
-.social.i-libPicasa{background-position:-58px 0;width:24px;height:24px;}
+.hovering .social.i-libFlickr{background-position:-174px 0;width:24px;height:24px;}
+.social.i-libPicasa{background-position:-57px 0;width:24px;height:24px;}
+.hovering .social.i-libPicasa{background-position:-232px 0;width:23px;height:24px;}
 .social.i-libRTA{background-position:-87px 0;width:24px;height:24px;}
 .social.i-libYT{background-position:-116px 0;width:24px;height:24px;}
-.social.i-profileFB{background-position:-145px 0;width:24px;height:24px;}
-.social.i-profileFlickr{background-position:-174px 0;width:24px;height:24px;}
+.hovering .social.i-libYT{background-position:-347px 0;width:24px;height:24px;}
 .social.i-profileGplus{background-position:-203px 0;width:24px;height:24px;}
-.social.i-profilePicasa{background-position:-232px 0;width:23px;height:24px;}
 .social.i-profileSkype{background-position:-260px 0;width:24px;height:24px;}
 .social.i-profileSocl{background-position:-289px 0;width:24px;height:24px;}
 .social.i-profileTwitter{background-position:-318px 0;width:24px;height:24px;}
-.social.i-profileYT{background-position:-347px 0;width:24px;height:24px;}
 /*Large Icon Sprite*/
 .largeIcons{background:url("/images/sprites/largeIcons.png") no-repeat top left;display:inline-block;min-width:95px;min-height:91px;margin-top:1px;margin-right:0.3em;line-height:14px;vertical-align:top;}
 .largeIcons.i-avatar{background-position:0 0;width:95px;height:91px;}
@@ -124,21 +122,21 @@ Directory Icon Sprite*/
 /*Listing Creation Icon Sprite*/
 .listingCreation{background:url("/images/sprites/listingCreation.png") no-repeat top left;display:inline-block;min-width:30px;min-height:30px;margin-top:1px;margin-right:0.3em;line-height:14px;vertical-align:top;}
 .listingCreation.i-addEvent{background-position:0 0;width:45px;height:40px;}
-.listingCreation.i-addEvent.Hover{background-position:-50px 0;width:45px;height:40px;}
+.hovering .listingCreation.i-addEvent{background-position:-50px 0;width:45px;height:40px;}
 .listingCreation.i-addMedia{background-position:-100px 0;width:45px;height:40px;}
-.listingCreation.i-addMedia.Hover{background-position:-150px 0;width:45px;height:40px;}
+.hovering .listingCreation.i-addMedia{background-position:-150px 0;width:45px;height:40px;}
 .listingCreation.i-back{background-position:-200px 0;width:30px;height:30px;}
-.listingCreation.i-back.Hover{background-position:-235px 0;width:30px;height:30px;}
+.hovering .listingCreation.i-back{background-position:-235px 0;width:30px;height:30px;}
 .listingCreation.i-cancel{background-position:-270px 0;width:30px;height:30px;}
-.listingCreation.i-cancel.Hover{background-position:-305px 0;width:30px;height:30px;}
+.hovering .listingCreation.i-cancel{background-position:-305px 0;width:30px;height:30px;}
 .listingCreation.i-draft{background-position:-340px 0;width:30px;height:30px;}
-.listingCreation.i-draft.Hover{background-position:-375px 0;width:30px;height:30px;}
+.hovering .listingCreation.i-draft{background-position:-375px 0;width:30px;height:30px;}
 .listingCreation.i-next{background-position:-410px 0;width:30px;height:30px;}
-.listingCreation.i-next.Hover{background-position:-445px 0;width:30px;height:30px;}
+.hovering .listingCreation.i-next{background-position:-445px 0;width:30px;height:30px;}
 .listingCreation.i-publish{background-position:-480px 0;width:30px;height:30px;}
-.listingCreation.i-publish.Hover{background-position:-515px 0;width:30px;height:30px;}
+.hovering .listingCreation.i-publish{background-position:-515px 0;width:30px;height:30px;}
 .listingCreation.i-reset{background-position:-550px 0;width:30px;height:30px;}
-.listingCreation.i-reset.Hover{background-position:-585px 0;width:30px;height:30px;}
+.hovering .listingCreation.i-reset{background-position:-585px 0;width:30px;height:30px;}
 /*renegades*/
 .online{background:transparent url("/images/online.png") no-repeat;display:inline-block;width:14px;height:14px;}
 .offline{background:transparent url("/images/offline.png") no-repeat;width:14px;height:14px;display:inline-block;}
