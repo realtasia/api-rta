@@ -210,6 +210,8 @@
 <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 65%"></div></div><span class="thumbCaption">Uploading</span></a></li>                         
 <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 85%"></div></div><span class="thumbCaption">Uploading</span></a></li>                         
 <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 100%"></div></div><span class="thumbCaption">Upload Complete</span></a></li>                         
+<li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 100%"></div></div><span class="thumbCaption">Upload Complete</span></a></li>                         
+<li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 100%"></div></div><span class="thumbCaption">Upload Complete</span></a></li>                         
 <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt=""></a><span class="thumbCaption">Thumbnail caption...</span></li>
 <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt=""></a><span class="thumbCaption">Thumbnail caption...</span></li>
 <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt=""></a><span class="thumbCaption">Thumbnail caption...</span></li>
