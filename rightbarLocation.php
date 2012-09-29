@@ -14,8 +14,8 @@
                 <h5><a class="moreLink" href="#">More&hellip;</a></h5>
             </div>             
             <hr class="thumbnailGallerySeperator" />
-            <h5 class="sideBarHeader">
-                <a href="#"><i class="postMini i-likes"></i>Likes&nbsp;</a><span class="badge badge-blue">54</span>
+            <h5 class="sideBarHeader hovering">
+                <a href="#"><i class="action16 likeSmall"></i>Likes&nbsp;</a><span class="badge badge-blue">54</span>
             </h5>
             <ul class="thumbnails thumbnailGallery">
                 <?php
@@ -38,7 +38,7 @@
             </div>                        
             <hr class="thumbnailGallerySeperator" />
             <h5 class="sideBarHeader">
-                <a href="#"><i class="sidebar i-subscribers"></i>Subscribers&nbsp;</a>&nbsp;<span class="badge badge-blue">14</span>                            
+                <a href="#"><i class="info16 subscribers"></i>Subscribers&nbsp;</a>&nbsp;<span class="badge badge-blue">14</span>                            
             </h5>        
             <ul class="thumbnails thumbnailGallery">
                 <?php
@@ -63,7 +63,7 @@
     <div class="outerBox">
         <div class="contentArea widgetContentBG">
             <h5 class="sideBarHeader">
-                <a href="#"><i class="sidebar i-event"></i>Current Events&nbsp;</a><span class="badge badge-blue">4</span>
+                <a href="#"><i class="info16 event"></i>Current Events&nbsp;</a><span class="badge badge-blue">4</span>
             </h5>
             <ul class="thumbnails eventContainer">
                 <li>

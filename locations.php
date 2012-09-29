@@ -4,7 +4,7 @@
     <div class="centerContent relative">
         <div class="outerBox centerWidth relative">
             <section class="contentArea introBox widgetContentBG relative">
-                <h2 id="introHeader"><i class="directoryIcons i-locationsDirectory"></i>Locations Directory</h2>
+                <h2 id="introHeader"><i class="app locationsDirectory"></i>Locations Directory</h2>
                 <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</p>
             </section>
         </div> <!-- intro content -->
@@ -22,7 +22,7 @@
                                 </div>
                                 <!--                                <button type="submit" class="btn" style="width:70px;margin:0;height:28px;">Search</button>-->
                             </div>
-                            <button class="btnReset directoryIcons i-map" id="mapBtn"></button>
+<!--                            <button class="btnReset directoryIcons hovercards map" id="mapBtn"></button>-->
                         </div>
                     </div> <!-- SEARCH BOX -->
                     <input type="hidden" value="c6d6581afc6dda3ec151f8353a96a8d1ca3d865e" name="token">
@@ -39,116 +39,112 @@
                 </section> <!--  sort button & result count -->
                 <div class="widgetOuterBox relative">
                     <article class="contentArea location widgetContentBG relative">
-                        <div class="mainListingContent">
+                        <div class="mainlocationContent">
                             <div class="locationLeft relative">
-                                <i class="largeIcons i-landed"></i>
-                            </div> <!-- listings thumbnail -->
+                                <i class="hovercards landed"></i>
+                            </div> <!-- locations thumbnail -->
                             <div class="locationRight relative">
                                 <h3><a href="#">Lakeside Grove <a><small>Private Landed</small></a></a></h3>
                                 <ul class="locationDetails">
                                     <li><label>Estate</label><span>Jurong</span></li>
                                     <li><label>Locality</label><span>Lakeside</span></li>
                                     <li><label>Type</label><span>Landed Housing</span></li>                                    
-                                    <li><label>Listings</label><span>0</span></li>
                                 </ul>                                   
-                            </div> <!-- listings content -->
-                        </div> <!-- main listing content -->
+                            </div> <!-- locations content -->
+                        </div> <!-- main location content -->
                         <div class="postActions">
                             <ul class="postActionButtons">
-                                <li><a href="#"><i class="postActionsIcons i-share"></i></a></li>
-                                <li><a href="#"><i class="postActionsIcons i-subscribe"></i></a></li>
-                                <li><a href="#"><i class="postActionsIcons i-like"></i></a></li>
+                                <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 share"></i></a></li>
+                                <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 subscribe"></i></a></li>
+                                <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 like"></i></a></li>
                             </ul>
                             <ul class="postActionInfo">
-                                <li><a href="#"><i class="postMini i-subscribers"></i>215</a></li>
-                                <li><a href="#"><i class="postMini i-likes"></i>167</a></li>
+                                <li class="hasHoverState"><a href="#"><i class="info16 people"></i>215</a></li>
+                                <li class="hasHoverState"><a href="#"><i class="action16 likeSmall"></i>167</a></li>
                             </ul>
                         </div> <!-- postActions -->
                     </article>
                 </div> <!-- location -->
                 <div class="widgetOuterBox relative">
                     <article class="contentArea location widgetContentBG relative">
-                        <div class="mainListingContent">
+                        <div class="mainlocationContent">
                             <div class="locationLeft relative">
-                                <i class="largeIcons i-privateApt"></i>
-                            </div> <!-- listings thumbnail -->
+                                <i class="hovercards privateApt"></i>
+                            </div> <!-- locations thumbnail -->
                             <div class="locationRight relative">
                                 <h3><a href="#">The Mayfair</a> <a><small>Private Residential</small></a></h3>
                                 <ul class="locationDetails">
                                     <li><label>Estate</label><span>Jurong</span></li>
                                     <li><label>Locality</label><span>Jurong East</span></li>
                                     <li><label>Type</label><span>Apartments</span></li>                                    
-                                    <li><label>Listings</label><span>0</span></li>
                                 </ul>                                   
-                            </div> <!-- listings content -->
-                        </div> <!-- main listing content -->
+                            </div> <!-- locations content -->
+                        </div> <!-- main location content -->
                         <div class="postActions">
                             <ul class="postActionButtons">
-                                <li><a href="#"><i class="postActionsIcons i-share"></i></a></li>
-                                <li><a href="#"><i class="postActionsIcons i-subscribe"></i></a></li>
-                                <li><a href="#"><i class="postActionsIcons i-like"></i></a></li>
+                                <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 share"></i></a></li>
+                                <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 subscribe"></i></a></li>
+                                <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 like"></i></a></li>
                             </ul>
                             <ul class="postActionInfo">
-                                <li><a href="#"><i class="postMini i-subscribers"></i>215</a></li>
-                                <li><a href="#"><i class="postMini i-likes"></i>167</a></li>
+                                <li class="hasHoverState"><a href="#"><i class="info16 people"></i>215</a></li>
+                                <li class="hasHoverState"><a href="#"><i class="action16 likeSmall"></i>167</a></li>
                             </ul>
                         </div> <!-- postActions -->
                     </article>
                 </div> <!-- location -->                
                 <div class="widgetOuterBox relative">
                     <article class="contentArea location widgetContentBG relative">
-                        <div class="mainListingContent">
+                        <div class="mainlocationContent">
                             <div class="locationLeft relative">
-                                <i class="largeIcons i-hdb"></i>
-                            </div> <!-- listings thumbnail -->
+                                <i class="hovercards hdb"></i>
+                            </div> <!-- locations thumbnail -->
                             <div class="locationRight relative">
                                 <h3><a href="#">Jurong East <a><small>HDB</small></a></a></h3>
                                 <ul class="locationDetails">
                                     <li><label>Estate</label><span>Jurong</span></li>
                                     <li><label>Locality</label><span>Teban Gardens, Pandan Gardens</span></li>
                                     <li><label>Type</label><span>Apartment</span></li>                                    
-                                    <li><label>Listings</label><span>25</span></li>
                                 </ul>                                
-                            </div> <!-- listings content -->
-                        </div> <!-- main listing content -->
+                            </div> <!-- locations content -->
+                        </div> <!-- main location content -->
                         <div class="postActions">
                             <ul class="postActionButtons">
-                                <li><a href="#"><i class="postActionsIcons i-share"></i></a></li>
-                                <li><a href="#"><i class="postActionsIcons i-subscribe"></i></a></li>
-                                <li><a href="#"><i class="postActionsIcons i-like"></i></a></li>
+                                <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 share"></i></a></li>
+                                <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 subscribe"></i></a></li>
+                                <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 like"></i></a></li>
                             </ul>
                             <ul class="postActionInfo">
-                                <li><a href="#"><i class="postMini i-subscribers"></i>215</a></li>
-                                <li><a href="#"><i class="postMini i-likes"></i>167</a></li>
+                                <li class="hasHoverState"><a href="#"><i class="info16 people"></i>215</a></li>
+                                <li class="hasHoverState"><a href="#"><i class="action16 likeSmall"></i>167</a></li>
                             </ul>
                         </div> <!-- postActions -->
                     </article>
                 </div> <!-- location -->
                 <div class="widgetOuterBox relative">
                     <article class="contentArea location widgetContentBG relative">
-                        <div class="mainListingContent">
+                        <div class="mainlocationContent">
                             <div class="locationLeft relative">
-                                <i class="largeIcons i-hdb"></i>
-                            </div> <!-- listings thumbnail -->
+                                <i class="hovercards hdb"></i>
+                            </div> <!-- locations thumbnail -->
                             <div class="locationRight relative">
                                 <h3><a href="#">Jurong West <a><small>HDB</small></a></a></h3>
                                 <ul class="locationDetails">
                                     <li><label>Estate</label><span>Jurong</span></li>
                                     <li><label>Type</label><span>Apartment</span></li>
                                     <li><label>Locality</label><span>Boon Lay, Taman Jurong, Lakeside</span></li>
-                                    <li><label>Listings</label><span>15</span></li>
                                 </ul>
-                            </div> <!-- listings content -->
-                        </div> <!-- main listing content -->
+                            </div> <!-- locations content -->
+                        </div> <!-- main location content -->
                         <div class="postActions">
                             <ul class="postActionButtons">
-                                <li><a href="#"><i class="postActionsIcons i-share"></i></a></li>
-                                <li><a href="#"><i class="postActionsIcons i-subscribe"></i></a></li>
-                                <li><a href="#"><i class="postActionsIcons i-like"></i></a></li>
+                                <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 share"></i></a></li>
+                                <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 subscribe"></i></a></li>
+                                <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 like"></i></a></li>
                             </ul>
                             <ul class="postActionInfo">
-                                <li><a href="#"><i class="postMini i-subscribers"></i>215</a></li>
-                                <li><a href="#"><i class="postMini i-likes"></i>167</a></li>
+                                <li class="hasHoverState"><a href="#"><i class="info16 people"></i>215</a></li>
+                                <li class="hasHoverState"><a href="#"><i class="action16 likeSmall"></i>167</a></li>
                             </ul>
                         </div> <!-- postActions -->
                     </article>

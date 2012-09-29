@@ -1,4 +1,5 @@
-<? include('header.php') ?>
+<? 
+include('header.php') ?>
 <section id="container">
     <? include('leftbar.php') ?>
     <div id="contentArea" class="centerContent">
@@ -9,34 +10,42 @@
                     <a href="#">DTZ Debenham Tie Leung</a>
                 </span>  
                 <div class="pageActions">
-                    <a class="pageActionsButton btn btn-mini"><i class="postActionsIcons i-subscribe"></i>Subscribe</a>
-                    <a class="pageActionsButton btn btn-mini"><i class="postActionsIcons i-like"></i>Like</a>                    
-                    <a class="moreLink">View More<i class="postMini i-edit"></i></a>
+                    <a class="pageActionsButton btn btn-mini hasActiveState hasHoverState"><i class="action16 subscribe"></i>Subscribe</a>
+                    <a class="pageActionsButton btn btn-mini hasActiveState hasHoverState"><i class="action16 likeSmall"></i>Like</a>                     
+                    <a class="moreLink">View More<i class="Action16 infoCircleBG"></i></a>
                 </div>
             </div>
         </section> <!--  introcontent -->
         <div class="outerBox rounded">
             <section class="contentArea widgetContentBG rounded" id="newPostArea">
                 <ul class="newPostButtons">
-                    <li><a href="#"><i class="postMini i-postStatus"></i></a></li>
-                    <li><a href="#"><i class="postMini i-postTestimonial"></i></a></li>
-                    <li class="statusRight"><button class="close" type="button">&times;</button></li>
+                    <li class="hasActiveState hasHoverState"><a href="#"><i class="action16 postStatus"></i></a></li>
+                    <li class="hasActiveState hasHoverState"><a href="#"><i class="action16 postTestimonial"></i></a></li>
+                    <li class="statusRight" style="display:none"><button class="close" type="button">&times;</button></li>
                 </ul>
                 <div id="statusFormTA">                    
                     <textarea id="statusFormTextarea" class="rounded" placeholder="What's New"></textarea>
                 </div>
-                <div class="statusBoxExpand">
+                <div class="statusBoxExpand" style="display:none">
                     <ul class="newPostMediaButtons">
-                        <li><a href="#"><i class="postMini i-postImages"></i></a></li>
-                        <li><a href="#"><i class="postMini i-postVideo"></i></a></li>
+                        <li class="hasHoverState"><a href="#"><i class="action16 postImages"></i></a></li>
+                        <li class="hasHoverState"><a href="#"><i class="action16 postVideo"></i></a></li>
                     </ul>
                     <button class="btn btn-info relative">Share</button>
                 </div>
             </section>
-        </div> <!--  status form -->
+        </div> <!--  status form -->        
         <section id="theLoop">
-            <section id="feedActionDiv">                               
-                <div id="sortButtonDiv" class="dropdown">
+            <section id="feedActionDiv">                
+                <div id="filterButtonDiv" class="dropdown hasHoverState hasActiveState">
+                    <a data-toggle="dropdown" class="dropdown-toggle" id="filterButton" href="#">Show:&nbsp;<span class="dropDownSelected">All</span>&nbsp;<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#" id="filterAll">All</a></li>
+                        <li><a href="#" id="filterPopular">Published</a></li>
+                        <li><a href="#" id="filterDraft">Draft</a></li>
+                    </ul>                    
+                </div>                
+                <div id="sortButtonDiv" class="dropdown hasHoverState hasActiveState">
                     <a data-toggle="dropdown" class="btn btn-small dropdown-toggle" id="sortButton" href="#">Sort:&nbsp;<span class="sortSelected">Popular</span>&nbsp;<span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="#" id="sortNewest">Newest</a></li>
@@ -70,26 +79,26 @@
                         <li>
                             <div href="#" class="thumbnail">
                                 <a href="#">
-                                    <img src="/img/play_button.png" style="background:URL(http://i4.ytimg.com/vi/oCvkb8aNuys/hqdefault.jpg) center center black;background-size: 135px 110px;"  />
+                                    <img src="/img/play_button.png" style="background:URL(http://img.youtube.com/vi/1kpBN4hCOps/2.jpg) center center black;background-size: 135px 110px;"  />
                                 </a>
                                 <span class="thumbLinks"><a href="www.youtube.com">www.youtube.com</a></span>
                             </div>
                         </li>
                     </ul> <!-- post thumbnail -->
                     <p class="thumbPostDesc">
-                        <a href="#">This will run the script from an online directory</a> (a.k.a. folder). Alternatively you can download [Ref 3] the files choosing the latest version ÃƒÂ¯Ã‚Â¿Ã‚Â½ 2.1(beta4) at the time of writing ÃƒÂ¯Ã‚Â¿Ã‚Â½ and unzip them. You will find a directory 'ie7' and a sub directory 'src'. Both contain essentially the same files.
+                        <a href="#">This home is located in The Woodlands, TX.</a> Updated kitchen! Large master with volumous ceiling!Large walk-in closet! Master bath upgraded! Darling kids bedrooms! Approx 600 s.f. extra room was 3-car garage converted to bonus/playroom with laminate floors, fantastic room! much more!
                     </p> <!-- post description -->
                 </article> <!-- post content -->
                 <div class="postActions">
                     <ul class="postActionButtons">
-                        <li><a href="#"><i class="postActionsIcons i-share"></i></a></li>
-                        <li><a href="#"><i class="postActionsIcons i-subscribe Active"></i></a></li>
-                        <li><a href="#"><i class="postActionsIcons i-like Active"></i></a></li>
+                        <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 share"></i></a></li>
+                        <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 subscribe"></i></a></li>
+                        <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 like"></i></a></li>
                     </ul>
                     <ul class="postActionInfo">
-                        <li><a href="#"><i class="postMini i-comments"></i>51</a></li>
-                        <li><a href="#"><i class="postMini i-subscribers"></i>215</a></li>
-                        <li><a href="#"><i class="postMini i-likes"></i>167</a></li>
+                        <li class="hasHoverState"><a href="#"><i class="action16 comments"></i>51</a></li>
+                        <li class="hasHoverState"><a href="#"><i class="info16 people"></i>215</a></li>
+                        <li class="hasHoverState"><a href="#"><i class="action16 likeSmall"></i>167</a></li>
                     </ul>
                 </div> <!-- post action links -->
                 <div class="indentedComment widgetOuterBox">
@@ -100,7 +109,7 @@
                                 <li class="commentBody">
                                     <a class="commentAuthor" href="#">Lottie Lot</a>
                                     <p>I think it is probably over-rated actually!</p>
-                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><i class="postMini i-likes"></i><a href="#">2</a></span></div>
+                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><i class="action16 likeSmall"></i><a href="#">2</a></span></div>
                                 </li>
                             </ul> <!-- comment inline -->
                         </li> <!-- comment -->
@@ -112,7 +121,7 @@
                                     <p>
                                         Need 1 Billion to vote for Palestine Google is having a vote on whether to name israel or Palestine on its map on Google earth please vote for Palestine and share.
                                     </p>
-                                    <div class="commentInfo"><span class="timeAgo">17 minutes ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><i class="postMini i-likes"></i><a href="#">2</a></span></div>
+                                    <div class="commentInfo"><span class="timeAgo">17 minutes ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><i class="action16 likeSmall"></i><a href="#">2</a></span></div>
                                 </li>
                             </ul> <!-- comment inline -->
                         </li> <!-- comment -->
@@ -152,14 +161,14 @@
                 </div> <!-- post Title -->
                 <div class="postActions">
                     <ul class="postActionButtons">
-                        <li><a href="#"><i class="postActionsIcons i-share"></i></a></li>
-                        <li><a href="#"><i class="postActionsIcons i-subscribe"></i></a></li>
-                        <li><a href="#"><i class="postActionsIcons i-like"></i></a></li>
+                        <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 share"></i></a></li>
+                        <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 subscribe"></i></a></li>
+                        <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 like"></i></a></li>
                     </ul>
                     <ul class="postActionInfo">
-                        <li><a href="#"><i class="postMini i-comments"></i>51</a></li>
-                        <li><a href="#"><i class="postMini i-subscribers"></i>215</a></li>
-                        <li><a href="#"><i class="postMini i-likes"></i>167</a></li>
+                        <li class="hasHoverState"><a href="#"><i class="action16 comments"></i>51</a></li>
+                        <li class="hasHoverState"><a href="#"><i class="info16 people"></i>215</a></li>
+                        <li class="hasHoverState"><a href="#"><i class="action16 likeSmall"></i>167</a></li>
                     </ul>
                 </div> <!-- post action links -->
                 <div class="indentedComment widgetOuterBox">
@@ -170,7 +179,7 @@
                                 <li class="commentBody">
                                     <a class="commentAuthor" href="#">Lottie Lot</a>
                                     <p>I think it is probably over-rated actually!</p>
-                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><i class="postMini i-likes"></i><a href="#">2</a></span></div>
+                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><i class="action16 likeSmall"></i><a href="#">2</a></span></div>
                                 </li>
                             </ul> <!-- comment inline -->
                         </li> <!-- comment -->
@@ -182,7 +191,7 @@
                                     <p>
                                         I wouldn't know. I am a bimbo. What's a script?
                                     </p>
-                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><i class="postMini i-likes"></i><a href="#">2</a></span></div>
+                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><i class="action16 likeSmall"></i><a href="#">2</a></span></div>
                                 </li>
                             </ul> <!-- comment inline -->
                         </li> <!-- comment -->
@@ -235,14 +244,14 @@
                 </article> <!-- post content -->
                 <div class="postActions">
                     <ul class="postActionButtons">
-                        <li><a href="#"><i class="postActionsIcons i-share"></i></a></li>
-                        <li><a href="#"><i class="postActionsIcons i-subscribe"></i></a></li>
-                        <li><a href="#"><i class="postActionsIcons i-like"></i></a></li>
+                        <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 share"></i></a></li>
+                        <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 subscribe"></i></a></li>
+                        <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 like"></i></a></li>
                     </ul>
                     <ul class="postActionInfo">
-                        <li><a href="#"><i class="postMini i-comments"></i>51</a></li>
-                        <li><a href="#"><i class="postMini i-subscribers"></i>215</a></li>
-                        <li><a href="#"><i class="postMini i-likes"></i>167</a></li>
+                        <li class="hasHoverState"><a href="#"><i class="action16 comments"></i>51</a></li>
+                        <li class="hasHoverState"><a href="#"><i class="info16 people"></i>215</a></li>
+                        <li class="hasHoverState"><a href="#"><i class="action16 likeSmall"></i>167</a></li>
                     </ul>
                 </div> <!-- post action links -->
                 <div class="indentedComment widgetOuterBox">
@@ -253,7 +262,7 @@
                                 <li class="commentBody">
                                     <a class="commentAuthor" href="#">Lottie Lot</a>
                                     <p>I think it is probably over-rated actually!</p>
-                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="postMini i-commentLike Active"></i>2</a></span></div>
+                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="Action16 likeSmall Active"></i>2</a></span></div>
                                 </li>
                             </ul> <!-- comment inline -->
                         </li> <!-- comment -->
@@ -265,7 +274,7 @@
                                     <p>
                                         Need 1 Billion to vote for Palestine Google is having a vote on whether to name israel or Palestine on its map on Google earth please vote for Palestine and share.
                                     </p>
-                                    <div class="commentInfo"><span class="timeAgo">17 minutes ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="postMini i-likes"></i>2</a></span></div>
+                                    <div class="commentInfo"><span class="timeAgo">17 minutes ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="action16 likeSmall"></i>2</a></span></div>
                                 </li>
                             </ul> <!-- comment inline -->
                         </li> <!-- comment -->
@@ -311,10 +320,10 @@
                 </div> <!-- post Title -->
                 <div class="postActions">
                     <ul class="postActionButtons">
-                        <li><a href="#"><i class="postActionsIcons i-like"></i></a></li>
+                        <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 like"></i></a></li>
                     </ul>
                     <ul class="postActionInfo">
-                        <li><a href="#"><i class="postMini i-likes"></i>167</a></li>
+                        <li class="hasHoverState"><a href="#"><i class="action16 likeSmall"></i>167</a></li>
                     </ul>
                 </div> <!-- post action links -->
             </article> <!--  testimonial -->
@@ -345,8 +354,8 @@
                                 <div class="thumbnail ">
                                     <img src="/images/imphoto.jpg">
                                 </div>
-                                <span class="thumbInfo"><a href="#"><i class="postMini i-images"></i>15 images</a></span>
-                                <span class="thumbInfo"><a href="#"><i class="postMini i-videos"></i>1 video</a></span>
+                                <span class="thumbInfo"><a href="#"><i class="Info16 folderPic"></i>15 images</a></span>
+                                <span class="thumbInfo"><a href="#"><i class="Info16 folderVid"></i>1 video</a></span>
                             </div> <!-- listings thumbnail -->
                             <div class="listingRight relative">
                                 <h3><a href="#">Carribean @ Keppel Bay</a></h3>
@@ -355,9 +364,9 @@
                                     $200,000,000
                                 </span>
                                 <ul class="listingData">
-                                    <li><i class="postMini i-sqft"></i>8,000 sqft</li>
-                                    <li><i class="postMini i-bathrooms"></i>3 toilets</li>
-                                    <li><i class="postMini i-bedrooms"></i>3 bedrooms</li>
+                                    <li><i class="Info16 sqft"></i>8,000 sqft</li>
+                                    <li><i class="Info16 bathrooms"></i>3 toilets</li>
+                                    <li><i class="Info16 bedrooms"></i>3 bedrooms</li>
                                     <li></li>
                                 </ul>
                                 <p>
@@ -369,14 +378,14 @@
                 </div> <!-- post content -->
                 <div class="postActions">
                     <ul class="postActionButtons">
-                        <li><a href="#"><i class="postActionsIcons i-share"></i></a></li>
-                        <li><a href="#"><i class="postActionsIcons i-subscribe"></i></a></li>
-                        <li><a href="#"><i class="postActionsIcons i-like"></i></a></li>
+                        <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 share"></i></a></li>
+                        <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 subscribe"></i></a></li>
+                        <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 like"></i></a></li>
                     </ul>
                     <ul class="postActionInfo">
-                        <li><a href="#"><i class="postMini i-comments"></i>51</a></li>
-                        <li><a href="#"><i class="postMini i-subscribers"></i>215</a></li>
-                        <li><a href="#"><i class="postMini i-likes"></i>167</a></li>
+                        <li class="hasHoverState"><a href="#"><i class="action16 comments"></i>51</a></li>
+                        <li class="hasHoverState"><a href="#"><i class="info16 people"></i>215</a></li>
+                        <li class="hasHoverState"><a href="#"><i class="action16 likeSmall"></i>167</a></li>
                     </ul>
                 </div> <!-- post action links -->
                 <div class="indentedComment widgetOuterBox">
@@ -389,7 +398,7 @@
                                     <p>
                                         I wouldn't know. I am a bimbo. What's a script?
                                     </p>
-                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="postMini i-commentLike Active"></i>2</a></span></div>
+                                    <div class="commentInfo"><span class="timeAgo">3 hours ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="Action16 likeSmall"></i>2</a></span></div>
                                 </li>
                             </ul> <!-- comment inline -->
                         </li> <!-- comment -->
@@ -401,7 +410,7 @@
                                     <p>
                                         Need 1 Billion to vote for Palestine Google is having a vote on whether to name israel or Palestine on its map on Google earth please vote for Palestine and share.
                                     </p>
-                                    <div class="commentInfo"><span class="timeAgo">17 minutes ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="postMini i-likes"></i>2</a></span></div>
+                                    <div class="commentInfo"><span class="timeAgo">17 minutes ago</span>&nbsp;&middot;&nbsp;<span class="commentActions"><a href="#"><i class="action16 likeSmall"></i>2</a></span></div>
                                 </li>
                             </ul> <!-- comment inline -->
                         </li> <!-- comment -->

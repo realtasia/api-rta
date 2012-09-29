@@ -1,6 +1,179 @@
 <? include('header.php') ?>
 <div class="container-fluid">
     <div class="row-fluid" style="margin-top:20px">
+        <div class="span4">
+            <section class="RTAWindow">
+                <section class="RTAWindowContainer">
+                    <section class="RTAWindowContent noSidebar">
+                        <div class="contentArea introBox">
+                            <p>                                
+                                Haven't received your welcome email? Interested in joining the Beta program?
+                                <a href="#" onclick="javascript:jQuery('#sidebar-beta-link').click();return false;">Join the Beta Program</a>
+                                and we'll invite you on the next beta cycle. <br><br> If you've already sent your interest via 'Join Beta Program', please be patient as
+                                we are still testing the system with a 100 randomly selected users at a time. We extend this to another 100 each week.                                
+                            </p><hr>
+                            <form class="form-horizontal">
+                                <div class="control-group">
+                                    <label class="control-label" for="inputEmail">Beta Key</label>
+                                    <div class="controls">
+                                        <input type="text" id="inputEmail" placeholder="Provided in your Welcome Email">
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <div class="controls">
+                                        <button class="btn btn btn-small">
+                                            <img src="/assets/images/facebook-login.png">
+                                            <span class="fb-auth-button" id="fb-auth">Submit</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>                                
+
+                        </div>
+                    </section>
+                </section>
+                <footer class="footerBar"></footer>
+            </section>
+        </div>    
+    </div>    
+    <div class="row-fluid" style="margin-top:20px">
+        <div class="span4">
+            <section class="RTAWindow">
+                <section class="RTAWindowContainer">
+                    <section class="RTAWindowContent noSidebar">
+                        <div class="contentArea introBox">
+                            <p>Forgot your Realtasia password? Just send us your email address and we'll tell you how to reset it. If you registered with your facebook profile, you only have to log in using Facebook! <br style="margin-bottom: 5px"/>
+                            </p><hr>
+                            <form class="form-horizontal">
+                                <div class="control-group">
+                                    <label class="control-label" for="inputEmail">Email</label>
+                                    <div class="controls">
+                                        <input type="text" id="inputEmail" placeholder="Realtasia Email">
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <div class="controls">
+                                        <button class="btn btn btn-small">
+                                            <img src="/assets/images/facebook-login.png">
+                                            <span class="fb-auth-button" id="fb-auth">Reset</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>                                
+
+                        </div>
+                    </section>
+                </section>
+                <footer class="footerBar"></footer>
+            </section>
+        </div>
+        <div class="span4">
+            <section class="RTAWindow">
+                <section class="RTAWindowContainer">
+                    <section class="RTAWindowContent noSidebar">
+                        <div class="contentArea introBox">
+                            <p>Please log in to continue. If you haven't done so already, please
+                                <a id="register-link" onclick="javascript:return false;" href="#beta-registration">register here.</a>
+                                Forgotten your Realtasia password?
+                                <a onclick="javascript:return false;" href="/user/reset_password">Click here</a>
+                                to reset it. <br style="margin-bottom: 5px"/>
+                                <button class="btn-fb btn btn-small btn-fb-login">
+                                    <img src="/assets/images/facebook-login.png">
+                                    <span class="fb-auth-button" id="fb-auth">login with facebook</span>
+                                </button>
+                                <small id="fb-auth-container">Only if you have registered with your facebook profile.</small>
+                            </p>
+                            <hr>
+                            <p><small style="font-size:70%">Didn't register using Facebook? Please use your Realtasia credentials.</small></p>
+                            <form class="form-horizontal">
+                                <div class="control-group">
+                                    <label class="control-label" for="inputEmail">Email</label>
+                                    <div class="controls">
+                                        <input type="text" id="inputEmail" placeholder="Realtasia Email">
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label" for="inputPassword">Realtasia Password</label>
+                                    <div class="controls">
+                                        <input type="password" id="inputPassword" placeholder="Realtasia Password">
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <div class="controls">
+                                        <label class="checkbox">
+                                            <input type="checkbox"> Remember me
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <div class="controls">
+                                        <button class="btn-rta btn btn-small btn-rta-login">
+                                            <img src="/assets/images/facebook-login.png">
+                                            <span class="fb-auth-button" id="fb-auth">login with realtasia</span>
+                                        </button>
+                                    </div>
+                                </div>                                
+                            </form>                                
+
+                        </div>
+                    </section>
+                </section>
+                <footer class="footerBar"></footer>
+            </section>
+        </div>
+        <div class="span4">
+            <section class="RTAWindow">
+                <section class="RTAWindowContainer">
+                    <section class="RTAWindowContent noSidebar">
+                        <div class="contentArea introBox">
+                            <p>Please fill up the following form if you are interested in the Beta Program. We will send you an invite on our next beta cycle.
+                                If you have already received your welcome email, please
+                                <a onclick="javascript:jQuery('#sidebar-reg-link').click();return false;" href="#">register here</a>.
+                            </p><hr>
+                            <form class="form-horizontal">
+                                <div class="control-group">
+                                    <label class="control-label" for="inputEmail">Name</label>
+                                    <div class="controls">
+                                        <input type="text" id="inputEmail" placeholder="Your full name">
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label" for="inputPassword">Email</label>
+                                    <div class="controls">
+                                        <input type="password" id="inputPassword" placeholder="Email">
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label class="control-label" for="inputPassword">Message</label>
+                                    <div class="controls">
+                                        <textarea placeholder="Message"></textarea>
+                                    </div>
+                                </div>                                
+                                <div class="control-group">
+                                    <div class="controls">
+                                        <label class="checkbox">
+                                            <input type="checkbox"> Are you an Agent?
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <div class="controls">
+                                        <button class="btn btn-small">
+                                            <span class="fb-auth-button" id="fb-auth">Submit</span>
+                                        </button> 
+                                    </div>
+                                </div>
+                            </form>                                
+
+                        </div>
+                    </section>
+                </section>
+                <footer class="footerBar"></footer>
+            </section>
+        </div>          
+    </div>
+    <hr class="bolderLine"/>    
+    <div class="row-fluid" style="margin-top:20px">
         <div class="span12">
             <section class="RTAWindow slimWidth" id="listingCreationWizard">
                 <header class="titleBar">
@@ -13,23 +186,23 @@
                 </header>
                 <nav class="windowMenuBar">
                     <ul class="windowMenu">
-                        <li class="navigationElement">
-                            <a class="windowMenuItem" href="#" data-bind="css:{disabled: !currentStep() > 0}, click:goBack"><i class="listingCreation i-back"></i>Back</a>
+                        <li class="hasHoverState">
+                            <a class="windowMenuItem" href="#" data-bind="css:{disabled: !currentStep() > 0}, click:goBack"><i class="Round26 back"></i>Back</a>
                         </li>
-                        <li class="navigationElement">
-                            <a class="windowMenuItem" href="#" data-bind="css:{disabled: enableNext()}, click:progressStep"><i class="listingCreation i-next"></i>Next</a>
+                        <li class="hasHoverState">
+                            <a class="windowMenuItem" href="#" data-bind="css:{disabled: enableNext()}, click:progressStep"><i class="Round26 next"></i>Next</a>
                         </li>
-                        <li class="navigationElement">
-                            <a class="windowMenuItem" href="#" data-bind="css:{disabled: currentStep() <= 0}, click:resetSteps"><i class="listingCreation i-reset"></i>Reset</a>
+                        <li class="hasHoverState">
+                            <a class="windowMenuItem" href="#" data-bind="css:{disabled: currentStep() <= 0}, click:resetSteps"><i class="Round26 reset"></i>Reset</a>
                         </li>                        
-                        <li class="navigationElement">
-                            <a class="windowMenuItem" href="#" data-bind="css:{disabled: !currentStep() > 0}, click:save"><i class="listingCreation i-draft"></i>Save</a>
+                        <li class="hasHoverState">
+                            <a class="windowMenuItem" href="#" data-bind="css:{disabled: !currentStep() > 0}, click:save"><i class="Round26 draft"></i>Save</a>
                         </li>
-                        <li class="navigationElement">
-                            <a class="windowMenuItem" href="#" data-bind="css:{disabled: !isStepComplete(5)}, click:publish"><i class="listingCreation i-publish"></i>Publish</a>
+                        <li class="hasHoverState">
+                            <a class="windowMenuItem" href="#" data-bind="css:{disabled: !isStepComplete(5)}, click:publish"><i class="Round26 publish"></i>Publish</a>
                         </li> 
-                        <li class="navigationElement">
-                            <a class="windowMenuItem" href="#" data-bind="click:cancel"><i class="listingCreation i-cancel"></i>Cancel</a>
+                        <li class="hasHoverState">
+                            <a class="windowMenuItem" href="#" data-bind="click:cancel"><i class="Round26 cancel"></i>Cancel</a>
                         </li>                           
                     </ul>
                 </nav>
@@ -168,23 +341,23 @@
                 <!--</i>-->
                 <nav class="windowMenuBar">
                     <ul class="windowMenu">
-                        <li class="navigationElement hasActiveState">
-                            <a class="windowMenuItem" href="#" data-bind="click:function(){return true}"><i class="social i-libRTA"></i>Realtasia</a>
+                        <li class="hasHoverState hasActiveState isNavigation">
+                            <a class="windowMenuItem" href="#" data-bind="click:function(){return true}"><i class="social26 rta"></i>Realtasia</a>
                         </li>
-                        <li class="navigationElement hasActiveState">
-                            <a class="windowMenuItem" href="#" data-bind="click:function(){return true}"><i class="social i-libFB"></i>Facebook</a>
+                        <li class="hasHoverState hasActiveState isNavigation">
+                            <a class="windowMenuItem" href="#" data-bind="click:function(){return true}"><i class="social26 facebook"></i>Facebook</a>
                         </li>
-                        <li class="navigationElement hasActiveState">
-                            <a class="windowMenuItem" href="#" data-bind="click:function(){return true}"><i class="social i-libYT"></i>YouTube</a>
+                        <li class="hasHoverState hasActiveState isNavigation">
+                            <a class="windowMenuItem" href="#" data-bind="click:function(){return true}"><i class="social26 youtube"></i>YouTube</a>
                         </li>
-                        <li class="navigationElement hasActiveState">
-                            <a class="windowMenuItem" href="#" data-bind="click:function(){return true}"><i class="social i-libFlickr"></i>Flickr</a>
+                        <li class="hasHoverState hasActiveState isNavigation">
+                            <a class="windowMenuItem" href="#" data-bind="click:function(){return true}"><i class="social26 flickr"></i>Flickr</a>
                         </li>
-                        <li class="navigationElement hasActiveState">
-                            <a class="windowMenuItem" href="#" data-bind="click:function(){return true}"><i class="social i-libPicasa"></i>Picasa</a>
+                        <li class="hasHoverState hasActiveState isNavigation">
+                            <a class="windowMenuItem" href="#" data-bind="click:function(){return true}"><i class="social26 picasa"></i>Picasa</a>
                         </li>
-                        <li class="navigationElement hasActiveState rightMenuItem">
-                            <a class="windowMenuItem" href="#" data-bind="click:function(){return true}"><i><img src="/images/26X26/upload.png"></i>Upload</a>
+                        <li class="hasHoverState hasActiveState rightMenuItem isNavigation">
+                            <a class="windowMenuItem" href="#" data-bind="click:function(){return true}"><i class="action20 upload"></i>Upload</a>
                         </li>                        
                     </ul>
                 </nav>
@@ -204,25 +377,25 @@
                     </section>
                     <section class="RTAWindowContent">
                         <ul class="thumbnails">
-<li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 35%"></div></div><span class="thumbCaption">Uploading</span></a></li>                         
-<li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 45%"></div></div><span class="thumbCaption">Uploading</span></a></li>                         
-<li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 25%"></div></div><span class="thumbCaption">Uploading</span></a></li>                         
-<li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 65%"></div></div><span class="thumbCaption">Uploading</span></a></li>                         
-<li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 85%"></div></div><span class="thumbCaption">Uploading</span></a></li>                         
-<li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 100%"></div></div><span class="thumbCaption">Upload Complete</span></a></li>                         
-<li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 100%"></div></div><span class="thumbCaption">Upload Complete</span></a></li>                         
-<li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 100%"></div></div><span class="thumbCaption">Upload Complete</span></a></li>                         
-<li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt=""></a><span class="thumbCaption">Thumbnail caption...</span></li>
-<li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt=""></a><span class="thumbCaption">Thumbnail caption...</span></li>
-<li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt=""></a><span class="thumbCaption">Thumbnail caption...</span></li>
-<li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt=""></a><span class="thumbCaption">Thumbnail caption...</span></li>
-<li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt=""></a><span class="thumbCaption">Thumbnail caption...</span></li>
-<li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt=""></a><span class="thumbCaption">Thumbnail caption...</span></li>
-<li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt=""></a><span class="thumbCaption">Thumbnail caption...</span></li>
-<li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt=""></a><span class="thumbCaption">Thumbnail caption...</span></li>
-<li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt=""></a><span class="thumbCaption">Thumbnail caption...</span></li>
-<li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt=""></a><span class="thumbCaption">Thumbnail caption...</span></li>
-<li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt=""></a><span class="thumbCaption">Thumbnail caption...</span></li>
+                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 35%"></div></div><span class="thumbCaption">Uploading</span></a></li>                         
+                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 45%"></div></div><span class="thumbCaption">Uploading</span></a></li>                         
+                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 25%"></div></div><span class="thumbCaption">Uploading</span></a></li>                         
+                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 65%"></div></div><span class="thumbCaption">Uploading</span></a></li>                         
+                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 85%"></div></div><span class="thumbCaption">Uploading</span></a></li>                         
+                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 100%"></div></div><span class="thumbCaption">Upload Complete</span></a></li>                         
+                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 100%"></div></div><span class="thumbCaption">Upload Complete</span></a></li>                         
+                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 100%"></div></div><span class="thumbCaption">Upload Complete</span></a></li>                         
+                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt=""></a><span class="thumbCaption">Thumbnail caption...</span></li>
+                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt=""></a><span class="thumbCaption">Thumbnail caption...</span></li>
+                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt=""></a><span class="thumbCaption">Thumbnail caption...</span></li>
+                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt=""></a><span class="thumbCaption">Thumbnail caption...</span></li>
+                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt=""></a><span class="thumbCaption">Thumbnail caption...</span></li>
+                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt=""></a><span class="thumbCaption">Thumbnail caption...</span></li>
+                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt=""></a><span class="thumbCaption">Thumbnail caption...</span></li>
+                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt=""></a><span class="thumbCaption">Thumbnail caption...</span></li>
+                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt=""></a><span class="thumbCaption">Thumbnail caption...</span></li>
+                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt=""></a><span class="thumbCaption">Thumbnail caption...</span></li>
+                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt=""></a><span class="thumbCaption">Thumbnail caption...</span></li>
                         </ul>
                     </section>
                 </section>
@@ -248,12 +421,12 @@
                     </div>
                     <section class="postActions">
                         <ul class="postActionButtons">
-                            <li><a href="#"><i class="postActionsIcons i-subscribe"></i></a></li>
-                            <li><a href="#"><i class="postActionsIcons i-like"></i></a></li>
+                            <li class="hasHoverState hasActiveState"><a href="#"><i class="social26 subscribe"></i></a></li>
+                            <li class="hasHoverState hasActiveState"><a href="#"><i class="social26 like"></i></a></li>
                         </ul>
                         <ul class="postActionInfo">
-                            <li><a href="#"><i class="postMini i-subscribers"></i>215</a></li>
-                            <li><a href="#" class="tipsLike"><i class="postMini i-likes"></i>167</a></li>
+                            <li class="hasHoverState"><a href="#"><i class="Action16 people"></i>215</a></li>
+                            <li class="hasHoverState"><a href="#" class="tipsLike"><i class="postMini i-likes"></i>167</a></li>
                         </ul>
                     </section> <!-- post action links -->
 
@@ -273,12 +446,12 @@
                     </div>
                     <section class="postActions">
                         <ul class="postActionButtons">
-                            <li><a href="#"><i class="postActionsIcons i-subscribe"></i></a></li>
-                            <li><a href="#"><i class="postActionsIcons i-like"></i></a></li>
+                            <li class="hasHoverState hasActiveState"><a href="#"><i class="social26 subscribe"></i></a></li>
+                            <li class="hasHoverState hasActiveState"><a href="#"><i class="social26 like"></i></a></li>
                         </ul>
                         <ul class="postActionInfo">
-                            <li><a href="#"><i class="postMini i-subscribers"></i>215</a></li>
-                            <li id="tanLikes"><a href="#" class="tipsLike"><i class="postMini i-likes"></i>167</a></li>
+                            <li class="hasHoverState"><a href="#"><i class="Action16 people"></i>215</a></li>
+                            <li id="tanLikes" class="hasHoverState"><a href="#" class="tipsLike"><i class="postMini i-likes"></i>167</a></li>
                         </ul>
                     </section> <!-- post action links -->
                 </section>
@@ -303,12 +476,12 @@
                     </div>
                     <section class="postActions">
                         <ul class="postActionButtons">
-                            <li><a href="#"><i class="postActionsIcons i-subscribe"></i></a></li>
-                            <li><a href="#"><i class="postActionsIcons i-like"></i></a></li>
+                            <li class="hasHoverState hasActiveState"><a href="#"><i class="social26 subscribe"></i></a></li>
+                            <li class="hasHoverState hasActiveState"><a href="#"><i class="social26 like"></i></a></li>
                         </ul>
                         <ul class="postActionInfo">
-                            <li><a href="#"><i class="postMini i-subscribers"></i>215</a></li>
-                            <li><a href="#"><i class="postMini i-likes"></i>167</a></li>
+                            <li class="hasHoverState"><a href="#"><i class="Action16 people"></i>215</a></li>
+                            <li class="hasHoverState"><a href="#"><i class="postMini i-likes"></i>167</a></li>
                         </ul>
                     </section> <!-- post action links -->
                 </section>
@@ -334,12 +507,12 @@
                     <div class="hoverCard contentRight"><a href=""><img src="/images/90x90blue.gif" alt=""></div>
                             <section class="postActions">
                                 <ul class="postActionButtons">
-                                    <li><a href="#"><i class="postActionsIcons i-subscribe"></i></a></li>
-                                    <li><a href="#"><i class="postActionsIcons i-like"></i></a></li>
+                                    <li class="hasHoverState hasActiveState"><a href="#"><i class="social26 subscribe"></i></a></li>
+                                    <li class="hasHoverState hasActiveState"><a href="#"><i class="social26 like"></i></a></li>
                                 </ul>
                                 <ul class="postActionInfo">
-                                    <li><a href="#"><i class="postMini i-subscribers"></i>215</a></li>
-                                    <li><a href="#"><i class="postMini i-likes"></i>167</a></li>
+                                    <li class="hasHoverState"><a href="#"><i class="Action16 people"></i>215</a></li>
+                                    <li class="hasHoverState"><a href="#"><i class="postMini i-likes"></i>167</a></li>
                                 </ul>
                             </section> <!-- post action links -->
                             </section>
@@ -349,7 +522,7 @@
                         <div class="tipLinkContainer"><a href="#" class="tipsLikeTest tipsTest tipsRight">Likes Hover</a> </div>
                         <section class="hoverCard regular tipsLikeContent" style="display:none">
                             <section class="hoverCard contentArea">
-                                <h4 style="margin-bottom:10px;"><i class="postMini i-likes"></i>People who like <a href="#" class="hoverCard header">Tan Hwee Pheng</a></h4>
+                                <h4 style="margin-bottom:10px;" class="hasHoverState"><i class="postMini i-likes"></i>People who like <a href="#" class="hoverCard header">Tan Hwee Pheng</a></h4>
                                 <ul class="membersList contentArea">
                                     <li class="contentArea">
                                         <ul class="membersInline"><li class="commentThumb"><a href=""><img src="/images/40x40.gif" /></li><li class="commentBody"><h5><a class="commentAuthor" href="#">Susan Lim</a></h5></li></ul> <!-- comment inline -->
@@ -382,7 +555,7 @@
                             <div class="tipLinkContainer"><a href="#" class="tipsTest tipsLeft">Subscribers Hover</a></div>
                             <section class="hoverCard regular" style="display:none">
                                 <section class="hoverCard contentArea">
-                                    <h4 style="margin-bottom:10px;"><i class="sidebar i-subscribers"></i>People subscribed to <a href="#" class="hoverCard header">Tan Hwee Pheng</a></h4>
+                                    <h4 style="margin-bottom:10px;" class="hasHoverState"><i class="Action16 people"></i>People subscribed to <a href="#" class="hoverCard header">Tan Hwee Pheng</a></h4>
                                     <ul class="membersList contentArea">
                                         <li class="contentArea">
                                             <ul class="membersInline"><li class="commentThumb"><a href=""><img src="/images/40x40.gif" /></li><li class="commentBody"><h5><a class="commentAuthor" href="#">Susan Lim</a></h5></li></ul> <!-- comment inline -->

@@ -13,23 +13,23 @@
             <nav class="tabbable tabs-left">
                 <ul class="nav nav-tabs">
                     <li class="nav-header">Profile</li>
-                    <li><a href="/index.php" id="sidenavFeed"><i class="sidebar i-feed"></i> Feed</a></li>
-                    <li><a href="/info.php" id="sidenavInfo"><i class="sidebar i-info"></i> Info</a></li>
-                    <li class="dropdown">
-                        <a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="sidebar i-testimonial"></i>&nbsp;Testimonials&nbsp;<b class="caret"></b><span class="badge">4</span></a>
+                    <li class="hasHoverState"><a href="/index.php" id="sidenavFeed"><i class="info16 feed"></i> Feed</a></li>
+                    <li class="hasHoverState"><a href="/info.php" id="sidenavInfo"><i class="info16 infoCircle"></i> Info</a></li>
+                    <li class="dropdown hasHoverState">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="info16 itestimonial"></i>&nbsp;Testimonials&nbsp;<b class="caret"></b><span class="badge">4</span></a>
                         <ul class="dropdown-menu">
                             <li><a href="/testimonialsReceived.php" id="sidenavTestimonialReceived">Received</a></li>
                             <li><a href="/testimonialsWritten.php" id="sidenavTestimonialWritten">Written</a></li>
                         </ul>
                     </li>                                              
                     <li class="nav-header">Activity</li>
-                    <li><a href="/profilelistings.php"><i class="sidebar i-listings"></i>&nbsp;Listings&nbsp;<span class="badge">78</span></a></li>
-                    <li class="dropdown">
-                        <a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="sidebar i-subscribers"></i>&nbsp;Subscriptions&nbsp;<b class="caret"></b><span class="badge">14</span></a>
+                    <li><a href="/profilelistings.php"><i class="info16 listings"></i>&nbsp;Listings&nbsp;<span class="badge">78</span></a></li>
+                    <li class="dropdown hasHoverState">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="info16 subscribers"></i>&nbsp;Subscriptions&nbsp;<b class="caret"></b><span class="badge">14</span></a>
                         <ul class="dropdown-menu">
-                            <li><a href="#sidenavSubscriptionsPeople" id="sidenavSubscriptionsPeople">People</a></li>
-                            <li><a href="#sidenavSubscriptionsLocations" id="sidenavSubscriptionsLocations">Locations</a></li>
-                            <li><a href="#sidenavSubscriptionsListings" id="sidenavSubscriptionsListings">Listings</a></li>
+                            <li><a href="/subscribedPeople.php" id="sidenavSubscriptionsPeople">People</a></li>
+                            <li><a href="/subscribedLocations.php" id="sidenavSubscriptionsLocations">Locations</a></li>
+                            <li><a href="/subscribedListings.php" id="sidenavSubscriptionsListings">Listings</a></li>
                         </ul>
                     </li>                         
                 </ul>
@@ -38,8 +38,8 @@
     </div>
     <div class="outerBox">
         <div class="contentArea widgetContentBG sidebarActionButtons">
-            <a><i class="postActionsIcons i-subscribe"></i>Subscribe</a>
-            <a><i class="postActionsIcons i-like"></i>Like</a>
+            <a class="hasHoverState"><i class="action16 subscribe"></i>Subscribe</a>
+            <a class="hasHoverState"><i class="action16 likeSmall"></i>Like</a>
         </div>
     </div>
 <a style="display: block" href="/locationProfile.php">Location Profile</a>

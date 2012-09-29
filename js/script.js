@@ -44,7 +44,7 @@ var RTA = {
     },
     Handlers : function(){
         var DOM = $(document.body);
-        DOM.on("hover", ".navigationElement", function(event) {
+        DOM.on("hover", ".hasHoverState", function(event) {
             event.stopPropagation();
             var self = $(this);
             console.log(!self.hasClass('active'))
@@ -58,15 +58,27 @@ var RTA = {
             }
             return true;
         }).on("click", ".hasActiveState", function(event){
-            var self = $(this);
-            if(self.find('a').hasClass('disabled')){
+            var self = $(this), isNavigation = self.hasClass('isNavigation');            
+            if(!self.find('a').hasClass('disabled')){
+                if(isNavigation){
+                    $('.hasActiveState').each(function(index){
+                        $(this).removeClass('active').removeClass('hovering');
+                    })
+                }
+            }
+            if(isNavigation){
+                self.addClass('active');
                 self.removeClass('hovering');
             }else{
-                $('.hasActiveState').each(function(index){
-                    $(this).removeClass('active').removeClass('hovering');
-                })                
-            }
-            self.addClass('active');
+                if(self.hasClass('active')){
+                    self.removeClass('active')
+                    self.addClass('hovering')
+                }else{
+                    self.addClass('active')
+                    self.removeClass('hovering')
+                }
+            }            
+            return false;
         });
     }
 }

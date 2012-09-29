@@ -4,7 +4,7 @@
     <div class="centerContent relative">
         <div class="outerBox centerWidth relative">
             <section class="contentArea introBox widgetContentBG relative">
-                <h2 id="introHeader"><i class="directoryIcons i-listingsDirectory"></i>Listings Directory</h2>
+                <h2 id="introHeader"><i class="app listingsDirectory"></i>Listings Directory</h2>
                 <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</p>
             </section>
         </div> <!-- intro content -->
@@ -143,9 +143,8 @@
                                 <div class="containerLeft"></div>
                                 <div class="containerRight">
                                     <div class="formButtons">
-                                        <a class="btn" id="resetSearch"><i class="listingCreation i-reset"></i></a>
-                                        <a class="btn" id="cancelSearch"><i class="listingCreation i-cancel"></i></a>
-                                        <a class="btn" id="doSearch"><i class="listingCreation i-publish"></i></a>                                        
+                                        <a class="btn hasHoverState" id="cancelSearch"><i class="action20 xCircleBG"></i></a>
+                                        <a class="btn hasHoverState" id="doSearch"><i class="action20 search"></i></a>                                        
                                     </div> <!-- SEARCH FORM BUTTONS -->
                                 </div>
                             </div>
@@ -170,8 +169,8 @@
                                 <div class="thumbnail ">
                                     <img src="/images/imphoto.jpg">
                                 </div>
-                                <span class="thumbInfo"><a href="#"><i class="postMini i-images"></i>15 Photos</a></span>
-                                <span class="thumbInfo"><a href="#"><i class="postMini i-videos"></i>1 Videos</a></span>
+                                <span class="thumbInfo"><a href="#"><i class="info16 images"></i>15 Photos</a></span>
+                                <span class="thumbInfo"><a href="#"><i class="info16 videos"></i>1 Videos</a></span>
                             </div> <!-- listings thumbnail -->
                             <div class="listingRight relative">
                                 <h3><a href="#">Carribean @ Keppel Bay</a></h3>
@@ -180,9 +179,9 @@
                                     $200,000,000
                                 </span>
                                 <ul class="listingData">
-                                    <li><i class="postMini i-sqft"></i>8,000 sqft</li>
-                                    <li><i class="postMini i-bathrooms"></i>3 toilets</li>
-                                    <li><i class="postMini i-bedrooms"></i>3 bedrooms</li>
+                                    <li><i class="info16 sqft"></i>8,000 sqft</li>
+                                    <li><i class="info16 bathrooms"></i>3 toilets</li>
+                                    <li><i class="info16 bedrooms"></i>3 bedrooms</li>
                                     <li></li>
                                 </ul>
                                 <p>
@@ -197,14 +196,14 @@
                         </div> <!-- main listing content -->
                         <div class="postActions">
                             <ul class="postActionButtons">
-                                <li><a href="#"><i class="postActionsIcons i-share"></i></a></li>
-                                <li><a href="#"><i class="postActionsIcons i-subscribe"></i></a></li>
-                                <li><a href="#"><i class="postActionsIcons i-like"></i></a></li>
+                                <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 share"></i></a></li>
+                                <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 subscribe"></i></a></li>
+                                <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 like"></i></a></li>
                             </ul>
                             <ul class="postActionInfo">
-                                <li><a href="#"><i class="postMini i-comments"></i>51</a></li>
-                                <li><a href="#"><i class="postMini i-subscribers"></i>215</a></li>
-                                <li><a href="#"><i class="postMini i-likes"></i>167</a></li>
+                                <li class="hasHoverState"><a href="#"><i class="action16 comments"></i>51</a></li>
+                                <li class="hasHoverState"><a href="#"><i class="Action16 people"></i>215</a></li>
+                                <li class="hasHoverState"><a href="#"><i class="action16 likeSmall"></i>167</a></li>
                             </ul>
                         </div> <!-- postActions -->
                         <div class="widgetOuterBox relative comments">
@@ -220,7 +219,7 @@
                                             </p>
 
                                         </li>
-                                        <li class="commentActions"><i class="postMini i-likes"></i><a href="#"></a></li>
+                                        <li class="commentActions"><i class="action16 likeSmall"></i><a href="#"></a></li>
                                     </ul>
                                 </li> <!-- comment -->
                                 <li class="contentArea commentBG">
@@ -234,7 +233,7 @@
                                             </p>
 
                                         </li>
-                                        <li class="commentActions"><i class="postMini i-likes"></i><a href="#">1</a></li>
+                                        <li class="commentActions"><i class="action16 likeSmall"></i><a href="#">1</a></li>
                                     </ul>
 
                                 </li> <!-- comment -->
@@ -257,16 +256,16 @@
                                 <div class="thumbnail ">
                                     <img src="/images/imphoto.jpg">
                                 </div>
-                                <span class="thumbInfo"><a href="#"><i class="postMini i-images"></i>15 Photos</a></span>
-                                <span class="thumbInfo"><a href="#"><i class="postMini i-videos"></i>1 Videos</a></span>
+                                <span class="thumbInfo"><a href="#"><i class="info16 images"></i>15 Photos</a></span>
+                                <span class="thumbInfo"><a href="#"><i class="info16 videos"></i>1 Videos</a></span>
                             </div> <!-- listings thumbnail -->
                             <div class="listingRight relative">
                                 <h3><a href="#">Carribean @ Keppel Bay</a></h3>
                                 <span class="price relative"><span class="listingType">FOR<br />SALE</span>$200,000,000</span>
                                 <ul class="listingData">
-                                    <li><i class="postMini i-sqft"></i>8,000 sqft</li>
-                                    <li><i class="postMini i-bathrooms"></i>3 toilets</li>
-                                    <li><i class="postMini i-bedrooms"></i>3 bedrooms</li>
+                                    <li><i class="info16 sqft"></i>8,000 sqft</li>
+                                    <li><i class="info16 bathrooms"></i>3 toilets</li>
+                                    <li><i class="info16 bedrooms"></i>3 bedrooms</li>
                                     <li></li>
                                 </ul>
                                 <p>
@@ -281,14 +280,14 @@
                         </div> <!-- main listing content -->
                         <div class="postActions">
                             <ul class="postActionButtons">
-                                <li><a href="#"><i class="postActionsIcons i-share"></i></a></li>
-                                <li><a href="#"><i class="postActionsIcons i-subscribe Active"></i></a></li>
-                                <li><a href="#"><i class="postActionsIcons i-like Active"></i></a></li>
+                                <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 share"></i></a></li>
+                                <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 subscribe Active"></i></a></li>
+                                <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 like Active"></i></a></li>
                             </ul>
                             <ul class="postActionInfo">
-                                <li><a href="#"><i class="postMini i-comments"></i>51</a></li>
-                                <li><a href="#"><i class="postMini i-subscribers"></i>215</a></li>
-                                <li><a href="#"><i class="postMini i-likes"></i>167</a></li>
+                                <li class="hasHoverState"><a href="#"><i class="action16 comments"></i>51</a></li>
+                                <li class="hasHoverState"><a href="#"><i class="info16 people"></i>215</a></li>
+                                <li class="hasHoverState"><a href="#"><i class="action16 likeSmall"></i>167</a></li>
                             </ul>
                         </div> <!-- postActions -->
                         <div class="widgetOuterBox relative comments">
@@ -304,7 +303,7 @@
                                             </p>
 
                                         </li>
-                                        <li class="commentActions"><i class="postMini i-likes"></i><a href="#">167</a></li>
+                                        <li class="commentActions"><i class="action16 likeSmall"></i><a href="#">167</a></li>
                                     </ul>
 
                                 </li> <!-- comment -->
@@ -319,7 +318,7 @@
                                             </p>
 
                                         </li>
-                                        <li class="commentActions"><i class="postMini i-likes"></i><a href="#">3</a></li>
+                                        <li class="commentActions"><i class="action16 likeSmall"></i><a href="#">3</a></li>
                                     </ul>
 
                                 </li> <!-- comment -->

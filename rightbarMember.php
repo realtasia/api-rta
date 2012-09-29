@@ -1,8 +1,8 @@
 <aside id="rightbar">
     <div class="outerBox">
         <div class="contentArea widgetContentBG">
-            <h5 class="sideBarHeader">
-                <a href="#"><i class="postMini i-likes"></i>Likes&nbsp;</a><span class="badge badge-blue">54</span>
+            <h5 class="sideBarHeader hovering">
+                <a href="#"><i class="action16 likeSmall"></i>Likes&nbsp;</a><span class="badge badge-blue">54</span>
             </h5>
             <ul class="thumbnails thumbnailGallery">
                 <?php
@@ -25,7 +25,7 @@
             </div>                        
             <hr class="thumbnailGallerySeperator" />
             <h5 class="sideBarHeader">
-                <a href="#"><i class="sidebar i-subscribers"></i>Subscribers&nbsp;</a>&nbsp;<span class="badge badge-blue">14</span>                            
+                <a href="#"><i class="info16 subscribers"></i>Subscribers&nbsp;</a>&nbsp;<span class="badge badge-blue">14</span>                            
             </h5>        
             <ul class="thumbnails thumbnailGallery">
                 <?php
@@ -50,7 +50,7 @@
     <div class="outerBox">
         <div class="contentArea widgetContentBG">
             <h5 class="sideBarHeader">
-                <a href="#"><i class="formIcons i-reputation"></i>Reputation&nbsp;</a>&nbsp;<a href="#"><span class="badge badge-warning">beta</span></a>                            
+                <a href="#"><i class="info16 reputation"></i>Reputation&nbsp;</a>&nbsp;<a href="#"><span class="badge badge-warning">beta</span></a>                            
             </h5>        
             <ul class="reputationContainer">
                 <li class="outerBox reputationScore"><div class="contentArea"><span class="reputation">0</span></li>

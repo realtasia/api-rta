@@ -3,50 +3,54 @@
     <? include('leftbar.php') ?>
     <div id="contentArea" class="centerContent">
         <section id="introContent">
-            <h2>Aishwarya Rai</h2>
+            <h2>Alifah binte Abdul Salman</h2>
             <div class="pageInfo">
-                <span class="pageType">Director, Regional Sales & Marketing</span> at <span class="parentDesc">
+                <span class="pageType">Associate Director</span> at <span class="parentDesc">
                     <a href="#">DTZ Debenham Tie Leung</a>
-                </span>
+                </span>  
+                <div class="pageActions">
+                    <a class="pageActionsButton btn btn-mini hasActiveState hasHoverState hovering"><i class="action16 okCircleBG"></i>Finished Editing</a> 
+                    <a class="pageActionsButton btn btn-mini hasActiveState hasHoverState"><i class="action16 subscribe"></i>Subscribe</a>
+                    <a class="pageActionsButton btn btn-mini hasActiveState hasHoverState"><i class="action16 likeSmall"></i>Like</a>                                                           
+                    <a class="moreLink">View More<i class="Action16 infoCircleBG"></i></a>
+                </div>
             </div>
-            <p>
-                <?= nl2br('Aishwarya Rai the Miss World stunning beauty queen is considered to be one of the beautiful actresses in the movie industry. She has done movies in languages like Hindi, Tamil, English and Bengali.
-                            In the year 1994, she won the Miss World title and brought fame to her mother land.') ?>
-            </p>
         </section> <!--  introcontent -->
-        <div class="outerBox rounded" style="display:none;">
+        <div class="outerBox rounded">
             <section class="contentArea widgetContentBG rounded" id="newPostArea">
                 <ul class="newPostButtons">
-                    <li><a href="#"><i class="postMini i-postStatus"></i></a></li>
-                    <li><a href="#"><i class="postMini i-postTestimonial"></i></a></li>
+                    <li class="hasActiveState hasHoverState"><a href="#"><i class="action16 postStatus"></i></a></li>
+                    <li class="hasActiveState hasHoverState"><a href="#"><i class="action16 postTestimonial"></i></a></li>
+                    <li class="statusRight" style="display:none"><button class="close" type="button">&times;</button></li>
                 </ul>
-                <div id="statusFormTA">
-                    <button class="close" type="button">&times;</button>
+                <div id="statusFormTA">                    
                     <textarea id="statusFormTextarea" class="rounded" placeholder="What's New"></textarea>
                 </div>
-                <ul class="newPostMediaButtons">
-                    <li><a href="#"><i class="postMini i-postImages"></i></a></li>
-                    <li><a href="#"><i class="postMini i-postVideo"></i></a></li>
-                </ul>
-                <button class="btn btn-info relative">Share</button>
+                <div class="statusBoxExpand" style="display:none">
+                    <ul class="newPostMediaButtons">
+                        <li class="hasHoverState"><a href="#"><i class="action16 postImages"></i></a></li>
+                        <li class="hasHoverState"><a href="#"><i class="action16 postVideo"></i></a></li>
+                    </ul>
+                    <button class="btn btn-info relative">Share</button>
+                </div>
             </section>
-        </div> <!--  status form -->
+        </div> <!--  status form -->        
         <section id="theLoop">
-            <section id="feedActionDiv">
-                <div id="filterButtonDiv" class="dropdown">
+            <section id="feedActionDiv">                
+                <div id="filterButtonDiv" class="dropdown hasHoverState hasActiveState">
                     <a data-toggle="dropdown" class="dropdown-toggle" id="filterButton" href="#">Show:&nbsp;<span class="dropDownSelected">All</span>&nbsp;<span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="#" id="filterAll">All</a></li>
                         <li><a href="#" id="filterPopular">Published</a></li>
                         <li><a href="#" id="filterDraft">Draft</a></li>
-                    </ul>
-                </div>
-                <div id="sortButtonDiv" class="dropdown">
+                    </ul>                    
+                </div>                
+                <div id="sortButtonDiv" class="dropdown hasHoverState hasActiveState">
                     <a data-toggle="dropdown" class="btn btn-small dropdown-toggle" id="sortButton" href="#">Sort:&nbsp;<span class="sortSelected">Popular</span>&nbsp;<span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="#" id="sortNewest">Newest</a></li>
                         <li><a href="#" id="sortPopular">Popular</a></li>
-                    </ul>
+                    </ul>                    
                 </div>
             </section> <!--  sort button & result count -->
             <article class="postFeed editMode Approved successBorderColor">
@@ -56,14 +60,14 @@
                     </div>
                     <div class="containerRight">
                         <div class="btn-group">
-                            <a class="btn btn action"><i class="formIcons i-approve Deactive"></i>UnApprove</a>
+                            <a class="btn btn action"><i class="action20 approve"></i>UnApprove</a>
                             <a class="btn dropdown-toggle" data-toggle="dropdown">
                                 <span class="caret"></span>
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a><i class="formIcons i-approve Deactive"></i>UnApprove</a></li>
-                                <li><a><i class="formIcons i-archive"></i>Archive</a></li>
-                                <li><a><i class="formIcons i-trash"></i>Trash</a></li>
+                                <li class="hasHoverState"><a><i class="action20 approve"></i>UnApprove</a></li>
+                                <li class="hasHoverState"><a><i class="action20 archive"></i>Archive</a></li>
+                                <li class="hasHoverState"><a><i class="action20 trash"></i>Trash</a></li>
                             </ul>
                         </div>
                     </div>
@@ -89,10 +93,10 @@
                 </div> <!-- post Title -->
                 <div class="postActions" style="display:none">
                     <ul class="postActionButtons">
-                        <li><a href="#"><i class="postActionsIcons i-like"></i></a></li>
+                        <li class="hasActiveState hasHoverState"><a href="#"><i class="Social26 like"></i></a></li>
                     </ul>
                     <ul class="postActionInfo">
-                        <li><a href="#"><i class="postMini i-likes"></i>167</a></li>
+                        <li class="hasHoverState"><a href="#"><i class="action16 likeSmall"></i>167</a></li>
                     </ul>
                 </div> <!-- post action links -->
             </article> <!--  published -->
@@ -103,14 +107,14 @@
                     </div>
                     <div class="containerRight">
                         <div class="btn-group">
-                            <a class="btn btn action"><i class="formIcons i-approve Deactive"></i>UnApprove</a>
+                            <a class="btn btn action"><i class="action20 approve"></i>UnApprove</a>
                             <a class="btn dropdown-toggle" data-toggle="dropdown">
                                 <span class="caret"></span>
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a><i class="formIcons i-approve Deactive"></i>UnApprove</a></li>
-                                <li><a><i class="formIcons i-archive"></i>Archive</a></li>
-                                <li><a><i class="formIcons i-trash"></i>Trash</a></li>
+                                <li class="hasHoverState"><a><i class="action20 approve"></i>UnApprove</a></li>
+                                <li class="hasHoverState"><a><i class="action20 archive"></i>Archive</a></li>
+                                <li class="hasHoverState"><a><i class="action20 trash"></i>Trash</a></li>
                             </ul>
                         </div>
                     </div>
@@ -136,10 +140,10 @@
                 </div> <!-- post Title -->
                 <div class="postActions" style="display:none">
                     <ul class="postActionButtons">
-                        <li><a href="#"><i class="postActionsIcons i-like"></i></a></li>
+                        <li class="hasActiveState hasHoverState"><a href="#"><i class="Social26 like"></i></a></li>
                     </ul>
                     <ul class="postActionInfo">
-                        <li><a href="#"><i class="postMini i-likes"></i>167</a></li>
+                        <li class="hasHoverState"><a href="#"><i class="action16 likeSmall"></i>167</a></li>
                     </ul>
                 </div> <!-- post action links -->
             </article> <!--  approved -->
@@ -150,14 +154,14 @@
                     </div>
                     <div class="containerRight">
                         <div class="btn-group">
-                            <a class="btn btn action"><i class="formIcons i-approve"></i>Approve</a>
+                            <a class="btn btn action"><i class="action20 approve"></i>Approve</a>
                             <a class="btn dropdown-toggle" data-toggle="dropdown">
                                 <span class="caret"></span>
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a><i class="formIcons i-approve Deactive"></i>UnApprove</a></li>
-                                <li><a><i class="formIcons i-archive"></i>Archive</a></li>
-                                <li><a><i class="formIcons i-trash"></i>Trash</a></li>
+                                <li class="hasHoverState"><a><i class="action20 approve"></i>UnApprove</a></li>
+                                <li class="hasHoverState"><a><i class="action20 archive"></i>Archive</a></li>
+                                <li class="hasHoverState"><a><i class="action20 trash"></i>Trash</a></li>
                             </ul>
                         </div>
                     </div>
@@ -183,10 +187,10 @@
                 </div> <!-- post Title -->
                 <div class="postActions" style="display:none">
                     <ul class="postActionButtons">
-                        <li><a href="#"><i class="postActionsIcons i-like"></i></a></li>
+                        <li class="hasActiveState hasHoverState"><a href="#"><i class="Social26 like"></i></a></li>
                     </ul>
                     <ul class="postActionInfo">
-                        <li><a href="#"><i class="postMini i-likes"></i>167</a></li>
+                        <li class="hasHoverState"><a href="#"><i class="action16 likeSmall"></i>167</a></li>
                     </ul>
                 </div> <!-- post action links -->
             </article> <!--  draft -->
@@ -197,14 +201,14 @@
                     </div>
                     <div class="containerRight">
                         <div class="btn-group">
-                            <a class="btn btn action"><i class="formIcons i-approve"></i>Approve</a>
+                            <a class="btn btn action"><i class="action20 approve"></i>Approve</a>
                             <a class="btn dropdown-toggle" data-toggle="dropdown">
                                 <span class="caret"></span>
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a><i class="formIcons i-approve Deactive"></i>Un Approve</a></li>
-                                <li><a><i class="formIcons i-archive"></i>Archive</a></li>
-                                <li><a><i class="formIcons i-trash"></i>Trash</a></li>
+                                <li class="hasHoverState"><a><i class="action20 approve Deactive"></i>Un Approve</a></li>
+                                <li class="hasHoverState"><a><i class="action20 archive"></i>Archive</a></li>
+                                <li class="hasHoverState"><a><i class="action20 trash"></i>Trash</a></li>
                             </ul>
                         </div>
                     </div>
@@ -230,10 +234,10 @@
                 </div> <!-- post Title -->
                 <div class="postActions" style="display:none">
                     <ul class="postActionButtons">
-                        <li><a href="#"><i class="postActionsIcons i-like"></i></a></li>
+                        <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 like"></i></a></li>
                     </ul>
                     <ul class="postActionInfo">
-                        <li><a href="#"><i class="postMini i-likes"></i>167</a></li>
+                        <li class="hasHoverState"><a href="#"><i class="action16 likeSmall"></i>167</a></li>
                     </ul>
                 </div> <!-- post action links -->
             </article> <!--  trashed -->            

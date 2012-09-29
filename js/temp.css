@@ -1,0 +1,284 @@
+/*Document   : icons*/
+/*Created on : Sep 12, 2012, 7:50:34 PM*/
+/*Author     : Jason Nathan*/
+/*Description: Definition of All Icons.*/
+/**/
+/*All Icons*/
+.Action16,.Info16,.Round26,.Social26,.Square26,.Social48{display:inline;display:block;display:inline-block;vertical-align:middle;margin-right:0.3em;}
+/*---------------------------------------------------------------------------------*/
+/*--- Action 16 Sprites*/
+/*---------------------------------------------------------------------------------*/
+/*Directory Icon Sprite*/
+.directoryIcons{background:url("/images/sprites/directoryIcons.png") no-repeat top left;display:inline-block;min-width:20px;min-height:21px;margin-top:1px;margin-right:0.3em;line-height:14px;vertical-align:top;}
+.directoryIcons.i-listingsDirectory{background-position:0 0;width:20px;height:21px;}
+.directoryIcons.i-locationsDirectory{background-position:-25px 0;width:20px;height:21px;}
+.directoryIcons.i-map{background-position:-50px 0;width:55px;height:26px;}
+.hovering .directoryIcons.i-map{background-position:-110px 0;width:55px;height:26px;}
+.directoryIcons.i-membersDirectory{background-position:-170px 0;width:20px;height:21px;}
+/*Post (Mini) Icon Sprite*/
+.postMini{background:url("/images/sprites/postMini.png") no-repeat top left;display:inline-block;min-width:14px;min-height:14px;margin-top:2px;margin-right:0.3em;line-height:14px;vertical-align:top;}
+.postMini.i-bathrooms{background-position:0 0;width:18px;height:18px;}
+.postMini.i-bedrooms{background-position:-23px 0;width:18px;height:18px;}
+.active .postMini.i-commentLike{background-position:-46px 0;width:15px;height:15px;}
+.postMini.i-commentlike.Deactive{background-position:-66px 0;width:15px;height:15px;}
+.postMini.i-comments{background-position:-86px 0;width:15px;height:15px;}
+.hovering .postMini.i-comments{background-position:-106px 0;width:15px;height:15px;}
+.postMini.i-images{background-position:-126px 0;width:15px;height:15px;}
+.postMini.i-likes{background-position:-146px 0;width:15px;height:15px;}
+.hovering .postMini.i-likes{background-position:-166px 0;width:15px;height:15px;}
+.postMini.i-postImages{background-position:-186px 0;width:19px;height:20px;}
+.hovering .postMini.i-postImages{background-position:-210px 0;width:19px;height:20px;}
+.postMini.i-postStatus{background-position:-234px 1px;width:20px;height:18px;}
+.hovering .postMini.i-postStatus{background-position:-259px 1px;width:20px;height:18px;}
+.postMini.i-postTestimonial{background-position:-284px -1px;width:22px;height:21px;}
+.hovering .postMini.i-postTestimonial{background-position:-311px -1px;width:22px;height:22px;}
+.postMini.i-postVideo{background-position:-338px 1px;width:20px;height:20px;}
+.hovering .postMini.i-postVideo{background-position:-363px 1px;width:20px;height:20px;}
+.postMini.i-sqft{background-position:-388px 0;width:18px;height:18px;}
+.postMini.i-subscribers{background-position:-411px 0;width:15px;height:15px;}
+.hovering .postMini.i-subscribers{background-position:-431px 0;width:15px;height:15px;}
+.postMini.i-videos{background-position:-451px 0;width:15px;height:15px;}
+/*Header Icon Sprite*/
+.headerIcons{background:url("/images/sprites/headerIcons.png") no-repeat top left;display:inline-block;min-width:34px;min-height:34px;margin-top:1px;margin-right:0.3em;line-height:14px;vertical-align:top;}
+.headerIcons.i-inbox{background-position:-39px 0;width:34px;height:34px;}
+.hovering .headerIcons.i-inbox{background-position:-78px 0;width:34px;height:34px;}
+.headerIcons.i-notification{background-position:-156px 0;width:34px;height:34px;}
+.hovering .headerIcons.i-notification{background-position:-195px 0;width:34px;height:34px;}
+.headerIcons.i-settings{background-position:-234px 0;width:34px;height:34px;}
+.hovering .headerIcons.i-settings{background-position:-273px 0;width:34px;height:34px;}
+/*Large Icon Sprite*/
+.largeIcons{background:url("/images/sprites/largeIcons.png") no-repeat top left;display:inline-block;min-width:95px;min-height:91px;margin-top:1px;margin-right:0.3em;line-height:14px;vertical-align:top;}
+.largeIcons.i-avatar{background-position:0 0;width:95px;height:91px;}
+.largeIcons.i-avatarTransparent{background-position:-100px 0;width:95px;height:91px;}
+.largeIcons.i-estate{background-position:-200px 0;width:99px;height:93px;}
+.largeIcons.i-hdb{background-position:-304px 0;width:99px;height:93px;}
+.largeIcons.i-landed{background-position:-408px 0;width:99px;height:93px;}
+.largeIcons.i-privateApt{background-position:-512px 0;width:99px;height:93px;}
+.largeIcons.i-servicedApt{background-position:-616px 0;width:99px;height:93px;}
+.Action16{background:url("/images/Action16.png") no-repeat;}
+.hovering .Action16.marker{background-position:-289px 0;width:16px;height:16px;}
+.Action16.marker{background-position:-595px 0;width:16px;height:16px;}
+.Action16.new{background-position:-306px 0;width:16px;height:16px;}
+.hovering .Action16.new{background-position:-153px 0;width:16px;height:16px;}
+.Action16.okCircleBG{background-position:-255px 0;width:16px;height:16px;}
+.hovering .Action16.okCircleBG{background-position:0 0;width:16px;height:17px;}
+.Action16.okSquare{background-position:-391px 0;width:16px;height:16px;}
+.hovering .Action16.okSquare{background-position:-544px 0;width:16px;height:16px;}
+.Action16.people{background-position:-578px 0;width:16px;height:16px;}
+.hovering .Action16.people{background-position:-119px 0;width:16px;height:16px;}
+.Action16.plusCircleBG{background-position:-136px 0;width:16px;height:16px;}
+.hovering .Action16.plusCircleBG{background-position:-17px 0;width:16px;height:17px;}
+.Action16.testimonial{background-position:-629px 0;width:16px;height:14px;}
+.hovering .Action16.testimonial{background-position:-612px 0;width:16px;height:14px;}
+.Action16.upload{background-position:-204px 0;width:16px;height:16px;}
+.hovering .Action16.upload{background-position:-221px 0;width:16px;height:16px;}
+.Action16.warningCircleBG{background-position:-238px 0;width:16px;height:16px;}
+.hovering .Action16.warningCircleBG{background-position:-85px 0;width:16px;height:17px;}
+.Action16.xCircleBG{background-position:-272px 0;width:16px;height:16px;}
+.hovering .Action16.xCircleBG{background-position:-68px 0;width:16px;height:17px;}
+.Action16.zoomIn{background-position:-357px 0;width:16px;height:16px;}
+.hovering .Action16.zoomIn{background-position:-323px 0;width:16px;height:16px;}
+.Action16.zoomOut{background-position:-340px 0;width:16px;height:16px;}
+.hovering .Action16.zoomOut{background-position:-476px 0;width:16px;height:16px;}
+.Action16.cancelCircleBG{background-position:-374px 0;width:16px;height:16px;}
+.hovering .Action16.cancelCircleBG{background-position:-34px 0;width:16px;height:17px;}
+.Action16.download{background-position:-408px 0;width:16px;height:16px;}
+.hovering .Action16.download{background-position:-425px 0;width:16px;height:16px;}
+.Action16.edit{background-position:-442px 0;width:16px;height:16px;}
+.hovering .Action16.edit{background-position:-459px 0;width:16px;height:16px;}
+.Action16.event{background-position:-493px 0;width:16px;height:16px;}
+.hovering .Action16.event{background-position:-510px 0;width:16px;height:16px;}
+.Action16.helpCircleBG{background-position:-527px 0;width:16px;height:16px;}
+.hovering .Action16.helpCircleBG{background-position:-102px 0;width:16px;height:17px;}
+.Action16.infoCircleBG{background-position:-561px 0;width:16px;height:16px;}
+.hovering .Action16.infoCircleBG{background-position:-51px 0;width:16px;height:17px;}
+.Action16.likeSmall{background-position:-187px 0;width:16px;height:16px;}
+.active .Action16.likeSmall{background-position:-170px 0;width:16px;height:16px;}
+/*---------------------------------------------------------------------------------*/
+/*--- Info 16 Sprites*/
+/*---------------------------------------------------------------------------------*/
+.Info16{background:url("/images/Info16.png") no-repeat;}
+.Info16.folderVid{background-position:-493px 0;width:16px;height:16px;}
+.Info16.listings{background-position:-289px 0;width:16px;height:16px;}
+.Info16.postImages{background-position:-510px 0;width:16px;height:16px;}
+.hovering .Info16.postImages{background-position:-34px 0;width:16px;height:16px;}
+.Info16.postListing{background-position:-51px 0;width:16px;height:16px;}
+.hovering .Info16.postListing{background-position:-68px 0;width:16px;height:16px;}
+.Info16.postStatus{background-position:-85px 0;width:16px;height:16px;}
+.hovering .Info16.postStatus{background-position:-102px 0;width:16px;height:16px;}
+.Info16.postTestimonial{background-position:-119px 0;width:16px;height:16px;}
+.hovering .Info16.postTestimonial{background-position:-136px 0;width:16px;height:16px;}
+.Info16.postVideo{background-position:-153px 0;width:16px;height:16px;}
+.hovering .Info16.postVideo{background-position:-170px 0;width:16px;height:16px;}
+.Info16.qrcode{background-position:-187px 0;width:16px;height:16px;}
+.hovering .Info16.qrcode{background-position:-204px 0;width:16px;height:16px;}
+.Info16.search{background-position:-221px 0;width:16px;height:16px;}
+.hovering .Info16.search{background-position:-238px 0;width:16px;height:16px;}
+.Info16.showMore{background-position:-255px 0;width:16px;height:16px;}
+.hovering .Info16.showMore{background-position:-272px 0;width:16px;height:16px;}
+.Info16.sort{background-position:-459px 0;width:16px;height:16px;}
+.hovering .Info16.sort{background-position:-306px 0;width:16px;height:16px;}
+.Info16.sqft{background-position:-323px 0;width:16px;height:16px;}
+.Info16.status{background-position:-340px 0;width:16px;height:16px;}
+.hovering .Info16.status{background-position:-357px 0;width:16px;height:16px;}
+.Info16.subscribers{background-position:-577px 0;width:15px;height:16px;}
+.hovering .Info16.subscribers{background-position:-561px 0;width:15px;height:16px;}
+.Info16.bathrooms{background-position:-408px 0;width:16px;height:16px;}
+.Info16.bedrooms{background-position:-425px 0;width:16px;height:16px;}
+.Info16.comments{background-position:-442px 0;width:16px;height:16px;}
+.hovering .Info16.comments{background-position:-476px 0;width:16px;height:16px;}
+.Info16.feed{background-position:0 0;width:16px;height:17px;}
+.hovering .Info16.feed{background-position:-17px 0;width:16px;height:17px;}
+.Info16.filter{background-position:-527px 0;width:16px;height:16px;}
+.hovering .Info16.filter{background-position:-544px 0;width:16px;height:16px;}
+.Info16.folderDoc{background-position:-391px 0;width:16px;height:16px;}
+.Info16.folderPic{background-position:-374px 0;width:16px;height:16px;}
+.Info16.offline{background-position:-593px 0;width:14px;height:14px;}
+.Info16.online{background-position:-608px 0;width:14px;height:14px;}
+/*---------------------------------------------------------------------------------*/
+/*--- Round 26 Sprites*/
+/*---------------------------------------------------------------------------------*/
+.Round26{background:url("/images/Round26.png") no-repeat;}
+.Round26.cancelCircleBG{background-position:-960px 0;width:26px;height:26px;}
+.hovering .Round26.cancelCircleBG{background-position:-771px 0;width:26px;height:27px;}
+.Round26.helpCircleBG{background-position:-852px 0;width:26px;height:26px;}
+.hovering .Round26.helpCircleBG{background-position:-717px 0;width:26px;height:27px;}
+.Round26.infoCircleBG{background-position:-1068px 0;width:26px;height:26px;}
+.hovering .Round26.infoCircleBG{background-position:-663px 0;width:26px;height:27px;}
+.Round26.plusCircleBG{background-position:-1041px 0;width:26px;height:26px;}
+.hovering .Round26.plusCircleBG{background-position:-636px 0;width:26px;height:27px;}
+.Round26.upload{background-position:-1014px 0;width:26px;height:26px;}
+.hovering .Round26.upload{background-position:-987px 0;width:26px;height:26px;}
+.Round26.warningCircleBG{background-position:-1095px 0;width:26px;height:26px;}
+.hovering .Round26.warningCircleBG{background-position:-582px 0;width:26px;height:27px;}
+.Round26.xCircleBG{background-position:-933px 0;width:26px;height:26px;}
+.hovering .Round26.xCircleBG{background-position:-690px 0;width:26px;height:27px;}
+.Round26.zoomIn{background-position:-906px 0;width:26px;height:26px;}
+.hovering .Round26.zoomIn{background-position:-879px 0;width:26px;height:26px;}
+.Round26.zoomOut{background-position:-825px 0;width:26px;height:26px;}
+.hovering .Round26.zoomOut{background-position:-798px 0;width:26px;height:26px;}
+.Round26.okCircleBG{background-position:-744px 0;width:26px;height:27px;}
+.hovering .Round26.okCircleBG{background-position:-609px 0;width:26px;height:27px;}
+.Round26.back{background-position:-551px 0;width:30px;height:30px;}
+.hovering .Round26.back{background-position:-210px 0;width:30px;height:30px;}
+.Round26.cancel{background-position:-272px 0;width:30px;height:30px;}
+.hovering .Round26.cancel{background-position:-241px 0;width:30px;height:30px;}
+.Round26.draft{background-position:-303px 0;width:30px;height:30px;}
+.hovering .Round26.draft{background-position:-396px 0;width:30px;height:30px;}
+.Round26.next{background-position:-334px 0;width:30px;height:30px;}
+.hovering .Round26.next{background-position:-520px 0;width:30px;height:30px;}
+.Round26.publish{background-position:-489px 0;width:30px;height:30px;}
+.hovering .Round26.publish{background-position:-458px 0;width:30px;height:30px;}
+.Round26.reset{background-position:-427px 0;width:30px;height:30px;}
+.hovering .Round26.reset{background-position:-365px 0;width:30px;height:30px;}
+.Round26.inbox{background-position:-105px 0;width:34px;height:34px;}
+.active .Round26.inbox{background-position:0 0;width:34px;height:34px;}
+.Round26.notification{background-position:-175px 0;width:34px;height:34px;}
+.hovering .Round26.notification{background-position:-70px 0;width:34px;height:34px;}
+.Round26.settings{background-position:-35px 0;width:34px;height:34px;}
+.hovering .Round26.settings{background-position:-140px 0;width:34px;height:34px;}
+/*---------------------------------------------------------------------------------*/
+/*--- Social 26 Sprites*/
+/*---------------------------------------------------------------------------------*/
+.Social26{background:url("/images/Social26.png") no-repeat;}
+.Social26.picasa{background-position:-351px 0;width:26px;height:26px;}
+.hovering .Social26.picasa{background-position:-702px 0;width:26px;height:26px;}
+.Social26.rta{background-position:-324px 0;width:26px;height:26px;}
+.hovering .Social26.rta{background-position:-432px 0;width:26px;height:26px;}
+.Social26.share{background-position:-567px 0;width:26px;height:26px;}
+.hovering .Social26.share{background-position:-486px 0;width:26px;height:26px;}
+.Social26.subscribe{background-position:-27px 0;width:26px;height:27px;}
+.active .Social26.subscribe{background-position:-135px 0;width:26px;height:27px;}
+.hovering .Social26.subscribe{background-position:-243px 0;width:26px;height:27px;}
+.Social26.subscribers{background-position:-594px 0;width:26px;height:26px;}
+.hovering .Social26.subscribers{background-position:-621px 0;width:26px;height:26px;}
+.Social26.unsubscribe{background-position:-54px 0;width:26px;height:27px;}
+.Social26.youtube{background-position:-270px 0;width:26px;height:26px;}
+.hovering .Social26.youtube{background-position:-297px 0;width:26px;height:26px;}
+.Social26.coBroke{background-position:0 0;width:26px;height:27px;}
+.active .Social26.coBroke{background-position:-162px 0;width:26px;height:27px;}
+.Social26.facebook{background-position:-378px 0;width:26px;height:26px;}
+.hovering .Social26.facebook{background-position:-405px 2px;width:26px;height:27px;}
+.Social26.flickr{background-position:-81px 0;width:26px;height:27px;}
+.hovering .Social26.flickr{background-position:-459px 0;width:26px;height:27px;}
+.Social26.gplus{background-position:-513px 0;width:26px;height:26px;}
+.hovering .Social26.gplus{background-position:-540px 0;width:26px;height:26px;}
+.Social26.like{background-position:-216px 0;width:26px;height:27px;}
+.active .Social26.like{background-position:-108px 0;width:26px;height:27px;}
+.hovering .Social26.like{background-position:-189px 0;width:26px;height:27px;}
+.Social26.linkedin{background-position:-648px 0;width:26px;height:26px;}
+.hovering .Social26.linkedin{background-position:-675px 0;width:26px;height:26px;}
+/*---------------------------------------------------------------------------------*/
+/*--- Square 26 Sprites*/
+/*---------------------------------------------------------------------------------*/
+.Square26{background:url("/images/Square26.png") no-repeat;}
+.Square26.edit{background-position:-283px 0;width:26px;height:26px;}
+.hovering .Square26.edit{background-position:-580px 0;width:26px;height:26px;}
+.Square26.filter{background-position:-364px 0;width:26px;height:26px;}
+.hovering .Square26.filter{background-position:-499px 0;width:26px;height:26px;}
+.Square26.folderDoc{background-position:-310px 0;width:26px;height:26px;}
+.Square26.folderPic{background-position:-418px 0;width:26px;height:26px;}
+.Square26.folderVid{background-position:-877px 0;width:26px;height:26px;}
+.Square26.likeSmall{background-position:-796px 0;width:26px;height:26px;}
+.active .Square26.likeSmall{background-position:-661px 0;width:26px;height:26px;}
+.Square26.marker{background-position:-634px 0;width:26px;height:26px;}
+.hovering .Square26.marker{background-position:-742px 0;width:26px;height:26px;}
+.Square26.new{background-position:-607px 0;width:26px;height:26px;}
+.hovering .Square26.new{background-position:-445px 0;width:26px;height:26px;}
+.Square26.okSquare{background-position:-526px 0;width:26px;height:26px;}
+.hovering .Square26.okSquare{background-position:-688px 0;width:26px;height:26px;}
+.Square26.qrcode{background-position:-553px 0;width:26px;height:26px;}
+.hovering .Square26.qrcode{background-position:-715px 0;width:26px;height:26px;}
+.Square26.search{background-position:-337px 0;width:26px;height:26px;}
+.hovering .Square26.search{background-position:-391px 0;width:26px;height:26px;}
+.Square26.showMore{background-position:-472px 0;width:26px;height:26px;}
+.hovering .Square26.showMore{background-position:-823px 0;width:26px;height:26px;}
+.Square26.sort{background-position:-850px 0;width:26px;height:26px;}
+.hovering .Square26.sort{background-position:-769px 0;width:26px;height:26px;}
+.Square26.trash{background-position:-930px 0;width:25px;height:28px;}
+.hovering .Square26.trash{background-position:-904px 0;width:25px;height:28px;}
+.Square26.settingsPrivacy{background-position:-255px 0;width:27px;height:21px;}
+.Square26.settingsSubscriptions{background-position:-227px 0;width:27px;height:22px;}
+.Square26.settingsSocial{background-position:-199px 0;width:27px;height:23px;}
+.Square26.approve{background-position:-171px 0;width:27px;height:25px;}
+.hovering .Square26.approve{background-position:-113px 0;width:28px;height:25px;}
+.hovering .Square26.meesageNew{background-position:-26px 0;width:28px;height:25px;}
+.Square26.messageNew{background-position:-55px 0;width:28px;height:25px;}
+.Square26.unapprove{background-position:-142px 0;width:28px;height:25px;}
+.hovering .Square26.unapprove{background-position:-84px 0;width:28px;height:25px;}
+.Square26.editDone{background-position:-1103px 0;width:20px;height:20px;}
+.Square26.reputation{background-position:-1081px 0;width:21px;height:18px;}
+.Square26.edit{background-position:-1059px 0;width:21px;height:20px;}
+.Square26.settingsClose{background-position:-1034px 0;width:24px;height:23px;}
+.Square26.archive{background-position:-1008px 0;width:25px;height:22px;}
+.hovering .Square26.archive{background-position:-982px 0;width:25px;height:22px;}
+.Square26.messageRead{background-position:-956px 0;width:25px;height:28px;}
+.hovering .Square26.messageRead{background-position:0 0;width:25px;height:28px;}
+/*---------------------------------------------------------------------------------*/
+/*--- Social 48 Sprites*/
+/*---------------------------------------------------------------------------------*/
+.Social48{background:url("/images/Social48.png") no-repeat;}
+.Social48.flickr{background-position:-49px 0;width:48px;height:49px;}
+.hovering .Social48.flickr{background-position:-539px 0;width:48px;height:48px;}
+.Social48.gplus{background-position:-931px 0;width:48px;height:48px;}
+.hovering .Social48.gplus{background-position:-980px 0;width:48px;height:48px;}
+.Social48.like{background-position:-98px 0;width:48px;height:49px;}
+.Social48.liked{background-position:-343px 0;width:48px;height:49px;}
+.hovering .Social48.like{background-position:-147px 0;width:48px;height:49px;}
+.Social48.rta{background-position:-588px 0;width:48px;height:48px;}
+.hovering .Social48.rta{background-position:-490px 0;width:48px;height:48px;}
+.Social48.share{background-position:-441px 0;width:48px;height:48px;}
+.hovering .Social48.share{background-position:-686px 0;width:48px;height:48px;}
+.Social48.subscribe{background-position:-196px 0;width:48px;height:49px;}
+.Social48.subscribeed{background-position:0 0;width:48px;height:49px;}
+.hovering .Social48.subscribe{background-position:-294px 0;width:48px;height:49px;}
+.Social48.subscribers{background-position:-637px 0;width:48px;height:48px;}
+.hovering .Social48.subscribers{background-position:-735px 0;width:48px;height:48px;}
+.Social48.twitter{background-position:-784px 0;width:48px;height:48px;}
+.hovering .Social48.twitter{background-position:-833px 0;width:48px;height:48px;}
+.Social48.addMedia{background-position:-1124px 0;width:45px;height:40px;}
+.hovering .Social48.addMedia{background-position:-1078px 0;width:45px;height:40px;}
+.Social48.coBroke{background-position:-245px 0;width:48px;height:49px;}
+.active .Social48.coBroke{background-position:-392px 0;width:48px;height:49px;}
+.Social48.facebook{background-position:-882px 0;width:48px;height:48px;}
+.hovering .Social48.facebook{background-position:-1029px 0;width:48px;height:48px;}

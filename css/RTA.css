@@ -7,7 +7,7 @@ Purpose of the stylesheet follows.
 
 Common*/
 /*+clearfix {*/
-.statusRight:after, .listing:after, .mainListingContent:after, UL.listingData:after, .postedBy:after, .formContainer:after, .containerLeft:after, .containerRight:after, .large:after, .regular:after, .hoverCard .thumbnails:after, .hoverCard.contentLeft:after, .hoverCard.contentRight:after, .hoverCard .withLabel:after, .regular:after, .membersInline LI:after, .hoverCard .thumbnail:after
+.statusRight:after, .listing:after, .mainListingContent:after, UL.listingData:after, .postedBy:after, .formContainer:after, .containerLeft:after, .containerRight:after, .large:after, .regular:after, .hoverCard .thumbnails:after, .hoverCard .thumbnail:after, .hoverCard.contentLeft:after, .hoverCard.contentRight:after, .hoverCard .withLabel:after, .regular:after, .membersInline LI:after
 {
 	content: ".";
 	display: block;
@@ -16,11 +16,11 @@ Common*/
 	visibility: hidden;
 	font-size: 0;
 }
-.statusRight, .listing, .mainListingContent, UL.listingData, .postedBy, .formContainer, .containerLeft, .containerRight, .large, .regular, .hoverCard .thumbnails, .hoverCard.contentLeft, .hoverCard.contentRight, .hoverCard .withLabel, .regular, .membersInline LI, .hoverCard .thumbnail
+.statusRight, .listing, .mainListingContent, UL.listingData, .postedBy, .formContainer, .containerLeft, .containerRight, .large, .regular, .hoverCard .thumbnails, .hoverCard .thumbnail, .hoverCard.contentLeft, .hoverCard.contentRight, .hoverCard .withLabel, .regular, .membersInline LI
 {
 	display: inline-block;
 }
-.statusRight, .listing, .mainListingContent, UL.listingData, .postedBy, .formContainer, .containerLeft, .containerRight, .large, .regular, .hoverCard .thumbnails, .hoverCard.contentLeft, .hoverCard.contentRight, .hoverCard .withLabel, .regular, .membersInline LI, .hoverCard .thumbnail
+.statusRight, .listing, .mainListingContent, UL.listingData, .postedBy, .formContainer, .containerLeft, .containerRight, .large, .regular, .hoverCard .thumbnails, .hoverCard .thumbnail, .hoverCard.contentLeft, .hoverCard.contentRight, .hoverCard .withLabel, .regular, .membersInline LI
 {
 /*\*/
 	display: block;
@@ -108,7 +108,7 @@ BODY
 #resultCount
 {
 	left: 0;
-	margin: -10px 0 0 5px;
+	margin: -3px 0 0 5px;
 	padding: 0px;
 }
 /*[clearfix]*/.listing
@@ -333,12 +333,15 @@ UL.listingData LI
 	border-top: 1px solid #E2E3E4;
 	width: 100%;
 	position: relative;
+	padding-bottom: 5px;
 }
 .postActionButtons
 {
 	top: 0;
 	left: 0;
-	margin: 0px;
+	margin: 0px 0px 0;
+	padding-bottom: 0;
+	padding-top: 3px;
 }
 .postActionButtons LI, .postActionInfo LI, .commentInline LI, .newPostButtons LI, .newPostMediaButtons LI
 {
@@ -353,7 +356,7 @@ UL.listingData LI
 .postActionButtons LI
 {
 	padding: 3px 3px 0;
-	margin: 3px 3px 0;
+	margin: 3px 1px 0;
 }
 .postActionInfo LI A
 {
