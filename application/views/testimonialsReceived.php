@@ -57,12 +57,11 @@
                 <div class="dropdown postSettings infoBorderColor infoBGColor">
                     <div class="containerLeft">
                         <label class="label label-info">Approved</label>
-                    </div>
+                    </div> 
                     <div class="containerRight">
-                        <div class="btn-group">
-                            <button class="btn btn-mini">UnApprove</button>
-                            <button class="btn btn-mini">Archive</button>
-                            <button class="btn btn-mini">Trash</button>
+                        <div class="btn-group">                            
+                            <a class="btn btn-mini"><i class="action20 xCircleBG"></i></a>
+                            <a class="btn btn-mini"><i class="action20 unapprove"></i></a>
                         </div>                        
                     </div>
                 </div> <!-- post settings -->
@@ -100,17 +99,10 @@
                         <label class="label label-warning">Pending Approval</label>
                     </div>
                     <div class="containerRight">
-                        <div class="btn-group">
-                            <a class="btn btn action"><i class="action20 approve"></i>Approve</a>
-                            <a class="btn dropdown-toggle" data-toggle="dropdown">
-                                <span class="caret"></span>
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li class="hasHoverState"><a><i class="action20 approve"></i>Un Approve</a></li>
-                                <li class="hasHoverState"><a><i class="action20 archive"></i>Archive</a></li>
-                                <li class="hasHoverState"><a><i class="action20 trash"></i>Trash</a></li>
-                            </ul>
-                        </div>
+                        <div class="btn-group">                            
+                            <a class="btn btn-mini"><i class="action20 xCircleBG"></i></a>
+                            <a class="btn btn-mini"><i class="action20 approve"></i></a>
+                        </div> 
                     </div>
                 </div> <!-- post settings -->
                 <div class="feedProfileThumbs thumbnails">
@@ -147,17 +139,9 @@
                         <label class="label label-inverse">Trashed</label>
                     </div>
                     <div class="containerRight">
-                        <div class="btn-group">
-                            <a class="btn btn action"><i class="action20 approve"></i>Approve</a>
-                            <a class="btn dropdown-toggle" data-toggle="dropdown">
-                                <span class="caret"></span>
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li class="hasHoverState"><a><i class="action20 approve"></i>Un Approve</a></li>
-                                <li class="hasHoverState"><a><i class="action20 archive"></i>Archive</a></li>
-                                <li class="hasHoverState"><a><i class="action20 trash"></i>Trash</a></li>
-                            </ul>
-                        </div>
+                        <div class="btn-group">                            
+                            <a class="btn"><i class="action20 okCircleBG"></i></a>
+                        </div> 
                     </div>
                 </div> <!-- post settings -->
                 <div class="feedProfileThumbs thumbnails">
