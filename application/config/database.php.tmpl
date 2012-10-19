@@ -1,0 +1,66 @@
+<?php defined('SYSPATH') or die('No direct access allowed.');
+
+global $wpdb;
+return array
+(
+    'default' => array
+    (
+        'type'       => 'mysql',
+        'connection' => array(
+            /**
+             * The following options are available for MySQL:
+             *
+             * string   hostname     server hostname, or socket
+             * string   database     database name
+             * string   username     database username
+             * string   password     database password
+             * boolean  persistent   use persistent connections?
+             *
+             * Ports and sockets may be appended to the hostname.
+             */
+            'hostname'   => 'localhost',
+            'database'   => 'realtasia_app',
+            'username'   => 'realtasia_app',
+            'password'   => '8w8UC6v9hFMy2auW',
+            'persistent' => FALSE,
+        ),
+        'table_prefix' => $wpdb->prefix,
+        'charset'      => 'utf8',
+        'caching'      => true,
+        'profiling'    => TRUE,
+    ),
+    'singpost' => array(
+        'type'       => 'mysql',
+        'connection' => array(
+            /**
+             * The following options are available for MySQL:
+             *
+             * string   hostname     server hostname, or socket
+             * string   database     database name
+             * string   username     database username
+             * string   password     database password
+             * boolean  persistent   use persistent connections?
+             *
+             * Ports and sockets may be appended to the hostname.
+             */
+            'hostname'   => 'localhost',
+            'database'   => 'realtasia_spc',
+            'username'   => 'realtasia_spc',
+            'password'   => '9MTCWSymuhbrCQUP',
+            'persistent' => true,
+        ),
+        'table_prefix' => '',
+        'charset'      => 'utf8',
+        'caching'      => true,
+        'profiling'    => TRUE,
+        /**
+         * The following extra options are available for PDO:
+         *
+         * string   identifier  set the escaping identifier
+         */
+        'table_prefix' => '',
+        'charset'      => 'utf8',
+        'caching'      => FALSE,
+        'profiling'    => TRUE,
+    ),
+);

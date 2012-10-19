@@ -14,10 +14,10 @@ class Model
     /**
     *
     * @var mixed MongoID || string. Used if a record(s) is retrieved for a
-    * logged in user
+    * authenticated in user
     */
-    protected $_user_id;
-
+    protected $_user_id; 
+    
     /**
      *
      * @var MongoCursor. This is the MongDB cursor object. Used globally within

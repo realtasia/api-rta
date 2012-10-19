@@ -2,9 +2,13 @@
 
 class Controller_Welcome extends Controller {
 
-	public function action_index()
-	{
-		$this->response->body('hello, world!');
-	}
+    public function action_index()
+    {
+        $session = Session::instance();
+        $this->response->headers(array('Content-type' => 'application/json'));
+        $this->response->body(nl2br(json_encode(Event::get('post.insert'), JSON_PRETTY_PRINT)));
+    }
 
-} // End Welcome
+}
+
+// End Welcome

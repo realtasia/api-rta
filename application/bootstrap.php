@@ -1,19 +1,20 @@
-<?php defined('SYSPATH') or die('No direct script access.');
+<?php
+
+defined('SYSPATH') or die('No direct script access.');
 
 // -- Environment setup --------------------------------------------------------
-
 // Load the core Kohana class
-require SYSPATH.'classes/kohana/core'.EXT;
+require SYSPATH . 'classes/kohana/core' . EXT;
 
-if (is_file(APPPATH.'classes/kohana'.EXT))
+if (is_file(APPPATH . 'classes/kohana' . EXT))
 {
-	// Application extends the core
-	require APPPATH.'classes/kohana'.EXT;
+    // Application extends the core
+    require APPPATH . 'classes/kohana' . EXT;
 }
 else
 {
-	// Load empty core extension
-	require SYSPATH.'classes/kohana'.EXT;
+    // Load empty core extension
+    require SYSPATH . 'classes/kohana' . EXT;
 }
 
 /**
@@ -63,7 +64,7 @@ I18n::lang('en-us');
  */
 if (isset($_SERVER['KOHANA_ENV']))
 {
-	Kohana::$environment = constant('Kohana::'.strtoupper($_SERVER['KOHANA_ENV']));
+    Kohana::$environment = constant('Kohana::' . strtoupper($_SERVER['KOHANA_ENV']));
 }
 
 /**
@@ -80,13 +81,13 @@ if (isset($_SERVER['KOHANA_ENV']))
  * - boolean  caching     enable or disable internal caching                 FALSE
  */
 Kohana::init(array(
-	'base_url'   => '/',
+    'base_url' => '/',
 ));
 
 /**
  * Attach the file write to logging. Multiple writers are supported.
  */
-Kohana::$log->attach(new Log_File(APPPATH.'logs'));
+Kohana::$log->attach(new Log_File(APPPATH . 'logs'));
 
 /**
  * Attach a file reader to config. Multiple readers are supported.
@@ -97,25 +98,30 @@ Kohana::$config->attach(new Config_File);
  * Enable modules. Modules are referenced by a relative or absolute path.
  */
 Kohana::modules(array(
-	 'event'       => MODPATH.'event',      // Kohana 3 event class
-	 'rt_core'     => MODPATH.'rt_core',    // Core RT classes
-	 'interact'    => MODPATH.'interact',   // Interaction Models
-	// 'auth'       => MODPATH.'auth',       // Basic authentication
-	 'cache'       => MODPATH.'cache',      // Caching with multiple backends
-	// 'codebench'  => MODPATH.'codebench',  // Benchmarking tool
-	// 'database'   => MODPATH.'database',   // Database access
-	// 'image'      => MODPATH.'image',      // Image manipulation
-	// 'orm'        => MODPATH.'orm',        // Object Relationship Mapping
-	// 'unittest'   => MODPATH.'unittest',   // Unit testing
-	// 'userguide'  => MODPATH.'userguide',  // User guide and API documentation
-	));
+    'event'      => MODPATH . 'event', // Kohana 3 event class
+    'rt_core'    => MODPATH . 'rt_core', // Core RT classes
+    'interact'   => MODPATH . 'interact', // Interaction Models
+    'auth'       => MODPATH . 'auth', // Basic authentication
+    'cache'      => MODPATH . 'cache', // Caching with multiple backends
+    'mongodb'    => MODPATH . 'mongodb', // Database access
+    'mongo-auth' => MODPATH . 'mongo-auth', // Database access//
+        // 'codebench'  => MODPATH.'codebench',  // Benchmarking tool
+        // 'database'   => MODPATH.'database',   // Database access
+        // 'image'      => MODPATH.'image',      // Image manipulation
+        // 'orm'        => MODPATH.'orm',        // Object Relationship Mapping
+        // 'unittest'   => MODPATH.'unittest',   // Unit testing
+        // 'userguide'  => MODPATH.'userguide',  // User guide and API documentation
+));
+
+Kohana::$log->attach(new Log_Mongo(), array(), Log::DEBUG);
+
 
 /**
  * Set the routes. Each route must have a minimum of a name, a URI and a set of
  * defaults for the URI.
  */
 Route::set('default', '(<controller>(/<action>(/<id>)))')
-	->defaults(array(
-		'controller' => 'welcome',
-		'action'     => 'index',
-	));
+        ->defaults(array(
+            'controller' => 'welcome',
+            'action'     => 'index',
+        ));
