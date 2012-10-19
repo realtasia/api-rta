@@ -23,7 +23,7 @@ else
  * @see  http://kohanaframework.org/guide/using.configuration
  * @see  http://php.net/timezones
  */
-date_default_timezone_set('America/Chicago');
+date_default_timezone_set('Asia/Singapore');
 
 /**
  * Set the default locale.
@@ -87,7 +87,7 @@ Kohana::init(array(
 /**
  * Attach the file write to logging. Multiple writers are supported.
  */
-Kohana::$log->attach(new Log_File(APPPATH . 'logs'));
+Kohana::$log->attach(new Log_File(APPPATH . 'logs'), array(), Log::DEBUG);
 
 /**
  * Attach a file reader to config. Multiple readers are supported.

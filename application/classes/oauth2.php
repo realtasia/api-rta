@@ -20,7 +20,7 @@ class oauth2 {
     // oAuth instances
     protected static $_instance;
 
-    public function instance()
+    public static function instance()
     {
         if (!isset(static::$_instance))
         {
@@ -33,6 +33,7 @@ class oauth2 {
 
     // the current session instance. Default is Mongo
     protected $_session;
+    protected $_session_key = 'oauth2';
     protected $_model;
     protected $_config;
 
@@ -47,20 +48,10 @@ class oauth2 {
         $this->_config = $config;
 
         // Instantiate a session.
-        $this->_session = Session::instance('mongo', 'oauth2');
+        $this->_session = Session::instance('mongo');
 
         // The oauth Model
         $this->_model = Model::factory('oauth2');
-    }
-
-    public function code()
-    {
-        
-    }
-
-    public function token()
-    {
-        
     }
 
     /**
@@ -84,13 +75,11 @@ class oauth2 {
             $user_id = $this->_model->check_password($username, $password);
 
             if ($user_id)
-            {
-                return $this->set_token($client['client_id'], $user_id);
+            {          
+                return $this->get_token($client_id, $user_id);
             }
-
             return false;
         }
-
         return false;
     }
 
@@ -122,8 +111,8 @@ class oauth2 {
             // just to confirm the redirect uri's are the same
             $given_domain  = parse_url($redirect_uri, PHP_URL_HOST);
             $stored_domain = parse_url($client->redirect_uri, PHP_URL_HOST);
-            
-            if($given_domain === $stored_domain)
+
+            if ($given_domain === $stored_domain)
                 return $this->set_token($client['client_id']);
 
             return false;
@@ -132,42 +121,56 @@ class oauth2 {
         return false;
     }
 
-    public function get_token($client_id)
+    public function get_token($client_id, $user_id)
     {
         $check = $this->get_session();
 
-        if (array_key_exists($check, 'client_id') AND $check['client_id'] == $client_id)
+        if (is_array($check) AND Arr::get($check, 'client_id') === $client_id)
         {
-            return $check['token'];
+            return $check['access_token'];
         }
+        return $check;
+        return $this->set_token($client_id, $user_id);
     }
 
     public function set_token($client_id, $user_id = NULL, $grant_type = 'resource')
     {
-        $access_token = hash_hmac('sha256', new MongoID, 'my-baby-curly');
-        
-        $params = [
+        $access_token = new MongoID;
+        /*
+         * '_id'             => $this->_id,
+         * 'client_id'       => $this->_data['client_id'],
+         * 'redirect_uri'    => $this->_data['redirect_uri'],
+         * 'user_id'         => $this->_data['user_id'],
+         * 'grant_type'      => $this->_data['grant_type'],
+         * 'code'            => $this->_data['code'],
+         * 'first_requested' => $this->_data['first_requested'],
+         * 'last_active'     => $this->_data['last_updated'],
+         * 'access_token'    => $this->_data['access_token'],
+         * 'code'            => $this->_data['code']
+         */
+        $params       = [
             'user_id'      => $user_id,
             'grant_type'   => $grant_type,
             'client_id'    => $client_id,
             'code'         => null,
-            'access_token' => $access_token,
+            'access_token' => $access_token->__toString(),
             'stage'        => 'granted'
         ];
-        
-        return $this->set_session($params);
+
+        $this->set_session($params);
+        return $access_token->__toString();
     }
 
-    protected function get_session($key = null)
+    protected function get_session()
     {
-        return $key ? $this->_session->get($key) : $this->_session;
+        return $this->_session->get($this->_session_key);
     }
 
     protected function set_session(array $values)
     {
-        $this->_session->set('oauth2', $values);
-
-        return $this->_session;
-    }
-
+        $this->_session->regenerate();
+        $this->_session->set($this->_session_key, $values);        
+        return true;
+    }  
+    
 }
