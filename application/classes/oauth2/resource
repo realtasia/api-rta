@@ -1,0 +1,51 @@
+<?php
+
+defined('SYSPATH') or die('No direct access allowed.');
+
+class Oauth2_Resource {
+    // oAuth instances
+    protected static $_instance;
+
+    public static function instance()
+    {
+        if (!isset(static::$_instance))
+        {
+            static::$_instance = new self();
+        }
+
+        return static::$_instance;
+    }
+
+    // the client mongo model
+    protected static $mClient;
+    // the session mongo model
+    protected static $mSession;
+
+    /**
+     * Loads Session and configuration options.
+     *
+     * @return  void
+     */
+    public function __construct()
+    {
+        static::$mClient  = Model::factory('oauth2_client');
+        static::$mSession = Model::factory('oauth2_session');
+
+    }
+
+    /**
+     * Validates an access token and returns session
+     *
+     * @param string $client_id
+     * @param string $token
+     *
+     * @return boolean
+     */
+    public function validate_token($client_id, $token, $auto_approve = false)
+    {
+        $client = static::$mClient->get_client(array('client_id' => $client_id), $auto_approve);
+
+        return $client ? static::$mSession->get_session_by_token($token) : false;
+    }
+
+}

@@ -5,8 +5,17 @@ defined('SYSPATH') or die('No direct access allowed.');
  *   db.oauth_clients.insert({name :, client_id :, client_secret :, redirect_uri :, status :, auto_approve :});
  */
 
-class Model_Oauth2 extends Model {
+class Model_Oauth2_Client extends Model {
 
+    /**
+     * An implementation to validate a Resource Owner Flow by user credentials
+     * 
+     * @param array $params query fields, usually (client_id, client_secret, redirect_uri)
+     * @param boolean $auto_approve
+     * @uses Model_User
+     * 
+     * @return boolean
+     */    
     public function check_password($username, $password)
     {
         $params = array(
@@ -16,20 +25,15 @@ class Model_Oauth2 extends Model {
             ),
             'password' => $this->hash($password));
 
-        $user_id = Model::factory('user')->collection->findOne($params, array('_id' => 1));
+        $user_id = Model::factory('user')->collection->findOne($params, ['_id' => 1]);
 
-        if ($user_id)
-        {
-            return $user_id;
-        }
+        return $user_id ? $user_id : false;
 
-        return false;
     }
 
     /**
      * An implementation to validate client credentials. Since this can be used
-     * in an oAuth2 Client Side Application Flow, a Resource Owner Password Flow
-     * and for simply checking if a client exists, we add the auto-approve flag 
+     * in an all oAuth2 authentication flows, we add the auto-approve flag 
      * to it for extensibility,
      * 
      * @param array $params query fields, usually (client_id, client_secret, redirect_uri)
@@ -37,16 +41,16 @@ class Model_Oauth2 extends Model {
      * 
      * @return boolean
      */
-    public function check_client($params, $auto_approve = false)
+    public function get_client($params, $auto_approve = false)
     {
+        if(is_string($params)) $params = ['client_id' => $params];
+        
         $client = $this->collection->findOne($params);
 
         if ($client)
         {
             if ($auto_approve)
-            {
                 return $client['auto_approve'] ? $client : false;
-            }
 
             return $client;
         }
@@ -54,16 +58,16 @@ class Model_Oauth2 extends Model {
         return false;
     }
 
-    public function insert()
+    public function set_client($params)
     {
-        return $this->collection->insert(
-                        array(
-                            'name'          => 'main_app',
-                            'client_id'     => '123456789',
-                            'client_secret' => 'secret',
-                            'redirect_uri'  => 'http://rta.jjpc.net/rta/callback',
-                            'status'        => 'approved',
-                            'auto_approve'  => true,
+        // typing it out to remind myself of the fields
+        return $this->collection->insert(array(
+                    'name'          => $params['name'],
+                    'client_id'     => $params['client_id'],
+                    'client_secret' => $params['client_secret'],
+                    'redirect_uri'  => $params['redirect_uri'],
+                    'status'        => $params['status'],
+                    'auto_approve'  => $params['auto_approve'],
                 ));
     }
 
