@@ -14,6 +14,7 @@ class Controller_User extends Controller_Resource {
 
     public function action_index()
     {
+        // get the id from request
         $id = $this->request->param('id');
         return $this->data($data);
     }
