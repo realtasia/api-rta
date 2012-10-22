@@ -15,8 +15,6 @@ class Controller_User extends Controller_Resource {
     public function action_index()
     {
         $data = parent::get_user();
-        //print_r($data);
-        //die();
         return $this->data($data);
     }
 
