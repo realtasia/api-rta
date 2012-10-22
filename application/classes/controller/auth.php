@@ -1,4 +1,7 @@
-<?php defined('SYSPATH') or die('No direct script access.');
+<?php
+
+defined('SYSPATH') or die('No direct script access.');
+
 /**
  * This controller :
  *      1. Authenticates a request
@@ -14,55 +17,114 @@
  *          c. a user_id to make api requests with
  *      4. Needs to provide valid error messages
  */
-class Controller_Auth extends Controller {
-
-    public $return;
+class Controller_Auth extends Controller_Abstract {
     public static $auth;
+    public static $error;
+    public static $success;
 
+    /**
+     * Instantate the needed libraries.
+     */
     public function before()
     {
         parent::before();
-        $this->grant_type = $this->request->post('grant_type');
         static::$auth = Oauth2_Authentication::instance();
+        static::$error = new Oauth2_Error;
+        static::$success = new Oauth2_Success;
     }
 
+    /**
+     * Utility landing Auth Page. Checks the grant type and delegates the request
+     * to the proper actions.
+     *
+     * @return void
+     */
     public function action_index()
     {
-//        return Model::factory('oauth2_client')->set_client([
-//            'name' => 'testApp',
-//            'client_id' => '123456789',
-//            'client_secret' => 'secret',
-//            'status' => 'approved',
-//            'redirect_uri' => null,
-//            'auto_approve' => true,
-//        ]);
-        //return $this->return = time();
-        $this->return = static::$auth->login('123456789', 'one.user', 'one');
-        //return Model::factory('oauth2')->insert();
-//        switch($this->grant_type)
-//        {
-//            case 'code': return $this->action_code(); break;
-//            case 'token': return $this->action_token(); break;
-//            case 'password': return $this->action_password(); break;
-//            case 'credentials': return $this->action_credentials(); break;
-//            default: return $this->error(); break;
-//        }
-    }
+        if (!$params = $this->check_headers())
+            return;
 
-    public function action_code()
-    {
-        if(!$this->grant_type == 'code')
+        $grant_type = $params['grant_type'];
+
+        switch ($grant_type)
         {
-            return $this->error();
+            case 'password': return $this->action_login($params);
+            case 'oauth': return $this->action_oauth($params);
+            case 'client_credentials': return $this->action_credentials($params);
         }
     }
 
-    public function after()
+    /**
+     * Performs a Resource Owner Password Flow authentication. Sets error
+     * object if not valid or the the success object with access_token if not.
+     *
+     * @return boolean
+     */
+    public function action_login($params = null)
     {
-        $this->response->headers('Content-Type', 'application/javascript');
-        $body = json_encode($this->return, JSON_PRETTY_PRINT);
-        //$body .= Cookie::get('oauth2');
-        $this->response->body($body);
+        if (!$params)
+        {
+            if (!$params = $this->check_headers())
+                return;
+        }
+
+        $check = static::$auth->login($params);
+
+        return static::is_error($check) ? $this->error($check) : $this->success($check);
+    }
+
+    /**
+     * Performs a Client Credentials Flow authentication. Sets error
+     * object if not valid or the the success object with access_token if not.
+     *
+     * @return boolean
+     */
+    public function action_credentials($params)
+    {
+        if (!$params)
+        {
+            if (!$params = $this->check_headers())
+                return;
+        }
+
+        $check = static::$auth->credentials($params);
+
+        return static::is_error($check) ? $this->error($check) : $this->success($check);
+    }
+
+    /**
+     * A little misleading. Doesn't check headers for now. Just checks $_GETs &
+     * $_POSTs. Returns the parsed params
+     *
+     * @return boolean | params
+     */
+    protected function check_headers()
+    {
+        $post = $this->request->post();
+        $get  = $this->request->query();
+        if (empty($post) && empty($get))
+            return $this->error('invalid_request', 400);
+
+        if (empty($post))
+        {
+            $params = $get;
+        }
+        else
+        {
+            $params = $post;
+        }
+
+        switch (true)
+        {
+            case!isset($params['grant_type']) || empty($params['grant_type']):
+            case!isset($params['redirect_uri']) || empty($params['redirect_uri']):
+            case!isset($params['client_id']) || empty($params['client_id']):
+            case $params['grant_type'] == 'password' && (!isset($params['username']) || empty($params['username'])):
+            case $params['grant_type'] == 'password' && (!isset($params['password']) || empty($params['password'])):
+                return $this->error('invalid_request', 400);
+        }
+
+        return $params;
     }
 
 }

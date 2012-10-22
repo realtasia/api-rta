@@ -1,6 +1,4 @@
-<?php
-
-defined('SYSPATH') or die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');
 
 /**
  * Mongo User Model.
@@ -241,7 +239,7 @@ class Model_User extends Model {
         {
             $remove['$inc'] = array('counts.likes'   => -1);
             $remove['$pull'] = array('likes.' . $type => $post_id);
-            $try           = $this->_update_multiple(array(
+            $try             = $this->_update_multiple(array(
                 '_id' => array('$in' => $post->likers)
                     ), $remove);
             //Debug::log(print_r($remove, TRUE));
@@ -249,9 +247,9 @@ class Model_User extends Model {
 
         if (!empty($post->subscribers))
         {
-            $remove['$inc'] = array('counts.subscriptions' => -1, 'counts.' . $type        => -1);
+            $remove['$inc'] = array('counts.subscriptions' => -1, 'counts.' . $type      => -1);
             $remove['$pull']       = array('subscriptions.' . $type => $post_id);
-            $try                   = $this->_update_multiple(array(
+            $try                     = $this->_update_multiple(array(
                 '_id' => array('$in' => $post->subscribers)
                     ), $remove);
             //Debug::log(print_r($remove, TRUE));
@@ -265,13 +263,14 @@ class Model_User extends Model {
 
     public function register($fields)
     {
-        $new_user = array();
+        $new_user = [];
 
         list($month, $day, $year) = explode('/', $fields['birthday']);
 
         $new_user['first_name']          = ucfirst(strtolower($fields['first_name']));
+        $new_user['middle_name']         = ucfirst(strtolower($fields['last_name']));
         $new_user['last_name']           = ucfirst(strtolower($fields['last_name']));
-        $new_user['name']        = $new_user['first_name'] . ' ' . $new_user['last_name'];
+        $new_user['name']                = $new_user['first_name'] . ' ' . $new_user['last_name'];
         $new_user['username']            = $fields['nicename'];
         $new_user['uri']                 = '/' . $fields['nicename'];
         //$new_user['email'][] = $fields['email'];
@@ -282,13 +281,13 @@ class Model_User extends Model {
 
         if (isset($fields['oauth_token']))
         {
-            $new_user['social']['facebook'] = array(
+            $new_user['social']['facebook'] = [
                 'expires'     => $fields['expires'],
                 'issued_at'   => $fields['issued_at'],
                 'oauth_token' => $fields['oauth_token'],
                 'id'          => $fields['id'],
-                'link'        => $fields['link'],
-            );
+                'link'        => $fields['link']
+            ];
 
             $new_user['name'] = $fields['name'];
         }
@@ -297,13 +296,13 @@ class Model_User extends Model {
 
         if ($user)
         {
-            $user['email'] = Arr::merge($user['email'], array($fields['email']));
+            $user['email'] = Arr::merge($user['email'], [$fields['email']]);
             $merge = Arr::merge(self::_user_defaults(), $user, $new_user);
         }
         else
         {
             $defaults          = self::_user_defaults();
-            $defaults['email'] = Arr::merge($defaults['email'], array($fields['email']));
+            $defaults['email'] = Arr::merge($defaults['email'], [$fields['email']]);
             $merge = Arr::merge($defaults, $new_user);
         }
 
@@ -311,7 +310,7 @@ class Model_User extends Model {
 
         try
         {
-            $this->collection->save($merge, array('safe' => TRUE));
+            $this->collection->save($merge, ['safe' => TRUE]);
             return $merge;
         } catch (MongoCursorException $e)
         {
@@ -319,11 +318,11 @@ class Model_User extends Model {
             Debug::error(
                     "MongoCursorException while trying to register user (email-:uid). \n"
                     . "Error Message- :message \n"
-                    . "Error Code- :code", array(
+                    . "Error Code- :code", [
                 ':uid'     => $fields['email'],
                 ':message' => $e->getMessage(),
                 ':code'    => $e->getCode()
-            ));
+            ]);
             return FALSE;
         }
     }
@@ -494,11 +493,11 @@ class Model_User extends Model {
                 'cropped' => array(),
                 'uncropped' => array(),
             ),
-            'birthday'     => '',
-            'counts'       => $counts,
-            'designation'  => '',
-            'name' => '',
-            'email'        => array(),
+            'birthday'    => '',
+            'counts'      => $counts,
+            'designation' => '',
+            'name'        => '',
+            'email'       => array(),
             'first_name' => '',
             'last_name'  => '',
             'likers'     => array(),

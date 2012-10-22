@@ -1,0 +1,73 @@
+<?php
+
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+/**
+ * Description of abstract
+ *
+ * @author jj
+ */
+class Controller_Abstract extends Controller
+{
+    public $return = array();
+    /**
+     * Utility method that sets the response status and the response body for
+     * successful requests.
+     *
+     * @param type $session
+     * @return void
+     */
+    protected function success($session)
+    {
+        $this->response->status(200);
+        $this->return = $session;
+        return;
+    }
+    /**
+     * Utility method that checks if a response array is an error object
+     *
+     * @param array $return
+     * @return boolean
+     */
+    protected static function is_error(array $return)
+    {
+        return array_key_exists('error', $return);
+    }
+
+    /**
+     * Utility method that sets the response status and the response body for
+     * errors
+     *
+     * @param string $key
+     * @param int $status
+     * @return boolean
+     */
+    protected function error($key, $status = 401)
+    {
+        $this->response->status($status);
+        $this->return = is_array($key) ? $key : static::$error->create($key);
+        $header = '';
+
+        foreach($this->return as $k => $v)
+        {
+            $header .= "$k=$v&";
+        }
+        $this->response->headers('WWW-Authenticate', $header);
+        return false;
+    }
+
+    /**
+     * Sets content type and converts response body to JSON
+     *
+     */
+    public function after()
+    {
+        $this->response->headers('Content-Type', 'application/javascript');
+        $body = json_encode($this->return, JSON_PRETTY_PRINT);
+        $this->response->body($body);
+    }
+
+}

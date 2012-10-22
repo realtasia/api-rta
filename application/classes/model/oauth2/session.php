@@ -6,11 +6,11 @@ class Model_Oauth2_Session extends Model {
     /**
      * @var integer time to live
      */
-    protected static $ttl = 3600; // 1 hour
+    public static $ttl = 3600; // 1 hour
 
     /**
      * Gets a stored session for the given token.
-     * 
+     *
      * @param string $token
      * @return boolean|array
      */
@@ -22,7 +22,7 @@ class Model_Oauth2_Session extends Model {
     /**
      * Retrieves a session by an array of params. Normal cases should include
      * user_id, client_id or a given token.
-     * 
+     *
      * @param array $params
      * @return boolean|array
      */
@@ -30,14 +30,25 @@ class Model_Oauth2_Session extends Model {
     {
         // try to get a session with the given params.
         $session = $this->collection->findOne($params);
-        
+
+        if ($session)
+        {
+            $session['id'] = $session['_id']->__toString();
+            unset($session['_id']);
+            if (is_object($session['user_id']))
+            {
+                $session['user_id'] = $session['user_id']->__toString();
+            }
+            return $session;
+        }
+
         // return it. Auth class should check for expiry
-        return $session ? $session : false;
+        return false;
     }
-    
+
     /**
      * Destroys a session by it's access token.
-     * 
+     *
      * @param string $token
      * @return type
      */
@@ -45,22 +56,22 @@ class Model_Oauth2_Session extends Model {
     {
         return $this->collection->remove(['access_token' => $token]);
     }
-    
+
     /**
-     * Either updates or creates a new session with given params. The params 
-     * array should look like this. 
-     * [ 
+     * Either updates or creates a new session with given params. The params
+     * array should look like this.
+     * [
      *      _id        => the MongoID of the existing session or null for new.
-     *      client_id  => REQUIRED, 
+     *      client_id  => REQUIRED,
      *      user_id    => OPTIONAL,
      *      code       => OPTIONAL,
      *      grant_type => REQUIRED. Currently serving "password" and "credentials",
      *      stage      => the stage of the auth flow, defaults to "granted"
      * ]
-     * 
+     *
      * @param array $params
      * @param boolean $session
-     * 
+     *
      * @return string|array
      */
     public function set_token($params, $session = true)
@@ -77,7 +88,7 @@ class Model_Oauth2_Session extends Model {
             'grant_type'   => $params['grant_type'],
             'stage'        => isset($params['stage']) ? $params['stage'] : 'granted',
         ];
-        
+
         $result = $this->db->command([
             'findandmodify' => Inflector::plural($this->collname),
             'query'         => ['_id' => isset($params['_id']) ? $params['_id'] : NULL],
@@ -86,12 +97,12 @@ class Model_Oauth2_Session extends Model {
         ]);
 
 
-        return $session ? $result['value'] : $access_token;
+        return $session ? $params : $access_token;
     }
-    
+
     /**
      * Utility to check if a token expired.
-     * 
+     *
      * @param integer $ttl the current expiry timestamp.
      * @return boolean
      */

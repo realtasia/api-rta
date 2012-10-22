@@ -31,6 +31,10 @@ class Oauth2_Authentication {
     protected static $mSession;
     // the resource (user) mongo model
     protected static $mResource;
+    // the success object formatter
+    protected static $success;
+    // the error object formatter
+    protected static $error;
 
     /**
      * Just so we can use this statically...
@@ -57,6 +61,8 @@ class Oauth2_Authentication {
         static::$mClient  = Model::factory('oauth2_client');
         static::$mSession = Model::factory('oauth2_session');
         static::$mResource = Model::factory('oauth2_resource');
+        static::$success = new Oauth2_Success;
+        static::$error = new Oauth2_Error;
     }
 
     /**
@@ -69,23 +75,23 @@ class Oauth2_Authentication {
      * @param boolean $auto_approve
      * @return boolean
      */
-    public function login($client_id, $username, $password, $auto_approve = false)
+    public function login($values, $auto_approve = false)
     {
         // if there is no client_id registered, nothing left to do
-        if(!$client = static::$mClient->get_client($client_id, $auto_approve))
-                return false;
+        if(!$client = static::$mClient->get_client($values['client_id'], $auto_approve))
+                return static::$error->create('unauthorized_client');
 
         // if user registration fails, return false
-        if(!$user = static::$mResource->check_password($username, $password))
-                return false;
+        if(!$user = static::$mResource->check_password($values['username'], $values['password']))
+                return static::$error->create('unauthorized_client');
 
         // get or create a new token
         return $this->get_token($client['client_id'], $user['_id'], 'password');
     }
-    
+
     /**
      * Logout function that destroys the created session.
-     * 
+     *
      * @param string $token
      * @return boolean
      */
@@ -104,16 +110,16 @@ class Oauth2_Authentication {
      *
      * @return object|boolean
      */
-    public function credentials($client_id, $client_secret = NULL, $redirect_uri = NULL)
+    public function credentials($values)
     {
         $params = [
-            'client_id' => $client_id
+            'client_id' => $values['client_id']
         ];
 
         // only if we have a secret. This is n
-        if ($client_secret)
+        if (isset($values['client_secret']))
         {
-            $params['client_secret'] = $client_secret;
+            $params['client_secret'] = $values['client_secret'];
         }
 
         $client = static::$mClient->get_client($params);
@@ -121,13 +127,13 @@ class Oauth2_Authentication {
         if ($client)
         {
             // just to confirm the redirect uri's are the same
-            $given_domain  = parse_url($redirect_uri, PHP_URL_HOST);
-            $stored_domain = parse_url($client->redirect_uri, PHP_URL_HOST);
+            $given_domain  = parse_url($values['redirect_uri'], PHP_URL_HOST);
+            $stored_domain = parse_url($client['redirect_uri'], PHP_URL_HOST);
 
             if ($given_domain === $stored_domain)
-                return $this->get_token($client_id);
+                return $this->get_token($values['client_id']);
         }
-        return false;
+        return static::$error->create('unauthorized_client');
     }
 
     /**
@@ -138,14 +144,14 @@ class Oauth2_Authentication {
      * @param string $grant_type
      * @return string
      */
-    public function get_token($client_id, $user_id = NULL, $grant_type = 'credentials')
+    public function get_token($client_id, $user_id = NULL, $grant_type = 'client_credentials')
     {
         $params = [
             'client_id'  => $client_id,
             'user_id'    => $user_id,
             'grant_type' => $grant_type
-        ];       
-        
+        ];
+
         $session = static::$mSession->get_session($params);
 
         // we have one
@@ -156,16 +162,16 @@ class Oauth2_Authentication {
             {
                 // token expired. generate a new one and return the token.
                 $update_session = static::$mSession->set_token($session);
-                return $update_session['access_token'];
+                return static::$success->create($update_session);
             }
 
             // not expired, return the token.
-            return $session['access_token'];
+            return static::$success->create($session);
         }
 
         // no session, create a new token and return it.
-        $token = static::$mSession->set_token($params, false);
-        return $token;        
+        $new_session = static::$mSession->set_token($params);
+        return static::$success->create($new_session);
     }
 
 }

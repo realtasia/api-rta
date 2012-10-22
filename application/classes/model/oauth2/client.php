@@ -9,13 +9,13 @@ class Model_Oauth2_Client extends Model {
 
     /**
      * An implementation to validate a Resource Owner Flow by user credentials
-     * 
+     *
      * @param array $params query fields, usually (client_id, client_secret, redirect_uri)
      * @param boolean $auto_approve
      * @uses Model_User
-     * 
+     *
      * @return boolean
-     */    
+     */
     public function check_password($username, $password)
     {
         $params = array(
@@ -33,18 +33,18 @@ class Model_Oauth2_Client extends Model {
 
     /**
      * An implementation to validate client credentials. Since this can be used
-     * in an all oAuth2 authentication flows, we add the auto-approve flag 
+     * in an all oAuth2 authentication flows, we add the auto-approve flag
      * to it for extensibility,
-     * 
+     *
      * @param array $params query fields, usually (client_id, client_secret, redirect_uri)
      * @param boolean $auto_approve
-     * 
+     *
      * @return boolean
      */
     public function get_client($params, $auto_approve = false)
     {
         if(is_string($params)) $params = ['client_id' => $params];
-        
+
         $client = $this->collection->findOne($params);
 
         if ($client)
@@ -60,6 +60,7 @@ class Model_Oauth2_Client extends Model {
 
     public function set_client($params)
     {
+        $this->collection->ensureIndex(['client_id' => 1], ['unique' => 1]);
         // typing it out to remind myself of the fields
         return $this->collection->insert(array(
                     'name'          => $params['name'],
@@ -68,7 +69,7 @@ class Model_Oauth2_Client extends Model {
                     'redirect_uri'  => $params['redirect_uri'],
                     'status'        => $params['status'],
                     'auto_approve'  => $params['auto_approve'],
-                ));
+        ));
     }
 
     /**
