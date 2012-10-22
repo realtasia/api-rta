@@ -14,7 +14,7 @@ class Controller_User extends Controller_Resource {
 
     public function action_index()
     {
-        $data = parent::get_user();
+        $id = $this->request->param('id');
         return $this->data($data);
     }
 

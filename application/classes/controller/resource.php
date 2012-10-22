@@ -11,6 +11,8 @@
  */
 abstract class Controller_Resource extends Controller_Abstract{
     use Oauth2_Resource;
+    // the request params
+    public static $params = array();
 
     // the current session set upon authentication
     public static $current_session = null;
@@ -27,10 +29,12 @@ abstract class Controller_Resource extends Controller_Abstract{
     {
         parent::before();
         // check if available in $_GET
+        static::$params = $this->request->query();
         $token = $this->request->query('access_token');
         if(!$token)
         {
             // Check $_POST
+            static::$params = $this->request->post();
             $token = $this->request->post('access_token');
         }
 
