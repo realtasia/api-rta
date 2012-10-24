@@ -16,8 +16,8 @@ class Model
     * @var mixed MongoID || string. Used if a record(s) is retrieved for a
     * authenticated in user
     */
-    protected $_user_id; 
-    
+    protected $_user_id;
+
     /**
      *
      * @var MongoCursor. This is the MongDB cursor object. Used globally within
@@ -414,17 +414,29 @@ class Model
     /**
      * This checks an object to see if a current logged in user is interacting
      * with it. I.E. Whether he is liking or subscribing to it.
-     * Returns the appropriate HTML action links/buttons respectively. This is
-     * used within the recursal methods in each Model.
      *
      * @param array|MongoDocument $document
+     * @param string|MongoID $user_id
      * @return array the formatted document object
      */
-    public static function interacting($document, $user, $likes = FALSE)
+    protected function interacting($document, $user_id)
     {
-        return ($likes)
-                ? self::_subscribing(self::_liking($document, $user), $user)
-                : self::_subscribing($document, $user);
+        // if this document does not have a counts field then it should be a
+        // machine generated post. No need to do more, just return.
+        if(!isset($document['counts']))
+            return $document;
+
+        $results = Model::factory('interaction')->interacting($id, $user_id);
+
+        $return = [];
+
+        while ($results->hasNext())
+        {
+            $interaction = $results->getNext();
+            $return[$interaction['interaction']] = true;
+        }
+
+        return $return;
     }
 
     /**

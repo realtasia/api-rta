@@ -80,14 +80,14 @@ if (isset($_SERVER['KOHANA_ENV']))
  * - boolean  profile     enable or disable internal profiling               TRUE
  * - boolean  caching     enable or disable internal caching                 FALSE
  */
-Kohana::init(array(
+Kohana::init([
     'base_url' => '/',
-));
+]);
 
 /**
  * Attach the file write to logging. Multiple writers are supported.
  */
-Kohana::$log->attach(new Log_File(APPPATH . 'logs'), array(), Log::DEBUG);
+Kohana::$log->attach(new Log_File(APPPATH . 'logs'), [], Log::DEBUG);
 
 /**
  * Attach a file reader to config. Multiple readers are supported.
@@ -97,7 +97,7 @@ Kohana::$config->attach(new Config_File);
 /**
  * Enable modules. Modules are referenced by a relative or absolute path.
  */
-Kohana::modules(array(
+Kohana::modules([
     'event'      => MODPATH . 'event', // Kohana 3 event class
     'rt_core'    => MODPATH . 'rt_core', // Core RT classes
     'interact'   => MODPATH . 'interact', // Interaction Models
@@ -111,17 +111,25 @@ Kohana::modules(array(
         // 'orm'        => MODPATH.'orm',        // Object Relationship Mapping
         // 'unittest'   => MODPATH.'unittest',   // Unit testing
         // 'userguide'  => MODPATH.'userguide',  // User guide and API documentation
-));
+]);
 
-Kohana::$log->attach(new Log_Mongo(), array(), Log::DEBUG);
+Kohana::$log->attach(new Log_Mongo(), [], Log::DEBUG);
 
 
+
+Route::set('user', 'user(/<action>(/<id>))')
+        ->defaults([
+            'controller' => 'user',
+            'action'     => 'index',
+            'id'         => null
+        ]);
 /**
  * Set the routes. Each route must have a minimum of a name, a URI and a set of
  * defaults for the URI.
  */
-Route::set('default', '(<controller>(/<action>(/<id>)))')
-        ->defaults(array(
+Route::set('default', '(<controller>(/<action>(/<id>)))',["id" => "[a-zA-Z0-9_]+","action" => "[a-zA-Z]+"])
+        ->defaults([
             'controller' => 'welcome',
             'action'     => 'index',
-        ));
+            'id'         => null
+        ]);

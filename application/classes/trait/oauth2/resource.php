@@ -1,41 +1,19 @@
-<?php
+<?php defined('SYSPATH') or die('No direct access allowed.');
 
-defined('SYSPATH') or die('No direct access allowed.');
-
-trait Oauth2_Resource {
-    // oAuth instances
-    protected static $_instance;
-
-    public static function instance()
-    {
-        if (!isset(static::$_instance))
-        {
-            static::$_instance = new self();
-        }
-
-        return static::$_instance;
-    }
-
-    // the client mongo model
-    protected static $mClient;
+trait Trait_Oauth2_Resource {
     // the session mongo model
     protected static $mSession;
-    // the success object formatter
-    protected static $success;
-    // the error object formatter
-    protected static $error;
 
     /**
      * Loads Session and configuration options.
      *
-     * @return  void
+     * @return  self
      */
     public function init()
     {
-        static::$mClient  = Model::factory('oauth2_client');
         static::$mSession = Model::factory('oauth2_session');
-        static::$success = new Oauth2_Success;
-        static::$error = new Oauth2_Error;
+
+        return $this;
     }
 
     /**
@@ -45,7 +23,7 @@ trait Oauth2_Resource {
      *
      * @return boolean
      */
-    public function validate_token($token, $auto_approve = false)
+    public function validate_token($token)
     {
         $this->init();
         $session = static::$mSession->get_session_by_token($token);

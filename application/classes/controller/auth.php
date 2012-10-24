@@ -1,6 +1,4 @@
-<?php
-
-defined('SYSPATH') or die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');
 
 /**
  * This controller :
@@ -70,6 +68,12 @@ class Controller_Auth extends Controller_Abstract {
 
         $check = static::$auth->login($params);
 
+        // return state if available
+        if(isset($params['state']))
+        {
+            $check['state'] = $params['state'];
+        }
+
         return static::is_error($check) ? $this->error($check) : $this->success($check);
     }
 
@@ -79,7 +83,7 @@ class Controller_Auth extends Controller_Abstract {
      *
      * @return boolean
      */
-    public function action_credentials($params)
+    public function action_credentials($params = null)
     {
         if (!$params)
         {
@@ -88,6 +92,12 @@ class Controller_Auth extends Controller_Abstract {
         }
 
         $check = static::$auth->credentials($params);
+
+        // state parameter.
+        if(isset($params['state']))
+        {
+            $check['state'] = $params['state'];
+        }
 
         return static::is_error($check) ? $this->error($check) : $this->success($check);
     }

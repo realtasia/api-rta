@@ -148,9 +148,13 @@ class Oauth2_Authentication {
     {
         $params = [
             'client_id'  => $client_id,
-            'user_id'    => $user_id,
             'grant_type' => $grant_type
         ];
+
+        if($user_id)
+        {
+            $params['user_id'] = $user_id;
+        }
 
         $session = static::$mSession->get_session($params);
 

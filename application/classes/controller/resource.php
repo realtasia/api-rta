@@ -10,14 +10,16 @@
  *
  */
 abstract class Controller_Resource extends Controller_Abstract{
-    use Oauth2_Resource;
+    use Trait_Oauth2_Resource;
+
     // the request params
     public static $params = array();
-
+    //the model used in each controller
+    protected static $model;
     // the current session set upon authentication
     public static $current_session = null;
     // authenticated user_id, if the session is user authenticated
-    public static $user_id = null;
+    public static $user_id         = null;
 
     /**
      * This method extracts the token from the request params and sets global
@@ -27,7 +29,6 @@ abstract class Controller_Resource extends Controller_Abstract{
      */
     public function before()
     {
-        parent::before();
         // check if available in $_GET
         static::$params = $this->request->query();
         $token = $this->request->query('access_token');
@@ -51,6 +52,8 @@ abstract class Controller_Resource extends Controller_Abstract{
             static::$current_session = $current_session;
             static::$user_id = static::$current_session['user_id'];
         }
+
+        return parent::before();
     }
 
     /**
