@@ -49,6 +49,40 @@ class Controller_User extends Controller_Resource {
         return $this->data(['action' => ' in likes']);
     }
 
+    public function action_like()
+    {
+        $this->interact('like');
+
+        $this->data(['success' => 1]);
+    }
+
+    public function action_unlike()
+    {
+        $this->interact('unlike');
+
+        $this->data(['success' => 1]);
+    }
+
+    public function action_subscribe()
+    {
+        $this->interact('subscribe');
+
+        $this->data(['success' => 1]);
+    }
+
+    public function action_unsubscribe()
+    {
+        $this->interact('unsubscribe');
+
+        $this->data(['success' => 1]);
+    }
+
+    protected function interact($interaction)
+    {
+        $interact = Mongo_Document::factory('interaction', null, static::$user_id);
+        $interact->{$interaction}($this->request->param('id'), 'user');
+    }
+
     /**
      * 1. Returns a user's public information if not logged in.
      * 2. Returns all user information if logged in & ids are the same.
@@ -80,13 +114,13 @@ class Controller_User extends Controller_Resource {
 //            return $this->data(static::$model->get_public($id));
         $user = Mongo_Document::factory('user');
         $user->load($id, ['_id' => 1, 'name' => 1]);
-        $post = Mongo_Document::factory('post');
+//        $post = Mongo_Document::factory('post');
+//
+//        $post->title = 'Wassup to the people!!';
+//        $post->user = ['_id' => $user->id, 'name' => $user->name];
+//        $post->save();
 
-        $post->title = 'Wassup to the people!!';
-        $post->user = ['_id' => $user->id, 'name' => $user->name];
-        $post->save();
-
-        return $this->return = $post->as_array();
+        return $this->return = $user->as_array();
     }
 
     /**

@@ -11,7 +11,7 @@ trait Trait_Oauth2_Resource {
      */
     public function init()
     {
-        static::$mSession = Model::factory('oauth2_session');
+        static::$mSession = Mongo_Document::factory('oauth2_session');
 
         return $this;
     }

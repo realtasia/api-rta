@@ -14,5 +14,10 @@ class Model_User extends Document {
         
     }
 
+    public function get_public($id)
+    {
+
+    }
+
 }
 ?>

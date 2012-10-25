@@ -58,9 +58,9 @@ class Oauth2_Authentication {
      */
     public function __construct()
     {
-        static::$mClient  = Model::factory('oauth2_client');
-        static::$mSession = Model::factory('oauth2_session');
-        static::$mResource = Model::factory('oauth2_resource');
+        static::$mClient  = Mongo_Document::factory('oauth2_client');
+        static::$mSession = Mongo_Document::factory('oauth2_session');
+        static::$mResource = Mongo_Document::factory('oauth2_resource');
         static::$success = new Oauth2_Success;
         static::$error = new Oauth2_Error;
     }

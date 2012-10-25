@@ -1,19 +1,23 @@
-<?php defined('SYSPATH') or die('No direct access allowed.');
+<?php
+
+defined('SYSPATH') or die('No direct access allowed.');
 /*
  *   db.oauth_clients.insert({name :, client_id :, client_secret :, redirect_uri :, status :, auto_approve :});
  */
 
-class Model_Oauth2_Resource extends Model {
+class Model_Oauth2_Resource extends Document {
+
+    protected $name = 'oauth2_resources';
 
     /**
      * An implementation to validate a Resource Owner Flow by user credentials
-     * 
+     *
      * @param array $params query fields, usually (client_id, client_secret, redirect_uri)
      * @param boolean $auto_approve
      * @uses Model_User
-     * 
+     *
      * @return boolean
-     */    
+     */
     public function check_password($username, $password)
     {
         $params = array(
@@ -23,10 +27,10 @@ class Model_Oauth2_Resource extends Model {
             ),
             'password' => $this->hash($password));
 
-        $user_id = Model::factory('user')->collection->findOne($params, array('_id' => 1));
+        $user = Mongo_Document::factory('user');
+        $user->load($params, ['_id']);
 
-        return $user_id ? $user_id : false;
-
+        return $user->loaded() ? $this->stringify($user->as_array()) : false;
     }
 
     /**

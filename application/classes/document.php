@@ -11,7 +11,7 @@ defined('SYSPATH') or die('No direct script access.');
  * @copyright 2012 Realtasia Pte Ltd
  */
 class Document extends Mongo_Document {
-
+    use Trait_Oauth2_Utils;
     /**
      *
      * @var mixed MongoID || string. Used if a record(s) is retrieved for an
@@ -33,6 +33,22 @@ class Document extends Mongo_Document {
         'subscribers'  => 0,
         'testimonials' => 0,
     );
+
+
+    /**
+     * shorthand for findOne
+     *
+     * @param array|string $params
+     * @param boolean $object
+     * @return MongoDocument|object
+     */
+    public function get($params, array $fields = [], $object = TRUE)
+    {
+        if($result = $this->load($params, $fields))
+        {
+            return $object ? (object) $result->as_array() : $result->as_array();
+        }
+    }
 
     /**
      * const SAVE_INSERT = 'insert';
@@ -65,15 +81,6 @@ class Document extends Mongo_Document {
 
     public function after_load()
     {
-        $this->created  = date('c', $this->_id->getTimestamp());
-        $this->modified = date('c', $this->modified);
-
-        if (isset($this->active))
-        {
-            $this->active = date('c', $this->active);
-        }
-
-        return $this;
     }
 
     public function before_delete()

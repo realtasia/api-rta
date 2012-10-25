@@ -1,7 +1,8 @@
 <?php defined('SYSPATH') or die('No direct access allowed.');
 
 
-class Model_Oauth2_Session extends Model {
+class Model_Oauth2_Session extends Document {
+    protected $name = 'oauth2_sessions';
 
     /**
      * @var integer time to live
@@ -29,19 +30,8 @@ class Model_Oauth2_Session extends Model {
     public function get_session(array $params)
     {
         // try to get a session with the given params.
-        $session = $this->collection->findOne($params);
-
-        if ($session)
-        {
-            $session['id'] = $session['_id']->__toString();
-            unset($session['_id']);
-            if (is_object($session['user_id']))
-            {
-                $session['user_id'] = $session['user_id']->__toString();
-            }
-            return $session;
-        }
-
+        if ($this->load($params))
+            return $this->stringify($this->as_array());
         // return it. Auth class should check for expiry
         return false;
     }
@@ -54,7 +44,9 @@ class Model_Oauth2_Session extends Model {
      */
     public function destroy($token)
     {
-        return $this->collection->remove(['access_token' => $token]);
+        $this->before_delete();
+        return $this->collection()->remove(['access_token' => $token]);
+        $this->after_delete();
     }
 
     /**
@@ -112,25 +104,23 @@ class Model_Oauth2_Session extends Model {
             'stage'        => isset($params['stage']) ? $params['stage'] : 'granted',
         ];
 
-        $this->db->command([
-            'findandmodify' => Inflector::plural($this->collname),
+        $return = $this->collection(true)->findAndModify([
             'query'         => $query,
             'update'        => $params,
+            'new'           => true,
             'upsert'        => true
         ]);
 
-        foreach($params as $k => $v)
-        {
-            if($v instanceof MongoID)
-                $params[$k] = $v->__toString();
-        }
+        //print_r($return);
+
+        $params = Arr::merge($return, $params);
 
         // keeping this here for future
 //        $this->collection->ensureIndex(['user_id' => 1]);
 //        $this->collection->ensureIndex(['client_id' => 1]);
 //        $this->collection->ensureIndex(['access_token' => 1], ['unique' => 1]);
 
-        return $session ? $params : $access_token;
+        return $session ? $this->stringify($params) : $access_token;
     }
 
     /**

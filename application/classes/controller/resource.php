@@ -51,6 +51,11 @@ abstract class Controller_Resource extends Controller_Abstract{
         {
             static::$current_session = $current_session;
             static::$user_id = static::$current_session['user_id'];
+            if(isset($params['state']))
+            {
+                static::$current_session['state'] = $params['state'];
+            }
+
         }
 
         return parent::before();
@@ -68,17 +73,19 @@ abstract class Controller_Resource extends Controller_Abstract{
         if(!$this->logged_in())
             return null;
 
+        // the session key
+        $key = static::$current_session['access_token'] . static::$user_id;
         // check session
-        if(!$user = Session::instance()->get(static::$current_session['access_token'] . static::$user_id))
+        if(!$user = Session::instance()->get($key))
         {
             // fetch user from db
-            $user = (object) Model::factory('user')->get(static::$user_id);
+            $user = (object) Mongo_Document::factory('user');
+            $user->load(static::$user_id);
             // unset some sensitive info
             unset($user->password);
-            // make id available too
-            $user->id = $user->_id;
+            $user = $user->as_array();
             // set the session
-            Session::instance()->set(static::$current_session['access_token'] . static::$user_id, $user);
+            Session::instance()->set($key, $user);
         }
         // return the user
         return $user;
@@ -110,7 +117,7 @@ abstract class Controller_Resource extends Controller_Abstract{
             $return = static::$current_session;
         }
 
-        $return['data'] = static::string_ids($data);
+        $return['data'] = $data;
 
         return $this->success((object)$return);
     }
@@ -121,20 +128,5 @@ abstract class Controller_Resource extends Controller_Abstract{
      * @param array|object $data
      * @return mixed
      */
-    protected static function string_ids($data)
-    {
-        foreach($data as $k=>$v)
-        {
-            if($v instanceof MongoID)
-            {
-                if(is_object($data))
-                    $data->{$k} = $v->__toString();
-                else
-                    $data[$k] = $v->__toString();
-            }
-        }
-
-        return $data;
-    }
 }
 // End Welcome

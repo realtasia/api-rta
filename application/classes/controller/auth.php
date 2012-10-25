@@ -106,7 +106,7 @@ class Controller_Auth extends Controller_Abstract {
      * A little misleading. Doesn't check headers for now. Just checks $_GETs &
      * $_POSTs. Returns the parsed params
      *
-     * @return boolean | params
+     * @return boolean | array
      */
     protected function check_headers()
     {

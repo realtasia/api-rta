@@ -88,30 +88,28 @@ class Model_Interaction extends Document {
      *
      * @return boolean|array of interactions
      */
-    public function interacting($object_id)
+    public function interacting($object_id, $object_type)
     {
         if ($this->current_user == NULL)
             return false;
 
         $results = $this->collection(true)->find([
                     'user._id'  => $this->current_user->_id,
-                    'object_id' => $object_id
-                ])->as_array();
-
-        $return = [];
-
-        if (!empty($results))
+                    'object_id' => $object_id,
+                    'object_type' => $object_type
+                ]);
+        $return = ['like' => false, 'subscribe' => false];
+        while($results->hasNext())
         {
-            foreach ($results as $k => $v)
+            foreach ($results->getNext()->as_array() as $k => $v)
             {
-                if ($k === 'interaction')
+                if ($k == 'interaction')
                 {
                     $return[$v] = true;
                 }
             }
         }
-
-        return empty($results) ? false : $return;
+        return $return;
     }
 
     /**
@@ -121,10 +119,12 @@ class Model_Interaction extends Document {
      */
     public function before_save($action)
     {
-        if (isset($this->interaction))
-            return false;
+        $user = $this->current_user->as_array();
+        unset($user['created']);
+        if(isset($user['modified']))
+            unset($user['modified']);
 
-        $this->user = $this->current_user;
+        $this->user = $user;
     }
 
     /**
@@ -140,33 +140,38 @@ class Model_Interaction extends Document {
         // guess the update for this interaction.
         $this->guess_update();
 
+        $count_field = static::$count_field;
+
+        $current_user = $this->get_current_user_fields();
+
         // fetch the concerned object
-        $object = Mongo_Document::factory($this->object_type, $this->object__id);
+        $object = Mongo_Document::factory($this->object_type, $this->object_id);
 
         // update the latest interactions in the object
         if (static::$inc === 1)
         {
             // sadly can't be atomic
-            $obj_interact_counts = count($object->{static::$count_field});
+            $obj_interact_counts = count($object->{$count_field});
 
             // we are only saving the latest five interactions
             if ($obj_interact_counts === 5)
             {
                 // if 5, then we remove the last entry
-                $object->pop(static::$count_field);
+                $object->pop($count_field);
             }
             // add it to the set
-            $object->addToSet(static::$count_field, $this->as_array());
+            $object->addToSet($count_field, $current_user);
         }
         else
         {
             // we just remove the interaction.
-            $object->pull(static::$count_field . '._id', $this->_id);
+            $object->pull($count_field, ['_id' => $current_user['_id']]);
         }
 
         // increment the count for this interaction
-        $object->inc('counts.' . $this->{static::$count_field}, static::$inc);
-
+        $object->inc('counts.' . $count_field, static::$inc);
+        //print_r($object);
+        //die();
         // objects save method automatically updates timestamps
         $object->save();
 
@@ -176,8 +181,29 @@ class Model_Interaction extends Document {
         return $this;
     }
 
+
+    /**
+     * Runs the after_save method as it needs to do the same thing
+     *
+     */
+    public function after_delete()
+    {
+        $this->after_save();
+    }
+
     /**
      * Performs an interaction. Currently not very optimised.
+     * 1. unlike|unsubscribe
+     *      delete entry from db.
+     *      call the after_save function to update the user and interacted object
+     * 2. like
+     *      check current interactions and add a like if not available
+     *      check if this is a comment and fetch the parent object to run a subscribe
+     *      if not a comment, run a subscribe anyway.
+     *      call the after_save function to update the user and interacted object
+     * 3. subscribe
+     *      check current interactions and add a subscribe if not available
+     *      call the after_save function to update the user and interacted object
      *
      * @param string $interaction
      * @param string|MongoID $object_id
@@ -186,45 +212,100 @@ class Model_Interaction extends Document {
      */
     protected function interact($interaction, $object_id, $object_type)
     {
-
-        if ($this->current_user == NULL)
+        if (!$this->current_user->loaded())
             return false;
+
+        $user = (object) $this->get_current_user_fields();
 
         // set the query
         $query = [
             'interaction' => $interaction,
             'object_id'   => $object_id,
-            'user._id'    => $this->current_user->_id,
+            'user._id'    => $user->_id,
         ];
 
         $this->verify_fields($interaction, $object_id, $object_type);
 
-        switch ($this->interaction)
+        try
         {
-            case 'unlike':
-            case 'unsubscribe':
-                $this->collection(true)->remove_safe($query);
-                $this->after_save(null);
-                break;
-            case 'like':
-                $interacting = $this->interacting($object_id);
-                if (!$interacting['like'])
-                {
-                    $this->save();
-                }
-                if (!$interacting['subscribe'])
-                {
-                    $this->clear();
-                    $this->interact('subscribe', $object_id, $object_type);
-                }
-                break;
-            case 'subscribe':
-                $interacting = $this->interacting($object_id);
-                if (!$interacting['subscribe'])
-                {
-                    $this->save();
-                }
-                break;
+            switch ($this->interaction)
+            {
+                case 'unlike':
+                case 'unsubscribe':
+                    // remove the 'un'
+                    $query['interaction'] = substr($this->interaction, 2);
+
+                    // delete the subscription
+                    $this->collection(true)->remove_safe($query, ['justOne'    => TRUE]);
+                    $this->after_delete();
+                    break;
+                case 'like':
+
+                    // check current interactions with this object
+                    $interacting = $this->interacting($object_id, $object_type);
+
+                    // there were no likes by this user on this object
+                    if (!$interacting['like'])
+                    {
+                        $this->save();
+                    }
+                    /*
+                     * Comments are special. If someone likes a comment, we
+                     * have to subscribe that person to the object the comment
+                     * was created for. Cos we can't subscribe to comments.
+                     */
+                    if($this->object_type == 'comment')
+                    {
+                        // get the comment's parent object. variables are
+                        // confusing. $object_id refers to this comment _id.
+                        // retrieving 'object_id' for it's parent object
+                        $p = Mongo_Document::factory('comment')
+                                ->get($object_id, ['object_id', 'object_type']);
+
+                        // get the parent object interactions with the current user
+                        $p_interacting = $this->interacting($p->object_id, $p->object_type);
+
+                        // same as below, we create a subscribe if none exist.
+                        if (!$p_interacting['subscribe'])
+                        {
+                            $this->clear();
+                            $this->interact('subscribe', $p->object_id, $p->object_type);
+                        }
+                    }
+                    else
+                    {
+                        // this isn't a like on a comment, we proceed with user
+                        // subscription of this object
+                        if (!$interacting['subscribe'])
+                        {
+                            $this->clear();
+                            $this->interact('subscribe', $object_id, $object_type);
+                        }
+                    }
+
+                    break;
+                case 'subscribe':
+                    $interacting = $this->interacting($object_id, $object_type);
+                    if (!$interacting['subscribe'])
+                    {
+                        $this->save();
+                    }
+                    break;
+            }
+        } catch (MongoException $e)
+        {
+            Debug::error(
+                    "MongoCursorException while user :user tried to :interact an object: :object_type (:oid) \n"
+                    . "Error Message- :message \n"
+                    . "Error Code- :code", [
+                ':user'        => $user->name,
+                ':interact'    => $interaction,
+                ':iod'         => $object_id,
+                ':object_type' => $object_type,
+                ':message'     => $e->getMessage(),
+                ':code'        => $e->getCode()
+            ]);
+            return FALSE;
         }
         return $this;
     }
@@ -250,7 +331,7 @@ class Model_Interaction extends Document {
                 static::$inc = 1;
                 static::$count_field = 'subscribers';
                 break;
-            case 'unlike':
+            case 'unsubscribe':
                 static::$inc = -1;
                 static::$count_field = 'subscribers';
                 break;
@@ -277,6 +358,7 @@ class Model_Interaction extends Document {
             case!isset($object_type):
             case!in_array($object_type, self::$valid_objects):
             case!isset($this->current_user):
+            case!isset($object_id):
                 return false;
         }
 

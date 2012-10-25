@@ -365,65 +365,68 @@ EOD;
 
     public function action_users()
     {
-        Model::factory('user')->collection->ensureIndex(array("username" => 1, "email" => 1), array("unique" => 1));
-        $gender = array('male', 'female');
+        Mongo_Document::factory('user')
+                ->collection(true)
+                ->ensureIndex(["username" => 1, "email"    => 1]);
+        $gender    = ['male', 'female'];
         for ($i = 1; $i <= 100; $i++)
         {
             $numword = numword::factory($i);
-            $name = array(
+            $name    = [
                 'first_name'  => ucfirst($numword),
                 'middle_name' => 'Middle',
                 'last_name'   => 'User',
-            );
-            $user         =
-                    array(
-                        'first_name'  => $name['first_name'],
-                        'middle_name' => $name['middle_name'],
-                        'last_name'   => $name['last_name'],
-                        'name'        => implode(' ', $name),
-                        'username'    => $numword . '.user',
-                        'password'    => Auth::instance()->hash($numword),
-                        'locale'      => 'en_SG',
-                        'languages'   => array(), 
-                        'email'       => $numword . '.user' . '@realtasia.com',
-                        'birthday'    => mt_rand(378691200, 694224000),  
-                        'gender'      => $gender[array_rand(range(0,1), 1)],
-                        'telephone' =>
-                        array(
-                            'mobile'      => '+65 98000' . $num_padded   = sprintf("%03s", $i),
-                            'DID'         => '+65 64000' . $num_padded   = sprintf("%03s", $i),
-                        ),
-                        'designation' => 'User',
-                        'social'      => array(),
-                        'websites' => array(),
-                        'roles' => array('login', 'agent'),
-                        'avatar' =>
-                        array(
-                            'cropped' => array(),
-                            'uncropped'   => NULL,
-                            150           => '/agents/images/' . $i . '.jpg',
-                            60            => 'beta.realtasia.com.sg/assets/images/avatar-60X60.jpg',
-                            32            => 'beta.realtasia.com.sg/assets/images/avatar-32X32.jpg',
-                        ),
-                        'uri'         => '/' . $numword . '.user',
-                        'subscribers' => array(),
-                        'likers' => array(),
-                        'active'        => time(),
-                        'joined'        => time() - 86400,
-                        'notifications' => 'daily',
-                        'counts'        =>
-                        array(
-                            'posts'       => 0,
-                            'likes'       => 0,
-                            'listings'    => 0,
-                            'comments'    => 0,
-                            'subscribers' => 0,
-                            'attachments' => 0,
-                        )
-            );
+            ];
+            $user         = [
+                'first_name'  => $name['first_name'],
+                'middle_name' => $name['middle_name'],
+                'last_name'   => $name['last_name'],
+                'name'        => implode(' ', $name),
+                'username'    => $numword . '.user',
+                'password'    => Auth::instance()->hash($numword),
+                'locale'      => 'en_SG',
+                'languages'   => [],
+                'email'    => $numword . '.user' . '@realtasia.com',
+                'birthday' => mt_rand(378691200, 694224000),
+                'gender'   => $gender[array_rand(range(0, 1), 1)],
+                'actions'  => [
+                    ''
+                ],
+                'telephone' => [
+                    'mobile'      => '+65 98000' . $num_padded   = sprintf("%03s", $i),
+                    'DID'         => '+65 64000' . $num_padded   = sprintf("%03s", $i),
+                ],
+                'designation' => 'User',
+                'social'      => [],
+                'websites' => [],
+                'roles' => ['login', 'agent'],
+                'avatar' => [
+                    'cropped' => [90          => '/agents/images/' . $i . '.jpg'],
+                    'uncropped' => [],
+                    150           => 'beta.realtasia.com.sg/assets/images/avatar-150X150.jpg',
+                    60            => 'beta.realtasia.com.sg/assets/images/avatar-60X60.jpg',
+                    32            => 'beta.realtasia.com.sg/assets/images/avatar-32X32.jpg',
+                ],
+                'uri'         => '/' . $numword . '.user',
+                'subscribers' => [],
+                'likers' => [],
+                'active'        => time(),
+                'joined'        => time() - 86400,
+                'notifications' => 'daily',
+                'counts'        => [
+                    'attachments'  => 0,
+                    'comments'     => 0,
+                    'events'       => 0,
+                    'likers'       => 0,
+                    'listings'     => 0,
+                    'posts'        => 0,
+                    'subscribers'  => 0,
+                    'testimonials' => 0,
+                ]
+            ];
 
 //Model::factory('user')->collection->remove(array('username' => $user['username']));
-            Model::factory('user')->collection->save($user);
+            Mongo_Document::factory('user')->load_values($user)->save();
 //echo Debug::vars($user) . '<hr />';
         } // end for
     }
