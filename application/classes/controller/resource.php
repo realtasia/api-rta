@@ -41,7 +41,7 @@ abstract class Controller_Resource extends Controller_Abstract{
 
         // Still nothing, return an error
         if(!$token)
-            return $this->error('invalid_request');
+            return $this->oauth_error('invalid_request');
 
         // validate the token
         $current_session = $this->validate_token($token);
@@ -51,9 +51,9 @@ abstract class Controller_Resource extends Controller_Abstract{
         {
             static::$current_session = $current_session;
             static::$user_id = static::$current_session['user_id'];
-            if(isset($params['state']))
+            if(isset(static::$params['state']))
             {
-                static::$current_session['state'] = $params['state'];
+                static::$current_session['state'] = static::$params['state'];
             }
 
         }
@@ -123,10 +123,42 @@ abstract class Controller_Resource extends Controller_Abstract{
     }
 
     /**
-     * Utility method to convert all MongoID ids to strings
+     * Utility method to perform the interaction
      *
-     * @param array|object $data
-     * @return mixed
+     * @todo add email Job.
+     * @param string $interaction like|unlike|subscribe|unsubscribe
      */
+    protected function interact($interaction, $object_type)
+    {
+        $interact = Mongo_Document::factory('interaction', null, static::$user_id);
+        if($interact->{$interaction}($this->request->param('id'), $object_type))
+                return $this->data(['success' => 1]);
+
+        return $this->oauth_error('invalid_request', 400);
+    }
+
+    /**
+     * Utility method for Resource Errors
+     */
+
+    protected function error($file, $key, $status = 401)
+    {
+        $this->response->status($status);
+
+        $error = [
+            'error' => $key,
+            'error_description' => Kohana::message($file, $key)
+        ];
+
+        $this->return = $error;
+        $header       = '';
+
+        foreach ($this->return as $k => $v)
+        {
+            $header .= "$k=$v&";
+        }
+        $this->response->headers('WWW-Authenticate', $header);
+        return false;
+    }
 }
 // End Welcome

@@ -307,7 +307,7 @@ class Model_Interaction extends Document {
             ]);
             return FALSE;
         }
-        return $this;
+        return TRUE;
     }
 
     /**

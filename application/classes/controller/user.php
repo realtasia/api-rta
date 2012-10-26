@@ -6,12 +6,29 @@
  */
 class Controller_User extends Controller_Resource {
 
+    private static $valid_update_types = [
+        'password_reset', 'complete_registration'
+    ];
+
+    private static $valid_get_types = [
+        'verify_key', 'has_social', 'is_unique'
+    ];
+
+    private static $valid_create_types = [
+        'registration', 'join_beta'
+    ];
+
     public function before()
     {
         static::$model = Model::factory('user');
         parent::before();
 
     }
+
+
+    /**************************************************************************
+     * Default Actions
+     *************************************************************************/
 
     /**
      * Fetch by id/username/email if available. If not, fetch users
@@ -24,63 +41,135 @@ class Controller_User extends Controller_Resource {
     {
         $id = $this->request->param('id');
 
-        if($id)
+        $type = $this->params['request_type'];
+
+        if (in_array($type, static::$valid_get_types) && method_exists($this, $type))
+            return $this->{$type};
+
+        if ($id)
             return $this->get($id);
         else
             return $this->search();
     }
 
+    /**
+     * Changes to user settings, notifications, profile info etc will use
+     * this update.
+     */
     public function action_update()
     {
+        // get the type of update
+        $type = $this->params['request_type'];
+
+        if (!$type)
+            return $this->oauth_error('invalid_request', 400);
+
+        if (in_array($type, static::$valid_update_types) && method_exists($this, $type))
+            return $this->{$type};
+
+        return $this->oauth_error('invalid_request', 400);
     }
 
+    /**
+     * Creates a new user with the given params.
+     */
     public function action_create()
     {
 
     }
 
+    /**
+     * Changes the state of a user to inactive. No real delete in the api.
+     * Also checks if logged in user has authority to do so.
+     */
     public function action_delete()
     {
 
     }
 
+    /**************************************************************************
+     * Public Connections
+     *************************************************************************/
+
+     /**
+     * Retrieves an array of [user_ids and user names] of people who like this user
+     */
     public function action_likes()
     {
         return $this->data(['action' => ' in likes']);
     }
 
+    /**
+     * Retrieves an array of [user_ids and user names] of people who like this user
+     */
+    public function action_subscribes()
+    {
+        return $this->data(['action' => ' in likes']);
+    }
+
+
+    /**************************************************************************
+     * Public Actions
+     *************************************************************************/
+
+    /**
+     * Performs a like on the given user
+     */
     public function action_like()
     {
-        $this->interact('like');
-
-        $this->data(['success' => 1]);
+        return parent::interact('like', 'user');
     }
 
+    /**
+     * Performs an unlike on the given user
+     */
     public function action_unlike()
     {
-        $this->interact('unlike');
-
-        $this->data(['success' => 1]);
+        return parent::interact('unlike', 'user');
     }
 
+    /**
+     * Performs a subscribe on the given user
+     */
     public function action_subscribe()
     {
-        $this->interact('subscribe');
-
-        $this->data(['success' => 1]);
+        return parent::interact('subscribe', 'user');
     }
 
+    /**
+     * Performs an unsubscribe on the given user
+     */
     public function action_unsubscribe()
     {
-        $this->interact('unsubscribe');
-
-        $this->data(['success' => 1]);
+        return parent::interact('unsubscribe', 'user');
     }
 
-    protected function interact($interaction)
+
+    /**************************************************************************
+     * Protected Utility Actions
+     *************************************************************************/
+
+    /**
+     * Checks for unique username or email.
+     *
+     * @param string $this->params['type'] decides whether it is username or email
+     * @param string $request->param['id'] the username or email to check
+     */
+    protected function unique()
     {
-        $interact = Mongo_Document::factory('interaction', null, static::$user_id);
-        $interact->{$interaction}($this->request->param('id'), 'user');
+        $model = Mongo_Document::factory('user');
+
+        $type = $this->params['request_type'];
+        $value = $this->request->param('id');
+
+        if(!$type || !$value)
+            return $this->oauth_error('invalid_request', 400);
+
+        if($model->get([$type => $value]))
+            return $this->error('register/user', 'username.' . $type . '_not_available');
+
+        return $this->data(['success' => 1]);
+
     }
 
     /**

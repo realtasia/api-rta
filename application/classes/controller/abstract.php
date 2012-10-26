@@ -88,10 +88,10 @@ class Controller_Abstract extends Controller {
      * @param int $status
      * @return boolean
      */
-    protected function error($key, $status = 401)
+    protected function oauth_error($key, $status = 401)
     {
         $this->response->status($status);
-        $this->return = is_array($key) ? $key : static::$error->create($key);
+        $this->return = is_array($key) ? $key : Oauth2_Error::create($key);
         $header       = '';
 
         foreach ($this->return as $k => $v)

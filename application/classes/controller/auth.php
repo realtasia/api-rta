@@ -74,7 +74,7 @@ class Controller_Auth extends Controller_Abstract {
             $check['state'] = $params['state'];
         }
 
-        return static::is_error($check) ? $this->error($check) : $this->success($check);
+        return static::is_error($check) ? $this->oauth_error($check) : $this->success($check);
     }
 
     /**
@@ -99,7 +99,7 @@ class Controller_Auth extends Controller_Abstract {
             $check['state'] = $params['state'];
         }
 
-        return static::is_error($check) ? $this->error($check) : $this->success($check);
+        return static::is_error($check) ? $this->oauth_error($check) : $this->success($check);
     }
 
     /**
@@ -113,7 +113,7 @@ class Controller_Auth extends Controller_Abstract {
         $post = $this->request->post();
         $get  = $this->request->query();
         if (empty($post) && empty($get))
-            return $this->error('invalid_request', 400);
+            return $this->oauth_error('invalid_request', 400);
 
         if (empty($post))
         {
@@ -131,7 +131,7 @@ class Controller_Auth extends Controller_Abstract {
             case!isset($params['client_id']) || empty($params['client_id']):
             case $params['grant_type'] == 'password' && (!isset($params['username']) || empty($params['username'])):
             case $params['grant_type'] == 'password' && (!isset($params['password']) || empty($params['password'])):
-                return $this->error('invalid_request', 400);
+                return $this->oauth_error('invalid_request', 400);
         }
 
         return $params;
