@@ -1,13 +1,12 @@
-<?php
-
-defined('SYSPATH') or die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');
 
 /**
  * Description of document
  *
- * @author jj
- * @package realtasia-beta-1
- * @subpackage
+ * @author Jason Nathan
+ * @package RealtAsia API
+ * @subpackage /Model/Document
+ * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */
 class Document extends Mongo_Document {
@@ -92,6 +91,7 @@ class Document extends Mongo_Document {
     {
 
     }
+
 
 }
 

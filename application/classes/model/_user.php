@@ -434,38 +434,6 @@ class Model_User extends Model {
         return $return;
     }
 
-    /**
-     * Small utility function to reduce typing. returns an $or array for use in
-     * a typical Mongo query
-     *
-     * @param string $username
-     * @param bool $regex
-     * @return array
-     */
-    protected static function _get_one($username, $regex = FALSE)
-    {
-// Used if an actual keyword search is taking place. Uses MongoRegex()
-        if ($regex)
-        {
-            $username = new MongoRegex("/$username/i");
-            return array(
-                '$or' => array(
-                    array('username' => $username),
-                    array('email' => $username),
-                    array('company' => $username),
-                )
-            );
-        }
-// just a regular lookup
-        return array(
-            '$or' => array(
-                array('_id' => parent::check_id($username)),
-                array('username' => $username),
-                array('email' => $username),
-            )
-        );
-    }
-
     protected static function _user_defaults()
     {
 

@@ -16,10 +16,8 @@ abstract class Controller_Resource extends Controller_Abstract{
     public static $params = array();
     //the model used in each controller
     protected static $model;
-    // the current session set upon authentication
-    public static $current_session = null;
     // authenticated user_id, if the session is user authenticated
-    public static $user_id         = null;
+    public static $user_id    = null;
 
     /**
      * This method extracts the token from the request params and sets global
@@ -41,7 +39,7 @@ abstract class Controller_Resource extends Controller_Abstract{
 
         // Still nothing, return an error
         if(!$token)
-            return $this->oauth_error('invalid_request');
+            return $this->error('invalid_request');
 
         // validate the token
         $current_session = $this->validate_token($token);
@@ -80,10 +78,9 @@ abstract class Controller_Resource extends Controller_Abstract{
         {
             // fetch user from db
             $user = (object) Mongo_Document::factory('user');
-            $user->load(static::$user_id);
+            $user = $user->get(static::$user_id);
             // unset some sensitive info
-            unset($user->password);
-            $user = $user->as_array();
+            unset($user['password']);
             // set the session
             Session::instance()->set($key, $user);
         }
@@ -102,24 +99,19 @@ abstract class Controller_Resource extends Controller_Abstract{
     }
 
     /**
-     * Returns a formatted response containing current session and data
+     * Checks if the current logged in user has a role.
      *
-     * @uses Oauth2_Resource->success
-     * @param array|object $data
+     * @param string|array $role
      * @return boolean
      */
-    public function data($data)
+    public function has_role($role)
     {
-        $return = [];
-
-        if(static::$current_session)
+        $user = $this->get_user();
+        if($user)
         {
-            $return = static::$current_session;
+            return in_array($role, $user->roles);
         }
-
-        $return['data'] = $data;
-
-        return $this->success((object)$return);
+        return false;
     }
 
     /**
@@ -134,31 +126,7 @@ abstract class Controller_Resource extends Controller_Abstract{
         if($interact->{$interaction}($this->request->param('id'), $object_type))
                 return $this->data(['success' => 1]);
 
-        return $this->oauth_error('invalid_request', 400);
-    }
-
-    /**
-     * Utility method for Resource Errors
-     */
-
-    protected function error($file, $key, $status = 401)
-    {
-        $this->response->status($status);
-
-        $error = [
-            'error' => $key,
-            'error_description' => Kohana::message($file, $key)
-        ];
-
-        $this->return = $error;
-        $header       = '';
-
-        foreach ($this->return as $k => $v)
-        {
-            $header .= "$k=$v&";
-        }
-        $this->response->headers('WWW-Authenticate', $header);
-        return false;
+        return $this->error('invalid_request', 400);
     }
 }
 // End Welcome

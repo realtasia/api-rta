@@ -4,12 +4,40 @@ ini_set("max_execution_time", 0);
 ini_set('memory_limit', '2000M');
 
 class Controller_Test extends Controller {
-
+    use Trait_Oauth2_Utils;
     public $template = 'template';
 
     public function action_do()
     {
-        die(View::factory('template')->render());
+        $client_credentals = [
+            'client_id' => '123456789',
+            'redirect_uri' => 'http://jjpc.net',
+            'grant_type' => 'client_credentials',
+        ];
+
+        $token = [
+            'access_token' => '[REDACTED]',
+            'state' => Security::token(),
+        ];
+
+        $registration = [
+            'request_type' => 'registration',
+            'user_type' => 'user',
+        ];
+
+        $return = [];
+
+        for($i= 1; $i <= 99; $i++)
+        {
+            $values = Arr::merge($token, $registration, $this->users($i));
+
+            $request = Request::factory(URL::site('/user/', true))
+                    ->method(HTTP_Request::POST)
+                    ->post($values);
+            $return[] = "<pre>".$request->execute()."</pre>";
+        }
+
+        return $this->response->body(implode('<hr>', $return));
     }
 
     public function action_cea()
@@ -363,72 +391,40 @@ EOD;
         echo Debug::vars(iterator_to_array($m));
     }
 
-    public function action_users()
+    public function users($i)
     {
-        Mongo_Document::factory('user')
-                ->collection(true)
-                ->ensureIndex(["username" => 1, "email"    => 1]);
-        $gender    = ['male', 'female'];
-        for ($i = 1; $i <= 100; $i++)
-        {
-            $numword = numword::factory($i);
-            $name    = [
-                'first_name'  => ucfirst($numword),
-                'middle_name' => 'Middle',
-                'last_name'   => 'User',
-            ];
-            $user         = [
-                'first_name'  => $name['first_name'],
-                'middle_name' => $name['middle_name'],
-                'last_name'   => $name['last_name'],
-                'name'        => implode(' ', $name),
-                'username'    => $numword . '.user',
-                'password'    => Auth::instance()->hash($numword),
-                'locale'      => 'en_SG',
-                'languages'   => [],
-                'email'    => $numword . '.user' . '@realtasia.com',
+        $gender = ['male', 'female'];
+        $rand_gend = $gender[array_rand(range(0, 1), 1)];
+
+        if($rand_gend == 'female')
+            $mid = 'd/o';
+        else
+            $mid = 's/o';
+
+        $numword = numword::factory($i);
+        $name    = [
+            'first_name'  => ucfirst($numword),
+            'middle_name' => $mid,
+            'last_name'   => 'Agent',
+        ];
+        return [
+            'first_name'  => $name['first_name'],
+            'middle_name' => $name['middle_name'],
+            'last_name'   => $name['last_name'],
+            'name'        => implode(' ', $name),
+            'username'    => $numword . '.user',
+            'password'    => static::hash($numword),
+            'email'       => '[REDACTED]',
+            'designation' => 'Senior Sales Executive',
+            'roles'       => ['agent'],
+            'avatar' => [90 => '/agents/images/' . $i . '.jpg',],
+            'uri'  => '/' . $numword . '.user',
+            'info' => [
+                'telephone' => ['mobile'   => '[REDACTED]'],
                 'birthday' => mt_rand(378691200, 694224000),
                 'gender'   => $gender[array_rand(range(0, 1), 1)],
-                'actions'  => [
-                    ''
-                ],
-                'telephone' => [
-                    'mobile'      => '+65 98000' . $num_padded   = sprintf("%03s", $i),
-                    'DID'         => '+65 64000' . $num_padded   = sprintf("%03s", $i),
-                ],
-                'designation' => 'User',
-                'social'      => [],
-                'websites' => [],
-                'roles' => ['login', 'agent'],
-                'avatar' => [
-                    'cropped' => [90          => '/agents/images/' . $i . '.jpg'],
-                    'uncropped' => [],
-                    150           => 'beta.realtasia.com.sg/assets/images/avatar-150X150.jpg',
-                    60            => 'beta.realtasia.com.sg/assets/images/avatar-60X60.jpg',
-                    32            => 'beta.realtasia.com.sg/assets/images/avatar-32X32.jpg',
-                ],
-                'uri'         => '/' . $numword . '.user',
-                'subscribers' => [],
-                'likers' => [],
-                'active'        => time(),
-                'joined'        => time() - 86400,
-                'notifications' => 'daily',
-                'counts'        => [
-                    'attachments'  => 0,
-                    'comments'     => 0,
-                    'events'       => 0,
-                    'likers'       => 0,
-                    'listings'     => 0,
-                    'posts'        => 0,
-                    'subscribers'  => 0,
-                    'testimonials' => 0,
-                ]
-            ];
-
-//Model::factory('user')->collection->remove(array('username' => $user['username']));
-            Mongo_Document::factory('user')->load_values($user)->save();
-//echo Debug::vars($user) . '<hr />';
-        } // end for
+            ]
+        ];
     }
 
     public function action_request()

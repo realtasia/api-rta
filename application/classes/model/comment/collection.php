@@ -2,9 +2,10 @@
 /**
  * Description of collection
  *
- * @author jj
- * @package realtasia-beta-1
- * @subpackage
+ * @author Jason Nathan
+ * @package RealtAsia API
+ * @subpackage /Model/Comment/Collection
+ * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */
 class Model_Comment_Collection extends Mongo_Collection {
@@ -12,10 +13,10 @@ class Model_Comment_Collection extends Mongo_Collection {
 
     public function fetch($args)
     {
-        $defaults = array(
+        $defaults = [
            'limit' => 2, 'skip' => 0, 'type' => 'comment', 'sort' => 1,
-           'object_id' => NULL, 'include_ids' => NULL,'status' => 'publish'
-        );
+           'object_id' => NULL, 'include_ids' => NULL, 'status' => 'publish'
+        ];
 
         extract(Arr::merge($defaults, $args), EXTR_SKIP);
 
@@ -24,7 +25,7 @@ class Model_Comment_Collection extends Mongo_Collection {
         if ($include_ids)
         {
             if (is_array($include_ids))
-                $query['_id'] = ['$in'         => $include_ids];
+                $query['_id'] = ['$in'  => $include_ids];
             else
                 $query['_id'] = $include_ids;
         }
@@ -37,9 +38,10 @@ class Model_Comment_Collection extends Mongo_Collection {
                 ->sort('_id', $sort)
                 ->skip($skip);
 
-        if($results->hasNext())
+        while($results->hasNext())
         {
-            $return[] = $results->getNext()->as_array();
+            $row = $results->getNext();
+            $return[] = $row->stringify($row->as_array());
         }
 
         return $return;

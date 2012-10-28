@@ -3,8 +3,9 @@
  * Description of comment
  *
  * @author Jason Nathan
- * @package realtasia-beta-1
- * @subpackage /Model/Comment
+ * @package RealtAsia API
+ * @subpackage /Model/Comment/Document
+ * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */
 class Model_Comment extends Document {

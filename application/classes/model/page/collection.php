@@ -2,9 +2,10 @@
 /**
  * Description of collection
  *
- * @author jj
- * @package realtasia-beta-1
- * @subpackage
+ * @author Jason Nathan
+ * @package RealtAsia API
+ * @subpackage /Model/Page/Collection
+ * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */
 class Model_Page_Collection extends Mongo_Collection {

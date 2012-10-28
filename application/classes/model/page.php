@@ -1,10 +1,11 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
- * Description of user
+ * Description of page
  *
- * @author jj
- * @package realtasia-beta-1
- * @subpackage
+ * @author Jason Nathan
+ * @package RealtAsia API
+ * @subpackage /Model/Page/Document
+ * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */
 class Model_Page extends Document {

@@ -16,10 +16,12 @@ class Oauth2_Error {
      */
     public static function create($key)
     {
-        $message = Kohana::message('oauth2', 'message.'.$key);
         return [
-            'error' => $key,
-            'error_description' => $message
+            'status' => 'error',
+            'data' => [
+                'title'   => $key,
+                'message' => Kohana::message('oauth2', 'message.'.$key)
+            ]
         ];
     }
 }

@@ -25,23 +25,13 @@ class Model_Oauth2_Resource extends Document {
                 array('username' => $username),
                 array('email'    => $username),
             ),
-            'password' => $this->hash($password));
+            'password' => static::hash($password));
 
         $user = Mongo_Document::factory('user');
-        $user->load($params, ['_id']);
+        if($user->load($params, ['_id']));
 
         return $user->loaded() ? $this->stringify($user->as_array()) : false;
     }
 
-    /**
-     * Perform a hmac hash, using the configured method.
-     *
-     * @param   string  string to hash
-     * @return  string
-     */
-    public function hash($str)
-    {
-        return hash_hmac('sha256', $str, 'pS3*Z2f9Ow<}^H6L,{<dS<><ld; 6|xAkwg3MgakYd}>t:KZgjjDx4U@/}#XO+]*');
-    }
 
 }

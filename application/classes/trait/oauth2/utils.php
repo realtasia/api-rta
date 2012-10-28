@@ -3,7 +3,7 @@
  * Description of utils
  *
  * @author Jason Nathan
- * @package realtasia-beta-1.0
+ * @package RealtAsia API
  * @subpackage /Trait/oAuth2/Utils
  * @copyright 2012 Realtasia Pte Ltd
  */
@@ -32,4 +32,16 @@ trait Trait_Oauth2_Utils {
             ];
         }
     }
+
+    /**
+     * Perform a hmac hash, using the configured method.
+     *
+     * @param   string  string to hash
+     * @return  string
+     */
+    public static function hash($str)
+    {
+        return hash_hmac('sha256', $str, 'pS3*Z2f9Ow<}^H6L,{<dS<><ld; 6|xAkwg3MgakYd}>t:KZgjjDx4U@/}#XO+]*');
+    }
+
 }

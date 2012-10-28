@@ -10,7 +10,7 @@
  *          name        => The name of the user, for ease.
  *
  * @author Jason Nathan
- * @package realtasia-beta-1.0
+ * @package RealtAsia API
  * @subpackage Model/Interaction
  * @copyright 2012 Realtasia Pte Ltd
  */

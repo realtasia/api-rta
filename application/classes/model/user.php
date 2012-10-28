@@ -1,23 +1,371 @@
-<?php defined('SYSPATH') or die('No direct script access.');
+<?php
+
+defined('SYSPATH') or die('No direct script access.');
+
 /**
  * Description of user
  *
- * @author jj
- * @package realtasia-beta-1
- * @subpackage
+ * @author Jason Nathan
+ * @package RealtAsia API
+ * @subpackage /Model/User/Collection
+ * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */
 class Model_User extends Document {
 
-    public function get($id)
+    /**
+     * Retrieve a user by email, username or id
+     *
+     * @param MongoID|string $id
+     * @return array|null
+     */
+    public function get($id, array $fields = [], $object = TRUE)
     {
-        
+        return $this->stringify(parent::get(self::_get_one($id), $fields));
     }
 
+    /**
+     * Retrieve only user public fields by email, username or id
+     *
+     * @param MongoID|string $id
+     * @return array|null
+     */
     public function get_public($id)
     {
-
+        return $this->stringify(parent::get(self::_get_one($id), static::$protected_fields));
     }
 
+    /**
+     * Create a default user with new values.
+     *
+     * @param array $params
+     * @return boolean
+     */
+    public function create($params)
+    {
+//        $this->collection()->ensureIndex([
+//            'username' => 1
+//        ], ['unique' => 1]);
+//        $this->collection()->ensureIndex([
+//            'email' => 1
+//        ]);
+//        $this->collection()->ensureIndex([
+//            'logins.user_id' => 1,
+//        ]);
+//        $this->collection()->ensureIndex([
+//            'company.name' => 1,
+//        ]);
+        // if agent, we check for company and if it's an array.
+        if (isset($params['company']) && !is_array($params['company']))
+        {
+            // retrieve the company
+            $company = Mongo_Document::factory('page');
+            $company->load($params['company'], ['name' => 1, '_id'  => 1]);
+
+            // set the user's company
+            $params['company']        = $company->to_array();
+        }
+        //die();
+        // overwrite defaults
+        $data                     = Arr::overwrite(static::$user_fields, $params);
+        // merge with defaults
+        $data                     = Arr::merge(static::$user_fields, $data);
+        $data['info']['birthday'] = (int) $data['info']['birthday'];
+        ksort($data);
+
+
+        // load the document
+        $this->load_values($data);
+
+        try
+        {
+            // save
+            $this->save();
+        } catch (MongoException $e)
+        {
+            Debug::error(
+                    "MongoCursorException while trying to create user :user \n"
+                    . "Error Message- :message \n"
+                    . "Error Code- :code", [
+                ':user'    => print_r($data, TRUE),
+                ':message' => $e->getMessage(),
+                ':code'    => $e->getCode()
+            ]);
+            return false;
+        }
+
+        return (array) $this->as_array();
+    }
+
+    /**
+     * Unsets the 'created' field which was extracted from the MongoID
+     * sets the active timestamp
+     */
+    public function before_save($action)
+    {
+        $this->active = time();
+        unset($this->created);
+        if (isset($this->birthday) && !is_numeric($this->birthday))
+        {
+            $this->birthday = strtotime($this->birthday);
+        }
+    }
+
+    /**
+     * Converts timestamps to dates.
+     * Checks and sets current user attributes. (if user returned is the user logged in)
+     * Otherwise, checks current user's interaction with the returned user
+     */
+    public function after_load()
+    {
+        $id = $this->_id instanceof MongoID ? $this->_id : new MongoID($this->_id);
+
+        $this->created = date('c', $id->getTimestamp());
+        $this->active  = date('c', $this->active);
+        if (isset($this->birthday))
+        {
+            $this->birthday = date('c', $this->birthday);
+        }
+
+        if ($this->current_user == NULL)
+            return $this;
+
+        $current_user = (object) $this->get_current_user_fields();
+
+        // check if it's the same user
+        if ($this->_id === $current_user->_id)
+        {
+            $this->can_edit      = true;
+            $this->can_like      = false;
+            $this->can_subscribe = false;
+        }
+        else
+        {
+            $interactions       = Model_Document::factory('interaction', NULL, $current_user->_id);
+            $this->interactions = $interactions->interacting($this->_id, 'user');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Updates privacy options.
+     *
+     * @param array $params
+     * @param string|MongoID $user_id
+     * @return type
+     */
+    public function update_privacy($params, $user_id)
+    {
+        $field = static::$user_fields['settings']['privacy'];
+        $values = Arr::overwrite($field, $params);
+
+        $this->load_values([
+            '_id' => new MongoID($user_id),
+            'settings.privacy' => $values,
+        ]);
+        $this->save();
+
+        return $values;
+    }
+
+    /**
+     * Updates notification options.
+     *
+     * @param array $params
+     * @param string|MongoID $user_id
+     * @return type
+     */
+    public function update_notification($params, $user_id)
+    {
+        $field = static::$user_fields['settings']['notifications'];
+        $values = Arr::overwrite($field, $params);
+
+        $this->load_values([
+            '_id' => new MongoID($user_id),
+            'settings.notifications' => $values,
+        ]);
+        $this->save();
+
+        return $values;
+    }
+
+    /**
+     * Updates user info.
+     *
+     * @param array $params
+     * @param string|MongoID $user_id
+     * @return type
+     */
+    public function update_password($password, $user_id)
+    {
+        $this->load_values(['_id' => new MongoID($user_id)]);
+        $this->password = static::hash($password);
+        return $this->save();
+    }
+
+    /**
+     * Updates user info.
+     *
+     * @param array $params
+     * @param string|MongoID $user_id
+     * @return type
+     */
+    public function update_info($params, $user_id)
+    {
+        $field = static::$user_fields['info'];
+        $values = Arr::overwrite($field, $params);
+
+        $this->load_values([
+            '_id' => new MongoID($user_id),
+            'info' => $values,
+        ]);
+        $this->save();
+
+        return $values;
+    }
+
+    /**
+     * Small utility function to reduce typing. returns an $or array for use in
+     * a typical Mongo query
+     *
+     * @param string $username
+     * @param bool $regex
+     * @return array
+     */
+    protected static function _get_one($username, $regex = FALSE)
+    {
+// Used if an actual keyword search is taking place. Uses MongoRegex()
+        if ($regex)
+        {
+            $username = new MongoRegex("/^$username/i");
+            return [
+                '$or' => [
+                    ['username' => $username],
+                    ['email' => $username],
+                    ['company.name' => $username]
+                ]
+            ];
+        }
+// just a regular lookup
+        return [
+            '$or' => [
+                ['_id' => $username],
+                ['username' => $username],
+                ['email' => $username],
+            ]
+        ];
+    }
+
+    /**
+     * These are fields that are not needed for public info.
+     *
+     * @var array
+     */
+    private static $protected_fields = [
+        'password' => false,
+        'settings' => false,
+        'logins'   => false
+    ];
+
+    /**
+     * The standard user document.
+     *
+     * @var array
+     */
+    private static $user_fields = [
+        'password' => '',
+        'logins'   => [
+            'user_id'      => '',
+            'type'         => 'facebook',
+            'username'     => '',
+            'email'        => '',
+            'access_token' => '',
+            'token_type'   => '',
+            'expires_in'   => '',
+            'name'         => '',
+            'picture'      => '',
+        ],
+        'settings'     => [
+            'locale'  => 'en_SG',
+            'billing' => [
+                'mode'      => 'cash',
+                'frequency' => 'monthly',
+                'plan_id'   => NULL
+            ],
+            'privacy'   => [
+                'contacts'      => 'public',
+                'subscriptions' => 'public',
+                'messages'      => 'public',
+                'mentions'      => ['public'],
+                'wallposts' => [
+                    'others_posts'            => 'public',
+                    'others_posts_visibility' => 'public'
+                ]
+            ],
+            'notifications'           => [
+                'email'  => '',
+                'likers' => [
+                    'own_post'    => TRUE,
+                    'other_posts' => TRUE,
+                    'profile'     => TRUE,
+                    'comments'    => TRUE,
+                ],
+                'subscribers' => [
+                    'own_post'    => TRUE,
+                    'other_posts' => TRUE,
+                    'profile'     => TRUE,
+                ],
+                'comments'    => [
+                    'own_post'    => TRUE,
+                    'other_posts' => TRUE,
+                ],
+                'mentions'    => TRUE,
+                'testimonial' => TRUE,
+                'wallpost'    => TRUE,
+                'messages'    => TRUE
+            ]
+        ],
+        'username'    => '',
+        'email'       => '',
+        'first_name'  => '',
+        'middle_name' => '',
+        'last_name'   => '',
+        'name'        => '',
+        'status'      => 'active',
+        'actions'     => [],
+        'company' => [],
+        'designation' => '',
+        'roles'       => ['user'],
+        'avatar' => [
+            150           => 'beta.realtasia.com.sg/assets/images/avatar-150X150.jpg',
+            60            => 'beta.realtasia.com.sg/assets/images/avatar-60X60.jpg',
+            32            => 'beta.realtasia.com.sg/assets/images/avatar-32X32.jpg',
+        ],
+        'uri'         => '',
+        'subscribers' => [],
+        'likers' => [],
+        'active' => '',
+        'counts' => [
+            'attachments'  => 0,
+            'comments'     => 0,
+            'events'       => 0,
+            'likers'       => 0,
+            'listings'     => 0,
+            'posts'        => 0,
+            'subscribers'  => 0,
+            'testimonials' => 0,
+        ],
+        'info'         => [
+            'telephone' => ['mobile'    => ''],
+            'languages' => [],
+            'birthday'     => '',
+            'gender'       => '',
+            'achievements' => [],
+            'education' => [],
+            'social' => [],
+            'websites' => []
+        ]
+    ];
+
 }
-?>

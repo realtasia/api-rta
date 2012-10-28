@@ -1,0 +1,64 @@
+<?php
+
+defined('SYSPATH') or die('No direct script access.');
+
+/**
+ * Description of arr
+ *
+ * @author Jason Nathan
+ * @package RealtAsia API
+ * @subpackage /Helpers/Arr
+ * @version 1.0
+ * @copyright 2012 Realtasia Pte Ltd
+ */
+class Arr extends Kohana_Arr {
+
+    /**
+     * Returns a multidimensional array if there delimiters in the each key.
+     * All non-delimited keys are returned with their respective values.
+     * e.g
+     * // returns $values[one][two][three] = $value
+     * $values = array('one.two.three' => value)
+     *
+     * @param array $arr
+     * @param string $delimiter
+     * @return array
+     */
+    public static function delim_to_multi(array $arr, $delimiter = NULL)
+    {
+        $return = [];
+        if ($delimiter == NULL)
+        {
+            $delimiter = parent::$delimiter;
+        }
+
+        foreach ($arr as $key => $value)
+        {
+            // ignoring int 0 (false negative). Delimiter cannot start key.
+            if (strpos($key, $delimiter))
+            {
+                $keys = $parts = explode($delimiter, $key);
+                $count = count($parts) - 1;
+                while($bottom = array_pop($parts))
+                {
+                    if(count($parts) === $count)
+                    {
+                        $return = [$bottom => $value];
+                    }
+                    else
+                    {
+                        $return = [$bottom => $return];
+                    }
+
+                }
+            }
+            else
+            {
+                $return[$key] = $value;
+            }
+        }
+
+        return $return;
+    }
+
+}
