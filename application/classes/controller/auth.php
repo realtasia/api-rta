@@ -53,6 +53,16 @@ class Controller_Auth extends Controller_Abstract {
     }
 
     /**
+     * In case this is a post request
+     *
+     * @return type
+     */
+    public function action_update()
+    {
+        return $this->action_index();
+    }
+
+    /**
      * Performs a Resource Owner Password Flow authentication. Sets error
      * object if not valid or the the success object with access_token if not.
      *
@@ -113,28 +123,28 @@ class Controller_Auth extends Controller_Abstract {
         $post = $this->request->post();
         $get  = $this->request->query();
         if (empty($post) && empty($get))
-            return $this->error('invalid_request', 400);
+            return $this->error('invalid_request');
 
         if (empty($post))
         {
-            $params = $get;
+            static::$params = $get;
         }
         else
         {
-            $params = $post;
+            static::$params = $post;
         }
 
         switch (true)
         {
-            case!isset($params['grant_type']) || empty($params['grant_type']):
-            case!isset($params['redirect_uri']) || empty($params['redirect_uri']):
-            case!isset($params['client_id']) || empty($params['client_id']):
-            case $params['grant_type'] == 'password' && (!isset($params['username']) || empty($params['username'])):
-            case $params['grant_type'] == 'password' && (!isset($params['password']) || empty($params['password'])):
-                return $this->error('invalid_request', 400);
+            case!isset(static::$params['grant_type']) || empty(static::$params['grant_type']):
+            case!isset(static::$params['redirect_uri']) || empty(static::$params['redirect_uri']):
+            case!isset(static::$params['client_id']) || empty(static::$params['client_id']):
+            case static::$params['grant_type'] == 'password' && (!isset(static::$params['username']) || empty(static::$params['username'])):
+            case static::$params['grant_type'] == 'password' && (!isset(static::$params['password']) || empty(static::$params['password'])):
+                return $this->error('invalid_request');
         }
 
-        return $params;
+        return static::$params;
     }
 
 }

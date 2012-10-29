@@ -12,8 +12,6 @@
 abstract class Controller_Resource extends Controller_Abstract{
     use Trait_Oauth2_Resource;
 
-    // the request params
-    public static $params = array();
     //the model used in each controller
     protected static $model;
     // authenticated user_id, if the session is user authenticated
@@ -80,7 +78,7 @@ abstract class Controller_Resource extends Controller_Abstract{
             $user = (object) Mongo_Document::factory('user');
             $user = $user->get(static::$user_id);
             // unset some sensitive info
-            unset($user['password']);
+            $user->password = '';
             // set the session
             Session::instance()->set($key, $user);
         }
@@ -126,7 +124,7 @@ abstract class Controller_Resource extends Controller_Abstract{
         if($interact->{$interaction}($this->request->param('id'), $object_type))
                 return $this->data(['success' => 1]);
 
-        return $this->error('invalid_request', 400);
+        return $this->error('invalid_request');
     }
 }
 // End Welcome

@@ -10,14 +10,13 @@
  */
 class Controller_Abstract extends Controller {
 
+    public static $params = array();
     /**
      * @var array REST types
      */
     protected $_action_map = [
         HTTP_Request::GET    => 'index',
-        HTTP_Request::PUT    => 'update',
-        HTTP_Request::POST   => 'create',
-        HTTP_Request::DELETE => 'delete',
+        HTTP_Request::POST   => 'update',
     ];
 
     // the model each respective child controller uses
@@ -41,13 +40,33 @@ class Controller_Abstract extends Controller {
      */
     public function before()
     {
+
+        if($p = Arr::get($_SERVER, 'HTTP_ORIGIN') || $p = Arr::get($_SERVER, 'ORIGIN'))
+        {
+            switch ($p) {
+                case 'http://test.jjpc.net':
+                case 'https://test.casa.net':
+                case 'https://beta.realtasia.com':
+                case 'https://realtasia.com.sg':
+                case 'https://www.realtasia.com.sg':
+                case 'https://www.realtasia.com':
+                    $this->response->headers([
+                        'Access-Control-Allow-Origin' => $_SERVER['HTTP_ORIGIN'],
+                        'Access-Control-Allow-Methods' => 'POST, GET, PUT, DELETE, OPTIONS',
+                        'Access-Control-Max-Age' => '3600',
+                        'Access-Control-Allow-Headers' => 'Content-Type',
+                    ]);
+                    break;
+            }
+        }
+
         $_action_requested = $this->request->action();
 
-        $method = static::_method();
+        $method = $this->_method();
         // Map to default actions unless it's a connection
         if (method_exists($this, 'action_' . $_action_requested) && !in_array($_action_requested, $this->_action_map))
         {
-            $this->request->action(static::$_action_requested);
+            $this->request->action($_action_requested);
         }
         else
         {
@@ -109,8 +128,7 @@ class Controller_Abstract extends Controller {
             'data'   => [
                 'title'   => $key,
                 'message' => Kohana::message('oauth2', 'message.' . $key)
-            ]
-                ];
+            ]];
 
         if(static::$current_session)
         {
@@ -119,7 +137,9 @@ class Controller_Abstract extends Controller {
 
         $header   = http_build_query($this->return);
 
-        $this->response->headers('WWW-Authenticate', $header);
+        $this->response->status(200);
+//        if(!$this->request->is_ajax())
+//            $this->response->headers('WWW-Authenticate', $header);
         return false;
     }
 
@@ -181,8 +201,11 @@ class Controller_Abstract extends Controller {
     public function after()
     {
         $this->response->headers('Content-Type', 'application/javascript');
-        $body = json_encode($this->return, JSON_PRETTY_PRINT);
-        $this->response->body($body);
+        $data = json_encode($this->return, JSON_PRETTY_PRINT);
+        if(isset(static::$params['callback']))
+            $data = static::$params['callback'] . '(' . $data . ')';
+
+        $this->response->body($data);
     }
 
     /**
@@ -190,7 +213,7 @@ class Controller_Abstract extends Controller {
      *
      * @return string
      */
-    protected static function _method()
+    protected function _method()
     {
         return Arr::get($_SERVER, 'HTTP_X_HTTP_METHOD_OVERRIDE', $this->request->method());
     }
@@ -200,9 +223,9 @@ class Controller_Abstract extends Controller {
      *
      * @return boolean
      */
-    protected static function is_GET()
+    protected function is_GET()
     {
-        return static::_method() === HTTP_Request::GET;
+        return $this->_method() === HTTP_Request::GET;
     }
 
     /**
@@ -210,9 +233,9 @@ class Controller_Abstract extends Controller {
      *
      * @return boolean
      */
-    protected static function is_PUT()
+    protected function is_PUT()
     {
-        return static::_method() === HTTP_Request::PUT;
+        return $this->_method() === HTTP_Request::PUT;
     }
 
     /**
@@ -220,9 +243,9 @@ class Controller_Abstract extends Controller {
      *
      * @return boolean
      */
-    protected static function is_POST()
+    protected function is_POST()
     {
-        return static::_method() === HTTP_Request::POST;
+        return $this->_method() === HTTP_Request::POST;
     }
 
     /**
@@ -230,9 +253,9 @@ class Controller_Abstract extends Controller {
      *
      * @return boolean
      */
-    protected static function is_DELETE()
+    protected function is_DELETE()
     {
-        return static::_method() === HTTP_Request::DELETE;
+        return $this->_method() === HTTP_Request::DELETE;
     }
 
     /**

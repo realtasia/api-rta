@@ -43,10 +43,13 @@ class Document extends Mongo_Document {
      */
     public function get($params, array $fields = [], $object = TRUE)
     {
-        if($result = $this->load($params, $fields))
+        if($this->load($params, $fields))
         {
-            return $object ? (object) $result->as_array() : $result->as_array();
+            $ret = $this->stringify($this->as_array());
+            return $object ? (object) $ret : $ret;
         }
+
+        return $object ? (object) [] : [];
     }
 
     /**

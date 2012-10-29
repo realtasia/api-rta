@@ -10,16 +10,13 @@
  */
 class Controller_User extends Controller_Resource {
 
-    private static $valid_put_types = [
-        'password_reset', 'update_social_login', 'activate', 'change_avatar'
-    ];
-
     private static $valid_get_types = [
         'has_social_login', 'is_unique', 'get', 'search'
     ];
 
     private static $valid_post_types = [
-        'registration', 'beta_interest', 'create_social_login'
+        'registration', 'beta_interest', 'create_social_login', 'password_reset',
+        'update_social_login', 'activate', 'change_avatar'
     ];
 
     public function before()
@@ -77,36 +74,10 @@ class Controller_User extends Controller_Resource {
         if (!$type)
             return $this->error('invalid_request');
 
-        if (in_array($type, static::$valid_put_types) && method_exists($this, $type))
-            return $this->{$type}();
-
-        return $this->error('invalid_request');
-    }
-
-    /**
-     * Creates a new user with the given params.
-     */
-    public function action_create()
-    {
-        // get the type of create
-        $type = Arr::get(static::$params, 'request_type');
-
-        if (!$type)
-            return $this->error('invalid_request');
-
         if (in_array($type, static::$valid_post_types) && method_exists($this, $type))
             return $this->{$type}();
 
         return $this->error('invalid_request');
-    }
-
-    /**
-     * Changes the state of a user to terminated. No real delete in the api.
-     * Also checks if logged in user has authority to do so.
-     */
-    public function action_delete()
-    {
-
     }
 
     /**************************************************************************
@@ -121,7 +92,7 @@ class Controller_User extends Controller_Resource {
         static::$params['object_id'] = $this->request->param('id');
         static::$params['object_type'] = 'user';
 
-        $data = Mongo_Collection('interaction')->subscribers(static::$params);
+        $data = Mongo_Document::factory('interaction')->collection()->subscribers(static::$params);
 
         return $this->data($data);
     }
@@ -156,14 +127,14 @@ class Controller_User extends Controller_Resource {
         if((static::$user_id && static::$user_id === $id) || parent::has_role('admin') || parent::is_client())
         {
             // retrieve user privacy
-            if(static::is_GET())
+            if($this->is_GET())
             {
                 $user = static::$model;
                 $user->load($id, [$retrieve_field => 1]);
                 $this->data($user->stringify($user->as_array()));
             }
             // update user privacy
-            if(static::is_PUT())
+            if($this->is_POST())
             {
                 $this->data($this->{$update_method}());
             }
@@ -195,7 +166,14 @@ class Controller_User extends Controller_Resource {
      */
     public function action_info()
     {
-        return $this->validate_current_request('update_info', 'info');
+        if ($this->is_GET())
+        {
+            $user = static::$model;
+            $user->load($this->request->param('id'), ['info' => 1]);
+            $this->data($user->stringify($user->as_array()));
+        }
+        else
+            return $this->validate_current_request('update_info', 'info');
     }
 
     /**

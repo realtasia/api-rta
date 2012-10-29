@@ -93,6 +93,7 @@ class Model_Interaction extends Document {
         if ($this->current_user == NULL)
             return false;
 
+
         $results = $this->collection(true)->find([
                     'user._id'  => $this->current_user->_id,
                     'object_id' => $object_id,
@@ -188,7 +189,7 @@ class Model_Interaction extends Document {
      */
     public function after_delete()
     {
-        $this->after_save();
+        $this->after_save(null);
     }
 
     /**
@@ -216,6 +217,8 @@ class Model_Interaction extends Document {
             return false;
 
         $user = (object) $this->get_current_user_fields();
+
+        $object_id = $object_id instanceof MongoID ? $object_id : new MongoID($object_id);
 
         // set the query
         $query = [

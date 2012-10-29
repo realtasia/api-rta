@@ -21,7 +21,12 @@ class Model_User extends Document {
      */
     public function get($id, array $fields = [], $object = TRUE)
     {
-        return $this->stringify(parent::get(self::_get_one($id), $fields));
+        if($this->load(self::_get_one($id), $fields))
+        {
+            $ret = $this->stringify($this->as_array());
+            return $object ? (object) $ret : $ret;
+        }
+        return $object ? (object) [] : [];
     }
 
     /**
@@ -32,7 +37,7 @@ class Model_User extends Document {
      */
     public function get_public($id)
     {
-        return $this->stringify(parent::get(self::_get_one($id), static::$protected_fields));
+        return $this->get($id, static::$protected_fields);
     }
 
     /**
@@ -122,9 +127,9 @@ class Model_User extends Document {
 
         $this->created = date('c', $id->getTimestamp());
         $this->active  = date('c', $this->active);
-        if (isset($this->birthday))
+        if (isset($this->info['birthday']))
         {
-            $this->birthday = date('c', $this->birthday);
+            $this->birthday = date('c', $this->info['birthday']);
         }
 
         if ($this->current_user == NULL)
@@ -133,7 +138,7 @@ class Model_User extends Document {
         $current_user = (object) $this->get_current_user_fields();
 
         // check if it's the same user
-        if ($this->_id === $current_user->_id)
+        if ($this->_id->__toString() === $current_user->_id->__toString())
         {
             $this->can_edit      = true;
             $this->can_like      = false;
@@ -141,8 +146,11 @@ class Model_User extends Document {
         }
         else
         {
-            $interactions       = Model_Document::factory('interaction', NULL, $current_user->_id);
+            $interactions       = Mongo_Document::factory('interaction', NULL, $current_user->_id);
             $this->interactions = $interactions->interacting($this->_id, 'user');
+            $this->password = '';
+            $this->settings = [];
+            $this->logins = [];
         }
 
         return $this;
@@ -250,7 +258,7 @@ class Model_User extends Document {
 // just a regular lookup
         return [
             '$or' => [
-                ['_id' => $username],
+                ['_id' => new MongoID($username)],
                 ['username' => $username],
                 ['email' => $username],
             ]
