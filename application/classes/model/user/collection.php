@@ -24,7 +24,7 @@ class Model_User_Collection extends Mongo_Collection {
      * @param array $args
      * @return self Sets the $cursor property and returns itself
      */
-    public function search($args = array())
+    public function search($args = array(), $user_id = NULL)
     {
         $defaults = [
            'limit' => 11, 'skip' => 0, 'roles' => [], 'sort' => 'alpha',
@@ -78,8 +78,14 @@ class Model_User_Collection extends Mongo_Collection {
         while($results->hasNext())
         {
             $row = $results->getNext();
+            if($user_id && $usr = $this->get_user($user_id))
+            {
+                $row->current_user = $usr;
+                $row->after_load();
+            }
+            $ret = $row->stringify($row->as_array());
 
-            $return[] = $row->stringify($row->as_array());
+            $return[] = $ret;
         }
 
         return $return;

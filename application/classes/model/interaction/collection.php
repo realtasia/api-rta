@@ -54,7 +54,7 @@ class Model_Interaction_Collection extends Mongo_Collection {
         extract(Arr::merge($defaults, $args), EXTR_SKIP);
 
         $query = [
-            'object_id'   => $object_id,
+            'object_id'   => new MongoID($object_id),
             'object_type' => $object_type,
             'interaction' => $interaction
         ];
@@ -63,10 +63,13 @@ class Model_Interaction_Collection extends Mongo_Collection {
                 ->limit($limit)
                 ->skip($skip);
 
+        //var_dump($results->hasNext());
+        //die;
+
         while($results->hasNext())
         {
             $row = $results->getNext();
-            $return[] = $row->stringify($row->as_array());
+            $return[] = $row->stringify($row->as_array())['user'];
         }
 
         return $return;

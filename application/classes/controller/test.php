@@ -27,15 +27,12 @@ class Controller_Test extends Controller {
 
         $return = [];
 
-        for($i= 1; $i <= 99; $i++)
-        {
-            $values = Arr::merge($token, $registration, $this->users($i));
+            //$values = Arr::merge($token, $registration, $this->users($i));
 
-            $request = Request::factory(URL::site('/user/', true))
+            $request = Request::factory(URL::site('/user/notifications/508ccae4b90fb894090002c7', true))
                     ->method(HTTP_Request::POST)
-                    ->post($values);
+                    ->post($token);
             $return[] = "<pre>".$request->execute()."</pre>";
-        }
 
         return $this->response->body(implode('<hr>', $return));
     }

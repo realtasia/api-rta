@@ -8,5 +8,6 @@
     ->rule('profile.others_posts_visibility', 'Controller_User::valid_privacy');
  */
 return [
-    'default' => 'The value you entered is not recognised by the system'
+    'valid_privacy' => 'The server does not understand your entry, please try again.',
+    'not_empty' => 'All fields are required, please try again.',
 ];

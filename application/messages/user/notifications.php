@@ -20,5 +20,16 @@ return [
         'email' => 'Please enter a valid email address',
         'email_domain' => 'Please enter a valid email address',
     ],
-    'default' => 'Something went wrong with your submission'
+    'not_empty' => 'A required value is missing. Something went twrong with your submission.',
+    'range'     => 'The server does not understand your entry, please try again.'
+//    'likers' => [
+//        'own_post'=> [
+//            'not_empty' => 'Something went wrong with your submission',
+//            'range' => 'Something went wrong with your submission',
+//        ],
+//        'other_post'=> [
+//            'not_empty' => 'Something went wrong with your submission',
+//            'range' => 'Something went wrong with your submission'
+//        ],
+//    ]
 ];

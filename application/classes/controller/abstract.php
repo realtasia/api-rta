@@ -40,19 +40,19 @@ class Controller_Abstract extends Controller {
      */
     public function before()
     {
-
         if($p = Arr::get($_SERVER, 'HTTP_ORIGIN') || $p = Arr::get($_SERVER, 'ORIGIN'))
         {
             switch ($p) {
                 case 'http://test.jjpc.net':
                 case 'https://test.casa.net':
                 case 'https://beta.realtasia.com':
+                case 'https://beta.realtasia.com.sg':
                 case 'https://realtasia.com.sg':
                 case 'https://www.realtasia.com.sg':
                 case 'https://www.realtasia.com':
                     $this->response->headers([
                         'Access-Control-Allow-Origin' => $_SERVER['HTTP_ORIGIN'],
-                        'Access-Control-Allow-Methods' => 'POST, GET, PUT, DELETE, OPTIONS',
+                        'Access-Control-Allow-Methods' => 'POST, GET',
                         'Access-Control-Max-Age' => '3600',
                         'Access-Control-Allow-Headers' => 'Content-Type',
                     ]);
@@ -158,6 +158,7 @@ class Controller_Abstract extends Controller {
 
         if(!$file && !$key)
         {
+
             if(is_array($this->errors) && !empty($this->errors))
             {
                 $error = (object) [
@@ -177,21 +178,17 @@ class Controller_Abstract extends Controller {
             ];
         }
 
+
         $this->return = $error;
+        //var_dump($this->return);
 
         if(static::$current_session)
         {
             $this->return->session = static::$current_session;
         }
 
-        $header       = '';
-
-        foreach ($this->return as $k => $v)
-        {
-            $header .= "$k=$v&";
-        }
-        $this->response->headers('WWW-Authenticate', $header);
-        return false;
+//        $header   = http_build_query($this->return);
+//        $this->response->headers('WWW-Authenticate', $header);
     }
 
     /**

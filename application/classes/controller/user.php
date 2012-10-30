@@ -49,16 +49,29 @@ class Controller_User extends Controller_Resource {
      */
     public function action_index()
     {
-        $id = $this->request->param('id');
-
+        // we retrieve the request_type from params
         $type = Arr::get(static::$params, 'request_type');
 
-        if (in_array($type, static::$valid_get_types) && method_exists($this, $type))
-            return $this->{$type}();
+        // if we have a type
+        if($type)
+        {
+            // we check if it is valid and the method exists
+            if (in_array($type, static::$valid_get_types) && method_exists($this, $type))
+                // run it
+                return $this->{$type}();
+            // ok, why do we have a type and not a method???
+            else
+                // yeap, you guessed it.
+                $this->error('invalid_request');
+        }
+
+        // no type, let's try id
+        $id = $this->request->param('id');
 
         if ($id)
             return $this->get($id);
         else
+            // no id, this is a search
             return $this->search();
     }
 
@@ -68,15 +81,18 @@ class Controller_User extends Controller_Resource {
      */
     public function action_update()
     {
-        // get the type of update
+        // get the type of request
         $type = Arr::get(static::$params, 'request_type');
 
+        // no type. we need a type
         if (!$type)
             return $this->error('invalid_request');
 
+        // let's check if it's valid and run it
         if (in_array($type, static::$valid_post_types) && method_exists($this, $type))
             return $this->{$type}();
 
+        // nope, return an error
         return $this->error('invalid_request');
     }
 
@@ -92,7 +108,9 @@ class Controller_User extends Controller_Resource {
         static::$params['object_id'] = $this->request->param('id');
         static::$params['object_type'] = 'user';
 
-        $data = Mongo_Document::factory('interaction')->collection()->subscribers(static::$params);
+        $data = Mongo_Document::factory('interaction')
+                ->collection()
+                ->likers(static::$params);
 
         return $this->data($data);
     }
@@ -105,7 +123,9 @@ class Controller_User extends Controller_Resource {
         static::$params['object_id'] = $this->request->param('id');
         static::$params['object_type'] = 'user';
 
-        $data = Mongo_Collection('interaction')->likers(static::$params);
+        $data = Mongo_Document::factory('interaction')
+                ->collection()
+                ->subscribers(static::$params);
 
         return $this->data($data);
     }
@@ -123,21 +143,24 @@ class Controller_User extends Controller_Resource {
         $id = $this->request->param('id');
 
         // current user is the user we need to update/fetch or
-        // either an admin is logged in or this is a client_credentials grant_type
+        // an admin is logged in or this is a client_credentials grant_type
         if((static::$user_id && static::$user_id === $id) || parent::has_role('admin') || parent::is_client())
         {
-            // retrieve user privacy
+            // retrieve user by his/her specific field requested.
             if($this->is_GET())
             {
                 $user = static::$model;
-                $user->load($id, [$retrieve_field => 1]);
-                $this->data($user->stringify($user->as_array()));
+                if($user->load($id, [$retrieve_field => 1]))
+                {
+                    $this->data($user->stringify($user->as_array()));
+                }
             }
-            // update user privacy
+            // update user by his/her specific field
             if($this->is_POST())
             {
-                $this->data($this->{$update_method}());
+                $this->{$update_method}();
             }
+            return true;
         }
 
         // no way to validate this request.
@@ -179,7 +202,7 @@ class Controller_User extends Controller_Resource {
     /**
      * This handles both retrieval and updating of a user's avatar
      */
-    public function avatar()
+    public function action_avatar()
     {
 
     }
@@ -283,13 +306,16 @@ class Controller_User extends Controller_Resource {
      */
     protected function search()
     {
-        $users = Mongo_Collection::factory('user')->search(static::$params);
+        if(parent::logged_in())
+            $users = Mongo_Collection::factory('user')->search(static::$params, static::$user_id);
+        else
+            $users = Mongo_Collection::factory('user')->search(static::$params);
 
         return $this->data($users);
     }
 
     /**************************************************************************
-     * Protected Utility Actions - $_POSTs
+     * Protected Actions - CREATES
      *************************************************************************/
 
     /**
@@ -298,13 +324,23 @@ class Controller_User extends Controller_Resource {
      */
     protected function registration()
     {
+        if(!parent::has_role('admin') || !parent::is_client())
+        {
+            $this->error('access_denied');
+            return true;
+        }
         // validation rules for a regular user.
         $validation = Validation::factory(static::$params)
+                ->rule('first_name', 'alpha')
                 ->rule('first_name', 'not_empty')
                 ->rule('last_name', 'alpha')
+                ->rule('last_name', 'not_empty')
                 ->rule('number.mobile', 'not_empty')
+                ->rule('number.mobile', 'numeric')
                 ->rule('gender', 'alpha')
+                ->rule('gender', 'not_empty')
                 ->rule('password', 'not_empty')
+                ->rule('email', 'not_empty')
                 ->rule('email', 'email')
                 ->rule('email', 'email_domain')
                 ->rule('birthday', 'numeric');
@@ -320,7 +356,6 @@ class Controller_User extends Controller_Resource {
         if($validation->check())
         {
             static::$params['roles'] = [static::$params['user_type']];
-            static::$params['roles'] = ['agent'];
             static::$params['status'] = 'pending';
             unset(static::$params['user_type']);
 
@@ -346,13 +381,21 @@ class Controller_User extends Controller_Resource {
      */
     protected function beta_interest()
     {
+        if(!parent::has_role('admin') || !parent::is_client())
+        {
+            $this->error('access_denied');
+            return true;
+        }
+
         $user = Mongo_Document::factory('beta');
 
         $validation = Validation::factory(static::$params)
                 ->rule('message', 'not_empty')
                 ->rule('number.mobile', 'not_empty')
                 ->rule('user_type', 'not_empty')
-                ->rule('display_name', 'not_empty')
+                ->rule('name', 'not_empty')
+                ->rule('name', 'alpha')
+                ->rule('email', 'not_empty')
                 ->rule('email', 'email')
                 ->rule('email', 'email_domain');
 
@@ -361,7 +404,7 @@ class Controller_User extends Controller_Resource {
             static::$params['interested'] = 1;
             if ($user->new_beta_user(static::$params))
             {
-                $r = array('email' => static::$params['email'], 'name' => static::$params['display_name'], 'number.mobile' => static::$params['number.mobile']);
+                $r = static::$params;
                 $this->admin_email('New User Joined Beta!! Woots', print_r(static::$params, TRUE));
                 $this->user_email($r, 'We received your submission', Kohana::message('register/info', 'thank_you_beta_email'));
 
@@ -379,33 +422,8 @@ class Controller_User extends Controller_Resource {
         return true;
     }
 
-    /**
-     * The official Client should be able to send SMSes too, although this really
-     * shouldn't be publically known ... :-(
-     *
-     * @param string $message
-     * @param string $number
-     * @return type
-     */
-    protected function send_sms($message, $to = NULL)
-    {
-        $id = $this->request->params('id');
-        if(!$to)
-        {
-            if(!$to = Arr::get(static::$params['to']))
-            {
-                static::$model->load($id, ['info.telephone' => 1]);
-                $result = static::$model->as_array();
-                $to = $result['mobile'];
-            }
-        }
-        $this->return = SMS::factory($to, $message);
-        return;
-
-    }
-
-    /**************************************************************************
-     * Protected Utility Actions - $_PUTs
+    /*****************************************************"*********************
+     * Protected Actions - UPDATES
      *************************************************************************/
 
     /**
@@ -443,6 +461,7 @@ class Controller_User extends Controller_Resource {
         static::$model->load_values(['_id' => new MongoID($id)]);
         static::$model->status = 'active';
         static::$model->save();
+        $this->data(['status' => 1]);
     }
 
     /**
@@ -478,12 +497,18 @@ class Controller_User extends Controller_Resource {
     protected function update_privacy()
     {
         $validation = Validation::factory(static::$params)
-                ->rule('contact', 'Controller_User::valid_privacy')
-                ->rule('subscriptions', 'Controller_User::valid_privacy')
-                ->rule('messages', 'Controller_User::valid_privacy')
-                ->rule('mentions', 'Controller_User::valid_privacy')
-                ->rule('profile.others_posts', 'Controller_User::valid_privacy')
-                ->rule('profile.others_posts_visibility', 'Controller_User::valid_privacy');
+                ->rule('contact', 'Controller_User::valid_privacy', [':value', ':field', ':validation'])
+                ->rule('contact', 'not_empty')
+                ->rule('subscriptions', 'Controller_User::valid_privacy', [':value', ':field', ':validation'])
+                ->rule('subscriptions', 'not_empty')
+                ->rule('messages', 'Controller_User::valid_privacy', [':value', ':field', ':validation'])
+                ->rule('messages', 'not_empty')
+                ->rule('mentions', 'Controller_User::valid_privacy', [':value', ':field', ':validation'])
+                ->rule('mentions', 'not_empty')
+                ->rule('profile.others_posts', 'Controller_User::valid_privacy', [':value', ':field', ':validation'])
+                ->rule('profile.others_posts', 'not_empty')
+                ->rule('profile.others_posts_visibility', 'Controller_User::valid_privacy', [':value', ':field', ':validation'])
+                ->rule('profile.others_posts_visibility', 'not_empty');
 
         if($validation->check())
         {
@@ -508,18 +533,33 @@ class Controller_User extends Controller_Resource {
         $validation = Validation::factory(static::$params)
                 ->rule('email', 'email')
                 ->rule('email', 'email_domain')
+                ->rule('likers.own_post', 'not_empty')
                 ->rule('likers.own_post', 'range', [':value', 0, 1])
+                ->rule('likers.other_post', 'not_empty')
                 ->rule('likers.other_post', 'range', [':value', 0, 1])
                 ->rule('likers.profile', 'range', [':value', 0, 1])
+                ->rule('likers.profile', 'not_empty')
                 ->rule('subscribers.own_post', 'range', [':value', 0, 1])
+                ->rule('subscribers.own_post', 'not_empty')
                 ->rule('subscribers.other_post', 'range', [':value', 0, 1])
+                ->rule('subscribers.other_post', 'not_empty')
                 ->rule('subscribers.profile', 'range', [':value', 0, 1])
+                ->rule('subscribers.profile', 'not_empty')
                 ->rule('comments.own_post', 'range', [':value', 0, 1])
+                ->rule('comments.own_post', 'not_empty')
                 ->rule('comments.other_post', 'range', [':value', 0, 1])
+                ->rule('comments.other_post', 'not_empty')
                 ->rule('mentions', 'range', [':value', 0, 1])
+                ->rule('mentions', 'not_empty')
                 ->rule('testimonials', 'range', [':value', 0, 1])
+                ->rule('testimonials', 'not_empty')
                 ->rule('wallpost', 'range', [':value', 0, 1])
-                ->rule('messages', 'range', [':value', 0, 1]);
+                ->rule('wallpost', 'not_empty')
+                ->rule('messages', 'range', [':value', 0, 1])
+                ->rule('messages', 'not_empty');
+
+        //var_dump($validation->check());
+        //die;
 
         if($validation->check())
         {
@@ -528,12 +568,76 @@ class Controller_User extends Controller_Resource {
         else
         {
             $this->errors = $validation->errors('user/notifications');
+
             $this->fail();
         }
 
         return true;
 
     }
+
+    /**
+     * The official Client should be able to send SMSes too, although this really
+     * shouldn't be publically known ... :-(
+     *
+     * @param string $message
+     * @param string $number OPTIONAL
+     * @return type
+     */
+    protected function send_sms($message, $to = NULL)
+    {
+        $id = $this->request->params('id');
+        if(!$to)
+        {
+            if(!$to = Arr::get(static::$params['to']))
+            {
+                static::$model->load($id, ['info.telephone' => 1]);
+                $result = static::$model->as_array();
+                $to = $result['mobile'];
+            }
+        }
+        $this->return = SMS::factory($to, $message);
+        return;
+
+    }
+
+    /**
+     * Sends a user an email. Normally for registrations purposes. The official
+     * client can use this too.
+     *
+     * @param string $recipient
+     * @param string $subject
+     * @param string $message
+     * @return boolean
+     */
+    protected function send_email($recipient, $subject, $message)
+    {
+        $content  = array(
+           'header_plain' => $subject,
+           'message_plain' => $message,
+           'message' => View::factory('emails/content/standard')
+                            ->set('content_header', "<h3>$subject</h3>")
+                            ->set('content_message', $message)
+        );
+
+        $view = View::factory('emails/spam_mail')
+              ->set('title', $content['header_plain'])
+              ->set('teaser', strip_tags($content['header_plain']))
+              ->set('content_view', $content['message']);
+
+        $plainview = View::factory('emails/content/plaintext_generic')
+              ->set('content_header', $content['header_plain'])
+              ->set('content_message', $content['message_plain']);
+
+        $email = Email::factory($content['header_plain'], $plainview)
+              ->message($view, 'text/html')
+              ->to($recipient['email'], $recipient['name'])
+              ->bcc('administrators@realtasia.com', 'RealtAsia Administrators')
+              ->from('[REDACTED]', 'Realtasia Beta Program');
+
+        return $email->send();
+    }
+
     /**************************************************************************
      * Protected STATIC Utility Methods
      *************************************************************************/
@@ -573,50 +677,19 @@ class Controller_User extends Controller_Resource {
     }
 
     /**
-     * Sends a user an email. Normally for registrations purposes
-     *
-     * @param string $recipient
-     * @param string $subject
-     * @param string $message
-     * @return boolean
-     */
-    protected static function user_email($recipient, $subject, $message)
-    {
-        $content  = array(
-           'header_plain' => $subject,
-           'message_plain' => $message,
-           'message' => View::factory('emails/content/standard')
-                            ->set('content_header', "<h3>$subject</h3>")
-                            ->set('content_message', $message)
-        );
-
-        $view = View::factory('emails/spam_mail')
-              ->set('title', $content['header_plain'])
-              ->set('teaser', strip_tags($content['header_plain']))
-              ->set('content_view', $content['message']);
-
-        $plainview = View::factory('emails/content/plaintext_generic')
-              ->set('content_header', $content['header_plain'])
-              ->set('content_message', $content['message_plain']);
-
-        $email = Email::factory($content['header_plain'], $plainview)
-              ->message($view, 'text/html')
-              ->to($recipient['email'], $recipient['name'])
-              ->bcc('administrators@realtasia.com', 'RealtAsia Administrators')
-              ->from('[REDACTED]', 'Realtasia Beta Program');
-
-        return $email->send();
-    }
-
-    /**
      * Small validation for possible privacy settings
      *
      * @param string $value
      * @return boolean
      */
-    protected static function valid_privacy($value)
+    protected static function valid_privacy($value, $field, $validation)
     {
-        return in_array($value, ['public', 'subscribers', 'private']);
+        if(in_array($value, ['public', 'subscribers', 'private']))
+        {
+            return true;
+        }
+
+        $validation->error($field, 'valid_privacy');
     }
 
 }

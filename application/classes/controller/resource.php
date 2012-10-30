@@ -34,27 +34,29 @@ abstract class Controller_Resource extends Controller_Abstract{
             static::$params = $this->request->post();
             $token = $this->request->post('access_token');
         }
+        //var_dump($this->validate_token($token));
 
         // Still nothing, return an error
-        if(!$token)
-            return $this->error('invalid_request');
-
-        // validate the token
-        $current_session = $this->validate_token($token);
-
-        // if validated, we get an array, so set the global properties
-        if(is_array($current_session))
+        if($token)
         {
-            static::$current_session = $current_session;
-            static::$user_id = static::$current_session['user_id'];
-            if(isset(static::$params['state']))
-            {
-                static::$current_session['state'] = static::$params['state'];
-            }
+            // validate the token
+            $current_session = $this->validate_token($token);
 
+            // if validated, we get an array, so set the global properties
+            if(is_array($current_session))
+            {
+                static::$current_session = $current_session;
+                static::$user_id = static::$current_session['user_id'];
+                if(isset(static::$params['state']))
+                {
+                    static::$current_session['state'] = static::$params['state'];
+                }
+            }
+            return parent::before();
         }
 
-        return parent::before();
+        $this->data('invalid_request');
+        $this->request->action('after');
     }
 
     /**

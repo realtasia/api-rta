@@ -126,11 +126,18 @@ class Model_User extends Document {
         $id = $this->_id instanceof MongoID ? $this->_id : new MongoID($this->_id);
 
         $this->created = date('c', $id->getTimestamp());
-        $this->active  = date('c', $this->active);
+        if(is_numeric($this->active))
+        {
+            $this->active  = date('c', $this->active);
+        }
+        //
         if (isset($this->info['birthday']))
         {
             $this->birthday = date('c', $this->info['birthday']);
         }
+
+        if ($this->current_user == NULL)
+            return $this;
 
         if ($this->current_user == NULL)
             return $this;
@@ -184,7 +191,7 @@ class Model_User extends Document {
      * @param string|MongoID $user_id
      * @return type
      */
-    public function update_notification($params, $user_id)
+    public function update_notifications($params, $user_id)
     {
         $field = static::$user_fields['settings']['notifications'];
         $values = Arr::overwrite($field, $params);
@@ -243,7 +250,7 @@ class Model_User extends Document {
      */
     protected static function _get_one($username, $regex = FALSE)
     {
-// Used if an actual keyword search is taking place. Uses MongoRegex()
+        // Used if an actual keyword search is taking place. Uses MongoRegex()
         if ($regex)
         {
             $username = new MongoRegex("/^$username/i");
@@ -255,7 +262,7 @@ class Model_User extends Document {
                 ]
             ];
         }
-// just a regular lookup
+        // just a regular lookup
         return [
             '$or' => [
                 ['_id' => new MongoID($username)],

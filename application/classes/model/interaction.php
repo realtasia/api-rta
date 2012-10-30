@@ -120,10 +120,7 @@ class Model_Interaction extends Document {
      */
     public function before_save($action)
     {
-        $user = $this->current_user->as_array();
-        unset($user['created']);
-        if(isset($user['modified']))
-            unset($user['modified']);
+        $user =  $this->get_current_user_fields();
 
         $this->user = $user;
     }
