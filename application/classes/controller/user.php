@@ -610,32 +610,20 @@ class Controller_User extends Controller_Resource {
      * @param string $message
      * @return boolean
      */
-    protected function send_email($recipient, $subject, $message)
+    protected function send_email($subject, $message, $to = NULL)
     {
-        $content  = array(
-           'header_plain' => $subject,
-           'message_plain' => $message,
-           'message' => View::factory('emails/content/standard')
-                            ->set('content_header', "<h3>$subject</h3>")
-                            ->set('content_message', $message)
-        );
-
-        $view = View::factory('emails/spam_mail')
-              ->set('title', $content['header_plain'])
-              ->set('teaser', strip_tags($content['header_plain']))
-              ->set('content_view', $content['message']);
-
-        $plainview = View::factory('emails/content/plaintext_generic')
-              ->set('content_header', $content['header_plain'])
-              ->set('content_message', $content['message_plain']);
-
-        $email = Email::factory($content['header_plain'], $plainview)
-              ->message($view, 'text/html')
-              ->to($recipient['email'], $recipient['name'])
-              ->bcc('administrators@realtasia.com', 'RealtAsia Administrators')
-              ->from('[REDACTED]', 'Realtasia Beta Program');
-
-        return $email->send();
+        $id = $this->request->params('id');
+        if(!$to)
+        {
+            if(!$to = Arr::get(static::$params['to']))
+            {
+                static::$model->load($id);
+                $result = static::$model->as_array();
+                $to = $result['email'];
+            }
+        }
+        $this->user_email($to, $subject, $message);
+        return;
     }
 
     /**************************************************************************
@@ -672,6 +660,43 @@ class Controller_User extends Controller_Resource {
               ->message($view, 'text/html')
               ->to('administrators@realtasia.com', 'RealtAsia Administrators')
               ->from('[REDACTED]', 'SiRyA');
+
+        return $email->send();
+    }
+
+    /**
+     * Sends a user an email. Normally for registrations purposes. The official
+     * client can use this too.
+     *
+     * @param string $recipient
+     * @param string $subject
+     * @param string $message
+     * @return boolean
+     */
+    protected function user_email($recipient, $subject, $message)
+    {
+        $content  = array(
+           'header_plain' => $subject,
+           'message_plain' => $message,
+           'message' => View::factory('emails/content/standard')
+                            ->set('content_header', "<h3>$subject</h3>")
+                            ->set('content_message', $message)
+        );
+
+        $view = View::factory('emails/spam_mail')
+              ->set('title', $content['header_plain'])
+              ->set('teaser', strip_tags($content['header_plain']))
+              ->set('content_view', $content['message']);
+
+        $plainview = View::factory('emails/content/plaintext_generic')
+              ->set('content_header', $content['header_plain'])
+              ->set('content_message', $content['message_plain']);
+
+        $email = Email::factory($content['header_plain'], $plainview)
+              ->message($view, 'text/html')
+              ->to($recipient['email'], $recipient['name'])
+              ->bcc('administrators@realtasia.com', 'RealtAsia Administrators')
+              ->from('[REDACTED]', 'Realtasia Beta Program');
 
         return $email->send();
     }

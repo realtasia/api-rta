@@ -126,6 +126,34 @@ Route::set('user', 'user(/<action>(/<id>))')
             'id'         => null
         ]);
 
+Route::set('like_user', 'user/like(/<id>)')
+        ->defaults([
+            'controller' => 'user',
+            'action'     => 'like',
+            'id'         => null
+        ]);
+
+Route::set('unlike_user', 'user/unlike(/<id>)')
+        ->defaults([
+            'controller' => 'user',
+            'action'     => 'unlike',
+            'id'         => null
+        ]);
+
+Route::set('subscribe_user', 'user/subscribe(/<id>)')
+        ->defaults([
+            'controller' => 'user',
+            'action'     => 'subscribe',
+            'id'         => null
+        ]);
+
+Route::set('unsubscribe_user', 'user/unsubscribe(/<id>)')
+        ->defaults([
+            'controller' => 'user',
+            'action'     => 'unsubscribe',
+            'id'         => null
+        ]);
+
 Route::set('auth', 'auth(/<action>(/<id>))')
         ->defaults([
             'controller' => 'auth',
