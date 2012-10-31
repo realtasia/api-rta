@@ -105,7 +105,28 @@ require APPPATH.'bootstrap'.EXT;
  * Execute the main request. A source of the URI can be passed, eg: $_SERVER['PATH_INFO'].
  * If no source is specified, the URI will be automatically detected.
  */
-echo Request::factory()
-	->execute()
-	->send_headers()
-	->body();
+
+try
+{
+    echo Request::factory()
+            ->execute()
+            ->send_headers()
+            ->body();
+}
+catch (Exception $e)
+{
+    Debug::log(sprintf('%s [ %s ]: %s ~ %s [ %d ]', get_class($e), $e->getCode(), strip_tags($e->getMessage()), Debug::path($e->getFile()), $e->getLine()));
+
+    echo Response::factory([
+        'status' => 200
+    ])->headers('Content-Type', 'application/javascript')
+      ->body(json_encode([
+        'status' => 'error',
+        'data' => [
+            'title' => 'access_denied',
+            'message' => 'The resource owner or authorization server denied the request.'
+        ]
+    ], JSON_PRETTY_PRINT)
+    );
+
+}

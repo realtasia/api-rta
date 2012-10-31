@@ -32,7 +32,6 @@ class Controller_User extends Controller_Resource {
         }
     }
 
-
     /**************************************************************************
      * Default Actions
      *************************************************************************/
@@ -62,7 +61,7 @@ class Controller_User extends Controller_Resource {
             // ok, why do we have a type and not a method???
             else
                 // yeap, you guessed it.
-                $this->error('invalid_request');
+                $this->fail('user/generic', 'server_error');
         }
 
         // no type, let's try id
@@ -86,7 +85,7 @@ class Controller_User extends Controller_Resource {
 
         // no type. we need a type
         if (!$type)
-            return $this->error('invalid_request');
+            $this->error('invalid_request');
 
         // let's check if it's valid and run it
         if (in_array($type, static::$valid_post_types) && method_exists($this, $type))
@@ -164,7 +163,7 @@ class Controller_User extends Controller_Resource {
         }
 
         // no way to validate this request.
-        $this->error('access_denied');
+        $this->fail('user/generic', 'access_denied');
         return true;
     }
 
@@ -296,7 +295,7 @@ class Controller_User extends Controller_Resource {
     {
         return static::$model->load(['logins.type' => $network, '_id' => static::$user_id], ['logins'])
                 ? static::$model->as_array()
-                : false;
+                : $this->data('status', 1);;
     }
 
     /**
@@ -326,8 +325,8 @@ class Controller_User extends Controller_Resource {
     {
         if(!parent::has_role('admin') || !parent::is_client())
         {
-            $this->error('access_denied');
-            return true;
+            return $this->error('access_denied');
+
         }
         // validation rules for a regular user.
         $validation = Validation::factory(static::$params)
@@ -436,12 +435,14 @@ class Controller_User extends Controller_Resource {
             return $this->error('access_denied');
 
         if(!isset(static::$params['password']) || empty(static::$params['password']))
-            return $this->error('access_denied');
+            return $this->error('invalid_request');
+        if(!isset(static::$params['new_password']) || empty(static::$params['new_password']))
+            return $this->error('invalid_request');
 
         $id = $this->param->user('id');
-        $user = static::$model->update_password(static::$params['password'], $id);
+        $user = static::$model->update_password(static::$params['new_password'], $id);
 
-        return $user ? $this->data(['success' => 1]) : $this->error('access_denied');
+        return $user ? $this->data(['success' => 1]) : $this->fail('user/generic', 'server_error');
     }
 
     /**

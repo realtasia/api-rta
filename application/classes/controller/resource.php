@@ -51,13 +51,17 @@ abstract class Controller_Resource extends Controller_Abstract{
                 {
                     static::$current_session['state'] = static::$params['state'];
                 }
+                unset(static::$current_session['client_id']);
+                return parent::before();
             }
-            return parent::before();
+            else
+            {
+                return $this->request->action('continue');
+            }
         }
-
-        $this->data('invalid_request');
-        $this->request->action('after');
+        return $this->request->action('continue');
     }
+
 
     /**
      * Gets a user from session if available. If not, gets one from the user db
@@ -126,7 +130,7 @@ abstract class Controller_Resource extends Controller_Abstract{
         if($interact->{$interaction}($this->request->param('id'), $object_type))
                 return $this->data(['success' => 1]);
 
-        return $this->error('invalid_request');
+        return $this->fail('user/generic', 'server_error');
     }
 }
 // End Welcome

@@ -34,7 +34,7 @@ trait Trait_Oauth2_Resource {
             if(static::$mSession->expired($session['expires_in']))
             {
                 // token expired. generate a new one and return the token.
-                $update_session = static::$mSession->set_token($session);
+                $update_session = static::$mSession->set_token($session, true);
                 return $update_session;
             }
 

@@ -1,6 +1,4 @@
-<?php
-
-defined('SYSPATH') or die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');
 
 // -- Environment setup --------------------------------------------------------
 // Load the core Kohana class
@@ -83,7 +81,6 @@ if (isset($_SERVER['KOHANA_ENV']))
 Kohana::init([
     'base_url' => '/',
 ]);
-
 /**
  * Attach the file write to logging. Multiple writers are supported.
  */
@@ -107,6 +104,7 @@ Kohana::modules([
     //'mongo-auth' => MODPATH . 'mongo-auth', // Not using
     'email'      => MODPATH . 'email', // Emailer
     'sms'        => MODPATH . 'sms', // SMSer
+    'devtools'        => MODPATH . 'devtools', // SMSer
         // 'codebench'  => MODPATH.'codebench',  // Benchmarking tool
         // 'database'   => MODPATH.'database',   // Database access
         // 'image'      => MODPATH.'image',      // Image manipulation
@@ -117,40 +115,10 @@ Kohana::modules([
 
 Kohana::$log->attach(new Log_Mongo(), [], Log::DEBUG);
 
-
-
 Route::set('user', 'user(/<action>(/<id>))')
         ->defaults([
             'controller' => 'user',
             'action'     => 'index',
-            'id'         => null
-        ]);
-
-Route::set('like_user', 'user/like(/<id>)')
-        ->defaults([
-            'controller' => 'user',
-            'action'     => 'like',
-            'id'         => null
-        ]);
-
-Route::set('unlike_user', 'user/unlike(/<id>)')
-        ->defaults([
-            'controller' => 'user',
-            'action'     => 'unlike',
-            'id'         => null
-        ]);
-
-Route::set('subscribe_user', 'user/subscribe(/<id>)')
-        ->defaults([
-            'controller' => 'user',
-            'action'     => 'subscribe',
-            'id'         => null
-        ]);
-
-Route::set('unsubscribe_user', 'user/unsubscribe(/<id>)')
-        ->defaults([
-            'controller' => 'user',
-            'action'     => 'unsubscribe',
             'id'         => null
         ]);
 
@@ -166,7 +134,7 @@ Route::set('auth', 'auth(/<action>(/<id>))')
  */
 Route::set('default', '(<controller>(/<action>(/<id>)))',["id" => "[a-zA-Z0-9_]+","action" => "[a-zA-Z]+"])
         ->defaults([
-            'controller' => 'welcome',
+            'controller' => 'testpad',
             'action'     => 'index',
             'id'         => null
         ]);

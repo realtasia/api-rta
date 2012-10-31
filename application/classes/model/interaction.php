@@ -141,29 +141,30 @@ class Model_Interaction extends Document {
         $count_field = static::$count_field;
 
         $current_user = $this->get_current_user_fields();
-
         // fetch the concerned object
         $object = Mongo_Document::factory($this->object_type, $this->object_id);
+
 
         // update the latest interactions in the object
         if (static::$inc === 1)
         {
-            // sadly can't be atomic
-            $obj_interact_counts = count($object->{$count_field});
 
-            // we are only saving the latest five interactions
-            if ($obj_interact_counts === 5)
-            {
-                // if 5, then we remove the last entry
-                $object->pop($count_field);
-            }
+//            // sadly can't be atomic
+//            $obj_interact_counts = count($object->{$count_field});
+//
+//            // we are only saving the latest five interactions
+//            if ($obj_interact_counts === 5)
+//            {
+//                // if 5, then we remove the last entry
+//                $object->pop($count_field);
+//            }
             // add it to the set
-            $object->addToSet($count_field, $current_user);
+            //$object->addToSet($count_field, $current_user);
         }
         else
         {
             // we just remove the interaction.
-            $object->pull($count_field, ['_id' => $current_user['_id']]);
+            //$object->pull($count_field, ['_id' => $current_user['_id']]);
         }
 
         // increment the count for this interaction
@@ -171,7 +172,9 @@ class Model_Interaction extends Document {
         //print_r($object);
         //die();
         // objects save method automatically updates timestamps
+        //Debug::log(print_r($object, true));
         $object->save();
+        //Debug::log(print_r($object, true));
 
         // update the user's last active
         $this->current_user->save();
@@ -235,9 +238,13 @@ class Model_Interaction extends Document {
                     // remove the 'un'
                     $query['interaction'] = substr($this->interaction, 2);
 
-                    // delete the subscription
-                    $this->collection(true)->remove_safe($query, ['justOne'    => TRUE]);
-                    $this->after_delete();
+                    // remove the interaction
+                    if((bool) $this->collection(true)->remove_safe($query, ['justOne' => TRUE]))
+                    {
+                        // only do updates if there was a succesful removal.
+                        // the remove_safe returns the number of documents removed
+                        $this->after_delete();
+                    }
                     break;
                 case 'like':
 

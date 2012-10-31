@@ -11,7 +11,7 @@
 class Model_Comment_Collection extends Mongo_Collection {
     protected $name = 'comments';
 
-    public function fetch($args)
+    public function fetch($args, $user_id = NULL)
     {
         $defaults = [
            'limit' => 2, 'skip' => 0, 'type' => 'comment', 'sort' => 1,
@@ -41,6 +41,11 @@ class Model_Comment_Collection extends Mongo_Collection {
         while($results->hasNext())
         {
             $row = $results->getNext();
+            if($user_id && $usr = $this->get_user($user_id))
+            {
+                $row->current_user = $usr;
+                $row->after_load();
+            }
             $return[] = $row->stringify($row->as_array());
         }
 

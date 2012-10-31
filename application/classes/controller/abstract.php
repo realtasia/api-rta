@@ -40,26 +40,6 @@ class Controller_Abstract extends Controller {
      */
     public function before()
     {
-        if($p = Arr::get($_SERVER, 'HTTP_ORIGIN') || $p = Arr::get($_SERVER, 'ORIGIN'))
-        {
-            switch ($p) {
-                case 'http://test.jjpc.net':
-                case 'https://test.casa.net':
-                case 'https://beta.realtasia.com':
-                case 'https://beta.realtasia.com.sg':
-                case 'https://realtasia.com.sg':
-                case 'https://www.realtasia.com.sg':
-                case 'https://www.realtasia.com':
-                    $this->response->headers([
-                        'Access-Control-Allow-Origin' => $_SERVER['HTTP_ORIGIN'],
-                        'Access-Control-Allow-Methods' => 'POST, GET',
-                        'Access-Control-Max-Age' => '3600',
-                        'Access-Control-Allow-Headers' => 'Content-Type',
-                    ]);
-                    break;
-            }
-        }
-
         $_action_requested = $this->request->action();
 
         $method = $this->_method();
@@ -78,6 +58,11 @@ class Controller_Abstract extends Controller {
     }
 
     public $return = array();
+
+    public function action_continue()
+    {
+        return $this->error('access_denied');
+    }
 
     /**
      * Returns a formatted response containing current session and data
@@ -121,6 +106,10 @@ class Controller_Abstract extends Controller {
      */
     protected function error($key, $status = 200)
     {
+        $this->response->headers([
+            'Cache-Control' => 'no-cache, must-revalidate',
+            'Expires' => date('c', time()),
+        ]);
         $this->response->status(200);
         $this->return = is_array($key)
                 ? (object) $key : (object) [
@@ -132,15 +121,21 @@ class Controller_Abstract extends Controller {
 
         if(static::$current_session)
         {
-            $this->return->session = static::$current_session;
+            $this->return->session = [
+                'access_token' => static::$current_session['access_token']
+            ];
+            if(isset(static::$current_session['state']))
+            {
+                $this->return->session['state'] = static::$current_session['state'];
+            }
         }
 
-        $header   = http_build_query($this->return);
+//        $header   = http_build_query($this->return);
 
         $this->response->status(200);
 //        if(!$this->request->is_ajax())
 //            $this->response->headers('WWW-Authenticate', $header);
-        return false;
+        return $this->after();
     }
 
     /**
@@ -154,6 +149,10 @@ class Controller_Abstract extends Controller {
      */
     protected function fail($file = NULL, $key = NULL, $status = 200)
     {
+        $this->response->headers([
+            'Cache-Control' => 'no-cache, must-revalidate',
+            'Expires' => date('c', time()),
+        ]);
         $this->response->status($status);
 
         if(!$file && !$key)
@@ -197,6 +196,26 @@ class Controller_Abstract extends Controller {
      */
     public function after()
     {
+        $p = Arr::get($_SERVER, 'HTTP_ORIGIN');
+        if($p)
+        {
+            switch ($p) {
+                case 'http://test.jjpc.net':
+                case 'https://test.casa.net':
+                case 'https://beta.realtasia.com':
+                case 'https://beta.realtasia.com.sg':
+                case 'https://realtasia.com.sg':
+                case 'https://www.realtasia.com.sg':
+                case 'https://www.realtasia.com':
+                    $this->response->headers([
+                        'Access-Control-Allow-Origin' => $_SERVER['HTTP_ORIGIN'],
+                        'Access-Control-Allow-Methods' => 'POST, GET',
+                        'Access-Control-Max-Age' => '3600',
+                        'Access-Control-Allow-Headers' => 'Content-Type',
+                    ]);
+                    break;
+            }
+        }
         $this->response->headers('Content-Type', 'application/javascript');
         $data = json_encode($this->return, JSON_PRETTY_PRINT);
         if(isset(static::$params['callback']))

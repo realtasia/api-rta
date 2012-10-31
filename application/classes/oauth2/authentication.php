@@ -72,13 +72,13 @@ class Oauth2_Authentication {
      * @param string $client_id
      * @param string $username
      * @param string $password
-     * @param boolean $auto_approve
+     * @param boolean $new
      * @return boolean
      */
-    public function login($values, $auto_approve = false)
+    public function login($values)
     {
         // if there is no client_id registered, nothing left to do
-        if(!$client = static::$mClient->get_client($values['client_id'], $auto_approve))
+        if(!$client = static::$mClient->get_client($values['client_id']))
                 return static::$error->create('unauthorized_client');
 
         // if user registration fails, return false
@@ -86,7 +86,7 @@ class Oauth2_Authentication {
                 return static::$error->create('unauthorized_client');
 
         // get or create a new token
-        return $this->get_token($client['client_id'], $user['_id'], 'password');
+        return $this->get_token($client['client_id'], $user['_id'], TRUE, 'password');
     }
 
     /**
@@ -131,7 +131,7 @@ class Oauth2_Authentication {
             $stored_domain = parse_url($client['redirect_uri'], PHP_URL_HOST);
 
             if ($given_domain === $stored_domain)
-                return $this->get_token($values['client_id']);
+                return $this->get_token($values['client_id'], NULL, TRUE);
         }
         return static::$error->create('unauthorized_client');
     }
@@ -144,7 +144,7 @@ class Oauth2_Authentication {
      * @param string $grant_type
      * @return string
      */
-    public function get_token($client_id, $user_id = NULL, $grant_type = 'client_credentials')
+    public function get_token($client_id, $user_id = NULL, $new = false, $grant_type = 'client_credentials')
     {
         $params = [
             'client_id'  => $client_id,
@@ -165,7 +165,7 @@ class Oauth2_Authentication {
             if(static::$mSession->expired($session['expires_in']))
             {
                 // token expired. generate a new one and return the token.
-                $update_session = static::$mSession->set_token($session);
+                $update_session = static::$mSession->set_token($session, $new);
                 return static::$success->create($update_session);
             }
 
@@ -174,7 +174,7 @@ class Oauth2_Authentication {
         }
 
         // no session, create a new token and return it.
-        $new_session = static::$mSession->set_token($params);
+        $new_session = static::$mSession->set_token($params, $new);
         return static::$success->create($new_session);
     }
 

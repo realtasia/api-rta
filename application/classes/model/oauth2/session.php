@@ -44,9 +44,8 @@ class Model_Oauth2_Session extends Document {
      */
     public function destroy($token)
     {
-        $this->before_delete();
-        return $this->collection()->remove(['access_token' => $token]);
-        $this->after_delete();
+        $this->load_values(['access_token' => $token]);
+        $this->delete();
     }
 
     /**
@@ -62,35 +61,40 @@ class Model_Oauth2_Session extends Document {
      * ]
      *
      * @param array $params
-     * @param boolean $session
+     * @param boolean $new destroys an old token
      *
      * @return string|array
      */
-    public function set_token($params, $session = true)
+    public function set_token($params, $new = false)
     {
         // the access token
         $access_token = sha1(time() . uniqid());
 
         // query array can safely contain these
         $query = [
-            'client_id'    => $params['client_id'],
+            'client_id'    => new MongoID($params['client_id']),
             'grant_type'   => $params['grant_type']
         ];
 
         // only add the next 3 params if they exist
         if(isset($params['user_id']))
         {
-            $query['user_id'] = $params['user_id'];
+            $query['user_id'] = new MongoID($params['user_id']);
         }
 
         if(isset($params['_id']))
         {
-            $query['_id'] = $params['_id'];
+            $query['_id'] = new MongoID($params['_id']);
         }
 
         if(isset($params['access_token']))
         {
+            //Debug::log($params['access_token']);
             $query['access_token'] = $params['access_token'];
+            if($new)
+            {
+                $this->destroy($params['access_token']);
+            }
         }
 
         // for the new or the update object.
@@ -120,7 +124,7 @@ class Model_Oauth2_Session extends Document {
 //        $this->collection->ensureIndex(['client_id' => 1]);
 //        $this->collection->ensureIndex(['access_token' => 1], ['unique' => 1]);
 
-        return $session ? $this->stringify($params) : $access_token;
+        return $this->stringify($params);
     }
 
     /**

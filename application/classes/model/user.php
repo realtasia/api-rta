@@ -1,6 +1,4 @@
-<?php
-
-defined('SYSPATH') or die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');
 
 /**
  * Description of user
@@ -114,6 +112,21 @@ class Model_User extends Document {
         {
             $this->birthday = strtotime($this->birthday);
         }
+        if(isset($this->counts))
+        {
+            $counts = Arr::merge(static::$user_fields['counts'], $this->counts);
+
+            foreach($counts as $k => $v)
+            {
+                if($v < 0)
+                {
+                    $counts[$k] = 0;
+                }
+            }
+
+            $this->counts = $counts;
+        }
+        return true;
     }
 
     /**
@@ -136,10 +149,7 @@ class Model_User extends Document {
             $this->birthday = date('c', $this->info['birthday']);
         }
 
-        if ($this->current_user == NULL)
-            return $this;
-
-        if ($this->current_user == NULL)
+        if ($this->current_user === NULL)
             return $this;
 
         $current_user = (object) $this->get_current_user_fields();
@@ -150,14 +160,17 @@ class Model_User extends Document {
             $this->can_edit      = true;
             $this->can_like      = false;
             $this->can_subscribe = false;
+            $this->connections   = static::get_all_connection_routes($this->_id);
         }
         else
         {
             $interactions       = Mongo_Document::factory('interaction', NULL, $current_user->_id);
             $this->interactions = $interactions->interacting($this->_id, 'user');
-            $this->password = '';
-            $this->settings = [];
-            $this->logins = [];
+            $this->actions      = static::get_action_routes($this->_id);
+            $this->connections  = static::get_public_connection_routes($this->_id);
+            $this->password     = '';
+            $this->settings     = [];
+            $this->logins       = [];
         }
 
         return $this;
@@ -273,7 +286,63 @@ class Model_User extends Document {
     }
 
     /**
-     * These are fields that are not needed for public info.
+     * Gets all the available action links that can be done to a user
+     * (by a logged in user)
+     *
+     * @param string|MongoID $user_id
+     * @return array
+     */
+    protected static function get_action_routes($user_id)
+    {
+        $actions = [];
+
+        foreach(['like', 'unlike', 'subscribe', 'unsubscribe'] as $k => $v)
+        {
+            $actions[$v] = Router::user($v, $user_id);
+        }
+
+        return $actions;
+    }
+
+    /**
+     * Gets all connection links, including private ones belonging to a
+     * logged in user
+     *
+     * @param string|MongoID $user_id
+     * @return array
+     */
+    protected static function get_all_connection_routes($user_id)
+    {
+        $actions = [];
+
+        foreach(['privacy', 'notifications'] as $k => $v)
+        {
+            $actions[$v] = Router::user($v, $user_id);
+        }
+
+        return Arr::merge($actions, static::get_public_connection_routes($user_id));
+    }
+
+    /**
+     * Gets all publically available connection links for a given user.
+     *
+     * @param string|MongoID $user_id
+     * @return array
+     */
+    protected static function get_public_connection_routes($user_id)
+    {
+        $actions = [];
+
+        foreach(['likers', 'avatar', 'subscribers', 'info'] as $k => $v)
+        {
+            $actions[$v] = Router::user($v, $user_id);
+        }
+
+        return $actions;
+    }
+
+    /**
+     * These are fields that are not needed for public consumption.
      *
      * @var array
      */
@@ -370,6 +439,7 @@ class Model_User extends Document {
             'posts'        => 0,
             'subscribers'  => 0,
             'testimonials' => 0,
+            'total'        => 0,
         ],
         'info'         => [
             'telephone' => ['mobile'    => ''],

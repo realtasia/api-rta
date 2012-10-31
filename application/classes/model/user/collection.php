@@ -48,11 +48,12 @@ class Model_User_Collection extends Mongo_Collection {
         // keyword searches
         if ($s)
         {
-            // this time it's a regex search -> not good, no indexing...
+            // this time it's a regex search.
             $s = new MongoRegex("/^$s/i");
             $query['$or'] = [
                     ['username' => $s],
                     ['email' => $s],
+                    ['telephone.mobile' => $s],
                     ['company.name' => $s]
                 ];
         }
