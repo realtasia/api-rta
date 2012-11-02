@@ -240,6 +240,14 @@ class Model_User extends Document {
         return $values;
     }
 
+    /**
+     * Using this to format some fields. Can't set subarray values via model.
+     * Keep getting error that modifying overloaded property has no effect.
+     * Apparently, that is the way __get() works. So have to do it here instead.
+     *
+     * @param array $arr
+     * @return array
+     */
     public function stringify(array $arr)
     {
         $can_edit = Arr::get($arr, 'can_edit');
