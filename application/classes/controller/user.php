@@ -49,7 +49,7 @@ class Controller_User extends Controller_Resource {
     public function action_index()
     {
         // we retrieve the request_type from params
-        $type = Arr::get(static::$params, 'request_type');
+        $type = Arr::get(static::$params, 'request_type', false);
 
         // if we have a type
         if($type)
@@ -166,6 +166,7 @@ class Controller_User extends Controller_Resource {
         }
 
         // no way to validate this request.
+        Debug::log('In Validate Request, no way to validate request');
         $this->fail('user/generic', 'access_denied');
         return true;
     }
@@ -336,7 +337,7 @@ class Controller_User extends Controller_Resource {
     {
         if(parent::has_role('admin') === false && parent::is_client() === false)
         {
-            //Debug::log(parent::has_role('admin') === false);
+            Debug::log('In registration, Not admin or client. Can\'t continue');
             return $this->error('access_denied');
 
         }
@@ -391,8 +392,9 @@ class Controller_User extends Controller_Resource {
      */
     protected function beta_interest()
     {
-        if(!parent::has_role('admin') || !parent::is_client())
+        if(!parent::has_role('admin') && !parent::is_client())
         {
+            Debug::log('In beta interest. Not client or admin. cannot continue');
             $this->error('access_denied');
             return true;
         }
@@ -443,7 +445,11 @@ class Controller_User extends Controller_Resource {
     protected function password_reset()
     {
         if(!parent::logged_in())
+        {
+            Debug::log('In password reset. No logged in user');
             return $this->error('access_denied');
+        }
+
 
         if(!isset(static::$params['password']) || empty(static::$params['password']))
             return $this->error('invalid_request');

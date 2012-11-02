@@ -26,18 +26,18 @@ class Model_User_Collection extends Mongo_Collection {
      */
     public function search($args = array(), $user_id = NULL)
     {
-//        $this->collection()->ensureIndex([
-//            'status' => 1, 'name' => 1, 'roles' => 1, 'settings.privacy.is' => 1, 'active' => -1
-//        ], ['name' => 'user_search_fields', 'safe' => true]);
-//        $this->collection()->ensureIndex([
-//            'username' => 1, 'email' => 1, 'info.telephone.mobile' => 1
-//        ], ['name' => 'user_id_fields', 'safe' => true]);
-//        $this->collection()->ensureIndex([
-//            'logins.user_id' => 1
-//        ], ['sparse' => true, 'safe' => true]);
-//        $this->collection()->ensureIndex([
-//            'company._id' => 1
-//        ], ['sparse' => true, 'safe' => true]);
+        $this->collection()->ensureIndex([
+            'status' => 1, 'name' => 1, 'roles' => 1, 'settings.privacy.is' => 1, 'active' => -1
+        ], ['name' => 'user_search_fields', 'safe' => true]);
+        $this->collection()->ensureIndex([
+            'username' => 1, 'email' => 1, 'info.telephone.mobile' => 1
+        ], ['name' => 'user_id_fields', 'safe' => true]);
+        $this->collection()->ensureIndex([
+            'logins.user_id' => 1
+        ], ['sparse' => true, 'safe' => true]);
+        $this->collection()->ensureIndex([
+            'company._id' => 1
+        ], ['sparse' => true, 'safe' => true]);
         $logged_in_user = $user_search_fields_hint = false;
 
         $defaults = [
@@ -47,14 +47,14 @@ class Model_User_Collection extends Mongo_Collection {
         ];
 
         // set some empty arrays
-        $query = $ids = $return = $hint = [];
+        $query = $ids = $return = [];
 
         extract(Arr::merge($defaults, $args), EXTR_SKIP);
 
         // status is a must for a query. It is the fisrt field of a compound index
         $query['status'] = $status;
 
-        $query['settings.privacy.is'] = $privacy;
+        $query['settings.privacy.0.is'] = $privacy;
 
         /*
          * For some reason, explain() showed Mongo wasn't using any of the indexes
@@ -117,8 +117,8 @@ class Model_User_Collection extends Mongo_Collection {
         }
         //return $query;
 
-        $results = $this->find($query)
-                ->fields(static::$protected_fields, false)
+        $results = $this->collection()->find($query, static::$protected_fields)
+                //->fields(static::$protected_fields, false)
                 ->limit($limit)
                 ->sort($sort)
                 ->skip($skip);
@@ -133,10 +133,10 @@ class Model_User_Collection extends Mongo_Collection {
         {
             $results->hint($user_id_fields_hint);
         }
-
+        $row = Mongo_Document::factory('user');
         while($results->hasNext())
         {
-            $row = $results->getNext();
+            $row->load_values($results->getNext());
             if($logged_in_user)
             {
                 $row->current_user = $logged_in_user;
@@ -144,6 +144,7 @@ class Model_User_Collection extends Mongo_Collection {
             }
 
             $ret = $row->stringify($row->as_array());
+            $row->clear();
 
             $return[] = $ret;
         }
@@ -152,10 +153,10 @@ class Model_User_Collection extends Mongo_Collection {
     }
 
     private static $protected_fields = [
-        'password',
-        'settings.notifications',
-        'settings.billing',
-        'logins'
+            'password' => -1,
+            'settings.notifications' => -1,
+            'settings.billing' => -1,
+            'logins' => -1
         ];
 
 }

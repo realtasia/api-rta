@@ -61,6 +61,7 @@ class Controller_Abstract extends Controller {
 
     public function action_continue()
     {
+        Debug::log('Continue Invoked');
         return $this->error('access_denied');
     }
 
