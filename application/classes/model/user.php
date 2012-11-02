@@ -5,7 +5,7 @@
  *
  * @author Jason Nathan
  * @package RealtAsia API
- * @subpackage /Model/User/Collection
+ * @subpackage /Model/User/
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */
@@ -46,18 +46,6 @@ class Model_User extends Document {
      */
     public function create($params)
     {
-//        $this->collection()->ensureIndex([
-//            'username' => 1
-//        ], ['unique' => 1]);
-//        $this->collection()->ensureIndex([
-//            'email' => 1
-//        ]);
-//        $this->collection()->ensureIndex([
-//            'logins.user_id' => 1,
-//        ]);
-//        $this->collection()->ensureIndex([
-//            'company.name' => 1,
-//        ]);
         // if agent, we check for company and if it's an array.
         if (isset($params['company']) && !is_array($params['company']))
         {
@@ -152,7 +140,7 @@ class Model_User extends Document {
         if ($this->current_user === NULL)
             return $this;
 
-        $current_user = (object) $this->get_current_user_fields();
+        $current_user = (object) $this->get_default_user_fields();
 
         // check if it's the same user
         if ($this->_id->__toString() === $current_user->_id->__toString())
@@ -169,7 +157,6 @@ class Model_User extends Document {
             $this->actions      = static::get_action_routes($this->_id);
             $this->connections  = static::get_public_connection_routes($this->_id);
             $this->password     = '';
-            $this->settings     = [];
             $this->logins       = [];
         }
 
@@ -241,16 +228,53 @@ class Model_User extends Document {
      */
     public function update_info($params, $user_id)
     {
-        $field = static::$user_fields['info'];
+        $field  = static::$user_fields['info'];
         $values = Arr::overwrite($field, $params);
 
         $this->load_values([
-            '_id' => new MongoID($user_id),
+            '_id'  => new MongoID($user_id),
             'info' => $values,
         ]);
         $this->save();
 
         return $values;
+    }
+
+    public function stringify(array $arr)
+    {
+        $can_edit = Arr::get($arr, 'can_edit');
+
+        $settings = Arr::get($arr, 'settings');
+
+        if($settings && !$can_edit && $privacy = Arr::get($settings, 'privacy'))
+        {
+            //switch ($privacy['contacts']['is'])
+            switch ($privacy['contacts'])
+            {
+                case 'SUBSCRIBERS':
+                    if (Arr::path($arr, 'interactions.subscribe'))
+                    {
+                        $arr['info']['telephone'] = '';
+                        $arr['info']['social']    = '';
+                        $arr['email']             = '';
+                    }
+                    break;
+
+                case 'PRIVATE':
+                    $arr['info']['telephone'] = '';
+                    $arr['info']['social']    = '';
+                    $arr['email']             = '';
+                    break;
+
+                case 'CUSTOM': //check if current user id is in this list
+                    //$arr['info']['telephone'] = '';
+                    //$arr['info']['social']    = '';
+                    //$arr['email']             = '';
+                    break;
+            }
+        }
+
+        return parent::stringify($arr);
     }
 
     /**
@@ -348,7 +372,8 @@ class Model_User extends Document {
      */
     private static $protected_fields = [
         'password' => false,
-        'settings' => false,
+        'settings.billing' => false,
+        'settings.notifications' => false,
         'logins'   => false
     ];
 
@@ -361,7 +386,7 @@ class Model_User extends Document {
         'password' => '',
         'logins'   => [
             'user_id'      => '',
-            'type'         => 'facebook',
+            'type'         => '',
             'username'     => '',
             'email'        => '',
             'access_token' => '',
@@ -378,13 +403,14 @@ class Model_User extends Document {
                 'plan_id'   => NULL
             ],
             'privacy'   => [
-                'contacts'      => 'public',
-                'subscriptions' => 'public',
-                'messages'      => 'public',
-                'mentions'      => ['public'],
+                ['is' => 'PUBLIC'],
+                'contacts'      => ['is' => 'PUBLIC'],
+                'subscriptions' => ['is' => 'PUBLIC'],
+                'messages'      => ['is' => 'PUBLIC'],
+                'mentions'      => ['is' => 'PUBLIC'],
                 'wallposts' => [
-                    'others_posts'            => 'public',
-                    'others_posts_visibility' => 'public'
+                    'others_posts'            => ['is' => 'PUBLIC'],
+                    'others_posts_visibility' => ['is' => 'PUBLIC']
                 ]
             ],
             'notifications'           => [
@@ -438,8 +464,7 @@ class Model_User extends Document {
             'listings'     => 0,
             'posts'        => 0,
             'subscribers'  => 0,
-            'testimonials' => 0,
-            'total'        => 0,
+            'testimonials' => 0
         ],
         'info'         => [
             'telephone' => ['mobile'    => ''],

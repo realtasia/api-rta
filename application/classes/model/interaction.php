@@ -120,7 +120,7 @@ class Model_Interaction extends Document {
      */
     public function before_save($action)
     {
-        $user =  $this->get_current_user_fields();
+        $user =  $this->get_default_user_fields();
 
         $this->user = $user;
     }
@@ -140,7 +140,7 @@ class Model_Interaction extends Document {
 
         $count_field = static::$count_field;
 
-        $current_user = $this->get_current_user_fields();
+        $interactor = $this->get_default_user_fields();
         // fetch the concerned object
         $object = Mongo_Document::factory($this->object_type, $this->object_id);
 
@@ -148,33 +148,30 @@ class Model_Interaction extends Document {
         // update the latest interactions in the object
         if (static::$inc === 1)
         {
-
-//            // sadly can't be atomic
-//            $obj_interact_counts = count($object->{$count_field});
-//
-//            // we are only saving the latest five interactions
-//            if ($obj_interact_counts === 5)
-//            {
-//                // if 5, then we remove the last entry
-//                $object->pop($count_field);
-//            }
-            // add it to the set
-            //$object->addToSet($count_field, $current_user);
+            // add this subscriber to the list
+            $object->addToSet($count_field, $interactor);
         }
         else
         {
             // we just remove the interaction.
-            //$object->pull($count_field, ['_id' => $current_user['_id']]);
+            $object->pull($count_field, ['_id' => $interactor['_id']]);
         }
 
         // increment the count for this interaction
         $object->inc('counts.' . $count_field, static::$inc);
-        //print_r($object);
-        //die();
-        // objects save method automatically updates timestamps
-        //Debug::log(print_r($object, true));
         $object->save();
-        //Debug::log(print_r($object, true));
+
+        /*
+         * Small hack to ensure a capped interaction list.
+         * @see https://github.com/colinmollenhour/mongodb-php-odm/issues/27#issuecomment-9950515
+         */
+        if (static::$inc === 1)
+        {
+            $object->collection()->update_safe(
+              ['_id' => $object->_id, $count_field => ['$size' => 6]],
+              ['$pop' => [$count_field => 1]]
+            );
+        }
 
         // update the user's last active
         $this->current_user->save();
@@ -200,7 +197,7 @@ class Model_Interaction extends Document {
      * 2. like
      *      check current interactions and add a like if not available
      *      check if this is a comment and fetch the parent object to run a subscribe
-     *      if not a comment, run a subscribe anyway.
+     *      if not a comment, run a subscribe on the object anyway.
      *      call the after_save function to update the user and interacted object
      * 3. subscribe
      *      check current interactions and add a subscribe if not available
@@ -216,7 +213,7 @@ class Model_Interaction extends Document {
         if (!$this->current_user->loaded())
             return false;
 
-        $user = (object) $this->get_current_user_fields();
+        $user = (object) $this->get_default_user_fields();
 
         $object_id = $object_id instanceof MongoID ? $object_id : new MongoID($object_id);
 
@@ -289,7 +286,6 @@ class Model_Interaction extends Document {
                             $this->interact('subscribe', $object_id, $object_type);
                         }
                     }
-
                     break;
                 case 'subscribe':
                     $interacting = $this->interacting($object_id, $object_type);
@@ -299,10 +295,11 @@ class Model_Interaction extends Document {
                     }
                     break;
             }
-        } catch (MongoException $e)
+        }
+        catch (MongoException $e)
         {
             Debug::error(
-                    "MongoCursorException while user :user tried to :interact an object: :object_type (:oid) \n"
+                    "MongoException while user :user tried to :interact a :object_type (:oid) \n"
                     . "Error Message- :message \n"
                     . "Error Code- :code", [
                 ':user'        => $user->name,

@@ -26,15 +26,56 @@ class Model_User_Collection extends Mongo_Collection {
      */
     public function search($args = array(), $user_id = NULL)
     {
+//        $this->collection()->ensureIndex([
+//            'status' => 1, 'name' => 1, 'roles' => 1, 'settings.privacy.is' => 1, 'active' => -1
+//        ], ['name' => 'user_search_fields', 'safe' => true]);
+//        $this->collection()->ensureIndex([
+//            'username' => 1, 'email' => 1, 'info.telephone.mobile' => 1
+//        ], ['name' => 'user_id_fields', 'safe' => true]);
+//        $this->collection()->ensureIndex([
+//            'logins.user_id' => 1
+//        ], ['sparse' => true, 'safe' => true]);
+//        $this->collection()->ensureIndex([
+//            'company._id' => 1
+//        ], ['sparse' => true, 'safe' => true]);
+        $logged_in_user = $user_search_fields_hint = false;
+
         $defaults = [
            'limit' => 11, 'skip' => 0, 'roles' => [], 'sort' => 'alpha',
-           's' => '', 'include_ids' => [], 'children' => []
+           's' => '', 'include_ids' => [], 'status' => ['$ne' => 'terminated'],
+            'privacy' => 'PUBLIC', 'company' => null
         ];
 
         // set some empty arrays
-        $query = $ids = $return = [];
+        $query = $ids = $return = $hint = [];
 
         extract(Arr::merge($defaults, $args), EXTR_SKIP);
+
+        // status is a must for a query. It is the fisrt field of a compound index
+        $query['status'] = $status;
+
+        $query['settings.privacy.is'] = $privacy;
+
+        /*
+         * For some reason, explain() showed Mongo wasn't using any of the indexes
+         * created. So giving an explicit hint. This hint describes one of the
+         * compound indexes. It might be swapped with another later depending on
+         * the query.
+         */
+        $user_id_fields_hint = [
+            'status' => 1, 'name' => 1, 'roles' => 1, 'settings.privacy.is' => 1, 'active' => -1
+        ];
+
+        if($user_id)
+        {
+            // we don't fetch a user's own record... or do we... ?? Commenting
+            // $logged_in_user = $this->get_user($user_id);
+            // $query['_id']['$ne'] = new MongoID($user_id);
+        }
+        if($company)
+        {
+            $query['company._id'] = $company;
+        }
 
         // looking for a specific role
         if (!empty($roles))
@@ -48,14 +89,20 @@ class Model_User_Collection extends Mongo_Collection {
         // keyword searches
         if ($s)
         {
-            // this time it's a regex search.
+            // this time it's a regex search. Since it is a "start with", ie ^,
+            // indexes should work... Hopefully.
             $s = new MongoRegex("/^$s/i");
             $query['$or'] = [
                     ['username' => $s],
                     ['email' => $s],
-                    ['telephone.mobile' => $s],
-                    ['company.name' => $s]
+                    ['info.telephone.mobile' => $s],
+                    ['name' => $s]
                 ];
+            // we change the hint now as these are more relevant. Can we use
+            // all the fields?
+            $user_search_fields_hint = [
+                'username' => 1, 'email' => 1, 'info.telephone.mobile' => 1
+            ];
         }
 
         // iterate through the $ids and make sure they're all MongoID objects
@@ -65,25 +112,37 @@ class Model_User_Collection extends Mongo_Collection {
         switch($sort)
         {
             case 'alpha': $sort = ['name' => 1]; break;
-            case 'popular': $sort = ['counts.total' => -1]; break;
+            case 'active': $sort = ['active' => -1]; break;
             default: $sort = ['_id' => -1]; break;
         }
+        //return $query;
 
         $results = $this->find($query)
                 ->fields(static::$protected_fields, false)
                 ->limit($limit)
                 ->sort($sort)
-                ->skip($skip)
-                ->load();
+                ->skip($skip);
+                //->explain();
+                //
+        // Give the MongoCursor a hint. Set earlier.
+        if($user_search_fields_hint)
+        {
+            $results->hint($user_search_fields_hint);
+        }
+        else
+        {
+            $results->hint($user_id_fields_hint);
+        }
 
         while($results->hasNext())
         {
             $row = $results->getNext();
-            if($user_id && $usr = $this->get_user($user_id))
+            if($logged_in_user)
             {
-                $row->current_user = $usr;
+                $row->current_user = $logged_in_user;
                 $row->after_load();
             }
+
             $ret = $row->stringify($row->as_array());
 
             $return[] = $ret;
@@ -92,7 +151,11 @@ class Model_User_Collection extends Mongo_Collection {
         return $return;
     }
 
-    private static $protected_fields = ['password', 'settings', 'logins'];
+    private static $protected_fields = [
+        'password',
+        'settings.notifications',
+        'settings.billing',
+        'logins'
+        ];
 
 }
-?>

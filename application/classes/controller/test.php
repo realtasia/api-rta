@@ -17,7 +17,7 @@ class Controller_Test extends Controller {
 
         $token = [
             'access_token' => '[REDACTED]',
-            'state' => Security::token(),
+            'state' => substr(Security::token(), 0, 5),
         ];
 
         $registration = [
@@ -27,12 +27,17 @@ class Controller_Test extends Controller {
 
         $return = [];
 
-            //$values = Arr::merge($token, $registration, $this->users($i));
+        for($i=0;$i<=100;$i++)
+        {
+            $values = Arr::merge($token, $registration, $this->users($i));
 
-            $request = Request::factory(URL::site('/user/notifications/508ccae4b90fb894090002c7', true))
+            $request = Request::factory(URL::site('/user', true))
                     ->method(HTTP_Request::POST)
-                    ->post($token);
+                    ->post($values);
             $return[] = "<pre>".$request->execute()."</pre>";
+        }
+
+
 
         return $this->response->body(implode('<hr>', $return));
     }
@@ -393,7 +398,7 @@ EOD;
         $gender = ['male', 'female'];
         $rand_gend = $gender[array_rand(range(0, 1), 1)];
 
-        if($rand_gend == 'female')
+        if($rand_gend === 'female')
             $mid = 'd/o';
         else
             $mid = 's/o';
@@ -414,9 +419,10 @@ EOD;
             'email'       => '[REDACTED]',
             'designation' => 'Senior Sales Executive',
             'roles'       => ['agent'],
-            'avatar' => [90 => '/agents/images/' . $i . '.jpg',],
-            'uri'  => '/' . $numword . '.user',
-            'info' => [
+            'avatar'      => [90 => '/agents/images/' . $i . '.jpg',],
+            'uri'         => '/' . $numword . '.user',
+            'active'      => time(),
+            'info'        => [
                 'telephone' => ['mobile'   => '[REDACTED]'],
                 'birthday' => mt_rand(378691200, 694224000),
                 'gender'   => $gender[array_rand(range(0, 1), 1)],

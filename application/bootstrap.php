@@ -104,9 +104,9 @@ Kohana::modules([
     //'mongo-auth' => MODPATH . 'mongo-auth', // Not using
     'email'      => MODPATH . 'email', // Emailer
     'sms'        => MODPATH . 'sms', // SMSer
-    'devtools'        => MODPATH . 'devtools', // SMSer
+    'devtools'   => MODPATH . 'devtools', // Devtools (route checker etc...)
         // 'codebench'  => MODPATH.'codebench',  // Benchmarking tool
-        // 'database'   => MODPATH.'database',   // Database access
+    'database'   => MODPATH.'database',   // Database access
         // 'image'      => MODPATH.'image',      // Image manipulation
         // 'orm'        => MODPATH.'orm',        // Object Relationship Mapping
         // 'unittest'   => MODPATH.'unittest',   // Unit testing
@@ -114,6 +114,13 @@ Kohana::modules([
 ]);
 
 Kohana::$log->attach(new Log_Mongo(), [], Log::DEBUG);
+
+Route::set('singpost', 'singpost(/<action>(/<id>))')
+        ->defaults([
+            'controller' => 'singpost',
+            'action'     => 'index',
+            'id'         => null
+        ]);
 
 Route::set('user', 'user(/<action>(/<id>))')
         ->defaults([

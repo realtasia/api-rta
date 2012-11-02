@@ -5,7 +5,7 @@
  *
  * @author Jason Nathan
  * @package RealtAsia API
- * @subpackage /Model/User/Collection
+ * @subpackage /Model/Post/
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */
@@ -19,7 +19,7 @@ class Model_Post extends Document {
      */
     public function get($id, array $fields = [], $object = TRUE)
     {
-        if($this->load(self::_get_one($id), $fields))
+        if($this->load($id, $fields))
         {
             $ret = $this->stringify($this->as_array());
             return $object ? (object) $ret : $ret;
@@ -28,54 +28,39 @@ class Model_Post extends Document {
     }
 
     /**
-     * Retrieve only user public fields by email, username or id
-     *
-     * @param MongoID|string $id
-     * @return array|null
-     */
-    public function get_public($id)
-    {
-        return $this->get($id, static::$protected_fields);
-    }
-
-    /**
-     * Create a default user with new values.
+     * Create a default post with new values.
      *
      * @param array $params
      * @return boolean
      */
     public function create($params)
     {
-//        $this->collection()->ensureIndex([
-//            'username' => 1
-//        ], ['unique' => 1]);
-//        $this->collection()->ensureIndex([
-//            'email' => 1
-//        ]);
-//        $this->collection()->ensureIndex([
-//            'logins.user_id' => 1,
-//        ]);
-//        $this->collection()->ensureIndex([
-//            'company.name' => 1,
-//        ]);
+        $this->collection()->ensureIndex([
+            'page.id' => 1
+        ]);
+        $this->collection()->ensureIndex([
+            'page_parent.id' => 1
+        ]);
+        $this->collection()->ensureIndex([
+            'type' => 1,
+        ]);
+        $this->collection()->ensureIndex([
+            'status' => 1,
+        ]);
+        $this->collection()->ensureIndex([
+            'from.id' => 1,
+        ]);
+        $this->collection()->ensureIndex([
+            'to.id' => 1,
+        ]);
         // if agent, we check for company and if it's an array.
-        if (isset($params['company']) && !is_array($params['company']))
-        {
-            // retrieve the company
-            $company = Mongo_Document::factory('page');
-            $company->load($params['company'], ['name' => 1, '_id'  => 1]);
-
-            // set the user's company
-            $params['company']        = $company->to_array();
-        }
-        //die();
         // overwrite defaults
-        $data                     = Arr::overwrite(static::$user_fields, $params);
+        $data                     = Arr::overwrite(static::$post_fields, $params);
         // merge with defaults
-        $data                     = Arr::merge(static::$user_fields, $data);
-        $data['info']['birthday'] = (int) $data['info']['birthday'];
-        ksort($data);
+        $data                     = Arr::merge(static::$post_fields, $data);
 
+        // sort - for some sanity in debugging.. :-)
+        ksort($data);
 
         // load the document
         $this->load_values($data);
@@ -102,19 +87,16 @@ class Model_Post extends Document {
 
     /**
      * Unsets the 'created' field which was extracted from the MongoID
-     * sets the active timestamp
+     * sets the modified timestamp
      */
     public function before_save($action)
     {
-        $this->active = time();
+        $this->modified = time();
         unset($this->created);
-        if (isset($this->birthday) && !is_numeric($this->birthday))
-        {
-            $this->birthday = strtotime($this->birthday);
-        }
+
         if(isset($this->counts))
         {
-            $counts = Arr::merge(static::$user_fields['counts'], $this->counts);
+            $counts = Arr::merge(static::$post_fields['counts'], $this->counts);
 
             foreach($counts as $k => $v)
             {
@@ -126,7 +108,7 @@ class Model_Post extends Document {
 
             $this->counts = $counts;
         }
-        return true;
+        return $this;
     }
 
     /**
@@ -139,150 +121,52 @@ class Model_Post extends Document {
         $id = $this->_id instanceof MongoID ? $this->_id : new MongoID($this->_id);
 
         $this->created = date('c', $id->getTimestamp());
-        if(is_numeric($this->active))
+        if(is_numeric($this->modified))
         {
-            $this->active  = date('c', $this->active);
+            $this->modified  = date('c', $this->modified);
         }
         //
-        if (isset($this->info['birthday']))
-        {
-            $this->birthday = date('c', $this->info['birthday']);
-        }
-
         if ($this->current_user === NULL)
             return $this;
 
-        $current_user = (object) $this->get_current_user_fields();
+        $current_user = (object) $this->get_default_user_fields();
 
         // check if it's the same user
-        if ($this->_id->__toString() === $current_user->_id->__toString())
+        if ($this->user['_id']->__toString() === $current_user->_id->__toString())
         {
             $this->can_edit      = true;
-            $this->can_like      = false;
-            $this->can_subscribe = false;
             $this->connections   = static::get_all_connection_routes($this->_id);
         }
         else
         {
             $interactions       = Mongo_Document::factory('interaction', NULL, $current_user->_id);
-            $this->interactions = $interactions->interacting($this->_id, 'user');
+            $this->interactions = $interactions->interacting($this->_id, 'post');
             $this->actions      = static::get_action_routes($this->_id);
             $this->connections  = static::get_public_connection_routes($this->_id);
-            $this->password     = '';
-            $this->settings     = [];
-            $this->logins       = [];
         }
 
         return $this;
     }
 
     /**
-     * Updates privacy options.
+     * Updates privacy settings of a post.
      *
      * @param array $params
      * @param string|MongoID $user_id
      * @return type
      */
-    public function update_privacy($params, $user_id)
+    public function update_privacy($params, $_id)
     {
-        $field = static::$user_fields['settings']['privacy'];
+        $field = static::$post_fields['privacy'];
         $values = Arr::overwrite($field, $params);
 
         $this->load_values([
-            '_id' => new MongoID($user_id),
-            'settings.privacy' => $values,
+            '_id' => new MongoID($_id),
+            'privacy' => $values,
         ]);
         $this->save();
 
         return $values;
-    }
-
-    /**
-     * Updates notification options.
-     *
-     * @param array $params
-     * @param string|MongoID $user_id
-     * @return type
-     */
-    public function update_notifications($params, $user_id)
-    {
-        $field = static::$user_fields['settings']['notifications'];
-        $values = Arr::overwrite($field, $params);
-
-        $this->load_values([
-            '_id' => new MongoID($user_id),
-            'settings.notifications' => $values,
-        ]);
-        $this->save();
-
-        return $values;
-    }
-
-    /**
-     * Updates user info.
-     *
-     * @param array $params
-     * @param string|MongoID $user_id
-     * @return type
-     */
-    public function update_password($password, $user_id)
-    {
-        $this->load_values(['_id' => new MongoID($user_id)]);
-        $this->password = static::hash($password);
-        return $this->save();
-    }
-
-    /**
-     * Updates user info.
-     *
-     * @param array $params
-     * @param string|MongoID $user_id
-     * @return type
-     */
-    public function update_info($params, $user_id)
-    {
-        $field = static::$user_fields['info'];
-        $values = Arr::overwrite($field, $params);
-
-        $this->load_values([
-            '_id' => new MongoID($user_id),
-            'info' => $values,
-        ]);
-        $this->save();
-
-        return $values;
-    }
-
-    /**
-     * Small utility function to reduce typing. returns an $or array for use in
-     * a typical Mongo query
-     *
-     * @param string $username
-     * @param bool $regex
-     * @return array
-     */
-    protected static function _get_one($username, $regex = FALSE)
-    {
-        // Used if an actual keyword search is taking place. Uses MongoRegex()
-        if ($regex)
-        {
-            $username = new MongoRegex("/^$username/i");
-            return [
-                '$or' => [
-                    ['username' => $username],
-                    ['email' => $username],
-                    ['company.name' => $username]
-                ]
-            ];
-        }
-        // just a regular lookup
-        return [
-            '$or' => [
-                ['_id' => new MongoID($username)],
-                ['username' => $username],
-                ['email' => $username],
-            ]
-        ];
     }
 
     /**
@@ -296,161 +180,77 @@ class Model_Post extends Document {
     {
         $actions = [];
 
-        foreach(['like', 'unlike', 'subscribe', 'unsubscribe'] as $k => $v)
+        foreach(['like', 'unlike', 'subscribe', 'unsubscribe', 'comment'] as $k => $v)
         {
-            $actions[$v] = Router::user($v, $user_id);
+            $actions[$v] = Router::post($v, $user_id);
         }
 
         return $actions;
     }
 
     /**
-     * Gets all connection links, including private ones belonging to a
-     * logged in user
+     * Gets all connection links, including private ones that a logged in user
+     * can perform on this post
      *
      * @param string|MongoID $user_id
      * @return array
      */
-    protected static function get_all_connection_routes($user_id)
+    protected static function get_all_connection_routes($_id)
     {
-        $actions = [];
+        $actions = ['privacy' => Router::post('privacy', $_id)] ;
 
-        foreach(['privacy', 'notifications'] as $k => $v)
-        {
-            $actions[$v] = Router::user($v, $user_id);
-        }
-
-        return Arr::merge($actions, static::get_public_connection_routes($user_id));
+        return Arr::merge($actions, static::get_public_connection_routes($_id));
     }
 
     /**
-     * Gets all publically available connection links for a given user.
+     * Gets all publically available connection links for a given post.
      *
      * @param string|MongoID $user_id
      * @return array
      */
-    protected static function get_public_connection_routes($user_id)
+    protected static function get_public_connection_routes($_id)
     {
         $actions = [];
 
-        foreach(['likers', 'avatar', 'subscribers', 'info'] as $k => $v)
+        foreach(['likers', 'comments', 'subscribers'] as $k => $v)
         {
-            $actions[$v] = Router::user($v, $user_id);
+            $actions[$v] = Router::post($v, $_id);
         }
 
         return $actions;
     }
 
     /**
-     * These are fields that are not needed for public consumption.
+     * The standard post document.
      *
      * @var array
      */
-    private static $protected_fields = [
-        'password' => false,
-        'settings' => false,
-        'logins'   => false
-    ];
-
-    /**
-     * The standard user document.
-     *
-     * @var array
-     */
-    private static $user_fields = [
-        'password' => '',
-        'logins'   => [
-            'user_id'      => '',
-            'type'         => 'facebook',
-            'username'     => '',
-            'email'        => '',
-            'access_token' => '',
-            'token_type'   => '',
-            'expires_in'   => '',
-            'name'         => '',
-            'picture'      => '',
-        ],
-        'settings'     => [
-            'locale'  => 'en_SG',
-            'billing' => [
-                'mode'      => 'cash',
-                'frequency' => 'monthly',
-                'plan_id'   => NULL
-            ],
-            'privacy'   => [
-                'contacts'      => 'public',
-                'subscriptions' => 'public',
-                'messages'      => 'public',
-                'mentions'      => ['public'],
-                'wallposts' => [
-                    'others_posts'            => 'public',
-                    'others_posts_visibility' => 'public'
-                ]
-            ],
-            'notifications'           => [
-                'email'  => '',
-                'likers' => [
-                    'own_post'    => TRUE,
-                    'other_posts' => TRUE,
-                    'profile'     => TRUE,
-                    'comments'    => TRUE,
-                ],
-                'subscribers' => [
-                    'own_post'    => TRUE,
-                    'other_posts' => TRUE,
-                    'profile'     => TRUE,
-                ],
-                'comments'    => [
-                    'own_post'    => TRUE,
-                    'other_posts' => TRUE,
-                ],
-                'mentions'    => TRUE,
-                'testimonial' => TRUE,
-                'wallpost'    => TRUE,
-                'messages'    => TRUE
-            ]
-        ],
-        'username'    => '',
-        'email'       => '',
-        'first_name'  => '',
-        'middle_name' => '',
-        'last_name'   => '',
-        'name'        => '',
-        'status'      => 'active',
-        'actions'     => [],
-        'company' => [],
-        'designation' => '',
-        'roles'       => ['user'],
-        'avatar' => [
-            150           => 'beta.realtasia.com.sg/assets/images/avatar-150X150.jpg',
-            60            => 'beta.realtasia.com.sg/assets/images/avatar-60X60.jpg',
-            32            => 'beta.realtasia.com.sg/assets/images/avatar-32X32.jpg',
-        ],
-        'uri'         => '',
-        'subscribers' => [],
-        'likers' => [],
-        'active' => '',
-        'counts' => [
+    private static $post_fields = [
+        'from'  => [], // '_id', 'name' of the user who created this
+        'to' => [], // '_id', 'name' if this is a private post, the user this post was posted on.
+        'page' => [], // '_id', 'name', 'type' the page it was written on (location, user profile etc...)
+        'page_parent' => [], // '_id', 'name', 'type' the page's parent (company or estate)
+        'listing' => [], // '_id', 'name', 'type' the page's parent (company or estate)
+        'message' => '', // the content
+        'message_tags' => [], // names of existing people within the content are parsed
+        'picture' => '', // if this post has an image, this will be the url
+        'link'    => [], // 'name', 'caption', 'description', 'source' the original link if there is one
+        'video' => [], // 'name', 'caption', 'description', 'source', 'properties' if this post has a video
+        'type' => '', // wallpost, testimonial
+        'status'     => '', // pending, active, expired,
+        'uri'     => '',
+        'modified'     => '',
+        'privacy'     => ['is' => 'PUBLIC'],
+        'counts'     => [
             'attachments'  => 0,
             'comments'     => 0,
             'events'       => 0,
             'likers'       => 0,
-            'listings'     => 0,
-            'posts'        => 0,
-            'subscribers'  => 0,
-            'testimonials' => 0,
-            'total'        => 0,
+            'subscribers'  => 0
         ],
-        'info'         => [
-            'telephone' => ['mobile'    => ''],
-            'languages' => [],
-            'birthday'     => '',
-            'gender'       => '',
-            'achievements' => [],
-            'education' => [],
-            'social' => [],
-            'websites' => []
-        ]
+        'comments'    => [],
+        'subscribers' => [],
+        'likers' => []
     ];
 
 }

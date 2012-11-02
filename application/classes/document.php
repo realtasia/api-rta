@@ -94,6 +94,8 @@ class Document extends Mongo_Document {
     {
 
     }
+
+    
 }
 
 ?>

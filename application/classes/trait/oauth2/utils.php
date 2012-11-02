@@ -17,20 +17,46 @@ trait Trait_Oauth2_Utils {
             {
                 $arr[$k] = $v->__toString();
             }
+
+            if(is_array($v))
+            {
+                $arr[$k] = $this->stringify($v);
+            }
         }
+        
         return $arr;
     }
 
-    protected function get_current_user_fields()
+    protected function get_default_user_fields()
     {
         if(isset($this->current_user))
         {
             $user = $this->current_user->as_array();
-            return [
-                '_id' => $user['_id'],
-                'name' => $user['name'],
-            ];
+            return Arr::overwrite(['_id' => '', 'name' => ''], $user);
         }
+    }
+
+    protected function get_default_page_fields($_id)
+    {
+        $fields = ['_id' => '', 'name' => ''];
+
+        if($_id instanceof MongoID)
+        {
+            $page = Mongo_Document::factory('page')
+                    ->get($_id, $fields)
+                    ->as_array();
+
+            return Arr::overwrite($fields, $page);
+        }
+
+        if(is_array($_id))
+        {
+            if(Arr::get($_id, '_id') && Arr::get($_id, 'name'))
+                return Arr::overwrite($fields, $_id);
+        }
+
+        if(is_string($_id))
+            return $this->get_default_page_fields(new MongoID($_id));
     }
 
     /**

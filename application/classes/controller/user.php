@@ -143,6 +143,9 @@ class Controller_User extends Controller_Resource {
 
         // current user is the user we need to update/fetch or
         // an admin is logged in or this is a client_credentials grant_type
+        Debug::log('is_admin :' . parent::has_role('admin'));
+        Debug::log('is_client :' . parent::is_client());
+        Debug::log('is_user :' . static::$user_id && static::$user_id === $id);
         if((static::$user_id && static::$user_id === $id) || parent::has_role('admin') || parent::is_client())
         {
             // retrieve user by his/her specific field requested.
@@ -172,7 +175,15 @@ class Controller_User extends Controller_Resource {
      */
     public function action_privacy()
     {
-        return $this->validate_current_request('update_privacy', 'settings.privacy');
+        if ($this->is_GET())
+        {
+            $user = static::$model;
+            $user->load($this->request->param('id'), ['settings' => 1]);
+            $this->data($user->stringify($user->settings['privacy']->as_array()));
+        }
+        else
+            return $this->validate_current_request('update_privacy', 'settings.privacy');
+
     }
 
     /**
@@ -323,26 +334,26 @@ class Controller_User extends Controller_Resource {
      */
     protected function registration()
     {
-        if(!parent::has_role('admin') || !parent::is_client())
+        if(parent::has_role('admin') === false && parent::is_client() === false)
         {
+            //Debug::log(parent::has_role('admin') === false);
             return $this->error('access_denied');
 
         }
+        $params = static::extract_registration_values(static::$params);
         // validation rules for a regular user.
-        $validation = Validation::factory(static::$params)
+        $validation = Validation::factory($params)
                 ->rule('first_name', 'alpha')
                 ->rule('first_name', 'not_empty')
                 ->rule('last_name', 'alpha')
                 ->rule('last_name', 'not_empty')
-                ->rule('number.mobile', 'not_empty')
-                ->rule('number.mobile', 'numeric')
-                ->rule('gender', 'alpha')
-                ->rule('gender', 'not_empty')
+                ->rule('info.gender', 'alpha')
+                ->rule('info.telephone.mobile', 'numeric')
                 ->rule('password', 'not_empty')
                 ->rule('email', 'not_empty')
                 ->rule('email', 'email')
                 ->rule('email', 'email_domain')
-                ->rule('birthday', 'numeric');
+                ->rule('info.birthday', 'numeric');
 
         if (static::$params['user_type'] == 'agent')
         {
@@ -390,7 +401,7 @@ class Controller_User extends Controller_Resource {
 
         $validation = Validation::factory(static::$params)
                 ->rule('message', 'not_empty')
-                ->rule('number.mobile', 'not_empty')
+                ->rule('mobile', 'not_empty')
                 ->rule('user_type', 'not_empty')
                 ->rule('name', 'not_empty')
                 ->rule('name', 'alpha')
@@ -497,19 +508,20 @@ class Controller_User extends Controller_Resource {
      */
     protected function update_privacy()
     {
-        $validation = Validation::factory(static::$params)
-                ->rule('contact', 'Controller_User::valid_privacy', [':value', ':field', ':validation'])
-                ->rule('contact', 'not_empty')
-                ->rule('subscriptions', 'Controller_User::valid_privacy', [':value', ':field', ':validation'])
-                ->rule('subscriptions', 'not_empty')
-                ->rule('messages', 'Controller_User::valid_privacy', [':value', ':field', ':validation'])
-                ->rule('messages', 'not_empty')
-                ->rule('mentions', 'Controller_User::valid_privacy', [':value', ':field', ':validation'])
-                ->rule('mentions', 'not_empty')
-                ->rule('profile.others_posts', 'Controller_User::valid_privacy', [':value', ':field', ':validation'])
-                ->rule('profile.others_posts', 'not_empty')
-                ->rule('profile.others_posts_visibility', 'Controller_User::valid_privacy', [':value', ':field', ':validation'])
-                ->rule('profile.others_posts_visibility', 'not_empty');
+        $params = static::extract_privacy_values(static::$params);
+        $validation = Validation::factory($params)
+                ->rule('contacts.is', 'Controller_User::valid_privacy', [':value', ':field', ':validation'])
+                ->rule('contacts.is', 'not_empty')
+                ->rule('subscriptions.is', 'Controller_User::valid_privacy', [':value', ':field', ':validation'])
+                ->rule('subscriptions.is', 'not_empty')
+                ->rule('messages.is', 'Controller_User::valid_privacy', [':value', ':field', ':validation'])
+                ->rule('messages.is', 'not_empty')
+                ->rule('mentions.is', 'Controller_User::valid_privacy', [':value', ':field', ':validation'])
+                ->rule('mentions.is', 'not_empty')
+                ->rule('profile.others_posts.is', 'Controller_User::valid_privacy', [':value', ':field', ':validation'])
+                ->rule('profile.others_posts.is', 'not_empty')
+                ->rule('profile.others_posts_visibility.is', 'Controller_User::valid_privacy', [':value', ':field', ':validation'])
+                ->rule('profile.others_posts_visibility.is', 'not_empty');
 
         if($validation->check())
         {
@@ -531,7 +543,8 @@ class Controller_User extends Controller_Resource {
      */
     protected function update_notifications()
     {
-        $validation = Validation::factory(static::$params)
+        $params = static::extract_notification_values(static::$params);
+        $validation = Validation::factory($params)
                 ->rule('email', 'email')
                 ->rule('email', 'email_domain')
                 ->rule('likers.own_post', 'not_empty')
@@ -708,9 +721,9 @@ class Controller_User extends Controller_Resource {
      * @param string $value
      * @return boolean
      */
-    protected static function valid_privacy($value, $field, $validation)
+    public static function valid_privacy($value, $field, $validation)
     {
-        if(in_array($value, ['public', 'subscribers', 'private']))
+        if(in_array($value, ['PUBLIC', 'SUBSCRIBERS', 'SELF', 'CUSTOM']))
         {
             return true;
         }
@@ -718,4 +731,82 @@ class Controller_User extends Controller_Resource {
         $validation->error($field, 'valid_privacy');
     }
 
+    protected static function extract_privacy_values($array)
+    {
+        $return = [];
+
+        $return['contacts.is'] = Arr::path($array, 'contacts.is');
+        $return['subscriptions.is'] = Arr::path($array, 'subscriptions.is');
+        $return['messages.is'] = Arr::path($array, 'messages.is');
+        $return['profile.others_posts.is'] = Arr::path($array, 'profile.others_posts.is');
+        $return['profile.others_posts_visibility.is'] = Arr::path($array, 'profile.others_posts_visibility.is');
+        $return['mentions.is'] = Arr::path($array, 'mentions.is');
+
+        return Arr::merge($return, $array);
+    }
+
+    protected static function extract_notification_values($array)
+    {
+        /**
+         *                 ->rule('email', 'email')
+                ->rule('email', 'email_domain')
+                ->rule('likers.own_post', 'not_empty')
+                ->rule('likers.own_post', 'range', [':value', 0, 1])
+                ->rule('likers.other_post', 'not_empty')
+                ->rule('likers.other_post', 'range', [':value', 0, 1])
+                ->rule('likers.profile', 'range', [':value', 0, 1])
+                ->rule('likers.profile', 'not_empty')
+                ->rule('subscribers.own_post', 'range', [':value', 0, 1])
+                ->rule('subscribers.own_post', 'not_empty')
+                ->rule('subscribers.other_post', 'range', [':value', 0, 1])
+                ->rule('subscribers.other_post', 'not_empty')
+                ->rule('subscribers.profile', 'range', [':value', 0, 1])
+                ->rule('subscribers.profile', 'not_empty')
+                ->rule('comments.own_post', 'range', [':value', 0, 1])
+                ->rule('comments.own_post', 'not_empty')
+                ->rule('comments.other_post', 'range', [':value', 0, 1])
+                ->rule('comments.other_post', 'not_empty')
+                ->rule('mentions', 'range', [':value', 0, 1])
+                ->rule('mentions', 'not_empty')
+                ->rule('testimonials', 'range', [':value', 0, 1])
+                ->rule('testimonials', 'not_empty')
+                ->rule('wallpost', 'range', [':value', 0, 1])
+                ->rule('wallpost', 'not_empty')
+                ->rule('messages', 'range', [':value', 0, 1])
+                ->rule('messages', 'not_empty');
+         */
+        $return = [];
+
+        $return['likers.own_post'] = Arr::path($array, 'likers.own_post');
+        $return['likers.other_post'] = Arr::path($array, 'likers.other_post');
+        $return['likers.profile'] = Arr::path($array, 'likers.profile');
+        $return['subscribers.own_post'] = Arr::path($array, 'subscribers.own_post');
+        $return['subscribers.other_post'] = Arr::path($array, 'subscribers.other_post');
+        $return['subscribers.profile'] = Arr::path($array, 'subscribers.profile');
+        $return['comments.own_post'] = Arr::path($array, 'comments.own_post');
+        $return['comments.other_post'] = Arr::path($array, 'comments.other_post');
+
+        return Arr::merge($return, $array);
+    }
+
+    protected static function extract_registration_values($array)
+    {
+        /**
+                ->rule('info.gender', 'alpha')
+                ->rule('info.telephone.mobile', 'numeric')
+                ->rule('password', 'not_empty')
+                ->rule('email', 'not_empty')
+                ->rule('email', 'email')
+                ->rule('email', 'email_domain')
+                ->rule('info.birthday', 'numeric');
+         */
+        $return = [];
+
+        $return['info.gender'] = Arr::path($array, 'info.gender');
+        $return['info.telephone.mobile'] = Arr::path($array, 'info.telephone.mobile');
+        $return['info.birthday'] = Arr::path($array, 'info.birthday');
+
+
+        return Arr::merge($return, $array);
+    }
 }

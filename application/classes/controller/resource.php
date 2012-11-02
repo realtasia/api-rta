@@ -56,9 +56,11 @@ abstract class Controller_Resource extends Controller_Abstract{
             }
             else
             {
+                Debug::log('No session found');
                 return $this->request->action('continue');
             }
         }
+        Debug::log('No token found');
         return $this->request->action('continue');
     }
 

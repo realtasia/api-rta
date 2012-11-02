@@ -12,11 +12,11 @@ class Controller_Testpad extends controller {
 
     public function action_index()
     {
-        $route = Router::user('like', new MongoID);
+        $user = Mongo_Collection::factory('user')->search(['s' =>'test']);
 
 
 
-        $this->response->body($route);
+        $this->response->body('<pre>'.print_r($user, true));
     }
     //put your code here
 }
