@@ -201,12 +201,12 @@ class Controller_Abstract extends Controller {
         {
             switch ($p) {
                 case 'http://test.jjpc.net':
-                case 'https://test.casa.net':
-                case 'https://beta.realtasia.com':
-                case 'https://beta.realtasia.com.sg':
-                case 'https://realtasia.com.sg':
-                case 'https://www.realtasia.com.sg':
-                case 'https://www.realtasia.com':
+                case 'http://test.casa.net':
+                case 'http://beta.realtasia.com':
+                case 'http://beta.realtasia.com.sg':
+                case 'http://realtasia.com.sg':
+                case 'http://www.realtasia.com.sg':
+                case 'http://www.realtasia.com':
                     $this->response->headers([
                         'Access-Control-Allow-Origin' => $_SERVER['HTTP_ORIGIN'],
                         'Access-Control-Allow-Methods' => 'POST, GET',
