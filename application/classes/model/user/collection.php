@@ -26,20 +26,20 @@ class Model_User_Collection extends Mongo_Collection {
      */
     public function search($args = array(), $user_id = NULL)
     {
-        $this->collection()->ensureIndex([
-            'status' => 1, 'name' => 1, 'roles' => 1, 'settings.privacy.is' => 1, 'active' => -1
-        ], ['name' => 'user_search_fields', 'safe' => true]);
-        $this->collection()->ensureIndex([
-            'username' => 1, 'email' => 1, 'info.telephone.mobile' => 1
-        ], ['name' => 'user_id_fields', 'safe' => true]);
-        $this->collection()->ensureIndex([
-            'logins.user_id' => 1
-        ], ['sparse' => true, 'safe' => true]);
-        $this->collection()->ensureIndex([
-            'company._id' => 1
-        ], ['sparse' => true, 'safe' => true]);
+//        $this->collection()->ensureIndex([
+//            'status' => 1, 'name' => 1, 'roles' => 1, 'settings.privacy.is' => 1, 'active' => -1
+//        ], ['name' => 'user_search_fields', 'safe' => true]);
+//        $this->collection()->ensureIndex([
+//            'username' => 1, 'email' => 1, 'info.telephone.mobile' => 1
+//        ], ['name' => 'user_id_fields', 'safe' => true]);
+//        $this->collection()->ensureIndex([
+//            'logins.user_id' => 1
+//        ], ['sparse' => true, 'safe' => true]);
+//        $this->collection()->ensureIndex([
+//            'company._id' => 1
+//        ], ['sparse' => true, 'safe' => true]);
         $logged_in_user = $user_search_fields_hint = false;
-
+//
         $defaults = [
            'limit' => 11, 'skip' => 0, 'roles' => [], 'sort' => 'alpha',
            's' => '', 'include_ids' => [], 'status' => ['$ne' => 'terminated'],
@@ -69,7 +69,7 @@ class Model_User_Collection extends Mongo_Collection {
         if($user_id)
         {
             // we don't fetch a user's own record... or do we... ?? Commenting
-            // $logged_in_user = $this->get_user($user_id);
+            $logged_in_user = $this->get_user($user_id);
             // $query['_id']['$ne'] = new MongoID($user_id);
         }
         if($company)
@@ -117,8 +117,8 @@ class Model_User_Collection extends Mongo_Collection {
         }
         //return $query;
 
-        $results = $this->collection()->find($query, static::$protected_fields)
-                //->fields(static::$protected_fields, false)
+        $results = $this->find($query)
+                ->fields(static::$protected_fields, false)
                 ->limit($limit)
                 ->sort($sort)
                 ->skip($skip);
@@ -133,10 +133,10 @@ class Model_User_Collection extends Mongo_Collection {
         {
             $results->hint($user_id_fields_hint);
         }
-        $row = Mongo_Document::factory('user');
+
         while($results->hasNext())
         {
-            $row->load_values($results->getNext());
+            $row = $results->getNext();
             if($logged_in_user)
             {
                 $row->current_user = $logged_in_user;
@@ -144,7 +144,6 @@ class Model_User_Collection extends Mongo_Collection {
             }
 
             $ret = $row->stringify($row->as_array());
-            $row->clear();
 
             $return[] = $ret;
         }
@@ -153,10 +152,10 @@ class Model_User_Collection extends Mongo_Collection {
     }
 
     private static $protected_fields = [
-            'password' => -1,
-            'settings.notifications' => -1,
-            'settings.billing' => -1,
-            'logins' => -1
+        'password',
+        'settings.notifications',
+        'settings.billing',
+        'logins'
         ];
 
 }
