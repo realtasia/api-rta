@@ -24,7 +24,7 @@ class Arr extends Kohana_Arr {
      * @param string $delimiter
      * @return array
      */
-    public static function delim_to_multi(array $arr, $delimiter = NULL)
+    public static function delim_to_multi($arr, $delimiter = NULL)
     {
         $return = [];
         if ($delimiter == NULL)
@@ -32,29 +32,32 @@ class Arr extends Kohana_Arr {
             $delimiter = parent::$delimiter;
         }
 
-        foreach ($arr as $key => $value)
+        if(is_array($arr))
         {
-            // ignoring int 0 (false negative). Delimiter cannot start key.
-            if (strpos($key, $delimiter))
+            foreach ($arr as $key => $value)
             {
-                $keys = $parts = explode($delimiter, $key);
-                $count = count($parts) - 1;
-                while($bottom = array_pop($parts))
+                // ignoring int 0 (false negative). Delimiter cannot start key.
+                if (strpos($key, $delimiter))
                 {
-                    if(count($parts) === $count)
+                    $keys = $parts = explode($delimiter, $key);
+                    $count = count($parts) - 1;
+                    while($bottom = array_pop($parts))
                     {
-                        $return = [$bottom => $value];
-                    }
-                    else
-                    {
-                        $return = [$bottom => $return];
-                    }
+                        if(count($parts) === $count)
+                        {
+                            $return = [$bottom => $value];
+                        }
+                        else
+                        {
+                            $return = [$bottom => $return];
+                        }
 
+                    }
                 }
-            }
-            else
-            {
-                $return[$key] = $value;
+                else
+                {
+                    $return[$key] = $value;
+                }
             }
         }
 

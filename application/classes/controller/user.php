@@ -180,7 +180,7 @@ class Controller_User extends Controller_Resource {
         {
             $user = static::$model;
             $user->load($this->request->param('id'), ['settings' => 1]);
-            $this->data($user->stringify($user->settings['privacy']->as_array()));
+            $this->data($user->stringify($user->as_array()['settings']['privacy']));
         }
         else
             return $this->validate_current_request('update_privacy', 'settings.privacy');
@@ -204,7 +204,7 @@ class Controller_User extends Controller_Resource {
         {
             $user = static::$model;
             $user->load($this->request->param('id'), ['info' => 1]);
-            $this->data($user->stringify($user->as_array()));
+            $this->data($user->stringify($user->as_array()['info']));
         }
         else
             return $this->validate_current_request('update_info', 'info');
