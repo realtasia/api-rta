@@ -36,28 +36,30 @@ class Model_Post extends Document {
     public function create($params)
     {
         $this->collection()->ensureIndex([
-            'page.id' => 1
-        ]);
+            'status' => 1, 'user._id' => 1, 'page._id' => 1, 'privacy.is' => 1, 'modified' => -1
+        ], ['name' => 'post_id_fields', 'safe' => true]);
         $this->collection()->ensureIndex([
-            'page_parent.id' => 1
-        ]);
+            'page_parent._id' => 1
+        ], ['sparse' => true, 'safe' => true]);
+        $this->collection()->ensureIndex([
+            'to._id' => 1
+        ], ['sparse' => true, 'safe' => true]);
         $this->collection()->ensureIndex([
             'type' => 1,
         ]);
         $this->collection()->ensureIndex([
-            'status' => 1,
+            'listing.price' => 1, 'listing.rooms' => 1, 'listing.built_size' => 1,
+            'listing.property_type' => 1
         ]);
-        $this->collection()->ensureIndex([
-            'from.id' => 1,
-        ]);
-        $this->collection()->ensureIndex([
-            'to.id' => 1,
-        ]);
-        // if agent, we check for company and if it's an array.
         // overwrite defaults
         $data                     = Arr::overwrite(static::$post_fields, $params);
         // merge with defaults
         $data                     = Arr::merge(static::$post_fields, $data);
+
+        if(in_array($data['type'], ['testimonial, subscription, like']))
+        {
+            
+        }
 
         // sort - for some sanity in debugging.. :-)
         ksort($data);
@@ -72,10 +74,10 @@ class Model_Post extends Document {
         } catch (MongoException $e)
         {
             Debug::error(
-                    "MongoCursorException while trying to create user :user \n"
+                    "MongoException while trying to create post: :post \n"
                     . "Error Message- :message \n"
                     . "Error Code- :code", [
-                ':user'    => print_r($data, TRUE),
+                ':post'    => print_r($data, TRUE),
                 ':message' => $e->getMessage(),
                 ':code'    => $e->getCode()
             ]);
@@ -84,6 +86,7 @@ class Model_Post extends Document {
 
         return (array) $this->as_array();
     }
+
 
     /**
      * Unsets the 'created' field which was extracted from the MongoID
@@ -125,7 +128,7 @@ class Model_Post extends Document {
         {
             $this->modified  = date('c', $this->modified);
         }
-        //
+        // if there is no current user, no further formatting required.
         if ($this->current_user === NULL)
             return $this;
 
@@ -144,8 +147,45 @@ class Model_Post extends Document {
             $this->actions      = static::get_action_routes($this->_id);
             $this->connections  = static::get_public_connection_routes($this->_id);
         }
+        // comments processing in stringify
 
         return $this;
+    }
+
+    /**
+     * Using this to format some fields. Can't set subarray values via model.
+     * Keep getting error that modifying overloaded property has no effect.
+     * Apparently, that is the way __get() works. So have to do it here instead.
+     *
+     * @param array $arr
+     * @return array
+     */
+    public function stringify(array $arr)
+    {
+        $comments = Arr::get($arr, 'comments');
+        $current_user = (object) $this->get_default_user_fields();
+
+        // we should trigger the comment model's formatting so each comment in
+        // this post is properly formatted.
+        if(!empty($comments))
+        {
+            foreach ($comments as $key => $value)
+            {
+                $comment = Mongo_Document::factory('comment');
+                if($current_user)
+                {
+                    // check if there is a current user
+                    $comment->current_user = $current_user;
+                }
+                // trigger comment formatting and defaults
+                $comment->after_load();
+
+                // now each comment in the post is properly formatted.
+                $arr['comments'][$key] = $comment->stringify($comment->to_array());
+            }
+        }
+
+        return parent::stringify($arr);
     }
 
     /**
@@ -226,18 +266,27 @@ class Model_Post extends Document {
      * @var array
      */
     private static $post_fields = [
-        'from'  => [], // '_id', 'name' of the user who created this
+        'user'  => [], // '_id', 'name' of the user who created this
         'to' => [], // '_id', 'name' if this is a private post, the user this post was posted on.
         'page' => [], // '_id', 'name', 'type' the page it was written on (location, user profile etc...)
         'page_parent' => [], // '_id', 'name', 'type' the page's parent (company or estate)
-        'listing' => [], // '_id', 'name', 'type' the page's parent (company or estate)
+        'listing' => [
+            'price' => 0,
+            'rooms' => 1,
+            'built_size' => 0,
+            'property_type' => 0,
+            'tenure' => 0,
+            'land_size' => 0,
+            'value' => 0,
+            'cobroke' => 0,
+        ], // '_id'
         'message' => '', // the content
         'message_tags' => [], // names of existing people within the content are parsed
         'picture' => '', // if this post has an image, this will be the url
         'link'    => [], // 'name', 'caption', 'description', 'source' the original link if there is one
         'video' => [], // 'name', 'caption', 'description', 'source', 'properties' if this post has a video
-        'type' => '', // wallpost, testimonial
-        'status'     => '', // pending, active, expired,
+        'type' => 'wallpost', // wallpost, testimonial, message
+        'status'     => 'active', // pending, active, expired,
         'uri'     => '',
         'modified'     => '',
         'privacy'     => ['is' => 'PUBLIC'],

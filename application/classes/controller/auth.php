@@ -139,8 +139,8 @@ class Controller_Auth extends Controller_Abstract {
             case!isset(static::$params['grant_type']) || empty(static::$params['grant_type']):
             case!isset(static::$params['redirect_uri']) || empty(static::$params['redirect_uri']):
             case!isset(static::$params['client_id']) || empty(static::$params['client_id']):
-            case static::$params['grant_type'] == 'password' && (!isset(static::$params['username']) || empty(static::$params['username'])):
-            case static::$params['grant_type'] == 'password' && (!isset(static::$params['password']) || empty(static::$params['password'])):
+            case static::$params['grant_type'] === 'password' && (!isset(static::$params['username']) || empty(static::$params['username'])):
+            case static::$params['grant_type'] === 'password' && (!isset(static::$params['password']) || empty(static::$params['password'])):
                 return $this->error('invalid_request');
         }
 

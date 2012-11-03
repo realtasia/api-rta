@@ -411,7 +411,7 @@ class Model_User extends Document {
                 'plan_id'   => NULL
             ],
             'privacy'   => [
-                ['is' => 'PUBLIC'],
+                'is'            => 'PUBLIC',
                 'contacts'      => ['is' => 'PUBLIC'],
                 'subscriptions' => ['is' => 'PUBLIC'],
                 'messages'      => ['is' => 'PUBLIC'],

@@ -8,18 +8,29 @@
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */
-class Model_User_Collection extends Mongo_Collection {
-    protected $name = 'users';
+class Model_Post_Collection extends Mongo_Collection {
+    protected $name = 'posts';
 
     /**
      * Does a search, sort and limit. $args is an array that defaults to:
      *
-     *  array(
-     *          'limit' => 11, 'offset' => 0, 'type' => '',
-     *          'subtypes' => array(), 'sort' => 'alpha',
-     *          's' => '', 'include_ids' => FALSE,
-     *          'object_id' => FALSE, 'user_id' => false, 'children' => FALSE
-     *  );
+        $this->collection()->ensureIndex([
+            'status' => 1, 'user._id' => 1, 'page._id' => 1, 'privacy.is' => 1
+        ], ['name' => 'post_id_fields', 'safe' => true]);
+        $this->collection()->ensureIndex([
+            'page_parent._id' => 1
+        ], ['sparse' => true, 'safe' => true]);
+        $this->collection()->ensureIndex([
+            'to._id' => 1
+        ], ['sparse' => true, 'safe' => true]);
+        $this->collection()->ensureIndex([
+            'type' => 1,
+        ]);
+        $this->collection()->ensureIndex([
+            'listing' => 1
+        ]);
+     * 'price' => 0, 'rooms' => 1, 'built_size' => 0, 'property_type' => 0, 'tenure' => 0,
+     * 'land_size' => 0, 'value' => 0, 'description' => 0, 'cobroke' => 0,
      *
      * @param array $args
      * @return self Sets the $cursor property and returns itself
@@ -27,8 +38,9 @@ class Model_User_Collection extends Mongo_Collection {
     public function search($args = array(), $user_id = NULL)
     {
         $defaults = [
-           'limit' => 11, 'skip' => 0, 'roles' => [], 'sort' => 'alpha',
-           's' => '', 'include_ids' => [], 'children' => []
+           'status' => 'active', 'skip' => 0, 'limit' => 11, 'sort' => 'active',
+           's' => '', 'include_ids' => [], 'page' => null, 'parent' => null,
+           'user' => null, 'type' => null, 'listing' => [], 'to' => null
         ];
 
         // set some empty arrays
@@ -36,9 +48,16 @@ class Model_User_Collection extends Mongo_Collection {
 
         extract(Arr::merge($defaults, $args), EXTR_SKIP);
 
+        $query['status'] = $status;
         // looking for a specific role
-        if (!empty($roles))
-            $query['roles'] = array('$in' => $roles);
+        if ($type)
+        {
+            $query['type'] = $type;
+            if($type === 'listing')
+            {
+                $query = Arr::merge($query, $this->format_listing_params($listing));
+            }
+        }
 
         // if specific records are needed add to the ids array
         // here's where we set the $id array
@@ -49,28 +68,33 @@ class Model_User_Collection extends Mongo_Collection {
         if ($s)
         {
             // this time it's a regex search.
-            $s = new MongoRegex("/^$s/i");
-            $query['$or'] = [
-                    ['username' => $s],
-                    ['email' => $s],
-                    ['telephone.mobile' => $s],
-                    ['company.name' => $s]
-                ];
+            $query['message'] = new MongoRegex("/$s/i");
         }
 
         // iterate through the $ids and make sure they're all MongoID objects
         if (!empty($ids))
             $query['_id']['$in'] = $ids;
 
+        if($page)
+            $query['page._id'] = $page;
+
+        if($parent)
+            $query['parent._id'] = $parent;
+
+        if($user)
+            $query['user._id'] = $user;
+
+        if($to)
+            $query['to._id'] = $to;
+
         switch($sort)
         {
-            case 'alpha': $sort = ['name' => 1]; break;
-            case 'popular': $sort = ['counts.total' => -1]; break;
+            case 'active': $sort = ['modified' => -1]; break;
+            case 'newest': $sort = ['_id' => -1]; break;
             default: $sort = ['_id' => -1]; break;
         }
 
         $results = $this->find($query)
-                ->fields(static::$protected_fields, false)
                 ->limit($limit)
                 ->sort($sort)
                 ->skip($skip)
@@ -92,7 +116,36 @@ class Model_User_Collection extends Mongo_Collection {
         return $return;
     }
 
-    private static $protected_fields = ['password', 'settings', 'logins'];
+    public function testimonials($args = array(), $user_id = NULL)
+    {
+        $defaults = ['status' => 'active', 'type' => 'testimonial'];
 
+        return $this->search(Arr::merge($defaults, $args));
+    }
+
+    public function listings($args = array(), $user_id = NULL)
+    {
+        $defaults = ['status' => 'active', 'type' => 'listing'];
+
+        return $this->search(Arr::merge($defaults, $args));
+    }
+
+    /**
+     * Formats (hopefully) the listings query in the correct order such that it
+     * utilises an index.
+     *
+     * @param array $listings
+     * @return array
+     */
+    protected function format_listing_params(array $listings)
+    {
+        $format = [
+            'listing.price' => 0, 'listing.rooms' => 1, 'listing.built_size' => 0,
+            'listing.property_type' => '', 'listing.tenure' => 0, 'listing.land_size' => 0,
+            'listing.value' => 0, 'listing.description' => 0, 'listing.cobroke' => 0
+        ];
+
+        return Arr::merge($format, $listings);
+    }
 }
 ?>

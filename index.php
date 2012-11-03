@@ -115,7 +115,10 @@ try
 }
 catch (Exception $e)
 {
-    Debug::log(sprintf('%s [ %s ]: %s ~ %s [ %d ]', get_class($e), $e->getCode(), strip_tags($e->getMessage()), Debug::path($e->getFile()), $e->getLine()));
+    $error = sprintf('%s [ %s ]: %s ~ %s [ %d ]', get_class($e), $e->getCode(), strip_tags($e->getMessage()), Debug::path($e->getFile()), $e->getLine());
+    Debug::log($error);
+
+    print_r($error);
 
     echo Response::factory([
         'status' => 200
