@@ -116,9 +116,9 @@ try
 catch (Exception $e)
 {
     $error = sprintf('%s [ %s ]: %s ~ %s [ %d ]', get_class($e), $e->getCode(), strip_tags($e->getMessage()), Debug::path($e->getFile()), $e->getLine());
-    Debug::log($error);
+    Debug::error($error);
 
-    print_r($error);
+    //print_r($error);
 
     echo Response::factory([
         'status' => 200
@@ -126,8 +126,10 @@ catch (Exception $e)
       ->body(json_encode([
         'status' => 'error',
         'data' => [
-            'title' => 'access_denied',
-            'message' => 'The resource owner or authorization server denied the request.'
+            'title' => get_class($e),
+            'code' => $e->getCode(),
+            'message' => strip_tags($e->getMessage()),
+            'path' => Debug::path($e->getFile()), $e->getLine(),
         ]
     ], JSON_PRETTY_PRINT)
     );
