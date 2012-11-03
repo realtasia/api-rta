@@ -118,12 +118,11 @@ catch (Exception $e)
     $error = sprintf('%s [ %s ]: %s ~ %s [ %d ]', get_class($e), $e->getCode(), strip_tags($e->getMessage()), Debug::path($e->getFile()), $e->getLine());
     Debug::error($error);
 
-    //print_r($error);
-
-    echo Response::factory([
-        'status' => 200
-    ])->headers('Content-Type', 'application/javascript')
-      ->body(json_encode([
+    if(!$callback = Arr::get($_GET, 'callback'))
+    {
+        $callback = Arr::get($_POST, 'callback');
+    }
+    $data = json_encode([
         'status' => 'error',
         'data' => [
             'title' => get_class($e),
@@ -131,7 +130,16 @@ catch (Exception $e)
             'message' => strip_tags($e->getMessage()),
             'path' => Debug::path($e->getFile()), $e->getLine(),
         ]
-    ], JSON_PRETTY_PRINT)
-    );
+    ], JSON_PRETTY_PRINT);
+
+
+    if($callback)
+        $data = $callback . '(' . $data . ')';
+    //print_r($error);
+
+    echo Response::factory([
+        'status' => 200
+    ])->headers('Content-Type', 'application/javascript')
+      ->body($data);
 
 }

@@ -209,7 +209,7 @@ class Controller_Abstract extends Controller {
                 case 'http://www.realtasia.com.sg':
                 case 'http://www.realtasia.com':
                     $this->response->headers([
-                        'Access-Control-Allow-Origin' => $_SERVER['HTTP_ORIGIN'],
+                        'Access-Control-Allow-Origin' => $p,
                         'Access-Control-Allow-Methods' => 'POST, GET',
                         'Access-Control-Max-Age' => '3600',
                         'Access-Control-Allow-Headers' => 'Content-Type',
