@@ -438,10 +438,9 @@ class Controller_Singpost extends Controller {
         $mongo = Mongo_document::factory('singpost')->collection();
 
         $cursor = $mongo->find(['estate' => ['$ne' => null], 'geo.lat' => ['$ne' => null]])
-                        ->skip(1993);
+                        ->skip(7414);
 
-        echo "<pre>";
-        $i = 1993;
+        $i = 7414;
         $time = time();
         while($cursor->hasNext())
         {
@@ -491,6 +490,7 @@ class Controller_Singpost extends Controller {
 
         if($response->Status->code !== 200)
         {
+            fwrite(STDOUT,$response->Status->code);
             exit(0);
         }
 

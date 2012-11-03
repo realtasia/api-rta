@@ -123,7 +123,10 @@ class Controller_Auth extends Controller_Abstract {
         $post = $this->request->post();
         $get  = $this->request->query();
         if (empty($post) && empty($get))
+        {
+            Debug::log('invalid_request invoked in check headers [no params]');
             return $this->error('invalid_request');
+        }
 
         if (empty($post))
         {
@@ -141,7 +144,8 @@ class Controller_Auth extends Controller_Abstract {
             case!isset(static::$params['client_id']) || empty(static::$params['client_id']):
             case static::$params['grant_type'] === 'password' && (!isset(static::$params['username']) || empty(static::$params['username'])):
             case static::$params['grant_type'] === 'password' && (!isset(static::$params['password']) || empty(static::$params['password'])):
-                return $this->error('invalid_request');
+                Debug::log('invalid request invoked in check headers');
+                return $this->error('invalid_request [params not checking out]');
         }
 
         return static::$params;

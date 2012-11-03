@@ -79,11 +79,17 @@ class Oauth2_Authentication {
     {
         // if there is no client_id registered, nothing left to do
         if(!$client = static::$mClient->get_client($values['client_id']))
-                return static::$error->create('unauthorized_client');
+        {
+            Debug::log('unauthorised invoked in get_client');
+            return static::$error->create('unauthorized_client');
+        }
 
         // if user registration fails, return false
         if(!$user = static::$mResource->check_password($values['username'], $values['password']))
-                return static::$error->create('unauthorized_client');
+        {
+            Debug::log('unauthorised invoked in check_password');
+            return static::$error->create('unauthorized_client');
+        }
 
         // get or create a new token
         return $this->get_token($client['client_id'], $user['_id'], TRUE, 'password');
@@ -133,6 +139,7 @@ class Oauth2_Authentication {
             if ($given_domain === $stored_domain)
                 return $this->get_token($values['client_id'], NULL, TRUE);
         }
+        Debug::log('unauthorised invoked in credentials');
         return static::$error->create('unauthorized_client');
     }
 
