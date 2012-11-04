@@ -216,7 +216,7 @@ class Controller_Abstract extends Controller {
                         'Access-Control-Allow-Headers' => 'Content-Type, *',
                         'p3p' => 'CP=IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT',
                     ]);
-                    Debug::log('Made it to CORS');
+                    //Debug::log('Made it to CORS');
                     break;
             }
         }
@@ -224,7 +224,7 @@ class Controller_Abstract extends Controller {
         $data = json_encode($this->return, JSON_PRETTY_PRINT);
         if(isset(static::$params['callback']))
             $data = static::$params['callback'] . '(' . $data . ')';
-        Debug::log('Made it to body');
+        //Debug::log('Made it to body');
         $this->response->body($data);
     }
 

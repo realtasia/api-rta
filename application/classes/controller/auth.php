@@ -124,7 +124,7 @@ class Controller_Auth extends Controller_Abstract {
         $get  = $this->request->query();
         if (empty($post) && empty($get))
         {
-            Debug::log('invalid_request invoked in check headers [no params]');
+            Debug::log(print_r($_GET, true));
             return $this->error('invalid_request');
         }
 
