@@ -131,10 +131,12 @@ class Controller_Auth extends Controller_Abstract {
         if (empty($post))
         {
             static::$params = $get;
+            Debug::log(print_r($get, true));
         }
         else
         {
             static::$params = $post;
+            Debug::log(print_r($post, true));
         }
 
         switch (true)
@@ -144,7 +146,7 @@ class Controller_Auth extends Controller_Abstract {
             case!isset(static::$params['client_id']) || empty(static::$params['client_id']):
             case static::$params['grant_type'] === 'password' && (!isset(static::$params['username']) || empty(static::$params['username'])):
             case static::$params['grant_type'] === 'password' && (!isset(static::$params['password']) || empty(static::$params['password'])):
-                Debug::log('invalid request invoked in check headers');
+                Debug::log('invalid request invoked in check headers [params not checking out]');
                 return $this->error('invalid_request [params not checking out]');
         }
 
