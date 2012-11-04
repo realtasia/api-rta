@@ -214,7 +214,7 @@ class Controller_Abstract extends Controller {
                         'Access-Control-Allow-Credentials' => 'true',
                         'Access-Control-Max-Age' => '3600',
                         'Access-Control-Allow-Headers' => 'Content-Type, Origin, Accept',
-                        //'p3p' => 'CP=IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT',
+                        'p3p' => 'CP=IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT',
                     ]);
                     //Debug::log('Made it to CORS');
                     break;
