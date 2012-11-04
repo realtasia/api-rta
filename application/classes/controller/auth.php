@@ -124,19 +124,19 @@ class Controller_Auth extends Controller_Abstract {
         $get  = $this->request->query();
         if (empty($post) && empty($get))
         {
-            Debug::log(print_r($_GET, true));
+            Debug::log('invalid called because request params are empty');
             return $this->error('invalid_request');
         }
 
         if (empty($post))
         {
             static::$params = $get;
-            Debug::log(print_r($get, true));
+            //Debug::log('invalid called because request params are empty');
         }
         else
         {
             static::$params = $post;
-            Debug::log(print_r($post, true));
+            //Debug::log(print_r($post, true));
         }
 
         switch (true)
