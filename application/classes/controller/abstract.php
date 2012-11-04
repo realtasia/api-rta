@@ -210,7 +210,7 @@ class Controller_Abstract extends Controller {
                 case 'http://www.realtasia.com':
                     $this->response->headers([
                         'Access-Control-Allow-Origin' => $p,
-                        'Access-Control-Allow-Methods' => 'GET', 'POST', 'OPTIONS',
+                        'Access-Control-Allow-Methods' => 'GET, POST, OPTIONS',
                         'Access-Control-Allow-Credentials' => 'true',
                         'Access-Control-Max-Age' => '3600',
                         'Access-Control-Allow-Headers' => 'Content-Type, *',
