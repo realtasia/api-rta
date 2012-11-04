@@ -54,7 +54,7 @@ class Model_User_Collection extends Mongo_Collection {
         // status is a must for a query. It is the fisrt field of a compound index
         $query['status'] = $status;
 
-        $query['settings.privacy.is'] = $privacy;
+        $query['settings.privacy.0.is'] = $privacy;
 
         /*
          * For some reason, explain() showed Mongo wasn't using any of the indexes
