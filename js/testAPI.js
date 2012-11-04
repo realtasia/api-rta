@@ -81,7 +81,7 @@ function viewModel() {
             grant_type : 'client_credentials'
         }
         self.uri('/auth');
-        return self.load('GET', params);
+        return self.load('POST', params);
     }
 
     this.authUser = function()
@@ -95,7 +95,7 @@ function viewModel() {
         }
 
         self.uri('/auth');
-        return self.load('GET', params);
+        return self.load('POST', params);
     }
 
     this.authAdmin = function()
@@ -108,7 +108,7 @@ function viewModel() {
             grant_type : 'password'
         }
         self.uri('/auth');
-        return self.load('GET', params);
+        return self.load('POST', params);
     }
 
     this.load = function(type, params)
