@@ -102,7 +102,7 @@ function viewModel() {
 
     this.addParam = function(data, event)
     {
-        if (event.keyCode === '13') {
+        if (event.keyCode == '13') {
             if (self.name().length > 0 && self.val().length > 0) {
                 toAdd = new Param(self.name(), self.val());
 
@@ -114,7 +114,7 @@ function viewModel() {
 
             }
         }
-        if (event.keyCode === '46') {
+        if (event.keyCode == '46') {
             console.log(data.key)
             self.params.remove(function(item) {
                 return item.key() === data.name();

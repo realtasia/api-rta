@@ -130,6 +130,21 @@ class Controller_User extends Controller_Resource {
     }
 
     /**
+     * Retrieves an array of subscription interactions for this user
+     * Should at least have an object type
+     */
+    public function action_subscriptions()
+    {
+        static::$params['user_id'] = $this->request->param('id');
+
+        $data = Mongo_Document::factory('interaction')
+                ->collection()
+                ->subscriptions(static::$params);
+
+        return $this->data($data);
+    }
+
+    /**
      * Utility method that validates this request and either runs an update
      * method (for PUT requests) or retrieves a DB field (GET REQUEST)
      *
