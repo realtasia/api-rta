@@ -10,8 +10,13 @@
  */
 class Controller_Post extends Controller_Resource {
 
+    private static $valid_get_types = [
+        'find_unique', 'search_listings', 'search_testimonials'
+    ];
+
     private static $valid_post_types = [
-        'create_testimonial', 'create_listing', 'create_post', 'update_privacy'
+        'create_testimonial', 'create_listing', 'create_post', 'update_privacy',
+        'update_testimonial', 'update_listing', 'update_post'
     ];
 
     public function before()
@@ -32,18 +37,35 @@ class Controller_Post extends Controller_Resource {
      *************************************************************************/
 
     /**
-     * Fetch a post by id.
+     * Fetch a private GET action or fail if there is one and no method for it
+     * Or fetch a post by id.
      * Check if there is a logged in user
      * Fetch requested post and check relation to logged_in user
      *
      * GET post
      * Usage: Issue a GET to /post/index/{id}
      *
-     * @return json_encoded array
+     * @return json data
      */
     public function action_index()
     {
-        // get the id
+        // we retrieve the request_type from params
+        $type = Arr::get(static::$params, 'request_type', false);
+
+        // if we have a type
+        if($type)
+        {
+            // we check if it is valid and the method exists
+            if (in_array($type, static::$valid_get_types) && method_exists($this, $type))
+                // run it
+                return $this->{$type}();
+            // ok, why do we have a type and not a method???
+            else
+                // yeap, you guessed it.
+                return $this->fail('user/generic', 'server_error');
+        }
+
+        // try id
         $id = $this->request->param('id');
 
         if ($id)
@@ -189,9 +211,9 @@ class Controller_Post extends Controller_Resource {
      * Protected Utility Actions - $_GETs
      *************************************************************************/
     /**
-     * Performs a search/sort of users.
+     * Performs a search/sort of posts.
      *
-     * @return array of users
+     * @return array of posts
      */
     protected function search()
     {
@@ -203,6 +225,52 @@ class Controller_Post extends Controller_Resource {
         return $this->data($users);
     }
 
+    /**
+     * This method searches the DB for a duplicate listing. If it finds one,
+     * issues a fail with a message and the listing id. If the required params
+     * are not available, issues a fail with message.
+     * If none is found, issues a success.
+     *
+     * Required GET params [unit, not_empty, listing_type, page_id]
+     *
+     * @todo Only logged in user is checked. What about admins & client credentials?
+     *
+     * @return json data
+     */
+    protected function find_unique()
+    {
+        $validation = Validation::factory(static::$params)
+                      ->rule('unit', 'not_empty')
+                      ->rule('listing_type', 'not_empty')
+                      ->rule('page_id', 'not_empty');
+
+        if ($validation->check())
+        {
+            if($user_id = Arr::get(static::$params, 'user_id'))
+            {
+                static::$params['user_id'] = $user_id;
+            }
+            else
+            {
+                static::$params['user_id'] = static::$user_id;
+            }
+            if ($id = static::$model->find_unique(static::$params))
+            {
+                $this->errors = [
+                    'message' => Kohana::message('post/listings', 'listing_exists'),
+                    'id'      => $id
+                ];
+                return $this->fail();
+            }
+
+            return $this->data(['success' => 1]);
+        }
+
+        $this->errors = $validation->errors('post/listing');
+        return $this->fail();
+    }
+
+
     /**************************************************************************
      * Protected Actions - CREATES
      *************************************************************************/
@@ -210,13 +278,66 @@ class Controller_Post extends Controller_Resource {
 
     protected function create_testimonial()
     {
+        $validation = Validation::factory(static::$params)
+                ->rule('message', 'not_empty')
+                ->rule('page', 'Controller_Post::valid_page', [':value', ':field', ':validation'])
+                ->rule('page_parent', 'Controller_Post::valid_page', [':value', ':field', ':validation']);
 
+        $defaults = [
+            'type'   => 'testimonial', 'status' => 'pending'
+        ];
+        if ($validation->check())
+        {
+            // this is a little different. we merge params with defaults to force defaults
+            if ($post = static::$model->create(Arr::merge(static::$params, $defaults)))
+            {
+                return $this->data($post);
+            }
+
+            return $this->error('server_error');
+        }
+
+        $this->errors = $validation->errors('user/privacy');
+        return $this->fail();
     }
 
 
     protected function create_listing()
     {
+        $params = static::extract_listing_values(static::$params);
+        $validation = Validation::factory($params)
+                ->rule('listing.type', 'not_empty')
+                ->rule('listing.type', 'in_array', [':value', ['rent', 'sale']])
+                ->rule('listing.price', 'not_empty')
+                ->rule('listing.price', 'numeric')
+                ->rule('listing.rooms', 'not_empty')
+                ->rule('listing.rooms', 'numeric')
+                ->rule('listing.built_size', 'not_empty')
+                ->rule('listing.built_size', 'numeric')
+                ->rule('listing.built_size', 'not_empty')
+                ->rule('listing.property_type', 'not_empty')
+                ->rule('listing.property_type', 'Controller_Post::valid_property_type', [':value', ':field', ':validation'])
+                ->rule('listing.land_size', 'numeric')
+                ->rule('listing.unit', 'not_empty')
+                ->rule('status', 'not_empty')
+                ->rule('page', 'Controller_Page::valid_page', [':value', ':field', ':validation'])
+                ->rule('page_parent', 'Controller_Page::valid_parent', [':value', ':field', ':validation']);
 
+        $defaults = [
+            'type'   => 'listing', 'status' => 'active'
+        ];
+        if ($validation->check())
+        {
+            if ($post = static::$model->create(Arr::merge($defaults, static::$params)))
+            {
+                return $this->data($post);
+            }
+
+            return $this->error('server_error');
+        }
+
+        $this->errors = $validation->errors('post/listing');
+        return $this->fail();
     }
 
 
@@ -234,11 +355,7 @@ class Controller_Post extends Controller_Resource {
      */
     protected function update_listing()
     {
-        $id = $this->request->params('id');
-        static::$model->load_values(['_id' => new MongoID($id)]);
-        static::$model->status = 'active';
-        static::$model->save();
-        $this->data(['status' => 1]);
+
     }
 
     protected function update_testimonial()
@@ -248,11 +365,11 @@ class Controller_Post extends Controller_Resource {
 
     protected function update_post()
     {
-        
+
     }
 
     /**
-     * Update a user's privacuy settings.
+     * Update a post's privacuy settings.
      *
      * @return boolean
      */
@@ -260,18 +377,7 @@ class Controller_Post extends Controller_Resource {
     {
         $params = static::extract_privacy_values(static::$params);
         $validation = Validation::factory($params)
-                ->rule('contacts.is', 'Controller_User::valid_privacy', [':value', ':field', ':validation'])
-                ->rule('contacts.is', 'not_empty')
-                ->rule('subscriptions.is', 'Controller_User::valid_privacy', [':value', ':field', ':validation'])
-                ->rule('subscriptions.is', 'not_empty')
-                ->rule('messages.is', 'Controller_User::valid_privacy', [':value', ':field', ':validation'])
-                ->rule('messages.is', 'not_empty')
-                ->rule('mentions.is', 'Controller_User::valid_privacy', [':value', ':field', ':validation'])
-                ->rule('mentions.is', 'not_empty')
-                ->rule('profile.others_posts.is', 'Controller_User::valid_privacy', [':value', ':field', ':validation'])
-                ->rule('profile.others_posts.is', 'not_empty')
-                ->rule('profile.others_posts_visibility.is', 'Controller_User::valid_privacy', [':value', ':field', ':validation'])
-                ->rule('profile.others_posts_visibility.is', 'not_empty');
+                ->rule('is', 'Controller_User::valid_privacy', [':value', ':field', ':validation']);
 
         if($validation->check())
         {
@@ -291,27 +397,68 @@ class Controller_Post extends Controller_Resource {
      *************************************************************************/
 
     /**
-     * Small validation for possible privacy settings
+     * Small validation for property types
      *
      * @param string $value
      * @return boolean
      */
-    public static function valid_privacy($value, $field, $validation)
+    public static function valid_property_type($value, $field, $validation)
     {
-        $privacy = ['PUBLIC', 'SUBSCRIBERS', 'SELF', 'CUSTOM'];
+        if(!is_array($value))
+        {
+            $validation->error($field, 'prop_type.not_array');
+            return false;
+        }
 
-        return in_array($value, $privacy) ? TRUE : $validation->error($field, 'valid_privacy');
+        foreach ($value as $location => $type)
+        {
+            switch ($location)
+            {
+                case 'HDB':
+                    $types = [
+                        '2I', '2S (Standard)', '3A', '3A Modified', '3NG', '3I',
+                        '3I Modified', '3S (Simplified)', '3STD (Standard)',
+                        '4A', '4NG', '4S (Simplified)', '4I', '4STD (Standard)',
+                        '5A', '5I', '5S', 'EA', 'EM', 'Other'
+                    ];
 
+                return in_array($type, $types) ? TRUE : $validation->error($field, 'prop_type.hdb_not_valid');
+
+                case 'Private Residential':
+                case 'Serviced Residential':
+                    $types = [ 'Condominium', 'Apartment', 'Walkup', 'Townhouse'];
+                return in_array($type, $types) ? TRUE : $validation->error($field, 'prop_type.apt_not_valid');
+
+                case 'Private Landed':
+                    $types = [ 'Bungalow', 'Bungalow (Good Class)', 'Detached', 'Semi-Detached', 'Terraced', 'Corner-Terrace'];
+                return in_array($type, $types) ? TRUE : $validation->error($field, 'prop_type.landed_not_valid');
+            }
+
+        }
     }
 
 
-    protected static function extract_creation_values($array)
+    /**
+     * Creates proper keys for validation. Because params (for Mongo) include
+     * sub arrays. But Kohana & Community decided that it should not validate
+     * sub arrays. I see their point, but I still think they're full of shit.
+     *
+     * @see http://forum.kohanaframework.org/discussion/1338/validation-and-sub-arrays/p1
+     *
+     * @param array $array
+     * @return type
+     */
+    protected static function extract_listing_values(array $array)
     {
         $return = [];
 
-        $return['info.gender'] = Arr::path($array, 'info.gender');
-        $return['info.telephone.mobile'] = Arr::path($array, 'info.telephone.mobile');
-        $return['info.birthday'] = Arr::path($array, 'info.birthday');
+        $return['listing.type']          = Arr::path($array, 'listing.type');
+        $return['listing.price']         = Arr::path($array, 'listing.price');
+        $return['listing.rooms']         = Arr::path($array, 'listing.rooms');
+        $return['listing.built_size']    = Arr::path($array, 'listing.price');
+        $return['listing.property_type'] = Arr::path($array, 'listing.property_type');
+        $return['listing.land_size']     = Arr::path($array, 'listing.land_size');
+        $return['listing.unit']          = Arr::path($array, 'listing.unit');
 
 
         return Arr::merge($return, $array);

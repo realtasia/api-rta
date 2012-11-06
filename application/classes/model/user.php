@@ -24,7 +24,8 @@ class Model_User extends Document {
             $ret = $this->stringify($this->as_array());
             return $object ? (object) $ret : $ret;
         }
-        return $object ? (object) [] : [];
+
+        return null;
     }
 
     /**
@@ -82,7 +83,7 @@ class Model_User extends Document {
                 ':message' => $e->getMessage(),
                 ':code'    => $e->getCode()
             ]);
-            return false;
+            return null;
         }
 
         return (array) $this->as_array();

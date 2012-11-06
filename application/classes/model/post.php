@@ -12,9 +12,9 @@
 class Model_Post extends Document {
 
     /**
-     * Retrieve a user by email, username or id
+     * Retrieve a single post
      *
-     * @param MongoID|string $id
+     * @param MongoID|string|array $id or an array of query params
      * @return array|null
      */
     public function get($id, array $fields = [], $object = TRUE)
@@ -24,7 +24,7 @@ class Model_Post extends Document {
             $ret = $this->stringify($this->as_array());
             return $object ? (object) $ret : $ret;
         }
-        return $object ? (object) [] : [];
+        return false;
     }
 
     /**
@@ -48,17 +48,29 @@ class Model_Post extends Document {
             'type' => 1,
         ]);
         $this->collection()->ensureIndex([
-            'listing.price' => 1, 'listing.rooms' => 1, 'listing.built_size' => 1,
-            'listing.property_type' => 1
+            'listing.unit' => 1,
+        ]);
+        $this->collection()->ensureIndex([
+            'listing.type' => 1, 'listing.price' => 1, 'listing.rooms' => 1,
+            'listing.built_size' => 1, 'listing.property_type' => 1
         ]);
         // overwrite defaults
         $data                     = Arr::overwrite(static::$post_fields, $params);
         // merge with defaults
         $data                     = Arr::merge(static::$post_fields, $data);
 
-        if(in_array($data['type'], ['testimonial, subscription, like']))
+        if(in_array($data['type'], ['subscription', 'like']))
         {
-            
+            foreach (['comments', 'subscribers', 'likers'] as $key => $value)
+            {
+                unset($data[$value], $data['counts'][$value]);
+
+            }
+        }
+
+        if($data['type'] === 'testimonial')
+        {
+            unset($data['comments'], $data['counts']['comments']);
         }
 
         // sort - for some sanity in debugging.. :-)
@@ -87,6 +99,25 @@ class Model_Post extends Document {
         return (array) $this->as_array();
     }
 
+
+    /**
+     * Searches for a document that has unique values. Returns false if none is
+     * found and the id of the document if found.
+     *
+     * @param array $params
+     * @return boolean|array
+     */
+    public function find_unique(array $params)
+    {
+        $query = [
+            'listing.unit' => $params['unit'],
+            'listing.type' => $params['listing_type'],
+            'page.id'      => parent::check_id($params['page_id']),
+            'user.id'      => parent::check_id($params['user_id'])
+        ];
+
+        return $this->get($query, ['_id' => 1], false);
+    }
 
     /**
      * Unsets the 'created' field which was extracted from the MongoID
@@ -266,36 +297,39 @@ class Model_Post extends Document {
      * @var array
      */
     private static $post_fields = [
-        'user'  => [], // '_id', 'name' of the user who created this
-        'to' => [], // '_id', 'name' if this is a private post, the user this post was posted on.
+        'user' => [], // '_id', 'name' of the user who created this
+        'to' => [], // '_id', 'name' of the user this message was sent to (for messages)
         'page' => [], // '_id', 'name', 'type' the page it was written on (location, user profile etc...)
         'page_parent' => [], // '_id', 'name', 'type' the page's parent (company or estate)
         'listing' => [
-            'price' => 0,
-            'rooms' => 1,
-            'built_size' => 0,
-            'property_type' => 0,
-            'tenure' => 0,
-            'land_size' => 0,
-            'value' => 0,
-            'cobroke' => 0,
+            'type'         => '',
+            'price'         => 0,
+            'rooms'         => 1,
+            'built_size'    => 0,
+            'property_type' => '',
+            'tenure'        => 0,
+            'land_size'     => 0,
+            'value'         => 0,
+            'cobroke'       => 0,
+            'unit'          => '',
         ], // '_id'
-        'message' => '', // the content
-        'message_tags' => [], // names of existing people within the content are parsed
+        'message'       => '', // the content
+        'message_tags'  => [], // names of existing people within the content are parsed
         'picture' => '', // if this post has an image, this will be the url
         'link'    => [], // 'name', 'caption', 'description', 'source' the original link if there is one
         'video' => [], // 'name', 'caption', 'description', 'source', 'properties' if this post has a video
-        'type' => 'wallpost', // wallpost, testimonial, message
-        'status'     => 'active', // pending, active, expired,
-        'uri'     => '',
-        'modified'     => '',
-        'privacy'     => ['is' => 'PUBLIC'],
-        'counts'     => [
-            'attachments'  => 0,
-            'comments'     => 0,
-            'events'       => 0,
-            'likers'       => 0,
-            'subscribers'  => 0
+        'type'     => 'wallpost', // wallpost, testimonial, message, listing
+        'status'   => 'active', // pending, active, expired,
+        'uri'      => '',
+        'modified' => 0,
+        'privacy'  => ['is' => 'PUBLIC'],
+        'attachments' => [], // '_id', 'name', 'type' of the attachments for this post
+        'counts' => [
+            'attachments' => 0,
+            'comments'    => 0,
+            'events'      => 0,
+            'likers'      => 0,
+            'subscribers' => 0
         ],
         'comments'    => [],
         'subscribers' => [],

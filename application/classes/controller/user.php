@@ -14,9 +14,13 @@ class Controller_User extends Controller_Resource {
         'has_social_login', 'is_unique', 'get', 'search'
     ];
 
-    private static $valid_post_types = [
-        'registration', 'beta_interest', 'create_social_login', 'password_reset',
-        'update_social_login', 'activate', 'change_avatar'
+    private static $valid_adminPost_types = [
+        'registration', 'beta_interest', 'activate', 'send_sms', 'send_email',
+        'is_unique', 'admin_email'
+    ];
+
+    private static $valid_userPost_types = [
+        'create_social_login', 'password_reset', 'update_social_login'
     ];
 
     public function before()
@@ -24,7 +28,8 @@ class Controller_User extends Controller_Resource {
         parent::before();
         if(parent::logged_in())
         {
-            static::$model = Mongo_Document::factory('user', null, static::$user_id);
+            static::$model =
+                    Mongo_Document::factory('user', null, static::$user_id);
         }
         else
         {
@@ -55,7 +60,8 @@ class Controller_User extends Controller_Resource {
         if($type)
         {
             // we check if it is valid and the method exists
-            if (in_array($type, static::$valid_get_types) && method_exists($this, $type))
+            if (in_array($type, static::$valid_get_types)
+                && method_exists($this, $type))
                 // run it
                 return $this->{$type}();
             // ok, why do we have a type and not a method???
@@ -88,8 +94,29 @@ class Controller_User extends Controller_Resource {
             $this->error('invalid_request');
 
         // let's check if it's valid and run it
-        if (in_array($type, static::$valid_post_types) && method_exists($this, $type))
-            return $this->{$type}();
+        if (in_array($type, static::$valid_adminPost_types)
+            && method_exists($this, $type))
+        {
+            if(parent::has_role('admin') || parent::is_client())
+            {
+                return $this->{$type}();
+            }
+
+            return $this->error('access_denied');
+        }
+
+        // let's check if it's valid and run it
+        if (in_array($type, static::$valid_userPost_types)
+            && method_exists($this, $type))
+        {
+
+            if(static::logged_in_is_id($id))
+            {
+                return $this->{$type}();
+            }
+
+            return $this->error('access_denied');
+        }
 
         // nope, return an error
         return $this->error('invalid_request');
@@ -145,6 +172,196 @@ class Controller_User extends Controller_Resource {
     }
 
     /**
+     * Retrieves an array of listings belonging to a user.
+     */
+    public function action_listings()
+    {
+        $id = $this->request->param('id');
+        static::$params['user_id'] = $id;
+
+        $posts = Mongo_Collection::factory('post');
+
+        /*
+         * 1. if user is logged in and ids are the same (or admin or client)
+         *      - all statuses allowed.
+         * 2. if not
+         *      - only active statuses allowed.
+         */
+
+        switch ($status)
+        {
+            case 'pending':
+            case 'archived':
+            case 'draft':
+            case 'trashed':
+                // requested user and logged in user must be the same or must be admin
+                if (static::logged_in_is_id($id) || parent::has_role('admin'))
+                    return $this->data(
+                            $posts->listings(static::$params, static::$user_id)
+                    );
+
+                // clients only see 'active' (public) posts
+                return $this->error('access_denied');
+
+            // this is a regular (public) lookup
+            default :
+                // need a client or user token.
+                if (parent::is_client() || parent::logged_in())
+                    return $this->data(
+                            $posts->listings(static::$params, static::$user_id)
+                    );
+
+                // oops. zip token.
+                return $this->error('access_denied');
+        }
+
+        return $this->error('invalid_request');
+    }
+
+    /**
+     * Returns inbox of the user.
+     *
+     * @return json data
+     */
+    public function action_inbox()
+    {
+        $id = $this->request->param('id');
+        static::$params['user'] = $id;
+
+        // no status checks here, statuses are in individual messages (comments)
+        if (static::logged_in_is_id($id) || parent::has_role('admin'))
+        {
+            $posts = Mongo_Collection::factory('post');
+            return $this->data($posts->inbox(static::$params, static::$user_id));
+        }
+
+        return $this->error('invalid_request');
+    }
+
+    /**
+     * Retrieves an array of posts belonging to a user.
+     */
+    public function action_feed()
+    {
+        $id = $this->request->param('id');
+
+        static::$params['user_id'] = $id;
+
+        static::$params['type'] = ['$ne' => 'messages'];
+
+        $posts = Mongo_Collection::factory('post');
+
+        /*
+         * 1. if user is logged in and ids are the same (or admin or client)
+         *      - all statuses allowed.
+         * 2. if not
+         *      - only active statuses allowed.
+         */
+
+        $status = Arr::get(static::$params, 'status', 'active');
+
+        switch ($status)
+        {
+            case 'pending':
+            case 'archived':
+            case 'draft':
+            case 'trashed':
+                // logged in user does not see other statuses if posts don't
+                // belong to him
+                if (static::logged_in_is_id($id))
+                {
+                    return $this->data(
+                            $posts->search(static::$params, static::$user_id)
+                    );
+                }
+
+                // admin sees everything
+                if (parent::has_role('admin'))
+                {
+                    static::$params['page_id'] = $id;
+                    return $this->data(
+                            $posts->search(static::$params, static::$user_id)
+                    );
+                }
+                // clients only see active (public) posts
+                return $this->error('access_denied');
+
+            // this is a regular (public) lookup
+            default :
+                // need a client or user token.
+                if (parent::is_client() || parent::logged_in())
+                {
+                    // we include posts written on his page
+                    static::$params['page_id'] = $id;
+                    return $this->data(
+                            $posts->search(static::$params, static::$user_id)
+                    );
+                }
+                // oops. zip token.
+                return $this->error('access_denied');
+        }
+
+        return $this->error('invalid_request');
+    }
+
+    /**
+     * Retrieves an array of testimonials written by or received for a user.
+     */
+    public function action_testimonials()
+    {
+        $type  = Arr::get(static::$params, 'request_type', 'received');
+        $id    = $this->request->param('id');
+        $posts = Mongo_Collection::factory('post');
+
+        switch ($type)
+        {
+            case 'written' :
+                static::$params['user_id'] = $id;
+                break;
+            case 'received' :
+                static::$params['page_id'] = $id;
+                break;
+        }
+        /*
+         * 1. if user is logged in and ids are the same (or admin or client)
+         *      - all statuses allowed.
+         * 2. if not
+         *      - only active statuses allowed (with a valid token).
+         */
+
+        $status = Arr::get(static::$params, 'status', 'active');
+
+        switch ($status)
+        {
+            case 'pending':
+            case 'archived':
+            case 'draft':
+            case 'trashed':
+                if (static::logged_in_is_id($id) || parent::has_role('admin'))
+                    return $this->data(
+                            $posts->testimonials(static::$params, static::$user_id)
+                    );
+
+                // clients only see 'active' (public) posts
+                return $this->error('access_denied');
+
+            // this is a regular (public) lookup
+            default :
+                // need a client or user token.
+                if (parent::is_client() || parent::logged_in())
+                    return $this->data(
+                            $posts->testimonials(static::$params, static::$user_id)
+                    );
+
+                // oops. zip token.
+                return $this->error('access_denied');
+        }
+
+        return $this->error('invalid_request');
+    }
+
+
+    /**
      * Utility method that validates this request and either runs an update
      * method (for PUT requests) or retrieves a DB field (GET REQUEST)
      *
@@ -158,10 +375,7 @@ class Controller_User extends Controller_Resource {
 
         // current user is the user we need to update/fetch or
         // an admin is logged in or this is a client_credentials grant_type
-        Debug::log('is_admin :' . parent::has_role('admin'));
-        Debug::log('is_client :' . parent::is_client());
-        Debug::log('is_user :' . static::$user_id && static::$user_id === $id);
-        if((static::$user_id && static::$user_id === $id) || parent::has_role('admin') || parent::is_client())
+        if(static::logged_in_is_id($id) || parent::has_role('admin'))
         {
             // retrieve user by his/her specific field requested.
             if($this->is_GET())
@@ -191,14 +405,18 @@ class Controller_User extends Controller_Resource {
      */
     public function action_privacy()
     {
-        if ($this->is_GET())
+        if ($this->is_GET() && (parent::logged_in() || parent::is_client()))
         {
             $user = static::$model;
             $user->load($this->request->param('id'), ['settings' => 1]);
-            $this->data($user->stringify($user->as_array()['settings']['privacy']));
+            $this->data(
+                    $user->stringify($user->as_array()['settings']['privacy'])
+            );
         }
         else
-            return $this->validate_current_request('update_privacy', 'settings.privacy');
+            return $this->validate_current_request(
+                    'update_privacy', 'settings.privacy'
+                   );
 
     }
 
@@ -207,7 +425,9 @@ class Controller_User extends Controller_Resource {
      */
     public function action_notifications()
     {
-        return $this->validate_current_request('update_notifications', 'settings.notifications');
+        return $this->validate_current_request(
+                'update_notifications', 'settings.notifications'
+               );
     }
 
     /**
@@ -215,7 +435,7 @@ class Controller_User extends Controller_Resource {
      */
     public function action_info()
     {
-        if ($this->is_GET())
+        if ($this->is_GET() && (parent::logged_in() || parent::is_client()))
         {
             $user = static::$model;
             $user->load($this->request->param('id'), ['info' => 1]);
@@ -290,7 +510,9 @@ class Controller_User extends Controller_Resource {
             return $this->error('invalid_request');
 
         if(static::$model->get([$type => $value]))
-            return $this->fail('register/user', 'username.' . $type . '_not_available');
+            return $this->fail(
+                    'register/user', 'username.' . $type . '_not_available'
+            );
 
         return $this->data(['success' => 1]);
 
@@ -320,8 +542,10 @@ class Controller_User extends Controller_Resource {
      */
     protected function has_social_login($network)
     {
-        return static::$model->load(['logins.type' => $network, '_id' => static::$user_id], ['logins'])
-                ? static::$model->as_array()
+        return static::$model->load([
+            'logins.type' => $network, '_id' => static::$user_id
+        ], ['logins'])
+                ? static::$model->as_array()['logins']
                 : $this->data('status', 1);;
     }
 
@@ -333,9 +557,11 @@ class Controller_User extends Controller_Resource {
     protected function search()
     {
         if(parent::logged_in())
-            $users = Mongo_Collection::factory('user')->search(static::$params, static::$user_id);
+            $users = Mongo_Collection::factory('user')
+                                    ->search(static::$params, static::$user_id);
         else
-            $users = Mongo_Collection::factory('user')->search(static::$params);
+            $users = Mongo_Collection::factory('user')
+                                    ->search(static::$params);
 
         return $this->data($users);
     }
@@ -350,12 +576,6 @@ class Controller_User extends Controller_Resource {
      */
     protected function registration()
     {
-        if(parent::has_role('admin') === false && parent::is_client() === false)
-        {
-            Debug::log('In registration, Not admin or client. Can\'t continue');
-            return $this->error('access_denied');
-
-        }
         $params = static::extract_registration_values(static::$params);
         // validation rules for a regular user.
         $validation = Validation::factory($params)
@@ -407,13 +627,6 @@ class Controller_User extends Controller_Resource {
      */
     protected function beta_interest()
     {
-        if(!parent::has_role('admin') && !parent::is_client())
-        {
-            Debug::log('In beta interest. Not client or admin. cannot continue');
-            $this->error('access_denied');
-            return true;
-        }
-
         $user = Mongo_Document::factory('beta');
 
         $validation = Validation::factory(static::$params)
@@ -432,10 +645,20 @@ class Controller_User extends Controller_Resource {
             if ($user->new_beta_user(static::$params))
             {
                 $r = static::$params;
-                $this->admin_email('New User Joined Beta!! Woots', print_r(static::$params, TRUE));
-                $this->user_email($r, 'We received your submission', Kohana::message('register/info', 'thank_you_beta_email'));
+                $this->admin_email(
+                        'New User Joined Beta!! Woots',
+                        print_r(static::$params, TRUE)
+                );
+                $this->user_email(
+                        $r,
+                        'We received your submission',
+                        Kohana::message('register/info', 'thank_you_beta_email')
+                );
 
-                $this->send_sms('Thank you for you submission', static::$params['number.mobile']);
+                $this->send_sms(
+                        'Thank you for you submission',
+                        static::$params['number.mobile']
+                );
 
                 $this->data(['message' => 'Thank you for you submission']);
             }
@@ -459,22 +682,22 @@ class Controller_User extends Controller_Resource {
      */
     protected function password_reset()
     {
-        if(!parent::logged_in())
-        {
-            Debug::log('In password reset. No logged in user');
-            return $this->error('access_denied');
-        }
-
-
-        if(!isset(static::$params['password']) || empty(static::$params['password']))
+        if(!isset(static::$params['password'])
+           || empty(static::$params['password']))
             return $this->error('invalid_request');
-        if(!isset(static::$params['new_password']) || empty(static::$params['new_password']))
+
+        if(!isset(static::$params['new_password'])
+           || empty(static::$params['new_password']))
             return $this->error('invalid_request');
 
         $id = $this->param->user('id');
-        $user = static::$model->update_password(static::$params['new_password'], $id);
+        $user = static::$model->update_password(
+                static::$params['new_password'], $id
+        );
 
-        return $user ? $this->data(['success' => 1]) : $this->fail('user/generic', 'server_error');
+        return $user
+        ? $this->data(['success' => 1])
+        : $this->fail('user/generic', 'server_error');
     }
 
     /**
@@ -509,17 +732,19 @@ class Controller_User extends Controller_Resource {
                 ->rule('birthday', 'numeric')
                 ->rule('gender', 'not_empty');
 
-        if($validation->check())
+        if ($validation->check())
         {
-            $this->data(static::$model->update_info(static::$params, static::$user_id));
-        }
-        else
-        {
-            $this->errors = $validation->errors('user/info');
-            $this->fail();
+            if ($info = static::$model->update_info(
+                    static::$params, static::$user_id)
+            )
+            {
+                return $this->data($info);
+            }
+            return $this->error('server_error');
         }
 
-        return true;
+        $this->errors = $validation->errors('user/info');
+        return $this->fail();
     }
 
     /**
@@ -531,30 +756,48 @@ class Controller_User extends Controller_Resource {
     {
         $params = static::extract_privacy_values(static::$params);
         $validation = Validation::factory($params)
-                ->rule('contacts.is', 'Controller_User::valid_privacy', [':value', ':field', ':validation'])
+                ->rule('contacts.is', 'Controller_User::valid_privacy', [
+                    ':value', ':field', ':validation'
+                ])
                 ->rule('contacts.is', 'not_empty')
-                ->rule('subscriptions.is', 'Controller_User::valid_privacy', [':value', ':field', ':validation'])
+                ->rule('subscriptions.is', 'Controller_User::valid_privacy', [
+                    ':value', ':field', ':validation'
+                ])
                 ->rule('subscriptions.is', 'not_empty')
-                ->rule('messages.is', 'Controller_User::valid_privacy', [':value', ':field', ':validation'])
+                ->rule('messages.is', 'Controller_User::valid_privacy', [
+                    ':value', ':field', ':validation'
+                ])
                 ->rule('messages.is', 'not_empty')
-                ->rule('mentions.is', 'Controller_User::valid_privacy', [':value', ':field', ':validation'])
+                ->rule('mentions.is', 'Controller_User::valid_privacy', [
+                    ':value', ':field', ':validation'
+                ])
                 ->rule('mentions.is', 'not_empty')
-                ->rule('profile.others_posts.is', 'Controller_User::valid_privacy', [':value', ':field', ':validation'])
+                ->rule('profile.others_posts.is',
+                       'Controller_User::valid_privacy', [
+                            ':value', ':field', ':validation'
+                ])
                 ->rule('profile.others_posts.is', 'not_empty')
-                ->rule('profile.others_posts_visibility.is', 'Controller_User::valid_privacy', [':value', ':field', ':validation'])
+                ->rule('profile.others_posts_visibility.is',
+                       'Controller_User::valid_privacy', [
+                            ':value', ':field', ':validation'
+                ])
                 ->rule('profile.others_posts_visibility.is', 'not_empty');
 
-        if($validation->check())
+
+        if ($validation->check())
         {
-            $this->data(static::$model->update_privacy(static::$params, static::$user_id));
-        }
-        else
-        {
-            $this->errors = $validation->errors('user/privacy');
-            $this->fail();
+            if ($privacy = static::$model->update_privacy(
+                    static::$params, static::$user_id
+            ))
+            {
+                return $this->data($privacy);
+            }
+
+            return $this->error('server_error');
         }
 
-        return true;
+        $this->errors = $validation->errors('user/privacy');
+        return $this->fail();
     }
 
     /**
@@ -595,20 +838,19 @@ class Controller_User extends Controller_Resource {
 
         //var_dump($validation->check());
         //die;
-
-        if($validation->check())
+        if ($validation->check())
         {
-            $this->data(static::$model->update_notifications(static::$params, static::$user_id));
+            if ($notif = static::$model->update_notifications(
+                    static::$params, static::$user_id
+            ))
+            {
+                return $this->data($notif);
+            }
+            return $this->error('server_error');
         }
-        else
-        {
-            $this->errors = $validation->errors('user/notifications');
 
-            $this->fail();
-        }
-
-        return true;
-
+        $this->errors = $validation->errors('user/notifications');
+        return $this->fail();
     }
 
     /**
@@ -631,9 +873,7 @@ class Controller_User extends Controller_Resource {
                 $to = $result['mobile'];
             }
         }
-        $this->return = SMS::factory($to, $message);
-        return;
-
+        return $this->data(SMS::factory($to, $message));
     }
 
     /**
@@ -736,6 +976,11 @@ class Controller_User extends Controller_Resource {
         return $email->send();
     }
 
+    protected static function logged_in_is_id($id)
+    {
+        return static::$user_id && static::$user_id === $id;
+    }
+
     /**
      * Small validation for possible privacy settings
      *
@@ -756,11 +1001,16 @@ class Controller_User extends Controller_Resource {
     {
         $return = [];
 
-        $return['contacts.is'] = Arr::path($array, 'contacts.is');
-        $return['subscriptions.is'] = Arr::path($array, 'subscriptions.is');
-        $return['messages.is'] = Arr::path($array, 'messages.is');
-        $return['profile.others_posts.is'] = Arr::path($array, 'profile.others_posts.is');
-        $return['profile.others_posts_visibility.is'] = Arr::path($array, 'profile.others_posts_visibility.is');
+        $return['contacts.is'] =
+                        Arr::path($array, 'contacts.is');
+        $return['subscriptions.is'] =
+                        Arr::path($array, 'subscriptions.is');
+        $return['messages.is'] =
+                        Arr::path($array, 'messages.is');
+        $return['profile.others_posts.is'] =
+                        Arr::path($array, 'profile.others_posts.is');
+        $return['profile.others_posts_visibility.is'] =
+                        Arr::path($array, 'profile.others_posts_visibility.is');
         $return['mentions.is'] = Arr::path($array, 'mentions.is');
 
         return Arr::merge($return, $array);
@@ -768,65 +1018,38 @@ class Controller_User extends Controller_Resource {
 
     protected static function extract_notification_values($array)
     {
-        /**
-         *                 ->rule('email', 'email')
-                ->rule('email', 'email_domain')
-                ->rule('likers.own_post', 'not_empty')
-                ->rule('likers.own_post', 'range', [':value', 0, 1])
-                ->rule('likers.other_post', 'not_empty')
-                ->rule('likers.other_post', 'range', [':value', 0, 1])
-                ->rule('likers.profile', 'range', [':value', 0, 1])
-                ->rule('likers.profile', 'not_empty')
-                ->rule('subscribers.own_post', 'range', [':value', 0, 1])
-                ->rule('subscribers.own_post', 'not_empty')
-                ->rule('subscribers.other_post', 'range', [':value', 0, 1])
-                ->rule('subscribers.other_post', 'not_empty')
-                ->rule('subscribers.profile', 'range', [':value', 0, 1])
-                ->rule('subscribers.profile', 'not_empty')
-                ->rule('comments.own_post', 'range', [':value', 0, 1])
-                ->rule('comments.own_post', 'not_empty')
-                ->rule('comments.other_post', 'range', [':value', 0, 1])
-                ->rule('comments.other_post', 'not_empty')
-                ->rule('mentions', 'range', [':value', 0, 1])
-                ->rule('mentions', 'not_empty')
-                ->rule('testimonials', 'range', [':value', 0, 1])
-                ->rule('testimonials', 'not_empty')
-                ->rule('wallpost', 'range', [':value', 0, 1])
-                ->rule('wallpost', 'not_empty')
-                ->rule('messages', 'range', [':value', 0, 1])
-                ->rule('messages', 'not_empty');
-         */
         $return = [];
 
-        $return['likers.own_post'] = Arr::path($array, 'likers.own_post');
-        $return['likers.other_post'] = Arr::path($array, 'likers.other_post');
-        $return['likers.profile'] = Arr::path($array, 'likers.profile');
-        $return['subscribers.own_post'] = Arr::path($array, 'subscribers.own_post');
-        $return['subscribers.other_post'] = Arr::path($array, 'subscribers.other_post');
-        $return['subscribers.profile'] = Arr::path($array, 'subscribers.profile');
-        $return['comments.own_post'] = Arr::path($array, 'comments.own_post');
-        $return['comments.other_post'] = Arr::path($array, 'comments.other_post');
+        $return['likers.own_post'] =
+                        Arr::path($array, 'likers.own_post');
+        $return['likers.other_post'] =
+                        Arr::path($array, 'likers.other_post');
+        $return['likers.profile'] =
+                        Arr::path($array, 'likers.profile');
+        $return['subscribers.own_post'] =
+                        Arr::path($array, 'subscribers.own_post');
+        $return['subscribers.other_post'] =
+                        Arr::path($array, 'subscribers.other_post');
+        $return['subscribers.profile'] =
+                        Arr::path($array, 'subscribers.profile');
+        $return['comments.own_post'] =
+                        Arr::path($array, 'comments.own_post');
+        $return['comments.other_post'] =
+                        Arr::path($array, 'comments.other_post');
 
         return Arr::merge($return, $array);
     }
 
     protected static function extract_registration_values($array)
     {
-        /**
-                ->rule('info.gender', 'alpha')
-                ->rule('info.telephone.mobile', 'numeric')
-                ->rule('password', 'not_empty')
-                ->rule('email', 'not_empty')
-                ->rule('email', 'email')
-                ->rule('email', 'email_domain')
-                ->rule('info.birthday', 'numeric');
-         */
         $return = [];
 
-        $return['info.gender'] = Arr::path($array, 'info.gender');
-        $return['info.telephone.mobile'] = Arr::path($array, 'info.telephone.mobile');
-        $return['info.birthday'] = Arr::path($array, 'info.birthday');
-
+        $return['info.gender'] =
+                        Arr::path($array, 'info.gender');
+        $return['info.telephone.mobile'] =
+                        Arr::path($array, 'info.telephone.mobile');
+        $return['info.birthday'] =
+                        Arr::path($array, 'info.birthday');
 
         return Arr::merge($return, $array);
     }

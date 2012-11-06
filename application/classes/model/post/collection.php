@@ -12,23 +12,6 @@ class Model_Post_Collection extends Mongo_Collection {
     protected $name = 'posts';
 
     /**
-     * Does a search, sort and limit. $args is an array that defaults to:
-     *
-        $this->collection()->ensureIndex([
-            'status' => 1, 'user._id' => 1, 'page._id' => 1, 'privacy.is' => 1
-        ], ['name' => 'post_id_fields', 'safe' => true]);
-        $this->collection()->ensureIndex([
-            'page_parent._id' => 1
-        ], ['sparse' => true, 'safe' => true]);
-        $this->collection()->ensureIndex([
-            'to._id' => 1
-        ], ['sparse' => true, 'safe' => true]);
-        $this->collection()->ensureIndex([
-            'type' => 1,
-        ]);
-        $this->collection()->ensureIndex([
-            'listing' => 1
-        ]);
      * 'price' => 0, 'rooms' => 1, 'built_size' => 0, 'property_type' => 0, 'tenure' => 0,
      * 'land_size' => 0, 'value' => 0, 'description' => 0, 'cobroke' => 0,
      *
@@ -39,8 +22,8 @@ class Model_Post_Collection extends Mongo_Collection {
     {
         $defaults = [
            'status' => 'active', 'skip' => 0, 'limit' => 11, 'sort' => 'active',
-           's' => '', 'include_ids' => [], 'page' => null, 'parent' => null,
-           'user' => null, 'type' => null, 'listing' => [], 'to' => null
+           's' => '', 'include_ids' => [], 'page_id' => null, 'parent_id' => null,
+           'user_id' => null, 'type' => null, 'listing' => [], 'to_id' => null
         ];
 
         // set some empty arrays
@@ -53,10 +36,6 @@ class Model_Post_Collection extends Mongo_Collection {
         if ($type)
         {
             $query['type'] = $type;
-            if($type === 'listing')
-            {
-                $query = Arr::merge($query, $this->format_listing_params($listing));
-            }
         }
 
         // if specific records are needed add to the ids array
@@ -75,30 +54,33 @@ class Model_Post_Collection extends Mongo_Collection {
         if (!empty($ids))
             $query['_id']['$in'] = $ids;
 
-        if($page)
-            $query['page._id'] = $page;
+        if($page_id)
+            $query['page._id'] = $page_id;
 
-        if($parent)
-            $query['parent._id'] = $parent;
+        if($parent_id)
+            $query['parent._id'] = $parent_id;
 
-        if($user)
-            $query['user._id'] = $user;
+        if($user_id)
+            $query['user._id'] = $user_id;
 
-        if($to)
-            $query['to._id'] = $to;
+        if($to_id)
+            $query['to._id'] = $to_id;
 
-        switch($sort)
+        if(!is_array($sort))
         {
-            case 'active': $sort = ['modified' => -1]; break;
-            case 'newest': $sort = ['_id' => -1]; break;
-            default: $sort = ['_id' => -1]; break;
+            switch($sort)
+            {
+                case 'active': $sort = ['modified' => -1]; break;
+                case 'newest': $sort = ['_id' => -1]; break;
+                default: $sort = ['_id' => -1]; break;
+            }
         }
 
-        $results = $this->find($query)
+        $results = $this
+                ->find($this->ensure_order($query))
                 ->limit($limit)
                 ->sort($sort)
-                ->skip($skip)
-                ->load();
+                ->skip($skip);
 
         while($results->hasNext())
         {
@@ -116,6 +98,14 @@ class Model_Post_Collection extends Mongo_Collection {
         return $return;
     }
 
+    /**
+     * Utility method to retrieve testimonials
+     *
+     * @uses self::search()
+     * @param array $args
+     * @param string||MongoID $user_id
+     * @return type
+     */
     public function testimonials($args = array(), $user_id = NULL)
     {
         $defaults = ['status' => 'active', 'type' => 'testimonial'];
@@ -123,29 +113,130 @@ class Model_Post_Collection extends Mongo_Collection {
         return $this->search(Arr::merge($defaults, $args));
     }
 
+    /**
+     * Utility method to retrieve listings
+     *
+     * @uses self::search()
+     * @param array $args
+     * @param string||MongoID $user_id
+     * @return type
+     */
     public function listings($args = array(), $user_id = NULL)
     {
         $defaults = ['status' => 'active', 'type' => 'listing'];
 
-        return $this->search(Arr::merge($defaults, $args));
+        $sort = Arr::get($args, 'sort', ['listing.price' => 1]);
+
+        if ($this->validate_listing_sort($sort))
+        {
+            $args['sort'] = $sort;
+        }
+
+        return $this->search(Arr::merge($defaults, $args, $user_id));
     }
 
     /**
-     * Formats (hopefully) the listings query in the correct order such that it
-     * utilises an index.
+     * Method to retrieve messages.
      *
-     * @param array $listings
-     * @return array
+     * @param array $args
+     * @param string||MongoID $user_id
+     * @return type
      */
-    protected function format_listing_params(array $listings)
+    public function inbox($args = array(), $user_id = NULL)
     {
-        $format = [
-            'listing.price' => 0, 'listing.rooms' => 1, 'listing.built_size' => 0,
+        if(!$user_id)
+            return [];
+
+        $status = Arr::get($args, 'status', 'active');
+        $limit = Arr::get($args, 'limit', 11);
+        $skip = Arr::get($args, 'skip', 0);
+        $sort = Arr::get($args, 'sort', ['_id' => -1]);
+        $id = parent::check_id(Arr::get($args, 'user', $user_id));
+
+        $query = [
+            'type' => 'message', 'status' => $status, '$or' => [
+                'user._id' => $id,
+                'to._id'   => $id
+            ]
+        ];
+        $results = $this
+                ->find($this->ensure_order($query))
+                ->limit($limit)
+                ->sort($sort)
+                ->skip($skip);
+
+        while($results->hasNext())
+        {
+            $row = $results->getNext();
+            if($user_id && $usr = $this->get_user($user_id))
+            {
+                $row->current_user = $usr;
+                $row->after_load();
+            }
+            $ret = $row->stringify($row->as_array());
+
+            $return[] = $ret;
+        }
+
+        return $return;
+    }
+
+    /**
+     * Multi keys (Compound indexes) in MongoDB need an exact order that was
+     * previously prescribed by ensureIndex() for it properly search by index
+     *
+     * e.g
+     *
+     * key = [status => 1, userid => 1, pageid => 1];
+     *
+     * // will use index because the order is correct
+     * $query = [status => 1, userid => 1, pageid => 1];
+     *
+     * // no index usage, because the first param should be 'status'
+     * $query = [userid => 1, pageid => 1, status => 1];
+     *
+     * So, here's a method that ensures that the query params are in the correct
+     * order
+     *
+     * @param array $args
+     * @uses parent::sorter
+     * @return array properly sorted args
+     */
+    protected static function ensure_order(array $args)
+    {
+        usort($args, 'parent::sorter');
+        return $args;
+    }
+
+    /**
+     * Just to make sure a sort field is in the proper format for mongo.
+     *
+     * @param array $sort
+     * @return boolean
+     */
+    protected function validate_listing_sort(array $sort)
+    {
+        foreach ($sort as $key => $value)
+        {
+            if(array_key_exists($key, $this->listing_fields) && ( (int) $value === 1 || (int) $value === -1))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected static $listing_fields = [
+            'listing.type' => 0, 'listing.price' => 0, 'listing.rooms' => 1, 'listing.built_size' => 0,
             'listing.property_type' => '', 'listing.tenure' => 0, 'listing.land_size' => 0,
             'listing.value' => 0, 'listing.description' => 0, 'listing.cobroke' => 0
         ];
 
-        return Arr::merge($format, $listings);
-    }
+    protected static $sort = [
+        'status', 'user._id', 'page._id, privacy.is', 'modified', 'listing.type',
+        'listing.price', 'listing.rooms', 'listing.built_size', 'listing.property_type',
+        'listing.tenure', 'listing.land_size', 'listing.value', 'listing.description',
+        'listing.cobroke'
+    ];
 }
-?>

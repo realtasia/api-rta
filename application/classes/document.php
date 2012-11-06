@@ -95,7 +95,44 @@ class Document extends Mongo_Document {
 
     }
 
-    
+    /**
+     * Testing revealed that can't query the DB with string IDs if it isn't an
+     * index. Utility to ensure all ids are in fact instances of the MongoID object.
+     *
+     * @todo Consider DBRefs??
+     *
+     *
+     * @param string|MongoID $id
+     * @return type
+     */
+    public static function check_id($id)
+    {
+        return ($id instanceof MongoID) ? $id : new MongoID($id);
+    }
+
+    /**
+     * Utility to sort arrays
+     *
+     * @param string $a
+     * @param string $b
+     * @return int
+     */
+    protected static function sorter($a, $b)
+    {
+        $order = static::$order;
+        foreach (static::$listing_fields as $k => $v)
+        {
+            $order[] = $k;
+        }
+        if ($a['position'] == $b['position'])
+            return 0;
+
+        $cmpa = array_search($a['position'], $order);
+        $cmpb = array_search($b['position'], $order);
+
+        return ($cmpa > $cmpb) ? 1 : -1;
+    }
+
 }
 
 ?>

@@ -435,12 +435,15 @@ class Controller_Singpost extends Controller {
 
     public function action_geocode()
     {
+        $skip = 14913;
         $mongo = Mongo_document::factory('singpost')->collection();
 
-        $cursor = $mongo->find(['estate' => ['$ne' => null], 'geo.lat' => ['$ne' => null]])
-                        ->skip(7414);
+        $cursor = $mongo->find(['geo.lon' => null]);
 
-        $i = 7414;
+        //fwrite(STDOUT, count($cursor) . "\r\n");
+        //die;
+
+        $i = $skip;
         $time = time();
         while($cursor->hasNext())
         {
@@ -451,8 +454,9 @@ class Controller_Singpost extends Controller {
             {
                 $row->geo = $geo;
                 $row->save();
-                $minutes = round((time() - $time) / 60, 2);
-                fwrite(STDOUT,"Processed Record $i: Total Time ".$minutes." Minutes so far... \r\n");
+                $interval = new DateInterval('PT' . time() - $time . 'S');
+                $minutes = $interval->format('%h hour(s), %i minute(s) & %s seconds');
+                fwrite(STDOUT,"Processed Record $i:  $minutes so far... \r\n");
             }
             $i++;
         }

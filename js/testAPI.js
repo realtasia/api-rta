@@ -136,8 +136,11 @@ function viewModel() {
         ko.utils.arrayForEach(this.params(), function(item) {
             pars[item.key()] = item.value();
         });
+        var settings = {
+            type : btn.text()
+        };
 
-        return new Load(btn.text(), pars, self);
+        return new Load(settings, pars, self);
     }
 
     this.authClient = function()

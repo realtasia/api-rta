@@ -158,7 +158,6 @@ class Controller_Abstract extends Controller {
 
         if(!$file && !$key)
         {
-
             if(is_array($this->errors) && !empty($this->errors))
             {
                 $error = (object) [
