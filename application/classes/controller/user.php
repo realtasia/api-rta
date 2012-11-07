@@ -604,6 +604,7 @@ class Controller_User extends Controller_Resource {
         {
             static::$params['roles'] = [static::$params['user_type']];
             static::$params['status'] = 'pending';
+            static::$params['name'] = static::$params['first_name'] . ' ' . static::$params['last_name'];
             unset(static::$params['user_type']);
 
             if ($u = static::$model->create(static::$params))
