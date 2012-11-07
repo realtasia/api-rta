@@ -175,9 +175,9 @@ class Model_User extends Document {
     {
         $field = static::$user_fields['settings']['privacy'];
         $values = Arr::overwrite($field, $params);
-
+        $this->load($user_id, ['settings.privacy' => 1]);
+        
         $this->load_values([
-            '_id' => new MongoID($user_id),
             'settings.privacy' => $values,
         ]);
         $this->save();
@@ -197,8 +197,8 @@ class Model_User extends Document {
         $field = static::$user_fields['settings']['notifications'];
         $values = Arr::overwrite($field, $params);
 
+        $this->load($user_id, ['settings.notifications' => 1]);
         $this->load_values([
-            '_id' => new MongoID($user_id),
             'settings.notifications' => $values,
         ]);
         $this->save();
@@ -215,7 +215,7 @@ class Model_User extends Document {
      */
     public function update_password($password, $user_id)
     {
-        $this->load_values(['_id' => new MongoID($user_id)]);
+        $this->load($user_id, ['password' => 1]);
         $this->password = static::hash($password);
         return $this->save();
     }
@@ -233,7 +233,7 @@ class Model_User extends Document {
         $values = Arr::overwrite($field, $params);
 
         $this->load($user_id, ['info' => 1]);
-        
+
         $this->info = $values;
 
         $this->save();
