@@ -57,16 +57,11 @@ class Model_Beta extends Document {
             // set the user's company
             $params['company']        = $company->to_array();
         }
-        //die();
-        // overwrite defaults
-        $data                     = Arr::overwrite(static::$user_fields, $params);
-        // merge with defaults
-        $data                     = Arr::merge(static::$user_fields, $data);
-        ksort($data);
 
+        ksort($params);
 
         // load the document
-        $this->load_values($data);
+        $this->load_values($params);
 
         try
         {
@@ -78,7 +73,7 @@ class Model_Beta extends Document {
                     "MongoCursorException while trying to create user :user \n"
                     . "Error Message- :message \n"
                     . "Error Code- :code", [
-                ':user'    => print_r($data, TRUE),
+                ':user'    => print_r($params, TRUE),
                 ':message' => $e->getMessage(),
                 ':code'    => $e->getCode()
             ]);
