@@ -232,8 +232,8 @@ class Model_User extends Document {
         $field  = static::$user_fields['info'];
         $values = Arr::overwrite($field, $params);
 
-
-        $this->_id = new MongoID($user_id);
+        $this->load($user_id, ['info' => 1]);
+        
         $this->info = $values;
 
         $this->save();
