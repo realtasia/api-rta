@@ -57,7 +57,7 @@ class Model_User extends Document {
             // set the user's company
             $params['company']        = $company->to_array();
         }
-        //die();
+
         // overwrite defaults
         $data                     = Arr::overwrite(static::$user_fields, $params);
         // merge with defaults
@@ -232,10 +232,10 @@ class Model_User extends Document {
         $field  = static::$user_fields['info'];
         $values = Arr::overwrite($field, $params);
 
-        $this->load_values([
-            '_id'  => new MongoID($user_id),
-            'info' => $values,
-        ]);
+
+        $this->_id = new MongoID($user_id);
+        $this->info = $values;
+
         $this->save();
 
         return $values;

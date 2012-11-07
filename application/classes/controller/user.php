@@ -1024,6 +1024,12 @@ class Controller_User extends Controller_Resource {
         return $email->send();
     }
 
+    /**
+     * Utility to check if logged in user id is the same as given id (in param)
+     *
+     * @param string $id
+     * @return type
+     */
     protected static function logged_in_is_id($id)
     {
         return static::$user_id && static::$user_id === $id;
@@ -1044,6 +1050,17 @@ class Controller_User extends Controller_Resource {
 
         $validation->error($field, 'valid_privacy');
     }
+
+    /************************************************************************************
+     * Creates proper keys for validation. Because params (for Mongo) can include
+     * sub arrays. But Kohana & Community decided that it should not validate
+     * sub arrays. I see their point, but I still think they're full of shit.
+     *
+     * @see http://forum.kohanaframework.org/discussion/1338/validation-and-sub-arrays/p1
+     *
+     * @param array $array
+     * @return array
+     *************************************************************************************/
 
     protected static function extract_privacy_values($array)
     {
