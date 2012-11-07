@@ -91,7 +91,7 @@ class Controller_User extends Controller_Resource {
 
         // no type. we need a type
         if (!$type)
-            $this->error('invalid_request');
+            return $this->error('invalid_request');
 
         // let's check if it's valid and run it
         if (in_array($type, static::$valid_adminPost_types)
@@ -102,6 +102,7 @@ class Controller_User extends Controller_Resource {
                 return $this->{$type}();
             }
 
+            Debug::log('Access Denied invoked because no admin user or not client');
             return $this->error('access_denied');
         }
 
@@ -608,6 +609,22 @@ class Controller_User extends Controller_Resource {
             if ($u = static::$model->create(static::$params))
             {
                 unset($u['password']);
+                $r = static::$params;
+                $this->admin_email(
+                        'New User REGISTERED!! Woots',
+                        print_r(static::$params, TRUE)
+                );
+                $this->user_email(
+                        $r,
+                        'We received your submission',
+                        Kohana::message('register/info', 'thank_you_beta_email')
+                );
+
+                $this->send_sms(
+                        'Thank you for you submission',
+                        static::$params['mobile']
+                );
+
                 $this->data($u);
             }
         }
@@ -657,7 +674,7 @@ class Controller_User extends Controller_Resource {
 
                 $this->send_sms(
                         'Thank you for you submission',
-                        static::$params['number.mobile']
+                        static::$params['mobile']
                 );
 
                 $this->data(['message' => 'Thank you for you submission']);
@@ -863,19 +880,31 @@ class Controller_User extends Controller_Resource {
      * @param string $number OPTIONAL
      * @return type
      */
-    protected function send_sms($message, $to = NULL)
+    protected function send_sms($message = NULL, $to = NULL)
     {
-        $id = $this->request->params('id');
+        $id = $this->request->param('id');
+        if(!$message)
+        {
+            $message = Arr::get(static::$params, 'message');
+        }
+        if(!$message)
+        {
+            Debug::log('no messages');
+            return $this->error('invalid_request');
+        }
+
         if(!$to)
         {
-            if(!$to = Arr::get(static::$params['to']))
+            $to = Arr::get(static::$params, 'to');
+            if(!$to)
             {
                 static::$model->load($id, ['info.telephone' => 1]);
                 $result = static::$model->as_array();
                 $to = $result['mobile'];
             }
         }
-        return $this->data(SMS::factory($to, $message));
+        $sms = SMS::factory($to, $message);
+        return $this->data($sms->send());
     }
 
     /**
@@ -887,19 +916,37 @@ class Controller_User extends Controller_Resource {
      * @param string $message
      * @return boolean
      */
-    protected function send_email($subject, $message, $to = NULL)
+    protected function send_email($subject = NULL, $message = NULL, $to = NULL)
     {
-        $id = $this->request->params('id');
+        $id = $this->request->param('id');
+
+        if(!$message)
+        {
+            $message = Arr::get(static::$params, 'message');
+        }
+
+        if(!$subject)
+        {
+            $subject = Arr::get(static::$params, 'subject');
+        }
+
+        if(!$message || !$subject)
+            return $this->error('invalid_request');
+
         if(!$to)
         {
-            if(!$to = Arr::get(static::$params['to']))
+            $to = Arr::get(static::$params, 'to');
+            if(!$to)
             {
                 static::$model->load($id);
                 $result = static::$model->as_array();
                 $to = $result['email'];
             }
         }
-        $this->user_email($to, $subject, $message);
+        $name = Arr::get(static::$params, 'name');
+
+
+        $this->user_email(['email' => $to, 'name' => $name], $subject, $message);
         return;
     }
 

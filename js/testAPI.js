@@ -173,7 +173,7 @@ function viewModel() {
         var params = {
             client_id: 123456789,
             username: 'admin',
-            password: 'admin',
+            password: 'one',
             redirect_uri: 'http://jjpc.net',
             grant_type: 'password'
         }
