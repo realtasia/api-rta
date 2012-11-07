@@ -585,7 +585,7 @@ class Controller_User extends Controller_Resource {
                 ->rule('last_name', 'alpha')
                 ->rule('last_name', 'not_empty')
                 ->rule('info.gender', 'alpha')
-                //->rule('info.telephone.mobile', 'numeric')
+                ->rule('info.telephone.mobile', 'not_empty')
                 ->rule('password', 'not_empty')
                 ->rule('email', 'not_empty')
                 ->rule('email', 'email')
@@ -650,8 +650,8 @@ class Controller_User extends Controller_Resource {
                 ->rule('message', 'not_empty')
                 ->rule('mobile', 'not_empty')
                 ->rule('user_type', 'not_empty')
+                ->rule('user_type', 'in_array', [':value', ['agent', 'user']])
                 ->rule('name', 'not_empty')
-                ->rule('name', 'alpha')
                 ->rule('email', 'not_empty')
                 ->rule('email', 'email')
                 ->rule('email', 'email_domain');
@@ -1019,7 +1019,6 @@ class Controller_User extends Controller_Resource {
         $email = Email::factory($content['header_plain'], $plainview)
               ->message($view, 'text/html')
               ->to($recipient['email'], $recipient['name'])
-              ->bcc('administrators@realtasia.com', 'RealtAsia Administrators')
               ->from('[REDACTED]', 'Realtasia Beta Program');
 
         return $email->send();
