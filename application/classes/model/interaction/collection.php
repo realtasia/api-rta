@@ -87,7 +87,7 @@ class Model_Interaction_Collection extends Mongo_Collection {
 
         if($field)
         {
-            $results->fields($field, $include);
+            $results->fields([$field], $include);
         }
 
         while($results->hasNext())
