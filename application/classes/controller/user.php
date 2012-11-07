@@ -623,7 +623,7 @@ class Controller_User extends Controller_Resource {
 
                 $this->send_sms(
                         'Thank you for you submission',
-                        static::$params['info.telephone.mobile']
+                        $params['info.telephone.mobile']
                 );
 
                 $this->data($u);
