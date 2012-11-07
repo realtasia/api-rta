@@ -184,7 +184,7 @@ function viewModel() {
 
 Load = function(settings, params, model)
 {
-    var dest = jQuery('pre'), token = null;
+    var dest = jQuery('#results'), token = null;
 
     if (model.uri().length === 0) {
         return false;
@@ -204,7 +204,8 @@ Load = function(settings, params, model)
         data: params,
         success: function(response, textStatus, jqXHR) {
 
-            dest.text(JSON.stringify(response, undefined, 3));
+            dest.html(parseValue(response));
+
             if (response.data && response.data['access_token']) {
                 token = response.data['access_token'];
             }
@@ -238,3 +239,4 @@ Load = function(settings, params, model)
 jQuery(document).ready(function($) {
     ko.applyBindings(new viewModel());
 });
+

@@ -584,7 +584,7 @@ class Controller_User extends Controller_Resource {
                 ->rule('last_name', 'alpha')
                 ->rule('last_name', 'not_empty')
                 ->rule('info.gender', 'alpha')
-                ->rule('info.telephone.mobile', 'numeric')
+                //->rule('info.telephone.mobile', 'numeric')
                 ->rule('password', 'not_empty')
                 ->rule('email', 'not_empty')
                 ->rule('email', 'email')
@@ -713,10 +713,12 @@ class Controller_User extends Controller_Resource {
      */
     protected function activate()
     {
-        $id = $this->request->params('id');
-        static::$model->load_values(['_id' => new MongoID($id)]);
-        static::$model->status = 'active';
-        static::$model->save();
+        $id = $this->request->param('id');
+        $user = Mongo_Document::factory('user', $id);
+
+        //static::$model->load_values(['_id' => new MongoID($id)]);
+        $user->status = 'active';
+        $user->save();
         $this->data(['status' => 1]);
     }
 
@@ -752,7 +754,7 @@ class Controller_User extends Controller_Resource {
      *
      * @return boolean
      */
-    protected function update_privacy()
+    protected function update_privacy_settings()
     {
         $params = static::extract_privacy_values(static::$params);
         $validation = Validation::factory($params)
@@ -805,7 +807,7 @@ class Controller_User extends Controller_Resource {
      *
      * @return boolean
      */
-    protected function update_notifications()
+    protected function update_notifications_settings()
     {
         $params = static::extract_notification_values(static::$params);
         $validation = Validation::factory($params)

@@ -8,7 +8,7 @@
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */
-class Model_Post_Collection extends Mongo_Collection {
+class Model_Post_Collection extends Collection {
     protected $name = 'posts';
 
     /**

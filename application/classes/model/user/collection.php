@@ -8,7 +8,7 @@
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */
-class Model_User_Collection extends Mongo_Collection {
+class Model_User_Collection extends Collection {
     protected $name = 'users';
 
     /**
@@ -116,8 +116,10 @@ class Model_User_Collection extends Mongo_Collection {
             default: $sort = ['_id' => -1]; break;
         }
         //return $query;
+        //print_r(json_encode($query));
 
-        $results = $this->find($query)
+        $results = $this
+                ->find($query)
                 ->fields(static::$protected_fields, false)
                 ->limit($limit)
                 ->sort($sort)
@@ -151,6 +153,53 @@ class Model_User_Collection extends Mongo_Collection {
         return $return;
     }
 
+    /**
+     * Multi keys (Compound indexes) in MongoDB need an exact order that was
+     * previously prescribed by ensureIndex() for it properly search by index
+     *
+     * e.g
+     *
+     * key = [status => 1, userid => 1, pageid => 1];
+     *
+     * // will use index because the order is correct
+     * $query = [status => 1, userid => 1, pageid => 1];
+     *
+     * // no index usage, because the first param should be 'status'
+     * $query = [userid => 1, pageid => 1, status => 1];
+     *
+     * So, here's a method that ensures that the query params are in the correct
+     * order
+     *
+     * @param array $args
+     * @uses parent::sorter
+     * @return array properly sorted args
+     */
+    protected static function ensure_order(array $args)
+    {
+        usort($args, 'parent::sorter');
+        return $args;
+    }
+
+/**
+ *         $this->collection()->ensureIndex([
+            'status' => 1, 'name' => 1, 'roles' => 1, 'settings.privacy.is' => 1, 'active' => -1
+        ], ['name' => 'user_search_fields', 'safe' => true]);
+        $this->collection()->ensureIndex([
+            'username' => 1, 'email' => 1, 'info.telephone.mobile' => 1
+        ], ['name' => 'user_id_fields', 'safe' => true]);
+        $this->collection()->ensureIndex([
+            'logins.user_id' => 1
+        ], ['sparse' => true, 'safe' => true]);
+        $this->collection()->ensureIndex([
+            'company._id' => 1
+        ], ['sparse' => true, 'safe' => true]);
+ *
+ * @var array
+ */
+    protected static $order = [
+        'status', 'name', 'roles', 'settings.privacy.is', 'active', 'username',
+        'email', 'info.telephone.mobile'
+    ];
     private static $protected_fields = [
         'password',
         'settings.notifications',

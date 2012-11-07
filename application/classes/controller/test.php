@@ -23,22 +23,61 @@ class Controller_Test extends Controller {
         $registration = [
             'request_type' => 'registration',
             'user_type' => 'user',
+            'status' => 'active',
+            'first_name' => 'Admin',
+            'last_name' => 'User',
+            'name' => 'Admin User',
+            'roles' => ['admin'],
+            'username' => 'admin',
+            'uri' => '/admin',
+            'info' => ['gender' => 'male'],
         ];
 
         $return = [];
 
-        for($i=0;$i<=100;$i++)
-        {
-            $values = Arr::merge($token, $registration, $this->users($i));
-
+//        for($i=1;$i<=99;$i++)
+//        {
+            $values = Arr::merge($token, $this->users(1), $registration);
+//            echo "<pre>";
+//            print_r($values);
+//            echo "</pre><hr>";
             $request = Request::factory(URL::site('/user', true))
                     ->method(HTTP_Request::POST)
                     ->post($values);
             $return[] = "<pre>".$request->execute()."</pre>";
+//        }
+
+
+//die;
+        return $this->response->body(implode('<hr>', $return));
+    }
+
+    public function action_activate()
+    {
+        $token = [
+            'access_token' => '[REDACTED]',
+            'state' => substr(Security::token(), 0, 5),
+        ];
+
+        $registration = [
+            'request_type' => 'activate',
+        ];
+
+        $users = Mongo_Collection::factory('user');
+
+        $cursor = $users->find();
+echo "<pre>";
+        while($cursor->hasNext())
+        {
+            $row = $cursor->getNext();
+            $values = Arr::merge($token, $registration);
+
+
+            $request = Request::factory(URL::site('/user/update/' . $row->stringify($row->as_array())['_id'], true))
+                    ->method(HTTP_Request::POST)
+                    ->post($values);
+            $return[] = "<pre>".$request->execute()."</pre>";
         }
-
-
-
         return $this->response->body(implode('<hr>', $return));
     }
 
@@ -399,9 +438,9 @@ EOD;
         $rand_gend = $gender[array_rand(range(0, 1), 1)];
 
         if($rand_gend === 'female')
-            $mid = 'd/o';
+            $mid = '';
         else
-            $mid = 's/o';
+            $mid = '';
 
         $numword = numword::factory($i);
         $name    = [
@@ -413,7 +452,7 @@ EOD;
             'first_name'  => $name['first_name'],
             'middle_name' => $name['middle_name'],
             'last_name'   => $name['last_name'],
-            'name'        => implode(' ', $name),
+            'name'        => $name['first_name'] . ' ' . $name['last_name'],
             'username'    => $numword . '.user',
             'password'    => static::hash($numword),
             'email'       => '[REDACTED]',

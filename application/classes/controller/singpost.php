@@ -454,7 +454,7 @@ class Controller_Singpost extends Controller {
             {
                 $row->geo = $geo;
                 $row->save();
-                $interval = new DateInterval('PT' . time() - $time . 'S');
+                $interval = new DateInterval('PT' . (time() - $time) . 'S');
                 $minutes = $interval->format('%h hour(s), %i minute(s) & %s seconds');
                 fwrite(STDOUT,"Processed Record $i:  $minutes so far... \r\n");
             }
