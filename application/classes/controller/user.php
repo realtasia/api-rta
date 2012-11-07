@@ -659,7 +659,7 @@ class Controller_User extends Controller_Resource {
         if($validation->check())
         {
             static::$params['interested'] = 1;
-            if ($user->new_beta_user(static::$params))
+            if ($user->create(static::$params))
             {
                 $r = static::$params;
                 $this->admin_email(
