@@ -436,6 +436,7 @@ class Controller_User extends Controller_Resource {
      */
     public function action_info()
     {
+        $id = $this->request->param('id');
         if ($this->is_GET() && (parent::logged_in() || parent::is_client()))
         {
             $user = static::$model;
@@ -443,7 +444,17 @@ class Controller_User extends Controller_Resource {
             $this->data($user->stringify($user->as_array()['info']));
         }
         else
-            return $this->validate_current_request('update_info', 'info');
+        {
+            if(static::logged_in_is_id($id) || parent::has_role('admin'))
+            {
+                // update user by his/her specific field
+                if($this->is_POST())
+                {
+                    $this->update_info();
+                }
+                return true;
+            }
+        }
     }
 
     /**
@@ -584,7 +595,7 @@ class Controller_User extends Controller_Resource {
                 ->rule('first_name', 'not_empty')
                 ->rule('last_name', 'alpha')
                 ->rule('last_name', 'not_empty')
-                ->rule('info.gender', 'alpha')
+                ->rule('info.gender', 'in_array', [':value', ['male', 'female']])
                 ->rule('info.telephone.mobile', 'not_empty')
                 ->rule('password', 'not_empty')
                 ->rule('email', 'not_empty')
@@ -750,12 +761,13 @@ class Controller_User extends Controller_Resource {
         $validation = Validation::factory(static::$params)
                 ->rule('telephone', 'is_array')
                 ->rule('birthday', 'numeric')
-                ->rule('gender', 'not_empty');
+                ->rule('gender', 'not_empty')
+                ->rule('gender', 'in_array', [':value', ['male', 'female']]);
 
         if ($validation->check())
         {
             if ($info = static::$model->update_info(
-                    static::$params, static::$user_id)
+                    static::$params, $this->request->param('id'))
             )
             {
                 return $this->data($info);
@@ -807,7 +819,7 @@ class Controller_User extends Controller_Resource {
         if ($validation->check())
         {
             if ($privacy = static::$model->update_privacy(
-                    static::$params, static::$user_id
+                    static::$params, $this->request->param('id')
             ))
             {
                 return $this->data($privacy);
@@ -854,14 +866,16 @@ class Controller_User extends Controller_Resource {
                 ->rule('wallpost', 'range', [':value', 0, 1])
                 ->rule('wallpost', 'not_empty')
                 ->rule('messages', 'range', [':value', 0, 1])
-                ->rule('messages', 'not_empty');
+                ->rule('messages', 'not_empty')
+                ->rule('subscriptions', 'not_empty')
+                ->rule('subscriptions', 'in_array', [':value', ['male', 'female']]);
 
         //var_dump($validation->check());
         //die;
         if ($validation->check())
         {
             if ($notif = static::$model->update_notifications(
-                    static::$params, static::$user_id
+                    static::$params, $this->request->param('id')
             ))
             {
                 return $this->data($notif);

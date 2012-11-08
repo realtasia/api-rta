@@ -95,9 +95,28 @@ class Document extends Mongo_Document {
 
     }
 
+    public function save($safe = TRUE)
+    {
+        try
+        {
+            parent::save($safe);
+        }
+        catch (MongoException $e)
+        {
+            Debug::error('Error: :e with values :v', [
+                ':e' => $e->getMessage(),
+                ':v' => print_r($this->as_array(), TRUE),
+            ]);
+
+            return false;
+        }
+
+        return true;
+    }
+
     /**
      * Testing revealed that can't query the DB with string IDs if it isn't an
-     * index. Utility to ensure all ids are in fact instances of the MongoID object.
+     * index. Utility to ensure all _ids are in fact instances of the MongoID object.
      *
      * @todo Consider DBRefs??
      *
@@ -109,4 +128,33 @@ class Document extends Mongo_Document {
     {
         return ($id instanceof MongoID) ? $id : new MongoID($id);
     }
+
+    /**
+     * Just to ensure that the plural versions of an object tallies with their
+     * respective count fields and subarrays
+     *
+     * @param string $type
+     */
+    protected static function plural($type)
+    {
+        switch($type)
+        {
+            case 'wallpost': return 'posts';
+            case 'testimonial': return 'testimonials';
+            case 'message': return 'messages';
+            case 'checkin': return 'checkins';
+            case 'event': return 'events';
+            case 'user': return 'users';
+            case 'page': return 'pages';
+            case 'location': return 'locations';
+            case 'agency': return 'agencies';
+            case 'comment': return 'comments';
+            case 'attachment': return 'attachments';
+            case 'like': return 'likes';
+            case 'liker': return 'likers';
+            case 'subscribe': return 'subscribes';
+            case 'subscriber': return 'subscribers';
+        }
+    }
+
 }

@@ -59,20 +59,6 @@ class Model_Post extends Document {
         // merge with defaults
         $data                     = Arr::merge(static::$post_fields, $data);
 
-        if(in_array($data['type'], ['subscription', 'like']))
-        {
-            foreach (['comments', 'subscribers', 'likers'] as $key => $value)
-            {
-                unset($data[$value], $data['counts'][$value]);
-
-            }
-        }
-
-        if($data['type'] === 'testimonial')
-        {
-            unset($data['comments'], $data['counts']['comments']);
-        }
-
         // sort - for some sanity in debugging.. :-)
         ksort($data);
 
@@ -120,28 +106,96 @@ class Model_Post extends Document {
     }
 
     /**
+     * Calls the parent pages and user to update counts and timestamps.
+     */
+    public function after_save($action)
+    {
+        if ($action === parent::SAVE_INSERT || $action === parent::SAVE_UPSERT)
+        {
+            $pages = [Arr::get($this->page, '_id')];
+
+            if (isset($this->parent))
+                $pages[] = Arr::get($this->parent, '_id');
+
+            $pages = array_filter($pages);
+
+            foreach ($pages as $page_id)
+            {
+                $page = Mongo_Document::factory('page', $page_id);
+                $page->inc('counts.' . parent::plural($this->type));
+                $page->save();
+            }
+
+            $user = Mongo_Document::factory('user', $this->user->_id);
+            $user->inc('counts.' . parent::plural($this->type));
+            $user->save();
+        }
+    }
+
+    /**
      * Unsets the 'created' field which was extracted from the MongoID
-     * sets the modified timestamp
+     * sets the modified timestamp, among other things.
      */
     public function before_save($action)
     {
-        $this->modified = time();
-        unset($this->created);
-
-        if(isset($this->counts))
+        // Updates
+        if ($action === parent::SAVE_UPDATE)
         {
-            $counts = Arr::merge(static::$post_fields['counts'], $this->counts);
+            $this->modified = time();
+            unset($this->created);
 
-            foreach($counts as $k => $v)
+            // during testing a whole lot of counts went into negative. Just a
+            // small sanity check.
+            if (isset($this->counts))
             {
-                if($v < 0)
+                foreach ($this->counts as $k => $v)
                 {
-                    $counts[$k] = 0;
+                    if ($v < 0)
+                    {
+                        $this->set('counts.' . $k, 0);
+                    }
                 }
             }
 
-            $this->counts = $counts;
+            unset($this->interactions, $this->private_actions);
+
+            if(isset($this->connections))
+            {
+                $this->connections = [];
+            }
+
+            if(isset($this->actions))
+            {
+                $this->actions = [];
+            }
         }
+
+        // Creates
+        if ($action === parent::SAVE_INSERT || $action === parent::SAVE_UPSERT)
+        {
+            // auto-posts have no subscriptions, likes or comments for now.
+            if (in_array($this->type, ['subscription', 'like']))
+            {
+                foreach (['comments', 'subscribers', 'likers'] as $value)
+                {
+                    unset($this->{$value}, $this->counts[$value]);
+                }
+            }
+
+            // testimonials have no comments.
+            if ($this->type === 'testimonial')
+            {
+                unset($this->comments, $this->counts['comments']);
+            }
+
+            $this->set('user._id', parent::check_id($this->user['_id']));
+            $this->set('page._id', parent::check_id($this->page['_id']));
+            if (isset($this->page_parent))
+            {
+                $this->set('page_parent._id', parent::check_id($this->page_parent['_id']));
+            }
+        }
+
         return $this;
     }
 
@@ -166,9 +220,9 @@ class Model_Post extends Document {
         $current_user = (object) $this->get_default_user_fields();
 
         // check if it's the same user
-        if ($this->user['_id']->__toString() === $current_user->_id->__toString())
+        if ((string) $this->user['_id'] === (string) $current_user->_id)
         {
-            $this->can_edit      = true;
+            $this->private_actions = ['can_edit' => true];
             $this->connections   = static::get_all_connection_routes($this->_id);
         }
         else
@@ -178,29 +232,12 @@ class Model_Post extends Document {
             $this->actions      = static::get_action_routes($this->_id);
             $this->connections  = static::get_public_connection_routes($this->_id);
         }
-        // comments processing in stringify
-
-        return $this;
-    }
-
-    /**
-     * Using this to format some fields. Can't set subarray values via model.
-     * Keep getting error that modifying overloaded property has no effect.
-     * Apparently, that is the way __get() works. So have to do it here instead.
-     *
-     * @param array $arr
-     * @return array
-     */
-    public function stringify(array $arr)
-    {
-        $comments = Arr::get($arr, 'comments');
-        $current_user = (object) $this->get_default_user_fields();
 
         // we should trigger the comment model's formatting so each comment in
         // this post is properly formatted.
-        if(!empty($comments))
+        if(!empty($this->comments))
         {
-            foreach ($comments as $key => $value)
+            foreach ($this->comments as $key => $value)
             {
                 $comment = Mongo_Document::factory('comment');
                 if($current_user)
@@ -208,15 +245,12 @@ class Model_Post extends Document {
                     // check if there is a current user
                     $comment->current_user = $current_user;
                 }
-                // trigger comment formatting and defaults
-                $comment->after_load();
-
                 // now each comment in the post is properly formatted.
-                $arr['comments'][$key] = $comment->stringify($comment->to_array());
+                $this->set("comments.$key", $comment->stringify($comment->to_array()));
             }
         }
 
-        return parent::stringify($arr);
+        return $this;
     }
 
     /**
@@ -318,7 +352,7 @@ class Model_Post extends Document {
         'picture' => '', // if this post has an image, this will be the url
         'link'    => [], // 'name', 'caption', 'description', 'source' the original link if there is one
         'video' => [], // 'name', 'caption', 'description', 'source', 'properties' if this post has a video
-        'type'     => 'wallpost', // wallpost, testimonial, message, listing
+        'type'     => 'wallpost', // wallpost, testimonial, message, listing, checkin, event
         'status'   => 'active', // pending, active, expired,
         'uri'      => '',
         'modified' => 0,

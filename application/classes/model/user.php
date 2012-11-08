@@ -52,7 +52,7 @@ class Model_User extends Document {
         {
             // retrieve the company
             $company = Mongo_Document::factory('page');
-            $company->load($params['company'], ['name' => 1, '_id'  => 1]);
+            $company->load($params['company'], ['_id'  => 1, 'name' => 1]);
 
             // set the user's company
             $params['company']        = $company->to_array();
@@ -95,26 +95,38 @@ class Model_User extends Document {
      */
     public function before_save($action)
     {
-        $this->active = time();
-        unset($this->created);
-        if (isset($this->birthday) && !is_numeric($this->birthday))
+        // Updates
+        if ($action === parent::SAVE_UPDATE)
         {
-            $this->birthday = strtotime($this->birthday);
-        }
-        if(isset($this->counts))
-        {
-            $counts = Arr::merge(static::$user_fields['counts'], $this->counts);
+            $this->modified = time();
+            unset($this->created);
 
-            foreach($counts as $k => $v)
+            if (isset($this->info['birthday']) && !is_numeric($this->info['birthday']))
             {
-                if($v < 0)
+                $this->set('info.birthday', strtotime($this->info['birthday']));
+            }
+
+            // during testing a whole lot of counts went into negative. Just a
+            // small sanity check.
+            if (isset($this->counts))
+            {
+                foreach ($this->counts as $k => $v)
                 {
-                    $counts[$k] = 0;
+                    if ($v < 0)
+                    {
+                        $this->set('counts.' . $k, 0);
+                    }
                 }
             }
 
-            $this->counts = $counts;
+            unset(
+                    $this->interactions,
+                    $this->private_actions,
+                    $this->connections,
+                    $this->actions
+           );
         }
+
         return true;
     }
 
@@ -127,15 +139,19 @@ class Model_User extends Document {
     {
         $id = $this->_id instanceof MongoID ? $this->_id : new MongoID($this->_id);
 
+        // add a created
         $this->created = date('c', $id->getTimestamp());
+
+        // change to iso date
         if(is_numeric($this->active))
         {
             $this->active  = date('c', $this->active);
         }
-        //
-        if (isset($this->info['birthday']))
+
+        // same, change to iso date
+        if (isset($this->info['birthday']) && is_numeric($this->info['birthday']))
         {
-            $this->birthday = date('c', $this->info['birthday']);
+            $this->set('info.birthday', date('c', $this->info['birthday']));
         }
 
         if ($this->current_user === NULL)
@@ -144,11 +160,13 @@ class Model_User extends Document {
         $current_user = (object) $this->get_default_user_fields();
 
         // check if it's the same user
-        if ($this->_id->__toString() === $current_user->_id->__toString())
+        if ((string) $this->_id === (string) $current_user->_id)
         {
-            $this->can_edit      = true;
-            $this->can_like      = false;
-            $this->can_subscribe = false;
+            $this->private_actions = [
+                'can_edit' => true,
+                'can_like' => false,
+                'can_subscribe' => false,
+            ];
             $this->connections   = static::get_all_connection_routes($this->_id);
         }
         else
@@ -159,6 +177,55 @@ class Model_User extends Document {
             $this->connections  = static::get_public_connection_routes($this->_id);
             $this->password     = '';
             $this->logins       = [];
+        }
+
+        if($this->settings && !$this->can_edit)
+        {
+            //switch ($privacy['contacts']['is'])
+            switch ($this->settings['privacy']['contacts']['is'])
+            {
+                case 'SUBSCRIBERS':
+                    if ($this->interactions['subscribe'])
+                    {
+                        $this->set('info.telephone', NULL);
+                        $this->set('info.social', NULL);
+                        $this->set('info.email', NULL);
+                    }
+                    break;
+
+                case 'PRIVATE':
+                    $this->set('info.telephone', NULL);
+                    $this->set('info.social', NULL);
+                    $this->set('info.email', NULL);
+                    break;
+
+                case 'CUSTOM': //check if current user id is in this list
+                    //$arr['info']['telephone'] = '';
+                    //$arr['info']['social']    = '';
+                    //$arr['email']             = '';
+                    break;
+            }
+            switch ($this->settings['privacy']['personal']['is'])
+            {
+                case 'SUBSCRIBERS':
+                    if (!$this->interactions['subscribe'])
+                    {
+                        $this->set('info.gender', NULL);
+                        $this->set('info.birthday', NULL);
+                    }
+                    break;
+
+                case 'PRIVATE':
+                    $this->set('info.gender', NULL);
+                    $this->set('info.birthday', NULL);
+                    break;
+
+                case 'CUSTOM': //check if current user id is in this list
+                    //$arr['info']['telephone'] = '';
+                    //$arr['info']['social']    = '';
+                    //$arr['email']             = '';
+                    break;
+            }
         }
 
         return $this;
@@ -175,11 +242,10 @@ class Model_User extends Document {
     {
         $field = static::$user_fields['settings']['privacy'];
         $values = Arr::overwrite($field, $params);
-        $this->load($user_id, ['settings.privacy' => 1]);
-        
-        $this->load_values([
-            'settings.privacy' => $values,
-        ]);
+        $this->clear();
+        $this->set('_id', parent::check_id($user_id));
+        $this->set('settings.privacy', $values);
+
         $this->save();
 
         return $values;
@@ -197,10 +263,11 @@ class Model_User extends Document {
         $field = static::$user_fields['settings']['notifications'];
         $values = Arr::overwrite($field, $params);
 
-        $this->load($user_id, ['settings.notifications' => 1]);
-        $this->load_values([
-            'settings.notifications' => $values,
-        ]);
+        $this->clear();
+
+        $this->set('_id', parent::check_id($user_id));
+        $this->set('settings.notifications', $values);
+
         $this->save();
 
         return $values;
@@ -215,8 +282,12 @@ class Model_User extends Document {
      */
     public function update_password($password, $user_id)
     {
-        $this->load($user_id, ['password' => 1]);
+        $this->clear();
+
+        $this->set('_id', parent::check_id($user_id));
+
         $this->password = static::hash($password);
+
         return $this->save();
     }
 
@@ -232,58 +303,15 @@ class Model_User extends Document {
         $field  = static::$user_fields['info'];
         $values = Arr::overwrite($field, $params);
 
-        $this->load($user_id, ['info' => 1]);
+        $this->clear();
+
+        $this->set('_id', parent::check_id($user_id));
 
         $this->info = $values;
 
         $this->save();
 
         return $values;
-    }
-
-    /**
-     * Using this to format some fields. Can't set subarray values via model.
-     * Keep getting error that modifying overloaded property has no effect.
-     * Apparently, that is the way __get() works. So have to do it here instead.
-     *
-     * @param array $arr
-     * @return array
-     */
-    public function stringify(array $arr)
-    {
-        $can_edit = Arr::get($arr, 'can_edit');
-
-        $settings = Arr::get($arr, 'settings');
-
-        if($settings && !$can_edit && $privacy = Arr::get($settings, 'privacy'))
-        {
-            //switch ($privacy['contacts']['is'])
-            switch ($privacy['contacts'])
-            {
-                case 'SUBSCRIBERS':
-                    if (Arr::path($arr, 'interactions.subscribe'))
-                    {
-                        $arr['info']['telephone'] = '';
-                        $arr['info']['social']    = '';
-                        $arr['email']             = '';
-                    }
-                    break;
-
-                case 'PRIVATE':
-                    $arr['info']['telephone'] = '';
-                    $arr['info']['social']    = '';
-                    $arr['email']             = '';
-                    break;
-
-                case 'CUSTOM': //check if current user id is in this list
-                    //$arr['info']['telephone'] = '';
-                    //$arr['info']['social']    = '';
-                    //$arr['email']             = '';
-                    break;
-            }
-        }
-
-        return parent::stringify($arr);
     }
 
     /**
@@ -414,6 +442,7 @@ class Model_User extends Document {
             'privacy'   => [
                 'is'            => 'PUBLIC',
                 'contacts'      => ['is' => 'PUBLIC'],
+                'personal'      => ['is' => 'PUBLIC'],
                 'subscriptions' => ['is' => 'PUBLIC'],
                 'messages'      => ['is' => 'PUBLIC'],
                 'mentions'      => ['is' => 'PUBLIC'],
@@ -442,7 +471,8 @@ class Model_User extends Document {
                 'mentions'    => TRUE,
                 'testimonial' => TRUE,
                 'wallpost'    => TRUE,
-                'messages'    => TRUE
+                'messages'    => TRUE,
+                'pages'       => 'Weekly',
             ]
         ],
         'username'    => '',
@@ -452,7 +482,6 @@ class Model_User extends Document {
         'last_name'   => '',
         'name'        => '',
         'status'      => 'active',
-        'actions'     => [],
         'company' => [],
         'designation' => '',
         'roles'       => ['user'],
@@ -473,7 +502,8 @@ class Model_User extends Document {
             'listings'     => 0,
             'posts'        => 0,
             'subscribers'  => 0,
-            'testimonials' => 0
+            'testimonials' => 0,
+            'messages'     => 0
         ],
         'info'         => [
             'telephone' => ['mobile'    => ''],
