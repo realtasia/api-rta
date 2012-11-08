@@ -85,7 +85,6 @@ class Model_Post extends Document {
         return (array) $this->as_array();
     }
 
-
     /**
      * Searches for a document that has unique values. Returns false if none is
      * found and the id of the document if found.
@@ -157,17 +156,12 @@ class Model_Post extends Document {
                 }
             }
 
-            unset($this->interactions, $this->private_actions);
-
-            if(isset($this->connections))
-            {
-                $this->connections = [];
-            }
-
-            if(isset($this->actions))
-            {
-                $this->actions = [];
-            }
+            unset(
+                    $this->interactions,
+                    $this->private_actions,
+                    $this->connections,
+                    $this->actions
+            );
         }
 
         // Creates
@@ -352,7 +346,7 @@ class Model_Post extends Document {
         'picture' => '', // if this post has an image, this will be the url
         'link'    => [], // 'name', 'caption', 'description', 'source' the original link if there is one
         'video' => [], // 'name', 'caption', 'description', 'source', 'properties' if this post has a video
-        'type'     => 'wallpost', // wallpost, testimonial, message, listing, checkin, event
+        'type'     => 'wallpost', // wallpost, testimonial, conversation, listing, checkin, event
         'status'   => 'active', // pending, active, expired,
         'uri'      => '',
         'modified' => 0,

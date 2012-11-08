@@ -248,7 +248,7 @@ class Controller_User extends Controller_Resource {
 
         static::$params['user_id'] = $id;
 
-        static::$params['type'] = ['$ne' => 'messages'];
+        static::$params['type'] = ['$ne' => 'conversation'];
 
         $posts = Mongo_Collection::factory('post');
 
@@ -361,46 +361,6 @@ class Controller_User extends Controller_Resource {
         return $this->error('invalid_request');
     }
 
-
-    /**
-     * Utility method that validates this request and either runs an update
-     * method (for PUT requests) or retrieves a DB field (GET REQUEST)
-     *
-     * @param string $update_method
-     * @param string $retrieve_field
-     * @return boolean
-     */
-    public function validate_current_request($update_method, $retrieve_field)
-    {
-        $id = $this->request->param('id');
-
-        // current user is the user we need to update/fetch or
-        // an admin is logged in or this is a client_credentials grant_type
-        if(static::logged_in_is_id($id) || parent::has_role('admin'))
-        {
-            // retrieve user by his/her specific field requested.
-            if($this->is_GET())
-            {
-                $user = static::$model;
-                if($user->load($id, [$retrieve_field => 1]))
-                {
-                    $this->data($user->stringify($user->as_array()));
-                }
-            }
-            // update user by his/her specific field
-            if($this->is_POST())
-            {
-                $this->{$update_method}();
-            }
-            return true;
-        }
-
-        // no way to validate this request.
-        Debug::log('In Validate Request, no way to validate request');
-        $this->fail('user/generic', 'access_denied');
-        return true;
-    }
-
     /**
      * This handles both retrieval and updating of a user's privacy settings
      */
@@ -415,9 +375,17 @@ class Controller_User extends Controller_Resource {
             );
         }
         else
-            return $this->validate_current_request(
-                    'update_privacy', 'settings.privacy'
-                   );
+        {
+            if(static::logged_in_is_id($id))
+            {
+                // update user by his/her specific field
+                if($this->is_POST())
+                {
+                    $this->update_privacy(static::$params, $id);
+                }
+                return true;
+            }
+        }
 
     }
 
@@ -426,9 +394,27 @@ class Controller_User extends Controller_Resource {
      */
     public function action_notifications()
     {
-        return $this->validate_current_request(
-                'update_notifications', 'settings.notifications'
-               );
+        $id = $this->request->param('id');
+        if ($this->is_GET() && (parent::logged_in() || parent::is_client()))
+        {
+            $user = static::$model;
+            $user->load($this->request->param('id'), ['settings' => 1]);
+            $this->data(
+                    $user->stringify($user->as_array()['settings']['notifications'])
+            );
+        }
+        else
+        {
+            if(static::logged_in_is_id($id))
+            {
+                // update user by his/her specific field
+                if($this->is_POST())
+                {
+                    $this->update_notifications(static::$params, $id);
+                }
+                return true;
+            }
+        }
     }
 
     /**
@@ -445,12 +431,12 @@ class Controller_User extends Controller_Resource {
         }
         else
         {
-            if(static::logged_in_is_id($id) || parent::has_role('admin'))
+            if(static::logged_in_is_id($id))
             {
                 // update user by his/her specific field
                 if($this->is_POST())
                 {
-                    $this->update_info();
+                    $this->update_info(static::$params, $id);
                 }
                 return true;
             }
@@ -868,7 +854,7 @@ class Controller_User extends Controller_Resource {
                 ->rule('messages', 'range', [':value', 0, 1])
                 ->rule('messages', 'not_empty')
                 ->rule('subscriptions', 'not_empty')
-                ->rule('subscriptions', 'in_array', [':value', ['male', 'female']]);
+                ->rule('subscriptions', 'in_array', [':value', ['daily', 'weekly']]);
 
         //var_dump($validation->check());
         //die;

@@ -154,13 +154,13 @@ class Model_Post_Collection extends Collection {
         $id = parent::check_id(Arr::get($args, 'user', $user_id));
 
         $query = [
-            'type' => 'message', 'status' => $status, '$or' => [
+            'type' => 'conversation', 'status' => $status, '$or' => [
                 'user._id' => $id,
                 'to._id'   => $id
             ]
         ];
         $results = $this
-                ->find($this->ensure_order($query))
+                ->find($query)
                 ->limit($limit)
                 ->sort($sort)
                 ->skip($skip);

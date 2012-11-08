@@ -193,7 +193,7 @@ class Model_User extends Document {
                     }
                     break;
 
-                case 'PRIVATE':
+                case 'SELF':
                     $this->set('info.telephone', NULL);
                     $this->set('info.social', NULL);
                     $this->set('info.email', NULL);
@@ -215,7 +215,7 @@ class Model_User extends Document {
                     }
                     break;
 
-                case 'PRIVATE':
+                case 'SELF':
                     $this->set('info.gender', NULL);
                     $this->set('info.birthday', NULL);
                     break;
