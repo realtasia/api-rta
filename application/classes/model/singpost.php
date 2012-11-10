@@ -15,5 +15,5 @@
  * @copyright 2012 Realtasia Pte Ltd
  */
 class Model_Singpost extends Document {
-    protected $name = 'singpost';
+
 }

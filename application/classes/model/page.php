@@ -107,9 +107,30 @@ class Model_Page extends Document {
      */
     public function before_save($action)
     {
-        $this->modified = time();
-        unset($this->created);
-        return $this;
+        if ($action === parent::SAVE_UPDATE)
+        {
+            $this->modified = time();
+
+            // during testing a whole lot of counts went into negative. Just a
+            // small sanity check.
+            if (!isset($this->_changed['counts']) && isset($this->counts))
+            {
+                foreach ($this->counts as $k => $v)
+                {
+                    if ($v < 0)
+                    {
+                        $this->set('counts.' . $k, 0);
+                    }
+                }
+            }
+            foreach(['interactions', 'private_actions', 'connections', 'actions', 'created'] as $v)
+            {
+                if( !isset($this->_changed[$v]) && isset( $this->{$v} ) )
+                {
+                    unset( $this->{$v} );
+                }
+            }
+        }
     }
 
     /**

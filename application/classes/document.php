@@ -65,10 +65,6 @@ class Document extends Mongo_Document {
         {
             $this->active = $time;
         }
-
-        unset($this->created);
-
-        return $this;
     }
 
     public function after_save($action)
@@ -95,6 +91,24 @@ class Document extends Mongo_Document {
 
     }
 
+    public function atomic($id)
+    {
+        if ($id !== NULL)
+        {
+            if (is_array($id))
+            {
+                foreach ($id as $key => $value)
+                {
+                    $this->_object[$this->get_field_name($key)] = $value;
+                }
+            }
+            else
+            {
+                $this->_object['_id'] = $this->_cast('_id', $id);
+            }
+        }
+    }
+
     public function save($safe = TRUE)
     {
         try
@@ -113,6 +127,7 @@ class Document extends Mongo_Document {
 
         return true;
     }
+
 
     /**
      * Testing revealed that can't query the DB with string IDs if it isn't an

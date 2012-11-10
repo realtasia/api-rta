@@ -18,11 +18,62 @@ class Model_Comment extends Document {
      */
     public function create($params)
     {
-        $this->check_params($params);
+        $this->collection()->ensureIndex([
+            'type' => 1, 'status' => 1, 'modified' => -1
+        ], ['safe' => true]);
+        $this->collection()->ensureIndex([
+            'user._id' => 1
+        ], ['safe' => true]);
+        $this->collection()->ensureIndex([
+            'object._id' => 1, 'object.type' => 1
+        ], [ 'safe' => true]);
+
+        $params = $this->check_params($params);
+
+        if(isset($params['_id']))
+        {
+            $this->atomic($params['_id']);
+            unset($params['_id']);
+        }
 
         $this->load_values($params);
 
-        $this->save();
+        if($this->save())
+            return $this;
+
+        return false;
+    }
+
+    /**
+     * A message is only created for the conversation post type. Slightly different
+     * because it doesn't have counts or is likeable.
+     *
+     * @param type $params
+     * @return \Model_Comment|boolean
+     */
+    public function create_message($params)
+    {
+        $args = [
+            'object' => [
+                '_id' => $params['post']['_id'],
+                'type' => $params['post']['type'],
+            ],
+            'message' => $params['message'],
+            'user'    => $params['user'],
+            'type'    => 'message'
+        ];
+
+        if(isset($params['_id']))
+        {
+            $this->atomic($params['_id']);
+        }
+
+        $this->load_values($params);
+
+        if($this->save())
+            return $this;
+
+        return false;
     }
 
     /**
@@ -35,23 +86,25 @@ class Model_Comment extends Document {
     {
         if (!$this->current_user->loaded())
             return false;
-        $comment = Validation::factory($params);
 
-        $comment
-            ->rule('object_id', 'not_empty')
-            ->rule('object_type', 'not_empty')
-            ->rule('content', 'not_empty');
+        $pars = $params;
+        $pars['object._id'] = Arr::path($params, 'object._id');
+        $pars['object.type'] = Arr::path($params, 'object.type');
+
+        $comment = Validation::factory($pars)
+                ->rule('object._id', 'not_empty')
+                ->rule('object.type', 'not_empty')
+                ->rule('message', 'not_empty')
+                ->rule('type', 'not_empty');
 
         $user = (object) $this->get_current_user_fields();
 
         if ($comment->check())
         {
-            $params['user'] = $user;
+            $params['user']  = isset($params['user']) ? $params['user'] : $user;
             $params['counts'] = ['likers' => 0];
             $params['likers'] = [];
-            $params['status'] = isset($params['status']) ? isset($params['status']) : 'publish';
-            $params['content'] = nl2br(HTML::chars($params['content']));
-
+            $params['status'] = isset($params['status']) ? $params['status'] : 'active';
             return $params;
         }
     }
@@ -70,7 +123,7 @@ class Model_Comment extends Document {
 
         if ($object_id)
         {
-            $query['object_id'] = $object_id;
+            $query['object._id'] = $object_id;
         }
 
         try
@@ -99,8 +152,51 @@ class Model_Comment extends Document {
      */
     public function after_save($action)
     {
-        $i = Mongo_Document::factory('interaction', null, $user->_id->__toString());
-        $i->interact('subscribe', $this->object_id, $this->object_type);
+        $i = Mongo_Document::factory('interaction', null, (string) $this->current_user->_id);
+        $i->interact('subscribe', $this->object['_id'], $this->object['type']);
+        // guess the update for this interaction.
+        $this->guess_update();
+
+        $count_field = static::$count_field;
+
+        $interactor = $this->get_default_user_fields();
+
+        // fetch the concerned object
+        $object = Mongo_Document::factory($this->object['type'], $this->object['_id']);
+
+
+        // update the latest interactions in the object
+        if (static::$inc === 1)
+        {
+            // add this subscriber to the list
+            $object->addToSet('comments', $interactor);
+        }
+        else
+        {
+            // we just remove the interaction.
+            $object->pull('comments', ['_id' => $interactor['_id']]);
+        }
+
+        // increment the count for this interaction
+        $object->inc('counts.comments', static::$inc);
+        $object->save();
+
+        /*
+         * Small hack to ensure a capped interaction list.
+         * @see https://github.com/colinmollenhour/mongodb-php-odm/issues/27#issuecomment-9950515
+         */
+        if (static::$inc === 1)
+        {
+            $object->collection()->update_safe(
+              ['_id' => $this->object['_id'], 'comments' => ['$size' => 6]],
+              ['$pop' => ['comments' => 1]]
+            );
+        }
+
+        // update the user's last active
+        $this->current_user->save();
+
+        return $this;
     }
 
     /**

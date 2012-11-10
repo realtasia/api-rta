@@ -1,4 +1,6 @@
-<?php defined('SYSPATH') or die('No direct script access.');
+<?php
+
+defined('SYSPATH') or die('No direct script access.');
 
 /**
  * Description of user
@@ -19,7 +21,7 @@ class Model_User extends Document {
      */
     public function get($id, array $fields = [], $object = TRUE)
     {
-        if($this->load(self::_get_one($id), $fields))
+        if ($this->load(self::_get_one($id), $fields))
         {
             $ret = $this->stringify($this->as_array());
             return $object ? (object) $ret : $ret;
@@ -55,7 +57,7 @@ class Model_User extends Document {
             $company->load($params['company'], ['_id'  => 1, 'name' => 1]);
 
             // set the user's company
-            $params['company']        = $company->to_array();
+            $params['company'] = $company->to_array();
         }
 
         // overwrite defaults
@@ -95,20 +97,14 @@ class Model_User extends Document {
      */
     public function before_save($action)
     {
+        //Debug::log('Entered before_save ' . count($this->_operations));
         // Updates
         if ($action === parent::SAVE_UPDATE)
         {
+            //Debug::log('before_save, in update' . print_r($this->_changed, true));
             $this->modified = time();
-            unset($this->created);
-
-            if (isset($this->info['birthday']) && !is_numeric($this->info['birthday']))
-            {
-                $this->set('info.birthday', strtotime($this->info['birthday']));
-            }
-
-            // during testing a whole lot of counts went into negative. Just a
-            // small sanity check.
-            if (isset($this->counts))
+            //Debug::log('After modified ' . count($this->_operations));
+            if (!isset($this->_changed['counts']) && isset($this->counts))
             {
                 foreach ($this->counts as $k => $v)
                 {
@@ -118,16 +114,16 @@ class Model_User extends Document {
                     }
                 }
             }
-
-            unset(
-                    $this->interactions,
-                    $this->private_actions,
-                    $this->connections,
-                    $this->actions
-           );
+            //Debug::log('after counts ' . count($this->_operations));
+            foreach (['interactions', 'private_actions', 'connections', 'actions', 'created'] as $v)
+            {
+                if (!isset($this->_changed[$v]) && isset($this->_object[$v]))
+                {
+                    unset($this->_object[$v]);
+                }
+            }
         }
-
-        return true;
+        //Debug::log('Exiting before_save ' . count($this->_operations));
     }
 
     /**
@@ -137,22 +133,12 @@ class Model_User extends Document {
      */
     public function after_load()
     {
-        $id = $this->_id instanceof MongoID ? $this->_id : new MongoID($this->_id);
+        $id = parent::check_id($this->_id);
 
         // add a created
-        $this->created = date('c', $id->getTimestamp());
-
-        // change to iso date
-        if(is_numeric($this->active))
-        {
-            $this->active  = date('c', $this->active);
-        }
+        $this->created = $id->getTimestamp();
 
         // same, change to iso date
-        if (isset($this->info['birthday']) && is_numeric($this->info['birthday']))
-        {
-            $this->set('info.birthday', date('c', $this->info['birthday']));
-        }
 
         if ($this->current_user === NULL)
             return $this;
@@ -163,11 +149,11 @@ class Model_User extends Document {
         if ((string) $this->_id === (string) $current_user->_id)
         {
             $this->private_actions = [
-                'can_edit' => true,
-                'can_like' => false,
-                'can_subscribe' => false,
+                'can_edit'         => true,
+                'can_like'         => false,
+                'can_subscribe'    => false,
             ];
-            $this->connections   = static::get_all_connection_routes($this->_id);
+            $this->connections = static::get_all_connection_routes($this->_id);
         }
         else
         {
@@ -179,7 +165,7 @@ class Model_User extends Document {
             $this->logins       = [];
         }
 
-        if($this->settings && !$this->can_edit)
+        if (isset($this->settings) && !$this->private_actions['can_edit'])
         {
             //switch ($privacy['contacts']['is'])
             switch ($this->settings['privacy']['contacts']['is'])
@@ -205,27 +191,27 @@ class Model_User extends Document {
                     //$arr['email']             = '';
                     break;
             }
-            switch ($this->settings['privacy']['personal']['is'])
-            {
-                case 'SUBSCRIBERS':
-                    if (!$this->interactions['subscribe'])
-                    {
-                        $this->set('info.gender', NULL);
-                        $this->set('info.birthday', NULL);
-                    }
-                    break;
-
-                case 'SELF':
-                    $this->set('info.gender', NULL);
-                    $this->set('info.birthday', NULL);
-                    break;
-
-                case 'CUSTOM': //check if current user id is in this list
-                    //$arr['info']['telephone'] = '';
-                    //$arr['info']['social']    = '';
-                    //$arr['email']             = '';
-                    break;
-            }
+//            switch ($this->settings['privacy']['personal']['is'])
+//            {
+//                case 'SUBSCRIBERS':
+//                    if (!$this->interactions['subscribe'])
+//                    {
+//                        $this->set('info.gender', NULL);
+//                        $this->set('info.birthday', NULL);
+//                    }
+//                    break;
+//
+//                case 'SELF':
+//                    $this->set('info.gender', NULL);
+//                    $this->set('info.birthday', NULL);
+//                    break;
+//
+//                case 'CUSTOM': //check if current user id is in this list
+//                    //$arr['info']['telephone'] = '';
+//                    //$arr['info']['social']    = '';
+//                    //$arr['email']             = '';
+//                    break;
+//            }
         }
 
         return $this;
@@ -240,15 +226,18 @@ class Model_User extends Document {
      */
     public function update_privacy($params, $user_id)
     {
-        $field = static::$user_fields['settings']['privacy'];
+        $field  = static::$user_fields['settings']['privacy'];
         $values = Arr::overwrite($field, $params);
+        $values = $this->typecast($values, 'upper');
+
         $this->clear();
-        $this->set('_id', parent::check_id($user_id));
+        $this->atomic($user_id);
+
         $this->set('settings.privacy', $values);
 
         $this->save();
 
-        return $values;
+        return $this->settings['privacy'];
     }
 
     /**
@@ -260,17 +249,19 @@ class Model_User extends Document {
      */
     public function update_notifications($params, $user_id)
     {
-        $field = static::$user_fields['settings']['notifications'];
+        $field  = static::$user_fields['settings']['notifications'];
         $values = Arr::overwrite($field, $params);
+        $values = $this->typecast($values, 'bool');
+
 
         $this->clear();
 
-        $this->set('_id', parent::check_id($user_id));
+        $this->atomic($user_id);
         $this->set('settings.notifications', $values);
 
         $this->save();
 
-        return $values;
+        return $this->settings['notifications'];
     }
 
     /**
@@ -283,8 +274,7 @@ class Model_User extends Document {
     public function update_password($password, $user_id)
     {
         $this->clear();
-
-        $this->set('_id', parent::check_id($user_id));
+        $this->load($user_id);
 
         $this->password = static::hash($password);
 
@@ -298,21 +288,44 @@ class Model_User extends Document {
      * @param string|MongoID $user_id
      * @return type
      */
-    public function update_info($params, $user_id)
+    public function update_billing($params, $user_id)
     {
-        $field  = static::$user_fields['info'];
+        $field = static::$user_fields['settings']['billing'];
         $values = Arr::overwrite($field, $params);
 
         $this->clear();
+        $this->atomic($user_id);
+        $this->set('settings.billing', $values);
 
-        $this->set('_id', parent::check_id($user_id));
+        $this->save();
 
+        return $this->$this->settings['billing'];
+    }
+
+    /**
+     * Updates user info.
+     *
+     * @param array $params
+     * @param string|MongoID $user_id
+     * @return type
+     */
+    public function update_info($params, $user_id)
+    {
+        $field = static::$user_fields['info'];
+
+        $params['birthday'] = (int) $params['birthday'];
+
+        $values = Arr::overwrite($field, $params);
+
+        $this->clear();
+        $this->atomic($user_id);
         $this->info = $values;
 
         $this->save();
 
-        return $values;
+        return $this->info;
     }
+
 
     /**
      * Small utility function to reduce typing. returns an $or array for use in
@@ -357,7 +370,7 @@ class Model_User extends Document {
     {
         $actions = [];
 
-        foreach(['like', 'unlike', 'subscribe', 'unsubscribe'] as $k => $v)
+        foreach (['like', 'unlike', 'subscribe', 'unsubscribe'] as $k => $v)
         {
             $actions[$v] = Router::user($v, $user_id);
         }
@@ -376,7 +389,7 @@ class Model_User extends Document {
     {
         $actions = [];
 
-        foreach(['privacy', 'notifications'] as $k => $v)
+        foreach (['privacy', 'notifications'] as $k => $v)
         {
             $actions[$v] = Router::user($v, $user_id);
         }
@@ -394,12 +407,49 @@ class Model_User extends Document {
     {
         $actions = [];
 
-        foreach(['likers', 'avatar', 'subscribers', 'info'] as $k => $v)
+        foreach (['likers', 'avatar', 'subscribers', 'info'] as $k => $v)
         {
             $actions[$v] = Router::user($v, $user_id);
         }
 
         return $actions;
+    }
+
+    public function typecast($array, $type)
+    {
+        foreach ($array as $key => $value)
+        {
+            if (is_array($value))
+            {
+                $array[$key] = $this->typecast($value, $type);
+            }
+
+            switch ($type)
+            {
+                case 'bool' :
+                    if (is_numeric($value))
+                    {
+                        $array[$key] = (bool) $value;
+                    }
+                    break;
+                case 'int' :
+                    if (is_numeric($value))
+                    {
+                        $array[$key] = (int) $value;
+                    }
+                    break;
+                case 'upper' :
+                    if (is_numeric($value))
+                    {
+                        $array[$key] = strtoupper((string) $value);
+                    }
+                    break;
+                default :
+                    $array[$key] = $value;
+                    break;
+            }
+        }
+        return $array;
     }
 
     /**
@@ -408,10 +458,10 @@ class Model_User extends Document {
      * @var array
      */
     private static $protected_fields = [
-        'password' => false,
-        'settings.billing' => false,
+        'password'               => false,
+        'settings.billing'       => false,
         'settings.notifications' => false,
-        'logins'   => false
+        'logins'                 => false
     ];
 
     /**
@@ -419,7 +469,7 @@ class Model_User extends Document {
      *
      * @var array
      */
-    private static $user_fields = [
+    public static $user_fields = [
         'password' => '',
         'logins'   => [
             'user_id'      => '',
@@ -440,18 +490,18 @@ class Model_User extends Document {
                 'plan_id'   => NULL
             ],
             'privacy'   => [
-                'is'            => 'PUBLIC',
-                'contacts'      => ['is' => 'PUBLIC'],
-                'personal'      => ['is' => 'PUBLIC'],
-                'subscriptions' => ['is' => 'PUBLIC'],
-                'messages'      => ['is' => 'PUBLIC'],
-                'mentions'      => ['is' => 'PUBLIC'],
+                'is'       => 'PUBLIC',
+                'contacts' => ['is'       => 'PUBLIC'],
+                'personal' => ['is'            => 'PUBLIC'],
+                'subscriptions' => ['is'       => 'PUBLIC'],
+                'messages' => ['is'       => 'PUBLIC'],
+                'mentions' => ['is'        => 'PUBLIC'],
                 'wallposts' => [
-                    'others_posts'            => ['is' => 'PUBLIC'],
-                    'others_posts_visibility' => ['is' => 'PUBLIC']
+                    'others_posts' => ['is'                      => 'PUBLIC'],
+                    'others_posts_visibility' => ['is'            => 'PUBLIC']
                 ]
             ],
-            'notifications'           => [
+            'notifications' => [
                 'email'  => '',
                 'likers' => [
                     'own_post'    => TRUE,
@@ -482,7 +532,7 @@ class Model_User extends Document {
         'last_name'   => '',
         'name'        => '',
         'status'      => 'active',
-        'company' => [],
+        'company'     => [],
         'designation' => '',
         'roles'       => ['user'],
         'avatar' => [

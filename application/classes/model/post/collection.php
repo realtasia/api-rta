@@ -50,21 +50,23 @@ class Model_Post_Collection extends Collection {
             $query['message'] = new MongoRegex("/$s/i");
         }
 
-        // iterate through the $ids and make sure they're all MongoID objects
-        if (!empty($ids))
-            $query['_id']['$in'] = $ids;
+        if($user_id)
+            $query['user._id'] = $user_id;
 
         if($page_id)
             $query['page._id'] = $page_id;
 
+        $query['settings.privacy.is'] = $privacy;
+
         if($parent_id)
             $query['parent._id'] = $parent_id;
 
-        if($user_id)
-            $query['user._id'] = $user_id;
-
         if($to_id)
             $query['to._id'] = $to_id;
+
+        // iterate through the $ids and make sure they're all MongoID objects
+        if (!empty($ids))
+            $query['_id']['$in'] = $ids;
 
         if(!is_array($sort))
         {
@@ -77,14 +79,23 @@ class Model_Post_Collection extends Collection {
         }
 
         $results = $this
-                ->find($this->ensure_order($query))
+                ->find($query)
                 ->limit($limit)
                 ->sort($sort)
                 ->skip($skip);
 
+        //Debug::log($user_id);
+        //Debug::log(parent::get_user($user_id));
+//            if($user_id && $usr = $this->get_user($user_id))
+//            {
+//                $row->current_user = $usr;
+//                $row->after_load();
+//            }
+
         while($results->hasNext())
         {
             $row = $results->getNext();
+                    Debug::log(static::$user_id);
             if($user_id && $usr = $this->get_user($user_id))
             {
                 $row->current_user = $usr;
@@ -110,7 +121,7 @@ class Model_Post_Collection extends Collection {
     {
         $defaults = ['status' => 'active', 'type' => 'testimonial'];
 
-        return $this->search(Arr::merge($defaults, $args));
+        return $this->search(Arr::merge($defaults, $args), $user_id);
     }
 
     /**
@@ -126,13 +137,17 @@ class Model_Post_Collection extends Collection {
         $defaults = ['status' => 'active', 'type' => 'listing'];
 
         $sort = Arr::get($args, 'sort', ['listing.price' => 1]);
+        if(!is_array($sort))
+        {
+            $sort = [$sort => 1];
+        }
 
         if ($this->validate_listing_sort($sort))
         {
             $args['sort'] = $sort;
         }
 
-        return $this->search(Arr::merge($defaults, $args, $user_id));
+        return $this->search(Arr::merge($defaults, $args), $user_id);
     }
 
     /**
@@ -147,11 +162,12 @@ class Model_Post_Collection extends Collection {
         if(!$user_id)
             return [];
 
+        $return = [];
         $status = Arr::get($args, 'status', 'active');
         $limit = Arr::get($args, 'limit', 11);
         $skip = Arr::get($args, 'skip', 0);
         $sort = Arr::get($args, 'sort', ['_id' => -1]);
-        $id = parent::check_id(Arr::get($args, 'user', $user_id));
+        $id = Document::check_id(Arr::get($args, 'user', $user_id));
 
         $query = [
             'type' => 'conversation', 'status' => $status, '$or' => [
@@ -218,7 +234,7 @@ class Model_Post_Collection extends Collection {
     {
         foreach ($sort as $key => $value)
         {
-            if(array_key_exists($key, $this->listing_fields) && ( (int) $value === 1 || (int) $value === -1))
+            if(array_key_exists($key, static::$listing_fields) && ( (int) $value === 1 || (int) $value === -1))
             {
                 return true;
             }
@@ -228,7 +244,7 @@ class Model_Post_Collection extends Collection {
     }
 
     protected static $listing_fields = [
-            'listing.type' => 0, 'listing.price' => 0, 'listing.rooms' => 1, 'listing.built_size' => 0,
+            'listing.type' => 'sale', 'listing.price' => 0, 'listing.rooms' => 1, 'listing.built_size' => 0,
             'listing.property_type' => '', 'listing.tenure' => 0, 'listing.land_size' => 0,
             'listing.value' => 0, 'listing.description' => 0, 'listing.cobroke' => 0
         ];

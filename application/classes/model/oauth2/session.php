@@ -44,8 +44,8 @@ class Model_Oauth2_Session extends Document {
      */
     public function destroy($token)
     {
-        $this->load_values(['access_token' => $token]);
-        $this->delete();
+        $this->load(['access_token' => $token]);
+        return $this->delete() ? true : false;
     }
 
     /**

@@ -29,4 +29,15 @@ class Collection extends Mongo_Collection {
         return ($cmpa > $cmpb) ? 1 : -1;
     }
 
+    public function get_user($user_id = null)
+    {
+        if ($user_id)
+        {
+            $user = Mongo_Document::factory('user', $user_id);
+            $user->load(null, ['_id', 'name']);
+            return $user;
+        }
+        return false;
+    }
+
 }

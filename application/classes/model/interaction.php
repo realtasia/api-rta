@@ -168,7 +168,7 @@ class Model_Interaction extends Document {
         if (static::$inc === 1)
         {
             $object->collection()->update_safe(
-              ['_id' => $object->_id, $count_field => ['$size' => 6]],
+              ['_id' => $this->object_id, $count_field => ['$size' => 6]],
               ['$pop' => [$count_field => 1]]
             );
         }
@@ -312,6 +312,21 @@ class Model_Interaction extends Document {
             return FALSE;
         }
         return TRUE;
+    }
+
+    /**
+     * This is normally called when a post (or comment or user) is deleted.
+     * We need to remove all interactions pertaining to the object
+     *
+     * @param type $object_id
+     * @param type $object_type
+     */
+    protected function uninteract($object_id, $object_type)
+    {
+        $this->collection(true)->remove_safe([
+            'object_id' => parent::check_id($object_id),
+            'object_type' => parent::check_id($object_type),
+        ]);
     }
 
     /**

@@ -15,8 +15,9 @@ class Controller_Post extends Controller_Resource {
     ];
 
     private static $valid_post_types = [
-        'create_testimonial', 'create_listing', 'create_post', 'update_privacy',
-        'update_testimonial', 'update_listing', 'update_post'
+        'create_testimonial', 'create_listing', 'create_post', 'create_conversation',
+        'update_privacy', 'update_testimonial', 'update_listing', 'update_post',
+        'delete_post'
     ];
 
     public function before()
@@ -128,48 +129,6 @@ class Controller_Post extends Controller_Resource {
         return $this->data($data);
     }
 
-    /**
-     * Utility method that validates this request and either runs an update
-     * method (for PUT requests) or retrieves a DB field (GET REQUEST)
-     *
-     * @param string $update_method
-     * @param string $retrieve_field
-     * @return boolean
-     */
-    public function validate_current_request($update_method, $retrieve_field)
-    {
-        $id = $this->request->param('id');
-
-        // current user is the user we need to update/fetch or
-        // an admin is logged in or this is a client_credentials grant_type
-        Debug::log('is_admin :' . parent::has_role('admin'));
-        Debug::log('is_client :' . parent::is_client());
-        Debug::log('is_user :' . static::$user_id && static::$user_id === $id);
-        if((static::$user_id && static::$user_id === $id) || parent::has_role('admin') || parent::is_client())
-        {
-            // retrieve user by his/her specific field requested.
-            if($this->is_GET())
-            {
-                $user = static::$model;
-                if($user->load($id, [$retrieve_field => 1]))
-                {
-                    $this->data($user->stringify($user->as_array()));
-                }
-            }
-            // update user by his/her specific field
-            if($this->is_POST())
-            {
-                $this->{$update_method}();
-            }
-            return true;
-        }
-
-        // no way to validate this request.
-        Debug::log('In Validate Request, no way to validate request');
-        $this->fail('user/generic', 'access_denied');
-        return true;
-    }
-
     /**************************************************************************
      * Public Actions
      *************************************************************************/
@@ -275,11 +234,66 @@ class Controller_Post extends Controller_Resource {
      * Protected Actions - CREATES
      *************************************************************************/
 
+    /**
+     * A conversation is a special post type with no message. It
+     * has to contain a user and maybe a list of to[ids]. It can also be one
+     * to[_id]. Either way, this post object has very little information and
+     * normally depends on it's containing messages (comments) for content.
+     */
+    protected function create_conversation()
+    {
+        $id = $this->request->param('id');
 
+        if(!$id && !parent::logged_in())
+            return $this->error('invalid_request');
+
+        static::$params['user']['_id'] = $id ? $id : static::$user_id;
+
+        $validation = Validation::factory(static::$params)
+                ->rule('to', 'not_empty')
+                ->rule('to', 'is_array')
+                ->rule('message', 'not_empty');
+
+        $defaults = [
+            'type'   => 'conversation', 'status' => 'active'
+        ];
+        if ($validation->check())
+        {
+            static::$params['message'] = nl2br(HTML::chars(static::$params['message']));
+            if ($post = static::$model->create_conversation(Arr::merge($defaults, static::$params)))
+            {
+                return $this->data($post);
+            }
+
+            return $this->error('server_error');
+        }
+
+        $this->errors = $validation->errors('post/conversation');
+        return $this->fail();
+    }
+
+    /**
+     * Testimonials are very similar to regular posts accept that this method
+     * sets the type to testimonial and ensures that the default status is pending.
+     *
+     * @return json array
+     */
     protected function create_testimonial()
     {
+        $id = $this->request->param('id');
+
+        if(!$id && !parent::logged_in())
+            return $this->error('invalid_request');
+
+        static::$params['user']['_id'] = $id ? $id : static::$user_id;
+
+        static::$params['privacy.is'] = Arr::path(static::$params, 'privacy.is');
         $validation = Validation::factory(static::$params)
                 ->rule('message', 'not_empty')
+                ->rule('privacy.is', 'Controller_User::valid_privacy', [
+                    ':value', ':field', ':validation'
+                ])
+                ->rule('page', 'not_empty')
                 ->rule('page', 'Controller_Post::valid_page', [':value', ':field', ':validation'])
                 ->rule('page_parent', 'Controller_Post::valid_page', [':value', ':field', ':validation']);
 
@@ -288,6 +302,7 @@ class Controller_Post extends Controller_Resource {
         ];
         if ($validation->check())
         {
+            static::$params['message'] = nl2br(HTML::chars(static::$params['message']));
             // this is a little different. we merge params with defaults to force defaults
             if ($post = static::$model->create(Arr::merge(static::$params, $defaults)))
             {
@@ -297,15 +312,32 @@ class Controller_Post extends Controller_Resource {
             return $this->error('server_error');
         }
 
-        $this->errors = $validation->errors('user/privacy');
+        $this->errors = $validation->errors('post/post');
         return $this->fail();
     }
 
 
+    /**
+     * Listing has a lot more validation rules.
+     *
+     * @return json array
+     */
     protected function create_listing()
     {
+        $id = $this->request->param('id');
+
+        if(!$id && !parent::logged_in())
+            return $this->error('invalid_request');
+
+        static::$params['user']['_id'] = $id ? $id : static::$user_id;
+
         $params = static::extract_listing_values(static::$params);
+        $params['privacy.is'] = Arr::path($params, 'privacy.is');
+
         $validation = Validation::factory($params)
+                ->rule('privacy.is', 'Controller_User::valid_privacy', [
+                    ':value', ':field', ':validation'
+                ])
                 ->rule('listing.type', 'not_empty')
                 ->rule('listing.type', 'in_array', [':value', ['rent', 'sale']])
                 ->rule('listing.price', 'not_empty')
@@ -320,6 +352,7 @@ class Controller_Post extends Controller_Resource {
                 ->rule('listing.land_size', 'numeric')
                 ->rule('listing.unit', 'not_empty')
                 ->rule('status', 'not_empty')
+                ->rule('page', 'not_empty')
                 ->rule('page', 'Controller_Page::valid_page', [':value', ':field', ':validation'])
                 ->rule('page_parent', 'Controller_Page::valid_parent', [':value', ':field', ':validation']);
 
@@ -340,10 +373,77 @@ class Controller_Post extends Controller_Resource {
         return $this->fail();
     }
 
-
+    /**
+     * Creates a regular post. Uses the page controller to validate a page if
+     * present. A page parent is optional, but a page is needed so we know
+     * where this post was created.
+     *
+     * @uses Controller_Page
+     *
+     * @return json array
+     */
     protected function create_post()
     {
+        $id = $this->request->param('id');
 
+        if(!$id && !parent::logged_in())
+            return $this->error('invalid_request');
+
+        static::$params['user']['_id'] = $id ? $id : static::$user_id;
+
+        static::$params['privacy.is'] = Arr::path(static::$params, 'privacy.is');
+
+        $validation = Validation::factory(static::$params)
+                ->rule('message', 'not_empty')
+                ->rule('privacy.is', 'Controller_User::valid_privacy', [
+                    ':value', ':field', ':validation'
+                ])
+                ->rule('page', 'not_empty')
+                ->rule('page', 'Controller_Post::valid_page', [':value', ':field', ':validation'])
+                ->rule('page_parent', 'Controller_Post::valid_page', [':value', ':field', ':validation']);
+
+        $defaults = [
+            'type'   => 'wallpost', 'status' => 'active'
+        ];
+        if ($validation->check())
+        {
+            static::$params['message'] = nl2br(HTML::chars(static::$params['message']));
+            // this is a little different. we merge params with defaults to force defaults
+            if ($post = static::$model->create(Arr::merge(static::$params, $defaults)))
+            {
+                return $this->data($post);
+            }
+
+            return $this->error('server_error');
+        }
+
+        $this->errors = $validation->errors('post/post');
+        return $this->fail();
+    }
+
+    protected function create_comment()
+    {
+        $params['post']['_id'] = $this->request->param('id');
+        $params['post']['type'] = static::$params['post_type'];
+
+        $params['message'] = nl2br(HTML::chars(static::$params['message']));
+        $params['type'] = 'comment';
+
+        $c = Model_Document::factory('comment')->create($params);
+
+        return $c ? $this->data($c) : $this->error('server_error');
+    }
+
+    protected function create_message()
+    {
+        $params['post']['_id'] = $this->request->param('id');
+        $params['post']['type'] = static::$params['post_type'];
+
+        $params['message'] = nl2br(HTML::chars(static::$params['message']));
+
+        $c = Model_Document::factory('comment')->create_message($params);
+
+        return $c ? $this->data($c) : $this->error('server_error');
     }
 
     /*****************************************************"*********************
@@ -351,21 +451,49 @@ class Controller_Post extends Controller_Resource {
      *************************************************************************/
 
     /**
-     * Update a listing
+     * Update a listing. Checks if there is an id and calls the create_listing
+     * method
      */
     protected function update_listing()
     {
+        $post_id = Arr::get(static::$params, '_id');
+
+        if(!$post_id)
+            return $this->error('invalid_request');
+
+        // the create post method in the model checks to see if this is an update.
+        return $this->create_listing();
 
     }
 
+    /**
+     * Update a testimonial. Checks if there is an id and calls the create_testimonial
+     * method
+     */
     protected function update_testimonial()
     {
+        $post_id = Arr::get(static::$params, '_id');
 
+        if(!$post_id)
+            return $this->error('invalid_request');
+
+        // the create post method in the model checks to see if this is an update.
+        return $this->create_testimonial();
     }
 
+    /**
+     * Update a post. Checks if there is an id and calls the create_post
+     * method
+     */
     protected function update_post()
     {
+        $post_id = Arr::get(static::$params, '_id');
 
+        if(!$post_id)
+            return $this->error('invalid_request');
+
+        // the create post method in the model checks to see if this is an update.
+        return $this->create_post();
     }
 
     /**

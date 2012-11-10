@@ -62,27 +62,40 @@ class Model_Post extends Document {
         // sort - for some sanity in debugging.. :-)
         ksort($data);
 
+        // if an id is present, this is an update.
+        if(isset($data['_id']))
+        {
+            $this->atomic($data['_id']);
+            unset($params['_id']);
+        }
+
         // load the document
         $this->load_values($data);
 
-        try
+        $this->save();
+
+        return $this->save() ?  $this->as_array() : false;
+    }
+
+    public function create_conversation($params)
+    {
+        $message = $params['message'];
+        unset($params['message']);
+
+        if($this->create($params))
         {
-            // save
-            $this->save();
-        } catch (MongoException $e)
-        {
-            Debug::error(
-                    "MongoException while trying to create post: :post \n"
-                    . "Error Message- :message \n"
-                    . "Error Code- :code", [
-                ':post'    => print_r($data, TRUE),
-                ':message' => $e->getMessage(),
-                ':code'    => $e->getCode()
-            ]);
-            return false;
+            $msg = Mongo_Document::factory('comment');
+
+            $params['post'] = ['_id' => $this->_id, 'type' => $this->type];
+            $params['message'] = $message;
+
+            if($msg->create_message($params))
+            {
+                return $msg->to_array();
+            }
         }
 
-        return (array) $this->as_array();
+        return false;
     }
 
     /**
@@ -141,11 +154,10 @@ class Model_Post extends Document {
         if ($action === parent::SAVE_UPDATE)
         {
             $this->modified = time();
-            unset($this->created);
 
             // during testing a whole lot of counts went into negative. Just a
             // small sanity check.
-            if (isset($this->counts))
+            if (!isset($this->_changed['counts']) && isset($this->counts))
             {
                 foreach ($this->counts as $k => $v)
                 {
@@ -155,13 +167,13 @@ class Model_Post extends Document {
                     }
                 }
             }
-
-            unset(
-                    $this->interactions,
-                    $this->private_actions,
-                    $this->connections,
-                    $this->actions
-            );
+            foreach(['interactions', 'private_actions', 'connections', 'actions', 'created'] as $v)
+            {
+                if( !isset($this->_changed[$v]) && isset( $this->{$v} ) )
+                {
+                    unset( $this->{$v} );
+                }
+            }
         }
 
         // Creates
@@ -182,8 +194,10 @@ class Model_Post extends Document {
                 unset($this->comments, $this->counts['comments']);
             }
 
+            // make sure all ids are mongo ids.
             $this->set('user._id', parent::check_id($this->user['_id']));
             $this->set('page._id', parent::check_id($this->page['_id']));
+            // we check if there is a parent too.
             if (isset($this->page_parent))
             {
                 $this->set('page_parent._id', parent::check_id($this->page_parent['_id']));
@@ -200,13 +214,9 @@ class Model_Post extends Document {
      */
     public function after_load()
     {
-        $id = $this->_id instanceof MongoID ? $this->_id : new MongoID($this->_id);
+        $id = parent::check_id($this->_id);
 
-        $this->created = date('c', $id->getTimestamp());
-        if(is_numeric($this->modified))
-        {
-            $this->modified  = date('c', $this->modified);
-        }
+        $this->created = $id->getTimestamp();
         // if there is no current user, no further formatting required.
         if ($this->current_user === NULL)
             return $this;

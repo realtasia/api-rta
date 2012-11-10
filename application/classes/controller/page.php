@@ -1,0 +1,443 @@
+<?php
+
+defined('SYSPATH') or die('No direct script access.');
+
+/**
+ *  1. Authenticate a token request
+ *      a. Set a global $session variable for consumption by child controllers.
+ *  2. Method to check if it is a user authenticated request.
+ *  3. Get error utility from trait.
+ *  4. Get success utility from trait.
+ *
+ * @uses Oauth2_Resource
+ *
+ */
+
+class Controller_Page extends Controller_Resource {
+
+    /**
+     * This method extracts the token from the request params and sets global
+     * variables for consumption by all child classes.
+     *
+     * @return void
+     */
+    public function before()
+    {
+        parent::before();
+        if (parent::logged_in())
+        {
+            static::$model =
+                    Mongo_Document::factory('page', null, static::$user_id);
+        }
+        else
+        {
+            static::$model = Mongo_Document::factory('page');
+        }
+    }
+
+    /**************************************************************************
+     * Default Actions
+     *************************************************************************/
+
+    /**
+     * Fetch a private GET action or fail if there is one and no method for it
+     * Or fetch a post by id.
+     * Check if there is a logged in user
+     * Fetch requested post and check relation to logged_in user
+     *
+     * GET post
+     * Usage: Issue a GET to /post/index/{id}
+     *
+     * @return json data
+     */
+    public function action_index()
+    {
+        // we retrieve the request_type from params
+        $type = Arr::get(static::$params, 'request_type', false);
+
+        // if we have a type
+        if($type)
+        {
+            // we check if it is valid and the method exists
+            if (in_array($type, static::$valid_get_types) && method_exists($this, $type))
+                // run it
+                return $this->{$type}();
+            // ok, why do we have a type and not a method???
+            else
+                // yeap, you guessed it.
+                return $this->fail('user/generic', 'server_error');
+        }
+
+        // try id
+        $id = $this->request->param('id');
+
+        if ($id)
+            return $this->data(static::$model->get($id));
+
+        return $this->error('invalid_request');
+    }
+
+    /**
+     * Changes to post settings or content and post creation will use this update.
+     */
+    public function action_update()
+    {
+        // get the type of request
+        $type = Arr::get(static::$params, 'request_type');
+
+        // no type. we need a type
+        if (!$type)
+            $this->error('invalid_request');
+
+        // let's check if it's valid and run it
+        if (in_array($type, static::$valid_post_types) && method_exists($this, $type))
+            return $this->{$type}();
+
+        // nope, return an error
+        return $this->error('invalid_request');
+    }
+
+    /**************************************************************************
+     * Public Connections
+     *************************************************************************/
+
+     /**
+     * Retrieves an array of [user_ids and user names] of people who like this post
+     */
+    public function action_likers()
+    {
+        static::$params['object_id'] = $this->request->param('id');
+        static::$params['object_type'] = 'user';
+
+        $data = Mongo_Document::factory('interaction')
+                ->collection()
+                ->likers(static::$params);
+
+        return $this->data($data);
+    }
+
+    /**
+     * Retrieves an array of [user_ids and user names] of people who are subscribed to this post
+     */
+    public function action_subscribers()
+    {
+        static::$params['object_id'] = $this->request->param('id');
+        static::$params['object_type'] = 'post';
+
+        $data = Mongo_Document::factory('interaction')
+                ->collection()
+                ->subscribers(static::$params);
+
+        return $this->data($data);
+    }
+
+    /**
+     * Retrieves an array of listings belonging to a user.
+     */
+    public function action_listings()
+    {
+        $id = $this->request->param('id');
+        static::$params['user_id'] = $id;
+
+        $posts = Mongo_Collection::factory('post');
+
+        /*
+         * 1. if user is logged in and ids are the same (or admin or client)
+         *      - all statuses allowed.
+         * 2. if not
+         *      - only active statuses allowed.
+         */
+        $status = Arr::get(static::$params, 'status', 'active');
+
+        switch ($status)
+        {
+            case 'pending':
+            case 'archived':
+            case 'draft':
+            case 'trashed':
+                // requested user and logged in user must be the same or must be admin
+                if (static::logged_in_is_id($id) || parent::has_role('admin'))
+                    return $this->data(
+                            $posts->listings(static::$params, static::$user_id)
+                    );
+
+                // clients only see 'active' (public) posts
+                return $this->error('access_denied');
+
+            // this is a regular (public) lookup
+            default :
+                // need a client or user token.
+                if (parent::is_client() || parent::logged_in())
+                    return $this->data(
+                            $posts->listings(static::$params, static::$user_id)
+                    );
+
+                // oops. zip token.
+                return $this->error('access_denied');
+        }
+
+        return $this->error('invalid_request');
+    }
+
+    /**
+     * Retrieves an array of testimonials written by or received for a user.
+     */
+    public function action_testimonials()
+    {
+        $type  = Arr::get(static::$params, 'request_type', 'received');
+        $id    = $this->request->param('id');
+        $posts = Mongo_Collection::factory('post');
+
+        switch ($type)
+        {
+            case 'written' :
+                static::$params['user_id'] = $id;
+                break;
+            case 'received' :
+                static::$params['page_id'] = $id;
+                break;
+        }
+        /*
+         * 1. if user is logged in and ids are the same (or admin or client)
+         *      - all statuses allowed.
+         * 2. if not
+         *      - only active statuses allowed (with a valid token).
+         */
+
+        $status = Arr::get(static::$params, 'status', 'active');
+
+        switch ($status)
+        {
+            case 'pending':
+            case 'archived':
+            case 'draft':
+            case 'trashed':
+                if (static::logged_in_is_id($id) || parent::has_role('admin'))
+                    return $this->data(
+                            $posts->testimonials(static::$params, static::$user_id)
+                    );
+
+                // clients only see 'active' (public) posts
+                return $this->error('access_denied');
+
+            // this is a regular (public) lookup
+            default :
+                // need a client or user token.
+                if (parent::is_client() || parent::logged_in())
+                    return $this->data(
+                            $posts->testimonials(static::$params, static::$user_id)
+                    );
+
+                // oops. zip token.
+                return $this->error('access_denied');
+        }
+
+        return $this->error('invalid_request');
+    }
+
+    /**
+     * This handles both retrieval and updating of a user's privacy settings
+     */
+    public function action_privacy()
+    {
+        $id    = $this->request->param('id');
+        if ($this->is_GET() && (parent::logged_in() || parent::is_client()))
+        {
+            $user = static::$model;
+            $user->load($this->request->param('id'), ['settings' => 1]);
+            $this->data(
+                    $user->stringify($user->as_array()['settings']['privacy'])
+            );
+        }
+        else
+        {
+            if(static::logged_in_is_id($id))
+            {
+                // update user by his/her specific field
+                if($this->is_POST())
+                {
+                    $this->update_privacy_settings(static::$params, $id);
+                }
+                return true;
+            }
+        }
+
+    }
+
+    /**
+     * This handles both retrieval and updating of a user's info
+     */
+    public function action_info()
+    {
+        $id = $this->request->param('id');
+        if ($this->is_GET() && (parent::logged_in() || parent::is_client()))
+        {
+            $user = static::$model;
+            $user->load($this->request->param('id'), ['info' => 1]);
+            $this->data($user->stringify($user->as_array()['info']));
+        }
+        else
+        {
+            if(static::logged_in_is_id($id))
+            {
+                // update user by his/her specific field
+                if($this->is_POST())
+                {
+                    $this->update_info(static::$params, $id);
+                }
+                return true;
+            }
+        }
+    }
+
+
+    public function action_pictures()
+    {
+
+    }
+
+    public function action_checkins()
+    {
+
+    }
+
+    public function action_members()
+    {
+        
+    }
+
+    /**************************************************************************
+     * Public Actions
+     *************************************************************************/
+
+    /**
+     * Performs a like on the given post
+     */
+    public function action_like()
+    {
+        return parent::interact('like', 'post');
+    }
+
+    /**
+     * Performs an unlike on the given post
+     */
+    public function action_unlike()
+    {
+        return parent::interact('unlike', 'post');
+    }
+
+    /**
+     * Performs a subscribe on the given post
+     */
+    public function action_subscribe()
+    {
+        return parent::interact('subscribe', 'post');
+    }
+
+    /**
+     * Performs an unsubscribe on the given post
+     */
+    public function action_unsubscribe()
+    {
+        return parent::interact('unsubscribe', 'post');
+    }
+
+
+
+
+    /**************************************************************************
+     * TestPad methods
+     *************************************************************************/
+    public function action_standard()
+    {
+        $pages = Mongo_collection::factory('singpost');
+
+        $query = [
+            'address'  => 'Standard',
+            //'address'  => 'Apartment',
+            //'other_name' => ['$ne'   => NULL],
+            'building' => ['$ne'   => NULL],
+            'building' => ['$not'   => new MongoRegex('/school|swimming|station|temple|church|complex|centre|camp|hospital|clinic|shop|library|college|stadium|car.park|exchange|depot|commission|polyclinic|mosque|masjid|association|interchange|aia.|industrial|office|kindergarden|mrt|lrt|sports|waterworks|hall|brickwork|tldm|brigade|defence|eating|food|shopping|post|police|fire|safety|club|hotel|motel|assembly|cargo|airport|airbase|cinema|ministry|government|parliment|health|driving|technology|ctr|kindergarten|breweries|materials|amphitheatre|storage|factory|warehouse|institute|logistics|hospice|center|innovation|aquarium|lagoon|sport|theatres|theatre|techpark|flight|terminal|operations|operation|embassy|amusement|flatted|general|chij|npc|convent|cathedral|aviation|academy|chapel|prison|methodist|metal|works|synagogue|pte.ltd|resort|store|megastore|distripark|hub|dhl|bank|barrack|enterprise|fraser|division|aged|disabled|hostel|hostels|ite|marine|sewage|works|motors|child|maintenance|dormitory|shipyard|naval|nursery|sewer|buddhist|taxi|old age|old people|home for|supply|chemical|islamiah|majlis|logit|homes for|academy|arts|museum|university|polytechnic|ntuc|restaurant|outward|bank|nursing|refuse|tuas|medical|plant|mission|indstrl|society|zoological|red.cross|automative|engineering|instrument|design|customs|leisure|publications|delivery/i')],
+            'street' => ['$not'   => new MongoRegex('/tuas/i')],
+            'estate' => ['$ne'   => NULL],
+            //'child' => NULL
+        ];
+
+//        $query = [
+//            '$or' => [
+//                'other_name' => new MongoRegex("/lakeshore/i"),
+//                'building' => new MongoRegex("/lakeshore/i")
+//            ]
+//        ];
+        $cursor = $pages->find($query);
+
+        $i = 0;
+        while($cursor->hasNext())
+        {
+            //$row[] = $cursor->getNext()->as_array();
+            $r = $cursor->getNext()->as_array();
+            $building = $this->format($r['building']);
+            //$other_name = $this->format($r['other_name']);
+            $row[] = $building;
+            //$row = array_unique($row, SORT_STRING);
+            //sort($row);
+            //$return[$r['estate']] = $row[$i];
+            $i++;
+        }
+
+        $cursor->rewind();
+        $count = $cursor->count();
+
+        $return = array_unique($row, SORT_STRING);
+        sort($return);
+
+        return $this->data([$count => $return]);
+        return $this->data([$count => $row]);
+    }
+
+    protected function format($building)
+    {
+        if(strpos($building, '@'))
+        {
+            if(strpos($building, ' @ ') !== -1)
+            {
+                $b = explode('@', $building);
+                $building = $b[0] . ' @ ' . $b[1];
+            }
+
+            $building = str_replace('-', ' ', $building);
+        }
+        if(strpos($building, '-'))
+        {
+            $building = str_replace('-', ' ', $building);
+        }
+        if (strpos($building, ', THE'))
+        {
+            $b        = explode(', ', $building);
+            $building = $b[1] . ' ' . $b[0];
+        }
+
+        $buildings = explode(' ', $building);
+
+        foreach($buildings as $k => $v)
+        {
+            switch($v)
+            {
+                case 'ILIV' : $buildings[$k] = 'iLiv'; break;
+                case 'AAEV79' : $buildings[$k] = 'Aaev 79'; break;
+                case '1A' :
+                case 'II' :
+                case 'DLV' :
+                case 'RV' :
+                case 'JLB' :
+                case 'M.T.F.A' : break;
+                default : $buildings[$k] = ucwords(strtolower($v)); break;
+            }
+        }
+
+        return implode(' ', $buildings);
+    }
+
+}
+
+// End Welcome

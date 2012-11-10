@@ -16,7 +16,7 @@ class Controller_User extends Controller_Resource {
 
     private static $valid_adminPost_types = [
         'registration', 'beta_interest', 'activate', 'send_sms', 'send_email',
-        'is_unique', 'admin_email'
+        'is_unique', 'admin_email', 'terminate', 'suspend'
     ];
 
     private static $valid_userPost_types = [
@@ -123,6 +123,20 @@ class Controller_User extends Controller_Resource {
         return $this->error('invalid_request');
     }
 
+    /**
+     * Logout a user from the sessions
+     */
+    public function action_logout()
+    {
+        $token = Arr::get(static::$params, 'access_token');
+        if(!$token)
+            return $this->error('invalid_request');
+
+        $s = Mongo_Document::factory('oauth2_session');
+
+        return $s->destroy($token) ? $this->data(['success' => 1]) : $this->error('invalid_request');
+    }
+
     /**************************************************************************
      * Public Connections
      *************************************************************************/
@@ -188,6 +202,7 @@ class Controller_User extends Controller_Resource {
          * 2. if not
          *      - only active statuses allowed.
          */
+        $status = Arr::get(static::$params, 'status', 'active');
 
         switch ($status)
         {
@@ -236,7 +251,7 @@ class Controller_User extends Controller_Resource {
             return $this->data($posts->inbox(static::$params, static::$user_id));
         }
 
-        return $this->error('invalid_request');
+        return $this->error('access_denied');
     }
 
     /**
@@ -366,6 +381,7 @@ class Controller_User extends Controller_Resource {
      */
     public function action_privacy()
     {
+        $id    = $this->request->param('id');
         if ($this->is_GET() && (parent::logged_in() || parent::is_client()))
         {
             $user = static::$model;
@@ -381,13 +397,43 @@ class Controller_User extends Controller_Resource {
                 // update user by his/her specific field
                 if($this->is_POST())
                 {
-                    $this->update_privacy(static::$params, $id);
+                    $this->update_privacy_settings();
                 }
                 return true;
             }
         }
 
     }
+
+    /**
+     * This handles both retrieval and updating of a user's privacy settings
+     */
+    public function action_billing()
+    {
+        $id    = $this->request->param('id');
+        if ($this->is_GET() && (parent::logged_in() || parent::is_client()))
+        {
+            $user = static::$model;
+            $user->load($this->request->param('id'), ['settings' => 1]);
+            $this->data(
+                    $user->stringify($user->as_array()['settings']['billing'])
+            );
+        }
+        else
+        {
+            if(static::logged_in_is_id($id))
+            {
+                // update user by his/her specific field
+                if($this->is_POST())
+                {
+                    $this->update_billing_settings();
+                }
+                return true;
+            }
+        }
+
+    }
+
 
     /**
      * This handles both retrieval and updating of a user's notifications settings
@@ -410,7 +456,7 @@ class Controller_User extends Controller_Resource {
                 // update user by his/her specific field
                 if($this->is_POST())
                 {
-                    $this->update_notifications(static::$params, $id);
+                    $this->update_notifications_settings();
                 }
                 return true;
             }
@@ -436,7 +482,7 @@ class Controller_User extends Controller_Resource {
                 // update user by his/her specific field
                 if($this->is_POST())
                 {
-                    $this->update_info(static::$params, $id);
+                    $this->update_info();
                 }
                 return true;
             }
@@ -542,9 +588,9 @@ class Controller_User extends Controller_Resource {
     {
         return static::$model->load([
             'logins.type' => $network, '_id' => static::$user_id
-        ], ['logins'])
+        ], ['logins' => 1])
                 ? static::$model->as_array()['logins']
-                : $this->data('status', 1);;
+                : $this->data([]);;
     }
 
     /**
@@ -697,18 +743,35 @@ class Controller_User extends Controller_Resource {
      */
     protected function password_reset()
     {
-        if(!isset(static::$params['password'])
-           || empty(static::$params['password']))
-            return $this->error('invalid_request');
+        $id = $this->param->user('id');
+        $model = static::$model;
+
+        if(!isset(static::$params['old_password'])
+           || empty(static::$params['old_password']))
+        {
+            $old = static::$params['old_password'];
+        }
 
         if(!isset(static::$params['new_password'])
            || empty(static::$params['new_password']))
-            return $this->error('invalid_request');
+            return $this->error('access_denied');
 
-        $id = $this->param->user('id');
-        $user = static::$model->update_password(
-                static::$params['new_password'], $id
-        );
+        if($old)
+        {
+            if($old === static::$params['new_password'])
+            {
+                return $this->fail('user/generic', 'same_password');
+            }
+            $model->load($id, ['password' => 1]);
+
+            if($model::hash($old) !== $model->password)
+            {
+                return $this->fail('user/generic', 'wrong_password');
+            }
+
+        }
+
+        $user = $model->update_password( static::$params['new_password'], $id);
 
         return $user
         ? $this->data(['success' => 1])
@@ -738,6 +801,34 @@ class Controller_User extends Controller_Resource {
     }
 
     /**
+     * Activate a user. Used by paypal return method or called directly by an admin.
+     */
+    protected function terminate()
+    {
+        $id = $this->request->param('id');
+        $user = Mongo_Document::factory('user', $id);
+
+        //static::$model->load_values(['_id' => new MongoID($id)]);
+        $user->status = 'terminate';
+        $user->save();
+        $this->data(['status' => 1]);
+    }
+
+    /**
+     * Activate a user. Used by paypal return method or called directly by an admin.
+     */
+    protected function suspend()
+    {
+        $id = $this->request->param('id');
+        $user = Mongo_Document::factory('user', $id);
+
+        //static::$model->load_values(['_id' => new MongoID($id)]);
+        $user->status = 'suspended';
+        $user->save();
+        $this->data(['status' => 1]);
+    }
+
+    /**
      * Update a user's info.
      *
      * @return boolean
@@ -752,9 +843,7 @@ class Controller_User extends Controller_Resource {
 
         if ($validation->check())
         {
-            if ($info = static::$model->update_info(
-                    static::$params, $this->request->param('id'))
-            )
+            if ($info = static::$model->update_info(static::$params, static::$user_id))
             {
                 return $this->data($info);
             }
@@ -790,16 +879,16 @@ class Controller_User extends Controller_Resource {
                     ':value', ':field', ':validation'
                 ])
                 ->rule('mentions.is', 'not_empty')
-                ->rule('profile.others_posts.is',
+                ->rule('wallposts.others_posts.is',
                        'Controller_User::valid_privacy', [
                             ':value', ':field', ':validation'
                 ])
-                ->rule('profile.others_posts.is', 'not_empty')
-                ->rule('profile.others_posts_visibility.is',
+                ->rule('wallposts.others_posts.is', 'not_empty')
+                ->rule('wallposts.others_posts_visibility.is',
                        'Controller_User::valid_privacy', [
                             ':value', ':field', ':validation'
                 ])
-                ->rule('profile.others_posts_visibility.is', 'not_empty');
+                ->rule('wallposts.others_posts_visibility.is', 'not_empty');
 
 
         if ($validation->check())
@@ -870,6 +959,34 @@ class Controller_User extends Controller_Resource {
         }
 
         $this->errors = $validation->errors('user/notifications');
+        return $this->fail();
+    }
+
+
+    /**
+     * Update a user's billing settings.
+     *
+     * @return type
+     */
+    protected function update_billing_settings()
+    {
+        $validation = Validation::factory(static::$params)
+                ->rule('mode', 'not_empty')
+                ->rule('mode', 'in_array', [':value', ['cash', 'cheque', 'autopay']])
+                ->rule('frequency', 'not_empty')
+                ->rule('frequency', 'in_array', [':value', ['monthly', 'yearly']])
+                ->rule('plan_id', 'not_empty');
+
+        if ($validation->check())
+        {
+            if ($info = static::$model->update_billing(static::$params, static::$user_id))
+            {
+                return $this->data($info);
+            }
+            return $this->error('server_error');
+        }
+
+        $this->errors = $validation->errors('user/info');
         return $this->fail();
     }
 
@@ -1073,10 +1190,10 @@ class Controller_User extends Controller_Resource {
                         Arr::path($array, 'subscriptions.is');
         $return['messages.is'] =
                         Arr::path($array, 'messages.is');
-        $return['profile.others_posts.is'] =
-                        Arr::path($array, 'profile.others_posts.is');
-        $return['profile.others_posts_visibility.is'] =
-                        Arr::path($array, 'profile.others_posts_visibility.is');
+        $return['wallposts.others_posts.is'] =
+                        Arr::path($array, 'wallposts.others_posts.is');
+        $return['wallposts.others_posts_visibility.is'] =
+                        Arr::path($array, 'wallposts.others_posts_visibility.is');
         $return['mentions.is'] = Arr::path($array, 'mentions.is');
 
         return Arr::merge($return, $array);
