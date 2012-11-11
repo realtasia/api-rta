@@ -6,7 +6,7 @@ class Model_Image extends Model
     protected $bucket = 'static2.realtasia.com.sg';
 
     /*the different thumbnail sizes that realtasia uses*/
-    protected $_avatar_sizes = array(150, 60, 32);
+    protected $_avatar_sizes = array(150, 90, 32);
 
     public function handle_media($files, $user, $component)
     {
@@ -164,7 +164,7 @@ class Model_Image extends Model
             parent::factory('user')
                   ->collection
                   ->update(array('_id' => new MongoID($user_id)), array('$set' => $u));
-            return $this->_get_user($user_id);
+            //return $this->_get_user($user_id);
         }
 
         unlink($file);
@@ -244,7 +244,7 @@ class Model_Image extends Model
      */
     public static function unique_filename($filename, $user)
     {
-        return md5($user->username . uniqid()) . '.' . self::_extension($filename);
+        return new MongoID($user->username . uniqid()) . '.' . self::_extension($filename);
     }
 
     /**

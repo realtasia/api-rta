@@ -53,7 +53,7 @@ class Model_User extends Document {
         if (isset($params['company']) && !is_array($params['company']))
         {
             // retrieve the company
-            $company = Mongo_Document::factory('page');
+            $company = parent::factory('page');
             $company->load($params['company'], ['_id'  => 1, 'name' => 1]);
 
             // set the user's company
@@ -157,7 +157,7 @@ class Model_User extends Document {
         }
         else
         {
-            $interactions       = Mongo_Document::factory('interaction', NULL, $current_user->_id);
+            $interactions       = parent::factory('interaction', NULL, $current_user->_id);
             $this->interactions = $interactions->interacting($this->_id, 'user');
             $this->actions      = static::get_action_routes($this->_id);
             $this->connections  = static::get_public_connection_routes($this->_id);

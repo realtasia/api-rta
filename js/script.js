@@ -19,7 +19,7 @@ function Comment(){
 }
 
 function Post(){
-    
+
 }
 
 function Testimonial(){
@@ -40,25 +40,25 @@ function Tag(){
 
 var RTA = {
     Utils : function(){
-        
+
     },
     Handlers : function(){
         var DOM = $(document.body);
         DOM.on("hover", ".hasHoverState", function(event) {
             event.stopPropagation();
             var self = $(this);
-            console.log(!self.hasClass('active'))
+            //console.log(!self.hasClass('active'))
             if(!self.hasClass('active')){
                 if(self.find('a').hasClass('disabled')){
                     self.removeClass('hovering');
                 }else{
                     self.toggleClass('hovering');
                 }
-                
+
             }
             return true;
         }).on("click", ".hasActiveState", function(event){
-            var self = $(this), isNavigation = self.hasClass('isNavigation');            
+            var self = $(this), isNavigation = self.hasClass('isNavigation');
             if(!self.find('a').hasClass('disabled')){
                 if(isNavigation){
                     $('.hasActiveState').each(function(index){
@@ -77,7 +77,7 @@ var RTA = {
                     self.addClass('active')
                     self.removeClass('hovering')
                 }
-            }            
+            }
             return false;
         });
     }
@@ -87,7 +87,7 @@ function MenuItem(label, css, state, callback){
     var self  = this;
     this.hovering = ko.observable(false);
     this.active = ko.observable(false);
-    this.disabled = ko.observable(false);    
+    this.disabled = ko.observable(false);
     if(typeof state == 'object'){
         for(var key in state){
             if(typeof state[key] == 'function'){
@@ -109,7 +109,7 @@ function MenuItem(label, css, state, callback){
 
 function Library(){
     var self  = this, icon = 'social i-';
-    
+
     this.loadUpload = function(){
         console.log(ko.contextFor(this));
         return false;
@@ -117,7 +117,7 @@ function Library(){
     this.loadRTA = function(){
         //console.log(ko.contextFor(this));
         return false;
-    }     
+    }
     this.menu = [
     new MenuItem('Realtasia', {
         iconClass : icon + 'libRTA'
@@ -143,7 +143,7 @@ function Library(){
         disabled : true
     }),
     new MenuItem('Upload', {
-        iconClass : icon + 'libRTA', 
+        iconClass : icon + 'libRTA',
         parentClass : 'rightMenuItem'
     }, {}, this.loadUpload),
     ];
@@ -154,7 +154,7 @@ function Library(){
 
 function CreateListing(){
     var self  = this, icon = 'listingCreation i-', id    = 'RTA_MenuItem_';
-    
+
     this.currentStep    = ko.observable(0);
     this.totalSteps     = 5;
     this.completedSteps = ko.observableArray();
@@ -162,7 +162,7 @@ function CreateListing(){
         if(step <= this.totalSteps){
             var inArr = jQuery.inArray(step, this.completedSteps());
             inArr =  inArr < 0 ? false : true;
-        }  
+        }
         return false;
     }
     this.isListingStep = ko.computed(function(){
@@ -170,12 +170,12 @@ function CreateListing(){
     }, this)
 
     this.goBack = function(){
-        
+
         if(self.currentStep() - 1 >= 0){
             self.currentStep(self.currentStep() - 1)
-        }        
+        }
         return false;
-    };    
+    };
     this.enableNext = function(){
         console.log(self.isStepComplete(self.currentStep() + 1) && self.currentStep() == self.totalSteps)
         return self.isStepComplete(self.currentStep() + 1) || self.currentStep() == self.totalSteps;
@@ -193,7 +193,7 @@ function CreateListing(){
     this.publish = function(){
         console.log(ko.contextFor(this));
         return false;
-    }; 
+    };
     this.cancel = function(){
         console.log(ko.contextFor(this));
         return false;
@@ -258,7 +258,7 @@ ko.bindingHandlers['checkedButtons'] = {
                 }
             }
         };
-        
+
         ko.utils.registerEventHandler(element, "click", updateHandler);
     },
     'update': function (element, valueAccessor) {
@@ -273,8 +273,8 @@ ko.bindingHandlers['checkedButtons'] = {
                 }
                 else {
                     ko.utils.toggleDomNodeCssClass(element, 'active', false);
-                }                    
-                    
+                }
+
             } else {
                 // When bound to anything other value (not an array), the checkbox being checked represents the value being trueish
                 ko.utils.toggleDomNodeCssClass(element, 'active', value);

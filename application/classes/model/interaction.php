@@ -142,7 +142,7 @@ class Model_Interaction extends Document {
 
         $interactor = $this->get_default_user_fields();
         // fetch the concerned object
-        $object = Mongo_Document::factory($this->object_type, $this->object_id);
+        $object = parent::factory($this->object_type, $this->object_id);
 
 
         // update the latest interactions in the object
@@ -263,7 +263,7 @@ class Model_Interaction extends Document {
                         // get the comment's parent object. variables are
                         // confusing. $object_id refers to this comment _id.
                         // retrieving 'object_id' for it's parent object
-                        $p = Mongo_Document::factory('comment')
+                        $p = parent::factory('comment')
                                 ->get($object_id, ['object_id', 'object_type']);
 
                         // get the parent object interactions with the current user

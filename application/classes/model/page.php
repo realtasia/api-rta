@@ -161,7 +161,7 @@ class Model_Page extends Document {
         }
         else
         {
-            $interactions       = Mongo_Document::factory('interaction', NULL, $current_user->_id);
+            $interactions       = parent::factory('interaction', NULL, $current_user->_id);
             $this->interactions = $interactions->interacting($this->_id, 'post');
             $this->actions      = static::get_action_routes($this->_id);
             $this->connections  = static::get_public_connection_routes($this->_id);
@@ -190,7 +190,7 @@ class Model_Page extends Document {
         {
             foreach ($comments as $key => $value)
             {
-                $comment = Mongo_Document::factory('comment');
+                $comment = parent::factory('comment');
                 if($current_user)
                 {
                     // check if there is a current user

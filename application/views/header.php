@@ -17,10 +17,13 @@ $currentURL = 'http://' . $currentDom;
         <script type="text/javascript" src="<?= $rootURL ?>/common/js/jquery.min.js"></script>
         <script type="text/javascript" src="<?= $rootURL ?>/common/js/jquery-ui.min.js"></script>
         <script type="text/javascript" src="<?= $rootURL ?>/common/js/bootstrap.min.js"></script>
-        <script type="text/javascript" src="/js/dropdown.min.js"></script>        
+        <script type="text/javascript" src="/js/dropdown.min.js"></script>
         <script type="text/javascript" src="<?= $rootURL ?>/common/js/jquery.qtip.min.js"></script>
         <script type="text/javascript" src="<?= $rootURL ?>/common/js/knockout.js"></script>
-        <script type="text/javascript" src="/js/script.js"></script>
+        <script type="text/javascript" src="http://bp.yahooapis.com/2.4.21/browserplus-min.js"></script>
+        <script type="text/javascript" src="<?= $rootURL ?>/common/js/plupload/plupload.full.js"></script>
+        <!--<script type="text/javascript" src="/js/script.js"></script>-->
+        <script type="text/javascript" src="/js/medialib.js"></script>
         <!--[if IE]>
         <link rel="stylesheet" type="text/css" href="/css/bubbletip-IE.css" />
         <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>

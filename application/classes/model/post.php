@@ -84,7 +84,7 @@ class Model_Post extends Document {
 
         if($this->create($params))
         {
-            $msg = Mongo_Document::factory('comment');
+            $msg = parent::factory('comment');
 
             $params['post'] = ['_id' => $this->_id, 'type' => $this->type];
             $params['message'] = $message;
@@ -133,12 +133,12 @@ class Model_Post extends Document {
 
             foreach ($pages as $page_id)
             {
-                $page = Mongo_Document::factory('page', $page_id);
+                $page = parent::factory('page', $page_id);
                 $page->inc('counts.' . parent::plural($this->type));
                 $page->save();
             }
 
-            $user = Mongo_Document::factory('user', $this->user->_id);
+            $user = parent::factory('user', $this->user->_id);
             $user->inc('counts.' . parent::plural($this->type));
             $user->save();
         }
@@ -231,7 +231,7 @@ class Model_Post extends Document {
         }
         else
         {
-            $interactions       = Mongo_Document::factory('interaction', NULL, $current_user->_id);
+            $interactions       = parent::factory('interaction', NULL, $current_user->_id);
             $this->interactions = $interactions->interacting($this->_id, 'post');
             $this->actions      = static::get_action_routes($this->_id);
             $this->connections  = static::get_public_connection_routes($this->_id);
@@ -243,7 +243,7 @@ class Model_Post extends Document {
         {
             foreach ($this->comments as $key => $value)
             {
-                $comment = Mongo_Document::factory('comment');
+                $comment = parent::factory('comment');
                 if($current_user)
                 {
                     // check if there is a current user

@@ -152,7 +152,7 @@ class Model_Comment extends Document {
      */
     public function after_save($action)
     {
-        $i = Mongo_Document::factory('interaction', null, (string) $this->current_user->_id);
+        $i = parent::factory('interaction', null, (string) $this->current_user->_id);
         $i->interact('subscribe', $this->object['_id'], $this->object['type']);
         // guess the update for this interaction.
         $this->guess_update();
@@ -162,7 +162,7 @@ class Model_Comment extends Document {
         $interactor = $this->get_default_user_fields();
 
         // fetch the concerned object
-        $object = Mongo_Document::factory($this->object['type'], $this->object['_id']);
+        $object = parent::factory($this->object['type'], $this->object['_id']);
 
 
         // update the latest interactions in the object
