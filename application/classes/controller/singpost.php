@@ -1,4 +1,6 @@
-<?php defined('SYSPATH') or die('No direct script access.');
+<?php
+
+defined('SYSPATH') or die('No direct script access.');
 ini_set("max_execution_time", 0);
 ini_set('memory_limit', '2000M');
 
@@ -13,56 +15,74 @@ class Controller_Singpost extends Controller {
         $localities = array(0         => '', 'NULL'    => 'NULL') + $this->action_get('localities');
         $children = array(0      => '', 'NULL' => 'NULL') + $this->action_get('children');
         //echo kohana::debug( $this->check_get( $_GET ) ); die;
-
         //if ($_GET && $this->check_get($_GET))
         //{
-            $cols = 'estates.estate, children.child, postcode.address_type AS address, postcode.number, streets.street_name As street, postcode.postal_code as postal, buildings.building_name AS building, localities.locality, old_table.name AS other_name, old_table.lng AS lon, old_table.lat';
+        $cols  = 'estates.estate, children.child, postcode.address_type AS address, postcode.number, streets.street_name As street, postcode.postal_code as postal, buildings.building_name AS building, localities.locality, old_table.name AS other_name, old_table.lng AS lon, old_table.lat';
 
-            $query = DB::select(DB::expr($cols))
-                    ->from('postcode')
-                    ->join('buildings', 'LEFT')
-                    ->on('buildings.building_key', '=', 'postcode.building_key')
-                    ->join('estates', 'LEFT')
-                    ->on('estates.id', '=', 'postcode.estate_key')
-                    ->join('localities', 'LEFT')
-                    ->on('localities.id', '=', 'postcode.locality_key')
-                    ->join('children', 'LEFT')
-                    ->on('children.id', '=', 'postcode.child_key')
-                    ->join('streets', 'LEFT')
-                    ->on('streets.street_key', '=', 'postcode.street_key')
-                    ->join('old_table', 'LEFT')
-                    ->on('old_table.postal', '=', 'postcode.postal_code');
-            //$query = $this->search($query);
-            //$query->where('old_table.lat', '>', 0);
+        $query  = DB::select(DB::expr($cols))
+                ->from('postcode')
+                ->join('buildings', 'LEFT')
+                ->on('buildings.building_key', '=', 'postcode.building_key')
+                ->join('estates', 'LEFT')
+                ->on('estates.id', '=', 'postcode.estate_key')
+                ->join('localities', 'LEFT')
+                ->on('localities.id', '=', 'postcode.locality_key')
+                ->join('children', 'LEFT')
+                ->on('children.id', '=', 'postcode.child_key')
+                ->join('streets', 'LEFT')
+                ->on('streets.street_key', '=', 'postcode.street_key')
+                ->join('old_table', 'LEFT')
+                ->on('old_table.postal', '=', 'postcode.postal_code');
+        //$query = $this->search($query);
+        //$query->where('old_table.lat', '>', 0);
+        //echo $query; die();
+        $result = $query->execute();
 
-            //echo $query; die();
-            $result = $query->execute();
+        // echo "<pre>";
+        $count = 0;
+        $mongo = Mongo_document::factory('singpost')->collection();
+        //print_r($result[130371]);
+        //die;
+        foreach ($result as $row)
+        {
+            $row['address'] = $this->actual_type($row['address']);
 
-            echo "<pre>";
-            $count = 130372;
-            $mongo = Mongo_document::factory('singpost');
-            print_r($result[130371]);
-            die;
-            for($i=120000;$i<=130372;$i++)
+            $upsert = [
+                'estate'     => $row['estate'] ? $row['estate'] : NULL,
+                'child'      => $row['child'] ? $row['child'] : NULL,
+                'address'    => $row['address'] ? $row['address'] : NULL,
+                'number'     => $row['number'] ? $row['number'] : NULL,
+                'street'     => $row['street'] ? $row['street'] : NULL,
+                'postal'     => (string) $row['postal'],
+                'building'   => $row['building'] ? $row['building'] : NULL,
+                'locality'   => $row['locality'] ? $row['locality'] : NULL,
+                'other_name' => $row['other_name'] ? $row['other_name'] : NULL,
+                'geo'        => [
+                    'lon' => isset($row['lon']) ? $row['lon'] : NULL,
+                    'lat' => isset($row['lat']) ? $row['lat'] : NULL
+                 ],
+            ];
+
+            $query = ['postal' => (int) $row['postal']];
+
+            try
             {
-                $row = $result[$i];
-                $row['address'] = $this->actual_type($row['address']);
-                $row['geo'] = ['lon' => $row['lon'], 'lat' => $row['lat']];
-                unset($row['lon'], $row['lat']);
-                $mongo->load_values($row);
-                if($mongo->save())
-                {
-                    print_r('Finished Record' . $i);
-                }
-                else
-                {
-                    print_r('ERROR' . $i);
-                }
-                echo "<br />";
-                $mongo->clear();
+                $mongo->insert($upsert);
+                //$mongo->update_safe($query, $upsert, ['upsert' => true]);
+                fwrite(STDOUT, "Processed Record Successfully: $count\r\n");
+                $count++;
+            } catch (MongoException $e)
+            {
+                fwrite(STDOUT, "Error Processing Record $count:  {$e->getMessage()}\r\n");
+                fwrite(STDOUT, "\r\n\r\n");
+                fwrite(STDOUT, "Query: " . print_r($query, true));
+                fwrite(STDOUT, "\r\n\r\n");
+                fwrite(STDOUT, "Update: " . print_r($upsert, true));
+                exit(0);
             }
-            echo "</pre>";
-            die;
+        }
+        //echo "</pre>";
+        die;
         //}
 
         $sectors = array(''     => '', "01"   => "01", "03"   => "03", "04"   => "04", "05"   => "05", "06"   => "06", "07"   => "07", "08"   => "08", "09"   => "09", "10"   => "10", "11"   => "11", "12"   => "12", "13"   => "13", "14"   => "14", "15"   => "15", "16"   => "16", "17"   => "17", "18"   => "18", "19"   => "19", "20"   => "20", "21"   => "21", "22"   => "22", "23"   => "23", "24"   => "24", "25"   => "25", "26"   => "26", "27"   => "27", "28"   => "28", "29"   => "29", "30"   => "30", "31"   => "31", "32"   => "32", "33"   => "33", "34"   => "34", "35"   => "35", "36"   => "36", "37"   => "37", "38"   => "38", "39"   => "39", "40"   => "40", "41"   => "41", "42"   => "42", "43"   => "43", "44"   => "44", "45"   => "45", "46"   => "46", "47"   => "47", "48"   => "48", "49"   => "49", "50"   => "50", "51"   => "51", "52"   => "52", "53"   => "53", "54"   => "54", "55"   => "55", "56"   => "56", "57"   => "57", "58"   => "58", "59"   => "59", "60"   => "60", "61"   => "61", "62"   => "62", "63"   => "63", "64"   => "64", "65"   => "65", "66"   => "66", "67"   => "67", "68"   => "68", "69"   => "69", "70"   => "70", "71"   => "71", "72"   => "72", "73"   => "73", "74"   => "74", "75"   => "75", "76"   => "76", "78"   => "78", "79"   => "79", "80"   => "80", "81"   => "81", "82"   => "82");
@@ -76,6 +96,72 @@ class Controller_Singpost extends Controller {
                 ->set('children', $children)
                 ->set('count', count($result))
                 ->set('loop', View::factory('loop')->set('rows', $result));
+    }
+
+    public function action_insertgeo()
+    {
+        echo "<pre>";
+        $count = 0;
+        $mongo = Mongo_document::factory('singpost')->collection();
+
+        $upsert = [
+            'geo' => [
+                'lon' => null,
+                'lat' => null
+            ]
+        ];
+
+        $query = ['geo' => ['$exists' => false]];
+
+        try
+        {
+            if ($mongo->update_safe($query, $upsert, ['upsert'   => false, 'multiple' => true]))
+            {
+                fwrite(STDOUT, "Processed Record Successfully: \r\n");
+            }
+        } catch (MongoException $e)
+        {
+            fwrite(STDOUT, "Processed Record Successfully: {$e->getMessage()}\r\n");
+        }
+
+        //echo "<br />";
+        //$mongo->clear();
+        //echo "</pre>";
+        die;
+    }
+
+    public function action_correctpostal()
+    {
+        $query = ['geo' => ['$exists' => false], 'postal'  => ['$type' => 16]];
+        $mongo  = Mongo_document::factory('singpost')->collection();
+        $cursor = $mongo->find($query)->fields(['postal']);
+
+        while ($cursor->hasNext())
+        {
+            $postalcodes[]    = $cursor->getNext()->as_array()['postal'];
+        }
+
+        $count = 0;
+
+        foreach($postalcodes as $num_postal)
+        {
+            $upsert = [
+                '$set' => ['geo' => ['lon' => null,'lat' => null], 'postal' => '0' . (string) $num_postal]
+            ];
+            try
+            {
+                if ($mongo->update_safe(['postal' => $num_postal], $upsert, ['upsert'   => false, 'multiple' => true]))
+                {
+                    fwrite(STDOUT, "Processed Record Successfully: $count\r\n");
+                }
+                $count ++;
+            } catch (MongoException $e)
+            {
+                fwrite(STDOUT, "Error processing $count: {$e->getMessage()}\r\n");
+                exit(0);
+            }
+        }
+        die;
     }
 
     public function action_update()
@@ -254,7 +340,7 @@ class Controller_Singpost extends Controller {
                     $obj->and_where_open()
                             ->where('streets.street_name', 'RLIKE', $s)
                             ->or_where('buildings.building_name', 'RLIKE', $s)
-                        ->and_where_close();
+                            ->and_where_close();
                 }
                 else
                 {
@@ -268,18 +354,18 @@ class Controller_Singpost extends Controller {
                             $obj->and_where_open()
                                     ->where('streets.street_name', 'NOT RLIKE', $term)
                                     ->or_where('streets.street_name', 'IS', NULL)
-                                 ->and_where_close()
-                                 ->and_where_open()
+                                    ->and_where_close()
+                                    ->and_where_open()
                                     ->where('buildings.building_name', 'NOT RLIKE', $term)
                                     ->or_where('buildings.building_name', 'IS', NULL)
-                                 ->and_where_close();
+                                    ->and_where_close();
                         }
                         else
                         {
                             $obj->and_where_open()
                                     ->where('streets.street_name', 'RLIKE', $s)
                                     ->or_where('buildings.building_name', 'RLIKE', $s)
-                                ->and_where_close();
+                                    ->and_where_close();
                         }
                     }
                 }
@@ -424,9 +510,9 @@ class Controller_Singpost extends Controller {
                 break;
             case 'P': return "PO Box";
                 break;
-            case 'W': return "PO Box";
+            case 'W': return "Window Delivery";
                 break;
-            case 'B': return "PO Box";
+            case 'B': return "Locked Bag";
                 break;
             case 'G': return "Godown";
                 break;
@@ -435,66 +521,90 @@ class Controller_Singpost extends Controller {
 
     public function action_geocode()
     {
-        $skip = 14913;
+        $skip  = 0;
         $mongo = Mongo_document::factory('singpost')->collection();
 
         $cursor = $mongo->find(['geo.lon' => null]);
+        //$cursor = $mongo->find(['geo.lon' => 0.000000]);
 
         //fwrite(STDOUT, count($cursor) . "\r\n");
         //die;
 
-        $i = $skip;
-        $time = time();
-        while($cursor->hasNext())
+        $i    = $skip;
+        $start = new DateTime(date('r', time()));
+        while ($cursor->hasNext())
         {
             $row = $cursor->getNext();
             sleep(1);
             $geo = $this->geocode($row);
-            if($geo)
+            if (is_array($geo))
             {
+                $accuracy = $geo['accuracy'];
+                unset($geo['accuracy']);
                 $row->geo = $geo;
-                $row->save();
-                $interval = new DateInterval('PT' . (time() - $time) . 'S');
-                $minutes = $interval->format('%h hour(s), %i minute(s) & %s seconds');
-                fwrite(STDOUT,"Processed Record $i:  $minutes so far... \r\n");
+                $row->geo_accuracy = $accuracy;
+                //$row->set('geo.lon', $geo['lon']);
+                //$row->set('geo.lat', $geo['lat']);
+                try
+                {
+                    $row->save();
+                    $now   = new DateTime(date('r', time()));
+                    $interval = $now->diff($start);
+                    $minutes  = $interval->format('%h hour(s), %i minute(s) & %s seconds');
+                    fwrite(STDOUT, "Processed Record $i:  $minutes so far... \r\n");
+                    fwrite(STDOUT, "\t Postal Code:  . {$row->postal} \r\n");
+                }
+                catch(MongoException $e)
+                {
+                    fwrite(STDOUT, "Error processing $i:  {$e->getMessage()} \r\n");
+                }
+            }
+            else
+            {
+                $geo = (array) $geo;
+                $geo = Arr::merge($row->as_array(), $geo);
+                fwrite(STDOUT, print_r($geo, true) . "\r\n");
+                //exit(0);
             }
             $i++;
         }
+
+        fwrite(STDOUT, "No Records Found \r\n");
     }
 
-    public $host     = 'http://maps.google.com.sg';
-    public $key      = '[REDACTED]';
+    public $host = 'http://maps.google.com.sg';
+    public $key  = '[REDACTED]';
     public $base_url;
 
     public function geocode($obj_add)
     {
         $this->base_url = $this->host . "/maps/geo?output=json&language=en" . "&key=" . $this->key;
         //$xml = simplexml_load_file( $this->base_url . "&q=" . urlencode( $postal ) );
-        $response = json_decode(file_get_contents($this->base_url . "&q=" . urlencode('Singapore ' . $obj_add->postal)));
-        $delay    = 0;
-        $status   = $response->Status->code;
-        //print_r($response);
-
-
-        if ($status == 200)
-        {
-            $accuracy = $response->Placemark[0]->AddressDetails->Accuracy;
-            if($accuracy !== 8)
-            {
-                sleep(1);
+//        $response       = json_decode(file_get_contents($this->base_url . "&q=" . urlencode('Singapore ' . $obj_add->postal)));
+//        $delay          = 0;
+//        $status         = $response->Status->code;
+//        //print_r($response);
+//
+//
+//        if ($status == 200)
+//        {
+//            $accuracy = $response->Placemark[0]->AddressDetails->Accuracy;
+//            if ($accuracy >= 5)
+//            {
+                //sleep(1);
                 $response = json_decode(file_get_contents($this->base_url . "&q=" . urlencode($obj_add->number . ' ' . $obj_add->street . ' Singapore')));
-            }
-        }
+//            }
+//        }
 
-        if ($response->Status->code == 620 )
+        if ($response->Status->code === 620)
         {
-            sleep(2);
+            sleep(1);
             $response = json_decode(file_get_contents($this->base_url . "&q=" . urlencode($obj_add->number . ' ' . $obj_add->street . ' Singapore')));
         }
 
-        if($response->Status->code !== 200)
+        if ($response->Status->code !== 200)
         {
-            fwrite(STDOUT,$response->Status->code);
+            fwrite(STDOUT, $response->Status->code);
             exit(0);
         }
 
@@ -502,15 +612,16 @@ class Controller_Singpost extends Controller {
         //die;
         //return;
         //return($response);
-        if($response->Placemark[0]->Point->coordinates[0] > 100)
+        if ($response->Placemark[0]->Point->coordinates[0] > 100 && $response->Placemark[0]->AddressDetails->Accuracy >= 5)
         {
             return [
                 'lon' => $response->Placemark[0]->Point->coordinates[0],
-                'lat' => $response->Placemark[0]->Point->coordinates[1]
+                'lat' => $response->Placemark[0]->Point->coordinates[1],
+                'accuracy' => $response->Placemark[0]->AddressDetails->Accuracy,
             ];
         }
 
-        return false;
+        return $response;
     }
 
 }

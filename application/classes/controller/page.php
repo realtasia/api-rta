@@ -1,7 +1,8 @@
 <?php
 
 defined('SYSPATH') or die('No direct script access.');
-
+ini_set("max_execution_time", 0);
+ini_set('memory_limit', '2000M');
 /**
  *  1. Authenticate a token request
  *      a. Set a global $session variable for consumption by child controllers.
@@ -12,7 +13,6 @@ defined('SYSPATH') or die('No direct script access.');
  * @uses Oauth2_Resource
  *
  */
-
 class Controller_Page extends Controller_Resource {
 
     /**
@@ -35,9 +35,9 @@ class Controller_Page extends Controller_Resource {
         }
     }
 
-    /**************************************************************************
+    /*     * ************************************************************************
      * Default Actions
-     *************************************************************************/
+     * *********************************************************************** */
 
     /**
      * Fetch a private GET action or fail if there is one and no method for it
@@ -56,15 +56,15 @@ class Controller_Page extends Controller_Resource {
         $type = Arr::get(static::$params, 'request_type', false);
 
         // if we have a type
-        if($type)
+        if ($type)
         {
             // we check if it is valid and the method exists
             if (in_array($type, static::$valid_get_types) && method_exists($this, $type))
-                // run it
+            // run it
                 return $this->{$type}();
             // ok, why do we have a type and not a method???
             else
-                // yeap, you guessed it.
+            // yeap, you guessed it.
                 return $this->fail('user/generic', 'server_error');
         }
 
@@ -97,11 +97,11 @@ class Controller_Page extends Controller_Resource {
         return $this->error('invalid_request');
     }
 
-    /**************************************************************************
+    /*     * ************************************************************************
      * Public Connections
-     *************************************************************************/
+     * *********************************************************************** */
 
-     /**
+    /**
      * Retrieves an array of [user_ids and user names] of people who like this post
      */
     public function action_likers()
@@ -158,7 +158,7 @@ class Controller_Page extends Controller_Resource {
                 // requested user and logged in user must be the same or must be admin
                 if (static::logged_in_is_id($id) || parent::has_role('admin'))
                     return $this->data(
-                            $posts->listings(static::$params, static::$user_id)
+                                    $posts->listings(static::$params, static::$user_id)
                     );
 
                 // clients only see 'active' (public) posts
@@ -169,7 +169,7 @@ class Controller_Page extends Controller_Resource {
                 // need a client or user token.
                 if (parent::is_client() || parent::logged_in())
                     return $this->data(
-                            $posts->listings(static::$params, static::$user_id)
+                                    $posts->listings(static::$params, static::$user_id)
                     );
 
                 // oops. zip token.
@@ -214,7 +214,7 @@ class Controller_Page extends Controller_Resource {
             case 'trashed':
                 if (static::logged_in_is_id($id) || parent::has_role('admin'))
                     return $this->data(
-                            $posts->testimonials(static::$params, static::$user_id)
+                                    $posts->testimonials(static::$params, static::$user_id)
                     );
 
                 // clients only see 'active' (public) posts
@@ -225,7 +225,7 @@ class Controller_Page extends Controller_Resource {
                 // need a client or user token.
                 if (parent::is_client() || parent::logged_in())
                     return $this->data(
-                            $posts->testimonials(static::$params, static::$user_id)
+                                    $posts->testimonials(static::$params, static::$user_id)
                     );
 
                 // oops. zip token.
@@ -240,7 +240,7 @@ class Controller_Page extends Controller_Resource {
      */
     public function action_privacy()
     {
-        $id    = $this->request->param('id');
+        $id = $this->request->param('id');
         if ($this->is_GET() && (parent::logged_in() || parent::is_client()))
         {
             $user = static::$model;
@@ -251,17 +251,16 @@ class Controller_Page extends Controller_Resource {
         }
         else
         {
-            if(static::logged_in_is_id($id))
+            if (static::logged_in_is_id($id))
             {
                 // update user by his/her specific field
-                if($this->is_POST())
+                if ($this->is_POST())
                 {
                     $this->update_privacy_settings(static::$params, $id);
                 }
                 return true;
             }
         }
-
     }
 
     /**
@@ -278,10 +277,10 @@ class Controller_Page extends Controller_Resource {
         }
         else
         {
-            if(static::logged_in_is_id($id))
+            if (static::logged_in_is_id($id))
             {
                 // update user by his/her specific field
-                if($this->is_POST())
+                if ($this->is_POST())
                 {
                     $this->update_info(static::$params, $id);
                 }
@@ -289,7 +288,6 @@ class Controller_Page extends Controller_Resource {
             }
         }
     }
-
 
     public function action_pictures()
     {
@@ -303,12 +301,12 @@ class Controller_Page extends Controller_Resource {
 
     public function action_members()
     {
-        
+
     }
 
-    /**************************************************************************
+    /*     * ************************************************************************
      * Public Actions
-     *************************************************************************/
+     * *********************************************************************** */
 
     /**
      * Performs a like on the given post
@@ -342,46 +340,43 @@ class Controller_Page extends Controller_Resource {
         return parent::interact('unsubscribe', 'post');
     }
 
-
-
-
-    /**************************************************************************
+    /*     * ************************************************************************
      * TestPad methods
-     *************************************************************************/
+     * *********************************************************************** */
+
     public function action_standard()
     {
-        $pages = Mongo_collection::factory('singpost');
+        $pages  = Mongo_collection::factory('singpost');
+        $mysqli = new mysqli('localhost', 'root', NULL, 'test');
+        $json = [];
+        $result = $mysqli->query('SELECT DISTINCT project FROM `condominiums` ORDER BY project ASC');
+        while ($each    = $result->fetch_row())
+        {
+            $json[] = $this->format($each[0]);
+        }
 
         $query = [
-            'address'  => 'Standard',
-            //'address'  => 'Apartment',
-            //'other_name' => ['$ne'   => NULL],
-            'building' => ['$ne'   => NULL],
+            'address' => ['$nin' => ['Condominium', 'Apartment', 'HDB', 'PO Box', 'Window Delivery', 'Locked Bag']],
             'building' => ['$not'   => new MongoRegex('/school|swimming|station|temple|church|complex|centre|camp|hospital|clinic|shop|library|college|stadium|car.park|exchange|depot|commission|polyclinic|mosque|masjid|association|interchange|aia.|industrial|office|kindergarden|mrt|lrt|sports|waterworks|hall|brickwork|tldm|brigade|defence|eating|food|shopping|post|police|fire|safety|club|hotel|motel|assembly|cargo|airport|airbase|cinema|ministry|government|parliment|health|driving|technology|ctr|kindergarten|breweries|materials|amphitheatre|storage|factory|warehouse|institute|logistics|hospice|center|innovation|aquarium|lagoon|sport|theatres|theatre|techpark|flight|terminal|operations|operation|embassy|amusement|flatted|general|chij|npc|convent|cathedral|aviation|academy|chapel|prison|methodist|metal|works|synagogue|pte.ltd|resort|store|megastore|distripark|hub|dhl|bank|barrack|enterprise|fraser|division|aged|disabled|hostel|hostels|ite|marine|sewage|works|motors|child|maintenance|dormitory|shipyard|naval|nursery|sewer|buddhist|taxi|old age|old people|home for|supply|chemical|islamiah|majlis|logit|homes for|academy|arts|museum|university|polytechnic|ntuc|restaurant|outward|bank|nursing|refuse|tuas|medical|plant|mission|indstrl|society|zoological|red.cross|automative|engineering|instrument|design|customs|leisure|publications|delivery/i')],
             'street' => ['$not'   => new MongoRegex('/tuas/i')],
-            'estate' => ['$ne'   => NULL],
-            //'child' => NULL
+            'estate' => ['$ne' => NULL],
         ];
 
-//        $query = [
-//            '$or' => [
-//                'other_name' => new MongoRegex("/lakeshore/i"),
-//                'building' => new MongoRegex("/lakeshore/i")
-//            ]
-//        ];
         $cursor = $pages->find($query);
+        $row = [];
 
         $i = 0;
-        while($cursor->hasNext())
+        while ($cursor->hasNext())
         {
             //$row[] = $cursor->getNext()->as_array();
-            $r = $cursor->getNext()->as_array();
+            $r        = $cursor->getNext()->as_array();
             $building = $this->format($r['building']);
-            //$other_name = $this->format($r['other_name']);
-            $row[] = $building;
-            //$row = array_unique($row, SORT_STRING);
-            //sort($row);
-            //$return[$r['estate']] = $row[$i];
+            if (!in_array($building, $json))
+            {
+                $format = "$building [{$r['address']}]";
+                $row[]  = $format;
+            }
+
             $i++;
         }
 
@@ -392,22 +387,22 @@ class Controller_Page extends Controller_Resource {
         sort($return);
 
         return $this->data([$count => $return]);
-        return $this->data([$count => $row]);
+        //return $this->data([$count => $row]);
     }
 
     protected function format($building)
     {
-        if(strpos($building, '@'))
+        if (strpos($building, '@'))
         {
-            if(strpos($building, ' @ ') !== -1)
+            if (strpos($building, ' @ ') !== -1)
             {
-                $b = explode('@', $building);
+                $b        = explode('@', $building);
                 $building = $b[0] . ' @ ' . $b[1];
             }
 
             $building = str_replace('-', ' ', $building);
         }
-        if(strpos($building, '-'))
+        if (strpos($building, '-'))
         {
             $building = str_replace('-', ' ', $building);
         }
@@ -417,25 +412,31 @@ class Controller_Page extends Controller_Resource {
             $building = $b[1] . ' ' . $b[0];
         }
 
-        $buildings = explode(' ', $building);
-
-        foreach($buildings as $k => $v)
-        {
-            switch($v)
-            {
-                case 'ILIV' : $buildings[$k] = 'iLiv'; break;
-                case 'AAEV79' : $buildings[$k] = 'Aaev 79'; break;
-                case '1A' :
-                case 'II' :
-                case 'DLV' :
-                case 'RV' :
-                case 'JLB' :
-                case 'M.T.F.A' : break;
-                default : $buildings[$k] = ucwords(strtolower($v)); break;
-            }
-        }
-
-        return implode(' ', $buildings);
+//        $buildings = explode(' ', $building);
+//
+//        foreach ($buildings as $k => $v)
+//        {
+//            switch ($v)
+//            {
+//                case 'ILIV' : $buildings[$k] = 'iLiv';
+//                    break;
+//                case 'AAEV79' : $buildings[$k] = 'Aaev 79';
+//                    break;
+//                case '1A' :
+//                case 'II' :
+//                case 'APS' :
+//                case 'DLV' :
+//                case 'RV' :
+//                case 'RVG' :
+//                case 'JLB' :
+//                case 'M.T.F.A' : break;
+//                default : $buildings[$k] = ucwords(strtolower($v));
+//                    break;
+//            }
+//        }
+//
+//        return implode(' ', $buildings);
+        return strtoupper($building);
     }
 
 }

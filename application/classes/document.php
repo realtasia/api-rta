@@ -57,15 +57,15 @@ class Document extends Mongo_Document {
      * const SAVE_UPDATE = 'update';
      * const SAVE_UPSERT = 'upsert';
      */
-    public function before_save($action)
-    {
-        $time           = time();
-        $this->modified = $time;
-        if (isset($this->active))
-        {
-            $this->active = $time;
-        }
-    }
+//    public function before_save($action)
+//    {
+//        $time           = time();
+//        $this->modified = $time;
+//        if (isset($this->active))
+//        {
+//            $this->active = $time;
+//        }
+//    }
 
     public function after_save($action)
     {

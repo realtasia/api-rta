@@ -105,44 +105,44 @@ require APPPATH.'bootstrap'.EXT;
  * Execute the main request. A source of the URI can be passed, eg: $_SERVER['PATH_INFO'].
  * If no source is specified, the URI will be automatically detected.
  */
-    echo Request::factory()
-            ->execute()
-            ->send_headers()
-            ->body();
-//try
-//{
 //    echo Request::factory()
 //            ->execute()
 //            ->send_headers()
 //            ->body();
-//}
-//catch (Exception $e)
-//{
-//    $error = sprintf('%s [ %s ]: %s ~ %s [ %d ]', get_class($e), $e->getCode(), strip_tags($e->getMessage()), Debug::path($e->getFile()), $e->getLine());
-//    Debug::error($error);
-//
-//    if(!$callback = Arr::get($_GET, 'callback'))
-//    {
-//        $callback = Arr::get($_POST, 'callback');
-//    }
-//    $data = json_encode([
-//        'status' => 'error',
-//        'data' => [
-//            'title' => get_class($e),
-//            'code' => $e->getCode(),
-//            'message' => strip_tags($e->getMessage()),
-//            'path' => Debug::path($e->getFile()), $e->getLine(),
-//        ]
-//    ], JSON_PRETTY_PRINT);
-//
-//
-//    if($callback)
-//        $data = $callback . '(' . $data . ')';
-//    //print_r($error);
-//
-//    echo Response::factory([
-//        'status' => 200
-//    ])->headers('Content-Type', 'application/javascript')
-//      ->body($data);
-//
-//}
+try
+{
+    echo Request::factory()
+            ->execute()
+            ->send_headers()
+            ->body();
+}
+catch (Exception $e)
+{
+    $error = sprintf('%s [ %s ]: %s ~ %s [ %d ]', get_class($e), $e->getCode(), strip_tags($e->getMessage()), Debug::path($e->getFile()), $e->getLine());
+    Debug::error($error);
+
+    if(!$callback = Arr::get($_GET, 'callback'))
+    {
+        $callback = Arr::get($_POST, 'callback');
+    }
+    $data = json_encode([
+        'status' => 'error',
+        'data' => [
+            'title' => get_class($e),
+            'code' => $e->getCode(),
+            'message' => strip_tags($e->getMessage()),
+            'path' => Debug::path($e->getFile()), $e->getLine(),
+        ]
+    ], JSON_PRETTY_PRINT);
+
+
+    if($callback)
+        $data = $callback . '(' . $data . ')';
+    //print_r($error);
+
+    echo Response::factory([
+        'status' => 200
+    ])->headers('Content-Type', 'application/javascript')
+      ->body($data);
+
+}
