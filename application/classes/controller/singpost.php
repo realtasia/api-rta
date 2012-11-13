@@ -524,8 +524,8 @@ class Controller_Singpost extends Controller {
         $skip  = 0;
         $mongo = Mongo_document::factory('singpost')->collection();
 
-        $cursor = $mongo->find(['geo.lon' => null]);
-        //$cursor = $mongo->find(['geo.lon' => 0.000000]);
+        $cursor = $mongo->find(['geo.lon' => null])->sort('_id', 1);
+        //$cursor = $mongo->find(['geo.lon' => '0.000000']);
 
         //fwrite(STDOUT, count($cursor) . "\r\n");
         //die;
@@ -535,7 +535,7 @@ class Controller_Singpost extends Controller {
         while ($cursor->hasNext())
         {
             $row = $cursor->getNext();
-            sleep(1);
+            sleep(2);
             $geo = $this->geocode($row);
             if (is_array($geo))
             {
@@ -596,11 +596,11 @@ class Controller_Singpost extends Controller {
 //            }
 //        }
 
-        if ($response->Status->code === 620)
-        {
-            sleep(1);
-            $response = json_decode(file_get_contents($this->base_url . "&q=" . urlencode($obj_add->number . ' ' . $obj_add->street . ' Singapore')));
-        }
+//        if ($response->Status->code === 620)
+//        {
+//            sleep(1);
+//            $response = json_decode(file_get_contents($this->base_url . "&q=" . urlencode($obj_add->number . ' ' . $obj_add->street . ' Singapore')));
+//        }
 
         if ($response->Status->code !== 200)
         {
@@ -612,13 +612,27 @@ class Controller_Singpost extends Controller {
         //die;
         //return;
         //return($response);
-        if ($response->Placemark[0]->Point->coordinates[0] > 100 && $response->Placemark[0]->AddressDetails->Accuracy >= 5)
+        $accuracy = (int) $response->Placemark[0]->AddressDetails->Accuracy;
+        if ($response->Placemark[0]->Point->coordinates[0] > 100 && ($accuracy >= 4))
         {
             return [
                 'lon' => $response->Placemark[0]->Point->coordinates[0],
                 'lat' => $response->Placemark[0]->Point->coordinates[1],
-                'accuracy' => $response->Placemark[0]->AddressDetails->Accuracy,
+                'accuracy' => $accuracy,
             ];
+        }
+
+        if(isset($response->Placemark[1]))
+        {
+            $accuracy = (int) $response->Placemark[1]->AddressDetails->Accuracy;
+            if ($response->Placemark[1]->Point->coordinates[0] > 100 && ($accuracy >= 4))
+            {
+                return [
+                    'lon' => $response->Placemark[1]->Point->coordinates[0],
+                    'lat' => $response->Placemark[1]->Point->coordinates[1],
+                    'accuracy' => $accuracy,
+                ];
+            }
         }
 
         return $response;

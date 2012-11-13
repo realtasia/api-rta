@@ -64,6 +64,7 @@ class Model_User extends Document {
         $data                     = Arr::overwrite(static::$user_fields, $params);
         // merge with defaults
         $data                     = Arr::merge(static::$user_fields, $data);
+        $data['password']         = static::hash($data['password']);
         $data['info']['birthday'] = (int) $data['info']['birthday'];
         ksort($data);
 
@@ -163,7 +164,7 @@ class Model_User extends Document {
             $this->connections  = static::get_public_connection_routes($this->_id);
             $this->password     = '';
             $this->logins       = [];
-            $this->private_actions       = [];
+            $this->private_actions = [];
             $this->modify('settings.billing', NULL);
         }
 
@@ -192,27 +193,27 @@ class Model_User extends Document {
                     //$arr['email']             = '';
                     break;
             }
-//            switch ($this->settings['privacy']['personal']['is'])
-//            {
-//                case 'SUBSCRIBERS':
-//                    if (!$this->interactions['subscribe'])
-//                    {
-//                        $this->modify('info.gender', NULL);
-//                        $this->modify('info.birthday', NULL);
-//                    }
-//                    break;
-//
-//                case 'SELF':
-//                    $this->modify('info.gender', NULL);
-//                    $this->modify('info.birthday', NULL);
-//                    break;
-//
-//                case 'CUSTOM': //check if current user id is in this list
-//                    //$arr['info']['telephone'] = '';
-//                    //$arr['info']['social']    = '';
-//                    //$arr['email']             = '';
-//                    break;
-//            }
+            switch ($this->settings['privacy']['personal']['is'])
+            {
+                case 'SUBSCRIBERS':
+                    if (!$this->interactions['subscribe'])
+                    {
+                        $this->modify('info.gender', NULL);
+                        $this->modify('info.birthday', NULL);
+                    }
+                    break;
+
+                case 'SELF':
+                    $this->modify('info.gender', NULL);
+                    $this->modify('info.birthday', NULL);
+                    break;
+
+                case 'CUSTOM': //check if current user id is in this list
+                    //$arr['info']['telephone'] = '';
+                    //$arr['info']['social']    = '';
+                    //$arr['email']             = '';
+                    break;
+            }
         }
 
         return $this;
@@ -291,7 +292,7 @@ class Model_User extends Document {
      */
     public function update_billing($params, $user_id)
     {
-        $field = static::$user_fields['settings']['billing'];
+        $field  = static::$user_fields['settings']['billing'];
         $values = Arr::overwrite($field, $params);
 
         $this->clear();
@@ -326,7 +327,6 @@ class Model_User extends Document {
 
         return $this->info;
     }
-
 
     /**
      * Small utility function to reduce typing. returns an $or array for use in

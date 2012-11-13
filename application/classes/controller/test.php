@@ -16,26 +16,28 @@ class Controller_Test extends Controller {
         ];
 
         $token = [
+            'request_type' => 'registration',
+            'user_type' => 'admin',
             'access_token' => '[REDACTED]',
             'state' => substr(Security::token(), 0, 5),
         ];
 
         $registration = [
-            'request_type' => 'registration',
-            'user_type' => 'user',
             'status' => 'active',
-            'first_name' => 'Admin',
-            'last_name' => 'User',
-            'name' => 'Admin User',
+            'first_name' => '[REDACTED]',
+            'last_name' => 'Nathan',
+            'name' => '[REDACTED]',
             'roles' => ['admin'],
-            'username' => 'admin',
-            'uri' => '/admin',
-            'info' => ['gender' => 'male'],
+            'username' => '[REDACTED]',
+            'password' => '[REDACTED]',
+            'uri' => '/[REDACTED]',
+            'email' => '[REDACTED]',
+            'info' => ['gender' => 'male', 'telephone' => ['mobile' => '[REDACTED]']],
         ];
 
         $return = [];
 
-//        for($i=1;$i<=99;$i++)
+//        for($i=1;$i<=3;$i++)
 //        {
             $values = Arr::merge($token, $this->users(1), $registration);
 //            echo "<pre>";
@@ -454,7 +456,7 @@ EOD;
             'last_name'   => $name['last_name'],
             'name'        => $name['first_name'] . ' ' . $name['last_name'],
             'username'    => $numword . '.user',
-            'password'    => static::hash($numword),
+            'password'    => $numword,
             'email'       => '[REDACTED]',
             'designation' => 'Senior Sales Executive',
             'roles'       => ['agent'],
