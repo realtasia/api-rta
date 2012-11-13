@@ -35,7 +35,7 @@ class Controller_Testpad extends Controller {
         {
             $collection = Arr::get($query, 'collection');
             $name       = APPPATH . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . "mongo.$collection.json";
-            exec('mongoexport --db db --collection ' . $collection . ' --out ' . $name);
+            exec('mongoexport --db db --collection ' . $collection .  ' --jsonArray --out ' . $name);
             //$this->response->headers('Content-type', 'application/json');
             return $this->response->send_file($name, NULL, ['delete' => TRUE]);
         }
@@ -68,10 +68,13 @@ class Controller_Testpad extends Controller {
                 $names      = explode('.', $name);
                 $collection = $names[1];
                 $tmp        = Arr::get($file, 'tmp_name');
+                $filename   = APPPATH . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . $name;
+                file_put_contents($filename, $tmp);
+                chmod($filename, 0776);
 
-                $output = exec('mongoimport --db db --collection ' . $collection . ' --file ' . $tmp);
+                $output = exec('mongoimport --db db --collection ' . $collection . ' --file ' . $filename);
 
-                unset($tmp);
+                unset($tmp, $filename);
             }
 
             $this->response->body($output);
