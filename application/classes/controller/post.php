@@ -290,7 +290,7 @@ class Controller_Post extends Controller_Resource {
         static::$params['privacy.is'] = Arr::path(static::$params, 'privacy.is');
         $validation = Validation::factory(static::$params)
                 ->rule('message', 'not_empty')
-                ->rule('privacy.is', 'Controller_User::valid_privacy', [
+                ->rule('privacy.is', 'Privacy::valid', [
                     ':value', ':field', ':validation'
                 ])
                 ->rule('page', 'not_empty')
@@ -335,7 +335,7 @@ class Controller_Post extends Controller_Resource {
         $params['privacy.is'] = Arr::path($params, 'privacy.is');
 
         $validation = Validation::factory($params)
-                ->rule('privacy.is', 'Controller_User::valid_privacy', [
+                ->rule('privacy.is', 'Privacy::valid', [
                     ':value', ':field', ':validation'
                 ])
                 ->rule('listing.type', 'not_empty')
@@ -395,7 +395,7 @@ class Controller_Post extends Controller_Resource {
 
         $validation = Validation::factory(static::$params)
                 ->rule('message', 'not_empty')
-                ->rule('privacy.is', 'Controller_User::valid_privacy', [
+                ->rule('privacy.is', 'Privacy::valid', [
                     ':value', ':field', ':validation'
                 ])
                 ->rule('page', 'not_empty')
@@ -505,7 +505,7 @@ class Controller_Post extends Controller_Resource {
     {
         $params = static::extract_privacy_values(static::$params);
         $validation = Validation::factory($params)
-                ->rule('is', 'Controller_User::valid_privacy', [':value', ':field', ':validation']);
+                ->rule('is', 'Privacy::valid', [':value', ':field', ':validation']);
 
         if($validation->check())
         {

@@ -356,12 +356,11 @@ class Model_Post extends Document {
         'picture' => '', // if this post has an image, this will be the url
         'link'    => [], // 'name', 'caption', 'description', 'source' the original link if there is one
         'video' => [], // 'name', 'caption', 'description', 'source', 'properties' if this post has a video
-        'type'     => 'wallpost', // wallpost, testimonial, conversation, listing, checkin, event
+        'type'     => 'wallpost', // wallpost, testimonial, conversation, listing, checkin, event, album, image
         'status'   => 'active', // pending, active, expired,
         'uri'      => '',
         'modified' => 0,
         'privacy'  => ['is' => 'PUBLIC'],
-        'attachments' => [], // '_id', 'name', 'type' of the attachments for this post
         'counts' => [
             'attachments' => 0,
             'comments'    => 0,

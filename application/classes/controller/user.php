@@ -863,29 +863,29 @@ class Controller_User extends Controller_Resource {
     {
         $params = static::extract_privacy_values(static::$params);
         $validation = Validation::factory($params)
-                ->rule('contacts.is', 'Controller_User::valid_privacy', [
+                ->rule('contacts.is', 'Privacy::valid', [
                     ':value', ':field', ':validation'
                 ])
                 ->rule('contacts.is', 'not_empty')
-                ->rule('subscriptions.is', 'Controller_User::valid_privacy', [
+                ->rule('subscriptions.is', 'Privacy::valid', [
                     ':value', ':field', ':validation'
                 ])
                 ->rule('subscriptions.is', 'not_empty')
-                ->rule('messages.is', 'Controller_User::valid_privacy', [
+                ->rule('messages.is', 'Privacy::valid', [
                     ':value', ':field', ':validation'
                 ])
                 ->rule('messages.is', 'not_empty')
-                ->rule('mentions.is', 'Controller_User::valid_privacy', [
+                ->rule('mentions.is', 'Privacy::valid', [
                     ':value', ':field', ':validation'
                 ])
                 ->rule('mentions.is', 'not_empty')
                 ->rule('wallposts.others_posts.is',
-                       'Controller_User::valid_privacy', [
+                       'Privacy::valid', [
                             ':value', ':field', ':validation'
                 ])
                 ->rule('wallposts.others_posts.is', 'not_empty')
                 ->rule('wallposts.others_posts_visibility.is',
-                       'Controller_User::valid_privacy', [
+                       'Privacy::valid', [
                             ':value', ':field', ':validation'
                 ])
                 ->rule('wallposts.others_posts_visibility.is', 'not_empty');
@@ -1153,21 +1153,6 @@ class Controller_User extends Controller_Resource {
         return static::$user_id && static::$user_id === $id;
     }
 
-    /**
-     * Small validation for possible privacy settings
-     *
-     * @param string $value
-     * @return boolean
-     */
-    public static function valid_privacy($value, $field, $validation)
-    {
-        if(in_array($value, ['PUBLIC', 'SUBSCRIBERS', 'SELF', 'CUSTOM']))
-        {
-            return true;
-        }
-
-        $validation->error($field, 'valid_privacy');
-    }
 
     /************************************************************************************
      * Creates proper keys for validation. Because params (for Mongo) can include

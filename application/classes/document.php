@@ -67,6 +67,12 @@ class Document extends Mongo_Document {
 //        }
 //    }
 
+    public function modify($key, $value)
+    {
+        $object = Arr::delim_to_multi([$key => $value]);
+        $this->_object = Arr::merge($this->_object, $object);
+    }
+
     public function after_save($action)
     {
 

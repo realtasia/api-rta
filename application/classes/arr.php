@@ -18,7 +18,7 @@ class Arr extends Kohana_Arr {
      * All non-delimited keys are returned with their respective values.
      * e.g
      * // returns $values[one][two][three] = $value
-     * $values = array('one.two.three' => value)
+     * $values = Arr::delim_to_multi(array('one.two.three' => value))
      *
      * @param array $arr
      * @param string $delimiter

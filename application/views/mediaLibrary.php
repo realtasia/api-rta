@@ -51,14 +51,26 @@
         </section>
         <section class="RTAWindowContent" id="droppable">
             <!--ko if : droppable-->
-                <h3 id="dropzone">You can drag files here or hit the upload button</h3>
+            <h3 id="dropzone">You can drag files here or hit the upload button</h3>
             <!--/ko-->
 
 
             <ul class="thumbnails" id="thumbnails">
                 <!--ko foreach : {data : files}-->
-                <li style="position:relative;">
-                    <a href="#" style="position:absolute;right:0;top:0;" data-bind="attr : {id : id}" class="deleteFile">X</a>
+                <li style="position:relative;" class="imageItem">
+                    <ul class="imageBar" data-bind="visible : isHovering">
+                        <li>
+                            <a href="#" style="" class="deleteFile">
+                                <i class="action16 xCircleBG"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" style="" data-bind="click: edit" class="editFile">
+                                <i class="action16 edit"></i>
+                            </a>
+                        </li>
+                    </ul>
+
                     <a class="thumbnail" href="">
                         <img onLoad="$(this).fadeTo('slow', 1)" class="imgPreview" data-bind="attr : {src : src() || '/images/165x110.gif'}" />
                         <!--ko if : $data.uploading-->
@@ -68,13 +80,17 @@
                         <span class="thumbCaption" data-bind="text:'Uploading'"></span>
                         <!--/ko -->
                     </a>
-                    <!--ko if : $data.uploaded-->
-                        <span class="thumbCaption" data-bind="text: name"></span>
+                    <!--ko ifnot : $data.uploading-->
+                        <span class="thumbCaption" data-bind="click: edit, text: name, visible : !editing()"></span>
+                        <input class="edit" data-bind="value: name, visible : editing,
+                               enterKey: stopEditing,
+                               selectAndFocus: editing,
+                               event: { blur: stopEditing }" />
                     <!--/ko -->
                 </li>
                 <!--/ko-->
             </ul>
-                <div style="clear:both;"></div>
+            <div style="clear:both;"></div>
         </section>
     </section>
     <footer class="footerBar"></footer>

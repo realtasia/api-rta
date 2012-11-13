@@ -141,7 +141,7 @@ class Model_User extends Document {
         // same, change to iso date
 
         if ($this->current_user === NULL)
-            return $this;
+            return;
 
         $current_user = (object) $this->get_default_user_fields();
 
@@ -163,26 +163,27 @@ class Model_User extends Document {
             $this->connections  = static::get_public_connection_routes($this->_id);
             $this->password     = '';
             $this->logins       = [];
+            $this->private_actions       = [];
+            $this->modify('settings.billing', NULL);
         }
 
-        if (isset($this->settings) && !$this->private_actions['can_edit'])
+        if (isset($this->settings) && !isset($this->private_actions['can_edit']))
         {
-            //switch ($privacy['contacts']['is'])
             switch ($this->settings['privacy']['contacts']['is'])
             {
                 case 'SUBSCRIBERS':
                     if ($this->interactions['subscribe'])
                     {
-                        $this->set('info.telephone', NULL);
-                        $this->set('info.social', NULL);
-                        $this->set('info.email', NULL);
+                        $this->modify('info.telephone', NULL);
+                        $this->modify('info.social', NULL);
+                        $this->modify('email', NULL);
                     }
                     break;
 
                 case 'SELF':
-                    $this->set('info.telephone', NULL);
-                    $this->set('info.social', NULL);
-                    $this->set('info.email', NULL);
+                    $this->modify('info.telephone', NULL);
+                    $this->modify('info.social', NULL);
+                    $this->modify('email', NULL);
                     break;
 
                 case 'CUSTOM': //check if current user id is in this list
@@ -196,14 +197,14 @@ class Model_User extends Document {
 //                case 'SUBSCRIBERS':
 //                    if (!$this->interactions['subscribe'])
 //                    {
-//                        $this->set('info.gender', NULL);
-//                        $this->set('info.birthday', NULL);
+//                        $this->modify('info.gender', NULL);
+//                        $this->modify('info.birthday', NULL);
 //                    }
 //                    break;
 //
 //                case 'SELF':
-//                    $this->set('info.gender', NULL);
-//                    $this->set('info.birthday', NULL);
+//                    $this->modify('info.gender', NULL);
+//                    $this->modify('info.birthday', NULL);
 //                    break;
 //
 //                case 'CUSTOM': //check if current user id is in this list

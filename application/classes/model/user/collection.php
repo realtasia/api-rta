@@ -145,7 +145,7 @@ class Model_User_Collection extends Collection {
                 $row->after_load();
             }
 
-            $ret = $row->stringify($row->as_array());
+            $ret = $row->stringify($row->as_array(true));
 
             $return[] = $ret;
         }

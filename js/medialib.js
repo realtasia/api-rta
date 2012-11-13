@@ -7,13 +7,25 @@ if (location.host.indexOf('casa') > 1)
 
 function File(id, name, size)
 {
-    this.id = id;
-    this.size = size;
+    var self = this;
+    this.id = id || null;
+    this.size = size || null;
     this.src = ko.observable(false);
     this.name = ko.observable(name || 'Description...');
     this.queued = ko.observable(true);
     this.uploading = ko.observable(false);
     this.uploaded = ko.observable(false);
+    this.isHovering = ko.observable(false);
+    this.editing = ko.observable(false);
+    this.stopEditing = function(item, event)
+    {
+        item.editing(false);
+    }
+    this.edit = function(item, event)
+    {
+        item.editing(true);
+    }
+
     this.progress = ko.observable(0);
 }
 
@@ -21,14 +33,8 @@ function Lib()
 {
     var self = this;
     this.files = ko.observableArray([]);
-    this.fadeIn = function(element, index, data){
-        $(element).fadeIn('slow');
-    };
-    this.fadeOut = function(element, index, data){
-        $(element).fadeOut('slow');
-    };
     this.isDroppable = ko.observable(false);
-    this.droppable = ko.computed(function(){
+    this.droppable = ko.computed(function() {
         return this.isDroppable() && this.files().length === 0;
     }, this)
 }
@@ -92,8 +98,8 @@ $(document).ready(function() {
         flash_swf_url: common + '/plupload/js/plupload.flash.swf',
         silverlight_xap_url: common + '/plupload/js/plupload.silverlight.xap',
         filters: [
-            {title: "Image files", extensions: "jpg,gif,png"},
-            {title: "Zip files", extensions: "zip"}
+            {title: "Images", extensions: "jpg,gif,png"},
+            {title: "Documents", extensions: "zip"}
         ],
         //resize: {width: 320, height: 240, quality: 90},
         // PreInit events, bound before any internal events
@@ -104,7 +110,7 @@ $(document).ready(function() {
                 log('[Refresh]');
             },
             StateChanged: function(up) {
-                var uploading = (up.state === plupload.STARTED) ? true : false;
+                var uploading = (up.state === plupload.STARTED);
 
                 ko.utils.arrayForEach(lib.files(), function(item) {
                     item.uploading(uploading);
@@ -159,8 +165,8 @@ $(document).ready(function() {
         }
     });
 
-    uploader.bind('Init', function(up, params){
-        if(!!FileReader && !((params.runtime === "flash") || (params.runtime === "silverlight")))
+    uploader.bind('Init', function(up, params) {
+        if (!!FileReader && !((params.runtime === "flash") || (params.runtime === "silverlight")))
         {
             lib.isDroppable(true);
         }
@@ -168,24 +174,76 @@ $(document).ready(function() {
 
     uploader.init();
 
-    $('.deleteFile').live('click', function(e){
-        e.preventDefault();
-        uploader.splice($(this).id, 1);
-        return lib.files.remove(ko.dataFor(this))
-    })
+    $("#thumbnails").delegate(".deleteFile", "click", function() {
+        //retrieve the context
+        var file = ko.dataFor(this);
+        if (file.uploaded())
+        {
+            log("File uploaded. Send request to server for deletion");
+        }
+        else
+        {
+            log("Removing file " + file.id + " from queue");
+            uploader.splice(file.id, 1)
+            lib.files.remove(file);
+        }
 
-//
-//    uploader.bind('Error', function(up, err) {
-//        $('#filelist').append("<div>Error: " + err.code +
-//                ", Message: " + err.message +
-//                (err.file ? ", File: " + err.file.name : "") +
-//                "</div>"
-//                );
-//
-//        up.refresh(); // Reposition Flash/Silverlight
-//    });
-//
-//    uploader.bind('FileUploaded', function(up, file) {
-//        $('#' + file.id + " b").html("100%");
-//    });
-})
+        return false;
+    });
+    $(".imageItem").live({
+        mouseenter: function() {
+            ko.dataFor(this).isHovering(true);
+        }, mouseleave: function() {
+            ko.dataFor(this).isHovering(false);
+        }
+    });
+
+    lib.files.push(new File());
+    lib.files.push(new File());
+    lib.files.push(new File());
+
+});
+
+var ENTER_KEY = 13;
+
+// a custom binding to handle the enter key (could go in a separate library)
+ko.bindingHandlers.enterKey = {
+    init: function(element, valueAccessor, allBindingsAccessor, data) {
+        var wrappedHandler, newValueAccessor;
+
+        // wrap the handler with a check for the enter key
+        wrappedHandler = function(data, event) {
+            if (event.keyCode === ENTER_KEY) {
+                valueAccessor().call(this, data, event);
+            }
+        };
+
+        // create a valueAccessor with the options that we would want to pass to the event binding
+        newValueAccessor = function() {
+            return {
+                keyup: wrappedHandler
+            };
+        };
+
+        // call the real event binding's init function
+        ko.bindingHandlers.event.init(element, newValueAccessor, allBindingsAccessor, data);
+    }
+};
+
+// wrapper to hasfocus that also selects text and applies focus async
+ko.bindingHandlers.selectAndFocus = {
+    init: function(element, valueAccessor, allBindingsAccessor) {
+        ko.bindingHandlers.hasfocus.init(element, valueAccessor, allBindingsAccessor);
+        ko.utils.registerEventHandler(element, 'focus', function() {
+            element.focus()
+            element.select();
+        });
+    },
+    update: function(element, valueAccessor) {
+        ko.utils.unwrapObservable(valueAccessor()); // for dependency
+        // ensure that element is visible before trying to focus
+        setTimeout(function() {
+            ko.bindingHandlers.hasfocus.update(element, valueAccessor);
+        }, 0);
+    }
+};

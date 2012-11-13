@@ -10,6 +10,19 @@
  */
 class Controller_Testpad extends Controller {
 
+    public function action_privacy()
+    {
+        $user = Mongo_Document::factory('user');
+        $user->get('5099cfc6b90fb8380a000002');
+        $privacy = Privacy::factory($user);
+        //$privacy->test('5099cfc6b90fb8380a000002');
+        echo "<pre>";
+        print_r('Privacy Doc is User: ' . $privacy->doc_is('user') . '<br>');
+        print_r('Privacy is: ' . $privacy->is . '<br>');
+        print_r('Privacy contacts: ' . $privacy->contacts . '<br>');
+        echo $privacy;
+    }
+
     public function action_index()
     {
         $user = Mongo_Collection::factory('user')->search(['s' =>'test']);
