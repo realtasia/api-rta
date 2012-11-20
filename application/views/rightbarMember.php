@@ -14,19 +14,17 @@
                     $b    = array_rand($a_rand);
                     $rand = $a_rand[$r] . $a_rand[$g] . $a_rand[$b];
                     $font = ($rand == 'ffffff') ? '000' : 'fff';
-                    ?>
-                    <li class="smallNail"><div class="thumbnail"><a href="#"><img src="http://placehold.it/45" alt="image" /></a></div></li>
-                    <?
+                    echo '<li class="smallNail"><div class="thumbnail"><a href="#"><img src="/images/35X35.gif" alt="image" /></a></div></li>';
                 }
-                ?>    
+                ?>
             </ul>
             <div class="moreContainer">
                 <h5><a class="moreLink" href="#">More&hellip;</a></h5>
-            </div>                        
+            </div>
             <hr class="thumbnailGallerySeperator" />
             <h5 class="sideBarHeader">
-                <a href="#"><i class="info16 subscribers"></i>Subscribers&nbsp;</a>&nbsp;<span class="badge badge-blue">14</span>                            
-            </h5>        
+                <a href="#"><i class="info16 subscribers"></i>Subscribers&nbsp;</a>&nbsp;<span class="badge badge-blue">14</span>
+            </h5>
             <ul class="thumbnails thumbnailGallery">
                 <?php
                 for ($i    = 0; $i <= 3; $i++)
@@ -36,28 +34,26 @@
                     $b    = array_rand($a_rand);
                     $rand = $a_rand[$r] . $a_rand[$g] . $a_rand[$b];
                     $font = ($rand == 'ffffff') ? '000' : 'fff';
-                    ?>
-                    <li class="smallNail"><div class="thumbnail"><a href="#"><img src="http://placehold.it/45" alt="image" /></a></div></li>
-                    <?
+                    echo '<li class="smallNail"><div class="thumbnail"><a href="#"><img src="/images/35X35.gif" alt="image" /></a></div></li>';
                 }
-                ?>    
+                ?>
             </ul>
             <div class="moreContainer">
                 <h5><a class="moreLink" href="#">More&hellip;</a></h5>
-            </div>                
+            </div>
         </div>
-    </div>    
+    </div>
     <div class="outerBox">
         <div class="contentArea widgetContentBG">
             <h5 class="sideBarHeader">
-                <a href="#"><i class="info16 reputation"></i>Reputation&nbsp;</a>&nbsp;<a href="#"><span class="badge badge-warning">beta</span></a>                            
-            </h5>        
+                <a href="#"><i class="info16 reputation"></i>Reputation&nbsp;</a>&nbsp;<a href="#"><span class="badge badge-warning">beta</span></a>
+            </h5>
             <ul class="reputationContainer">
                 <li class="outerBox reputationScore"><div class="contentArea"><span class="reputation">0</span></li>
                 <li class="outerBox reputationScore"><div class="contentArea"><span class="reputation">0</span></li>
                 <li class="outerBox reputationScore"><div class="contentArea"><span class="reputation">8</span></li>
                 <li class="outerBox reputationScore"><div class="contentArea"><span class="reputation">1</span></li>
-            </ul>             
+            </ul>
         </div>
-    </div>    
+    </div>
 </aside> <!--  rightbar -->

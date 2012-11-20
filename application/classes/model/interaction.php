@@ -210,6 +210,10 @@ class Model_Interaction extends Document {
      */
     protected function interact($interaction, $object_id, $object_type)
     {
+        $this->collection()->ensureIndex(['interaction' => 1]);
+        $this->collection()->ensureIndex(['object_id' => 1]);
+        $this->collection()->ensureIndex(['user._id' => 1]);
+        
         if (!$this->current_user->loaded())
             return false;
 

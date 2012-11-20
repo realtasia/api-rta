@@ -77,6 +77,7 @@ class Controller_Auth extends Controller_Abstract {
         }
 
         $check = static::$auth->login($params, true);
+        unset($check['_id']);
 
         // return state if available
         if(isset($params['state']))
@@ -102,6 +103,7 @@ class Controller_Auth extends Controller_Abstract {
         }
 
         $check = static::$auth->credentials($params, true);
+        unset($check['_id']);
 
         // state parameter.
         if(isset($params['state']))

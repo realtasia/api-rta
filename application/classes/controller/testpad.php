@@ -13,6 +13,41 @@ defined('SYSPATH') or die('No direct script access.');
  */
 class Controller_Testpad extends Controller {
 
+    use Trait_Oauth2_Utils;
+
+    public function action_plural()
+    {
+        echo "<pre>";
+        $types = [
+            'post', 'wallpost', 'message', 'comment', 'testimonial', 'attachment',
+            'checkin', 'subscriber', 'like', 'event', 'conversation', 'subscription',
+            'liker', 'page', 'user', 'interaction', 'action', 'album', 'library'
+        ];
+        foreach($types as $type)
+        {
+            print_r(Inflector::plural($type));
+            echo "<br>";
+        }
+    }
+
+    public function action_password()
+    {
+        $out   = '<h2>Type in your password to hash it</h2>';
+        $out   .= Form::open($this->request->uri(), ['enctype' => 'multipart/form-data', 'method' => 'GET']);
+        $out   .= Form::input('password');
+        $out   .= Form::submit('submit', 'Get Hash');
+        $out   .= Form::close();
+        $out   .= '<br>';
+
+        $query   = $this->request->query();
+        if ($query)
+        {
+            $password = Arr::get($query, 'password');
+            $out .= static::hash('password');
+        }
+        $this->response->body($out);
+    }
+
     public function action_privacy()
     {
 
@@ -23,22 +58,24 @@ class Controller_Testpad extends Controller {
         $mongo = new Mongo();
         $db    = $mongo->selectDB("db");
         $colls = $db->listCollections();
-        echo '<h2>Click on a link to export the collection</h2>';
-        echo '<ul>';
+        $out   = '<h2>Click on a link to export the collection</h2>';
+        $out .= '<ul>';
         foreach ($colls as $col)
         {
-            echo '<li>' . HTML::anchor('/testpad/export/?collection=' . substr($col, 3), $col, ['target' => '_blank']) . '</li>';
+            $out .= '<li>' . HTML::anchor('/testpad/export/?collection=' . substr($col, 3), $col, ['target' => '_blank']) . '</li>';
         }
-        echo '</ul>';
+        $out .= '</ul>';
         $query   = $this->request->query();
         if ($query)
         {
             $collection = Arr::get($query, 'collection');
             $name       = APPPATH . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . "mongo.$collection.json";
-            exec('mongoexport --db db --collection ' . $collection .  ' --out ' . $name);
+            exec('mongoexport --db db --collection ' . $collection . ' --out ' . $name);
+            chmod($name, 0776);
             //$this->response->headers('Content-type', 'application/json');
             return $this->response->send_file($name, NULL, ['delete' => TRUE]);
         }
+        $this->response->body($out);
     }
 
     public function action_import()
@@ -49,7 +86,7 @@ class Controller_Testpad extends Controller {
         echo Form::submit('submit', 'Upload');
         echo Form::close();
         $file     = Arr::get($_FILES, 'json');
-        $output = '';
+        $output   = '';
 
         if ($file)
         {
@@ -74,7 +111,8 @@ class Controller_Testpad extends Controller {
 
                 $output = exec('mongoimport --db db --collection ' . $collection . ' --file ' . $filename);
 
-                unset($tmp, $filename);
+                unlink($tmp);
+                unlink($filename);
             }
 
             $this->response->body($output);
@@ -254,10 +292,10 @@ class Controller_Testpad extends Controller {
 
     public function action_parseco()
     {
-//        foreach (range('Z', 'A') as $value)
-//        {
+        foreach (range('A', 'Z') as $value)
+        {
         $sep   = DIRECTORY_SEPARATOR;
-        $s     = SimpleHTML::file_get_html($_SERVER['DOCUMENT_ROOT'] . "/company/#.html");
+        $s     = SimpleHTML::file_get_html($_SERVER['DOCUMENT_ROOT'] . "/company/$value.html");
         $table = $s->find('table', 0);
         //die(Debug::vars($table));
         $trs   = $table->find('tr');
@@ -294,12 +332,14 @@ class Controller_Testpad extends Controller {
                     $ts[$t][$key]   = trim($td->innertext());
                 }
             }
-            $ts[$t]['type'] = 'agency';
-            echo Debug::vars(Mongo_Document::factory('page')->create($ts[$t]));
+            $ts[$t]['type'] = 'company';
+            $ts[$t]['subtype'] = 'agency';
+            echo Debug::vars(Document::factory('page')->create($ts[$t]));
         }
-//        }
+        }
         die();
     }
+
 
     //put your code here
 

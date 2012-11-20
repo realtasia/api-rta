@@ -28,7 +28,7 @@ class Model_Page extends Document {
     }
 
     /**
-     * Create a default post with new values.
+     * Create a page with new values.
      *
      * @param array $params
      * @return boolean
@@ -42,18 +42,29 @@ class Model_Page extends Document {
             'parent._id' => 1
         ], ['sparse' => true, 'safe' => true]);
         $this->collection()->ensureIndex([
-            'type' => 1,
+            'type' => 1, 'subtype' => 1
         ]);
 
         $type = Arr::get($params, 'type');
+        $subtype = Arr::get($params, 'subtype');
 
-        if(isset($params['name']) && $type === 'agency')
-            $params['uri'] = '/agency/' . URL::title($params['name']);
+        if(isset($params['name']))
+        {
+            $params['uri'] = "/$type/$subtype/" . URL::title($params['name']);
+            $params['slug'] = URL::title($params['name']);
+        }
+
 
         // overwrite defaults
         $data                     = Arr::overwrite(static::_page_defaults($type), $params);
         // merge with defaults
         $data                     = Arr::merge(static::_page_defaults($type), $data);
+
+        if($id = Arr::get($params, '_id'))
+        {
+            $this->atomic($id);
+            unset($params['_id']);
+        }
 
         // sort - for some sanity in debugging.. :-)
         ksort($data);
@@ -68,7 +79,7 @@ class Model_Page extends Document {
         } catch (MongoException $e)
         {
             Debug::error(
-                    "MongoException while trying to create post: :post \n"
+                    "MongoException while trying to create page: :page \n"
                     . "Error Message- :message \n"
                     . "Error Code- :code", [
                 ':post'    => print_r($data, TRUE),
@@ -78,7 +89,7 @@ class Model_Page extends Document {
             return false;
         }
 
-        return (array) $this->as_array();
+        return $this;
     }
 
 
@@ -140,13 +151,10 @@ class Model_Page extends Document {
      */
     public function after_load()
     {
-        $id = $this->_id instanceof MongoID ? $this->_id : new MongoID($this->_id);
+        $id = parent::check_id($this->_id);
 
-        $this->created = date('c', $id->getTimestamp());
-        if(is_numeric($this->modified))
-        {
-            $this->modified  = date('c', $this->modified);
-        }
+        $this->created = $id->getTimestamp();
+
         // if there is no current user, no further formatting required.
         if ($this->current_user === NULL)
             return $this;
@@ -154,57 +162,21 @@ class Model_Page extends Document {
         $current_user = (object) $this->get_default_user_fields();
 
         // check if it's the same user
-        if ($this->user['_id']->__toString() === $current_user->_id->__toString())
+        if ((string) $this->user['_id'] === (string) $current_user->_id)
         {
             $this->can_edit      = true;
-            $this->connections   = static::get_all_connection_routes($this->_id);
+            $this->connections   = static::get_all_connection_routes($this->_id, $this->type, $this->subtype);
         }
         else
         {
             $interactions       = parent::factory('interaction', NULL, $current_user->_id);
-            $this->interactions = $interactions->interacting($this->_id, 'post');
+            $this->interactions = $interactions->interacting($this->_id, 'page');
             $this->actions      = static::get_action_routes($this->_id);
-            $this->connections  = static::get_public_connection_routes($this->_id);
+            $this->connections  = static::get_public_connection_routes($this->_id, $this->type, $this->subtype);
         }
         // comments processing in stringify
 
         return $this;
-    }
-
-    /**
-     * Using this to format some fields. Can't set subarray values via model.
-     * Keep getting error that modifying overloaded property has no effect.
-     * Apparently, that is the way __get() works. So have to do it here instead.
-     *
-     * @param array $arr
-     * @return array
-     */
-    public function stringify(array $arr)
-    {
-        $comments = Arr::get($arr, 'comments');
-        $current_user = (object) $this->get_default_user_fields();
-
-        // we should trigger the comment model's formatting so each comment in
-        // this post is properly formatted.
-        if(!empty($comments))
-        {
-            foreach ($comments as $key => $value)
-            {
-                $comment = parent::factory('comment');
-                if($current_user)
-                {
-                    // check if there is a current user
-                    $comment->current_user = $current_user;
-                }
-                // trigger comment formatting and defaults
-                $comment->after_load();
-
-                // now each comment in the post is properly formatted.
-                $arr['comments'][$key] = $comment->stringify($comment->to_array());
-            }
-        }
-
-        return parent::stringify($arr);
     }
 
     /**
@@ -235,11 +207,11 @@ class Model_Page extends Document {
      * @param string|MongoID $user_id
      * @return array
      */
-    protected static function get_action_routes($user_id)
+    protected static function get_action_routes($_id)
     {
         $actions = [];
 
-        foreach(['like', 'unlike', 'subscribe', 'unsubscribe', 'comment'] as $k => $v)
+        foreach(['like', 'unlike', 'subscribe', 'unsubscribe'] as $v)
         {
             $actions[$v] = Router::post($v, $user_id);
         }
@@ -254,11 +226,11 @@ class Model_Page extends Document {
      * @param string|MongoID $user_id
      * @return array
      */
-    protected static function get_all_connection_routes($_id)
+    protected static function get_all_connection_routes($_id, $type, $subtype = NULL)
     {
-        $actions = ['privacy' => Router::post('privacy', $_id)] ;
+        $actions = ['privacy' => Router::page('privacy', $_id)] ;
 
-        return Arr::merge($actions, static::get_public_connection_routes($_id));
+        return Arr::merge($actions, static::get_public_connection_routes($_id, $type));
     }
 
     /**
@@ -267,13 +239,32 @@ class Model_Page extends Document {
      * @param string|MongoID $user_id
      * @return array
      */
-    protected static function get_public_connection_routes($_id)
+    protected static function get_public_connection_routes($_id, $type, $subtype = NULL)
     {
-        $actions = [];
+        $actions = [
+            'likers',
+            'feed',
+            'subscribers',
+            'testimonials',
+        ];
 
-        foreach(['likers', 'comments', 'subscribers'] as $k => $v)
+        switch($type)
         {
-            $actions[$v] = Router::post($v, $_id);
+            case 'location':
+                if($subtype && $subtype === 'estate')
+                {
+                    $actions[] = 'child-locations';
+                }
+                $actions[] = 'pictures';
+                break;
+            case 'company':
+                $actions[] = 'members';
+                break;
+        }
+
+        foreach($actions as $v)
+        {
+            $actions[$v] = Router::page($v, $_id);
         }
 
         return $actions;
@@ -282,43 +273,65 @@ class Model_Page extends Document {
 
     protected static function _page_defaults($type)
     {
+        $counts = $type == 'library' ? static::library_counts() : static::counts();
+
         $defaults = array(
             'content' => '',
-            'counts'  => [
-                'attachments'  => 0,
-                'comments'     => 0,
-                'events'       => 0,
-                'likers'       => 0,
-                'listings'     => 0,
-                'posts'        => 0,
-                'subscribers'  => 0,
-                'testimonials' => 0
-            ],
+            'counts'  => $counts,
             'likers'       => [],
             'modified' => time(),
             'parent'   => [],
-            'slug'  => '',
+            'privacy'   => ['is' => 'PUBLIC'],
             'stats' => [],
             'status'      => 'active',
             'subscribers' => [],
             'subtype' => '',
             'name'    => '',
             'type'    => $type,
+            'slug'    => '',
             'uri'     => '',
             'user'    => [],
-            'members' => [],
             'attachments' => [],
         );
 
         switch ($type)
         {
-            case 'location': return $defaults;
-            case 'agency' : return Arr::merge($defaults, static::_company_defaults());
+            case 'location': return Arr::merge($defaults, ['attachments' => []]);
+            case 'company' : return Arr::merge($defaults, static::_company_defaults());
+                default: return $defaults;
         }
     }
 
     protected static function _company_defaults()
     {
-        return ['license' => '', 'counts' => ['members' => 0]];
+        return ['license' => '', 'counts' => ['members' => 0], 'members' => []];
+    }
+
+    protected static function counts()
+    {
+        return [
+            'attachments'  => 0,
+            'checkins'     => 0,
+            'events'       => 0,
+            'likers'       => 0,
+            'listings'     => 0,
+            'posts'        => 0,
+            'subscribers'  => 0,
+            'members'      => 0,
+            'testimonials' => 0
+        ];
+    }
+
+    protected static function library_counts()
+    {
+        return [
+            'pictures'       => 0,
+            'videos'         => 0,
+            'documents'      => 0,
+            'albums' => [
+                'public' => 0,
+                'private' => 0,
+            ]
+        ];
     }
 }

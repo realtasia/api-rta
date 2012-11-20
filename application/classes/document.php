@@ -1,4 +1,6 @@
-<?php defined('SYSPATH') or die('No direct script access.');
+<?php
+
+defined('SYSPATH') or die('No direct script access.');
 
 /**
  * Description of document
@@ -10,7 +12,9 @@
  * @copyright 2012 Realtasia Pte Ltd
  */
 class Document extends Mongo_Document {
+
     use Trait_Oauth2_Utils;
+
     /**
      *
      * @var mixed MongoID || string. Used if a record(s) is retrieved for an
@@ -33,7 +37,6 @@ class Document extends Mongo_Document {
         'testimonials' => 0,
     );
 
-
     /**
      * shorthand for findOne
      *
@@ -43,7 +46,7 @@ class Document extends Mongo_Document {
      */
     public function get($params, array $fields = [], $object = TRUE)
     {
-        if($this->load($params, $fields))
+        if ($this->load($params, $fields))
         {
             $ret = $this->stringify($this->as_array());
             return $object ? (object) $ret : $ret;
@@ -53,50 +56,31 @@ class Document extends Mongo_Document {
     }
 
     /**
-     * const SAVE_INSERT = 'insert';
-     * const SAVE_UPDATE = 'update';
-     * const SAVE_UPSERT = 'upsert';
+     * I should have just stuck to using the official mongo driver. This is a
+     * method that changes the values of the fields in a loaded document.
+     * Hacky but works.
+     *
+     * Dot(.) notation allowed
+     *
+     * // returns Document[settings][privacy][something][else] = NULL;
+     * $this->modify('settings.privacy.something.else', NULL)
+     *
+     * @param string $key
+     * @param mixed $value
      */
-//    public function before_save($action)
-//    {
-//        $time           = time();
-//        $this->modified = $time;
-//        if (isset($this->active))
-//        {
-//            $this->active = $time;
-//        }
-//    }
-
     public function modify($key, $value)
     {
-        $object = Arr::delim_to_multi([$key => $value]);
+        // a method I wrote in Arr class
+        $object = Arr::delim_to_multi([$key           => $value]);
         $this->_object = Arr::merge($this->_object, $object);
     }
 
-    public function after_save($action)
-    {
-
-    }
-
-    public function before_load()
-    {
-
-    }
-
-    public function after_load()
-    {
-    }
-
-    public function before_delete()
-    {
-
-    }
-
-    public function after_delete()
-    {
-
-    }
-
+    /**
+     * Does the same as __construct except that we don't have to construct.
+     * Colin's library is pissing me off.
+     *
+     * @param mixed $id
+     */
     public function atomic($id)
     {
         if ($id !== NULL)
@@ -115,13 +99,18 @@ class Document extends Mongo_Document {
         }
     }
 
+    /**
+     * Catches the Mongo Exceptions and logs it.
+     *
+     * @param boolean $safe
+     * @return boolean
+     */
     public function save($safe = TRUE)
     {
         try
         {
             parent::save($safe);
-        }
-        catch (MongoException $e)
+        } catch (MongoException $e)
         {
             Debug::error('Error: :e with values :v', [
                 ':e' => $e->getMessage(),
@@ -134,6 +123,48 @@ class Document extends Mongo_Document {
         return true;
     }
 
+    /**
+     * Utility to cast array values to a certain type.
+     *
+     * @param array $array
+     * @param string $type can be UPPER, BOOL or INT currently
+     * @return array
+     */
+    public function typecast(array $array, $type)
+    {
+        foreach ($array as $key => $value)
+        {
+            if (is_array($value))
+            {
+                $array[$key] = $this->typecast($value, $type);
+            }
+            else
+            {
+                switch ($type)
+                {
+                    case 'bool' :
+                        if (is_numeric($value))
+                        {
+                            $array[$key] = (bool) $value;
+                        }
+                        break;
+                    case 'int' :
+                        if (is_numeric($value))
+                        {
+                            $array[$key] = (int) $value;
+                        }
+                        break;
+                    case 'upper' :
+                        $array[$key] = strtoupper((string) $value);
+                        break;
+                    default :
+                        $array[$key] = $value;
+                        break;
+                }
+            }
+        }
+        return $array;
+    }
 
     /**
      * Testing revealed that can't query the DB with string IDs if it isn't an
@@ -158,7 +189,7 @@ class Document extends Mongo_Document {
      */
     protected static function plural($type)
     {
-        switch($type)
+        switch ($type)
         {
             case 'wallpost': return 'posts';
             case 'testimonial': return 'testimonials';

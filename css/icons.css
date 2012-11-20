@@ -86,20 +86,20 @@ All Icons*/
 .app{background:url("/images/sprites/app.png") no-repeat;}
 .app.filter{background-position:-378px 0;width:20px;height:20px;}
 .hovering .app.filter{background-position:-357px 0;width:20px;height:20px;}
-.active .app.inbox{background-position:-175px 0;width:34px;height:34px;}
-.hovering .app.inbox{background-position:-105px 0;width:34px;height:34px;}
+.app.inbox{background-position:-175px 0;width:34px;height:34px;}
+.hovering .app.inbox,.app.inbox:hover{background-position:-105px 0;width:34px;height:34px;}
 .app.listingsDirectory{background-position:-294px 0;width:20px;height:21px;}
 .app.locationsDirectory{background-position:-273px 0;width:20px;height:21px;}
-.hovering .app.meesageNew{background-position:-399px 0;width:20px;height:20px;}
+.hovering .app.messageNew{background-position:-399px 0;width:20px;height:20px;}
 .app.membersDirectory{background-position:-252px 0;width:20px;height:21px;}
 .app.messageNew{background-position:-315px 0;width:20px;height:20px;}
 .app.messageRead{background-position:-231px 0;width:20px;height:22px;}
 .hovering .app.messageRead{background-position:-210px 0;width:20px;height:22px;}
-.active .app.notification{background-position:0 0;width:34px;height:34px;}
-.hovering .app.notification{background-position:-140px 0;width:34px;height:34px;}
+.app.notification{background-position:0 0;width:34px;height:34px;}
+.hovering .app.notification,.app.notification:hover{background-position:-140px 0;width:34px;height:34px;}
 .app.settings{background-position:-70px 0;width:34px;height:34px;}
 .hovering .app.settings{background-position:-35px 0;width:34px;height:34px;}
-.app.settingsPrivacy{background-position:-525px 0;width:20px;height:20px;}
+.app.settingsPrivacy{background-position:-525px -1px;width:20px;height:16px;}
 .app.settingsSocial{background-position:-336px 0;width:20px;height:20px;}
 .app.settingsSubscriptions{background-position:-441px 0;width:20px;height:20px;}
 .app.showMore{background-position:-462px 0;width:20px;height:20px;}

@@ -43,7 +43,7 @@ class Model_User_Collection extends Collection {
         $defaults = [
            'limit' => 11, 'skip' => 0, 'roles' => [], 'sort' => 'alpha',
            's' => '', 'include_ids' => [], 'status' => ['$ne' => 'terminated'],
-            'privacy' => 'PUBLIC', 'company' => null
+            'privacy' => NULL, 'company' => null
         ];
 
         // set some empty arrays
@@ -54,7 +54,8 @@ class Model_User_Collection extends Collection {
         // status is a must for a query. It is the fisrt field of a compound index
         $query['status'] = $status;
 
-        $query['settings.privacy.is'] = $privacy;
+        if($privacy)
+            $query['settings.privacy.is'] = $privacy;
 
         /*
          * For some reason, explain() showed Mongo wasn't using any of the indexes
@@ -150,7 +151,7 @@ class Model_User_Collection extends Collection {
             $return[] = $ret;
         }
 
-        return $return;
+        return array_filter($return);
     }
 
     /**

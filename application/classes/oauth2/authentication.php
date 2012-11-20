@@ -58,9 +58,9 @@ class Oauth2_Authentication {
      */
     public function __construct()
     {
-        static::$mClient  = Mongo_Document::factory('oauth2_client');
-        static::$mSession = Mongo_Document::factory('oauth2_session');
-        static::$mResource = Mongo_Document::factory('oauth2_resource');
+        static::$mClient  = Document::factory('oauth2_client');
+        static::$mSession = Document::factory('oauth2_session');
+        static::$mResource = Document::factory('oauth2_resource');
         static::$success = new Oauth2_Success;
         static::$error = new Oauth2_Error;
     }
@@ -87,8 +87,8 @@ class Oauth2_Authentication {
         // if user registration fails, return false
         if(!$user = static::$mResource->check_password($values['username'], $values['password']))
         {
-            Debug::log('unauthorised invoked in check_password');
-            return static::$error->create('unauthorized_client');
+            Debug::log('Access Denied in check_password');
+            return static::$error->create('access_denied');
         }
 
         // get or create a new token

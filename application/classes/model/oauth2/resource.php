@@ -27,7 +27,7 @@ class Model_Oauth2_Resource extends Document {
             ),
             'password' => static::hash($password));
 
-        $user = Mongo_Document::factory('user');
+        $user = Document::factory('user');
         if($user->load($params, ['_id']));
 
         return $user->loaded() ? $this->stringify($user->as_array()) : false;

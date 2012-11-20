@@ -8,4 +8,7 @@ return [
     'not_empty' => 'This is a required entry, please try again',
     'numeric' => 'Please enter numbers [0-9] only',
     'alpha' => 'Please enter letters [A-z] only',
+    'info' => [
+        
+    ]
 ];

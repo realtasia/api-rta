@@ -27,11 +27,11 @@ class Controller_Page extends Controller_Resource {
         if (parent::logged_in())
         {
             static::$model =
-                    Mongo_Document::factory('page', null, static::$user_id);
+                    Document::factory('page', null, static::$user_id);
         }
         else
         {
-            static::$model = Mongo_Document::factory('page');
+            static::$model = Document::factory('page');
         }
     }
 
@@ -72,9 +72,10 @@ class Controller_Page extends Controller_Resource {
         $id = $this->request->param('id');
 
         if ($id)
-            return $this->data(static::$model->get($id));
-
-        return $this->error('invalid_request');
+            return $this->get($id);
+        else
+            // no id, this is a search
+            return $this->search();
     }
 
     /**
@@ -109,7 +110,7 @@ class Controller_Page extends Controller_Resource {
         static::$params['object_id'] = $this->request->param('id');
         static::$params['object_type'] = 'user';
 
-        $data = Mongo_Document::factory('interaction')
+        $data = Document::factory('interaction')
                 ->collection()
                 ->likers(static::$params);
 
@@ -124,7 +125,7 @@ class Controller_Page extends Controller_Resource {
         static::$params['object_id'] = $this->request->param('id');
         static::$params['object_type'] = 'post';
 
-        $data = Mongo_Document::factory('interaction')
+        $data = Document::factory('interaction')
                 ->collection()
                 ->subscribers(static::$params);
 
@@ -338,6 +339,19 @@ class Controller_Page extends Controller_Resource {
     public function action_unsubscribe()
     {
         return parent::interact('unsubscribe', 'post');
+    }
+
+
+    protected function search()
+    {
+        if(parent::logged_in())
+            $pages = Collection::factory('page')
+                                    ->search(static::$params, static::$user_id);
+        else
+            $pages = Collection::factory('page')
+                                    ->search(static::$params);
+
+        return $this->data($pages);
     }
 
     /*     * ************************************************************************

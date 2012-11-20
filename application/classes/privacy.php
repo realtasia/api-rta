@@ -44,10 +44,10 @@ class Privacy {
     {
         if ((is_string($load) || $load instanceof MongoID) && $model)
         {
-            $this->document = Mongo_Document::factory(Inflector::singular($model), $load);
+            $this->document = Document::factory(Inflector::singular($model), $load);
         }
 
-        if (is_object($load) && $load instanceof Mongo_Document)
+        if (is_object($load) && $load instanceof Document)
         {
             $this->document = $load;
         }

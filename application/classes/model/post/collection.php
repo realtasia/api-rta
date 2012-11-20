@@ -23,7 +23,8 @@ class Model_Post_Collection extends Collection {
         $defaults = [
            'status' => 'active', 'skip' => 0, 'limit' => 11, 'sort' => 'active',
            's' => '', 'include_ids' => [], 'page_id' => null, 'parent_id' => null,
-           'user_id' => null, 'type' => null, 'listing' => [], 'to_id' => null
+           'user_id' => null, 'type' => null, 'listing' => [], 'to_id' => null,
+            'privacy' => NULL,
         ];
 
         // set some empty arrays
@@ -56,7 +57,8 @@ class Model_Post_Collection extends Collection {
         if($page_id)
             $query['page._id'] = $page_id;
 
-        $query['settings.privacy.is'] = $privacy;
+        if($privacy)
+            $query['privacy.is'] = $privacy;
 
         if($parent_id)
             $query['parent._id'] = $parent_id;
@@ -84,18 +86,9 @@ class Model_Post_Collection extends Collection {
                 ->sort($sort)
                 ->skip($skip);
 
-        //Debug::log($user_id);
-        //Debug::log(parent::get_user($user_id));
-//            if($user_id && $usr = $this->get_user($user_id))
-//            {
-//                $row->current_user = $usr;
-//                $row->after_load();
-//            }
-
         while($results->hasNext())
         {
             $row = $results->getNext();
-                    Debug::log(static::$user_id);
             if($user_id && $usr = $this->get_user($user_id))
             {
                 $row->current_user = $usr;
@@ -106,7 +99,7 @@ class Model_Post_Collection extends Collection {
             $return[] = $ret;
         }
 
-        return $return;
+        return array_filter($return);
     }
 
     /**

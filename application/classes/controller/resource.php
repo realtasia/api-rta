@@ -83,7 +83,7 @@ abstract class Controller_Resource extends Controller_Abstract{
         if(!$user = Session::instance()->get($key))
         {
             // fetch user from db
-            $user = (object) Mongo_Document::factory('user');
+            $user = (object) Document::factory('user');
             $user = $user->get(static::$user_id);
             // unset some sensitive info
             $user->password = '';
@@ -123,16 +123,28 @@ abstract class Controller_Resource extends Controller_Abstract{
     /**
      * Utility method to perform the interaction
      *
-     * @todo add email Job.
      * @param string $interaction like|unlike|subscribe|unsubscribe
      */
     protected function interact($interaction, $object_type)
     {
-        $interact = Mongo_Document::factory('interaction', null, static::$user_id);
-        if($interact->{$interaction}($this->request->param('id'), $object_type))
+        $id = $this->request->param('id');
+        // 
+        if($this->logged_in())
+        {
+            $interact = Document::factory('interaction', null, static::$user_id);
+            if($interact->{$interaction}($id, $object_type))
+            {
+                // Job added only for positive interactions.
+                if(strpos($interaction, 'un') !== 0)
+                {
+                    Job::add($id, $object_type, static::$user_id);
+                }
                 return $this->data(['success' => 1]);
+            }
+            return $this->fail('user/generic', 'server_error');
+        }
 
-        return $this->fail('user/generic', 'server_error');
+        return $this->error('access_denied');
     }
 }
 // End Welcome

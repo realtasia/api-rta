@@ -1,4 +1,7 @@
-<?php defined('SYSPATH') or die('No direct script access.');
+<?php
+
+defined('SYSPATH') or die('No direct script access.');
+
 /**
  * Description of comment
  *
@@ -10,6 +13,7 @@
  */
 class Model_Comment extends Document {
 
+    protected $after_delete_fields = [];
 
     /**
      * Creates a comment.
@@ -19,18 +23,18 @@ class Model_Comment extends Document {
     public function create($params)
     {
         $this->collection()->ensureIndex([
-            'type' => 1, 'status' => 1, 'modified' => -1
-        ], ['safe' => true]);
+            'type'     => 1, 'status'   => 1, 'modified' => -1
+                ], ['safe' => true]);
         $this->collection()->ensureIndex([
             'user._id' => 1
-        ], ['safe' => true]);
+                ], ['safe' => true]);
         $this->collection()->ensureIndex([
-            'object._id' => 1, 'object.type' => 1
-        ], [ 'safe' => true]);
+            'post._id'  => 1, 'post.type' => 1
+                ], [ 'safe' => true]);
 
         $params = $this->check_params($params);
 
-        if(isset($params['_id']))
+        if (isset($params['_id']))
         {
             $this->atomic($params['_id']);
             unset($params['_id']);
@@ -38,7 +42,7 @@ class Model_Comment extends Document {
 
         $this->load_values($params);
 
-        if($this->save())
+        if ($this->save())
             return $this;
 
         return false;
@@ -54,23 +58,24 @@ class Model_Comment extends Document {
     public function create_message($params)
     {
         $args = [
-            'object' => [
-                '_id' => $params['post']['_id'],
-                'type' => $params['post']['type'],
+            'post' => [
+                '_id'     => $params['post']['_id'],
+                'type'    => $params['post']['type'],
             ],
             'message' => $params['message'],
             'user'    => $params['user'],
             'type'    => 'message'
         ];
 
-        if(isset($params['_id']))
+        if (isset($params['_id']))
         {
             $this->atomic($params['_id']);
+            unset($params['_id']);
         }
 
         $this->load_values($params);
 
-        if($this->save())
+        if ($this->save())
             return $this;
 
         return false;
@@ -87,13 +92,13 @@ class Model_Comment extends Document {
         if (!$this->current_user->loaded())
             return false;
 
-        $pars = $params;
-        $pars['object._id'] = Arr::path($params, 'object._id');
-        $pars['object.type'] = Arr::path($params, 'object.type');
+        $pars                = $params;
+        $pars['post._id']  = Arr::path($params, 'post._id');
+        $pars['post.type'] = Arr::path($params, 'post.type');
 
         $comment = Validation::factory($pars)
-                ->rule('object._id', 'not_empty')
-                ->rule('object.type', 'not_empty')
+                ->rule('post._id', 'not_empty')
+                ->rule('post.type', 'not_empty')
                 ->rule('message', 'not_empty')
                 ->rule('type', 'not_empty');
 
@@ -101,8 +106,8 @@ class Model_Comment extends Document {
 
         if ($comment->check())
         {
-            $params['user']  = isset($params['user']) ? $params['user'] : $user;
-            $params['counts'] = ['likers' => 0];
+            $params['user']   = isset($params['user']) ? $params['user'] : $user;
+            $params['counts'] = ['likers'          => 0];
             $params['likers'] = [];
             $params['status'] = isset($params['status']) ? $params['status'] : 'active';
             return $params;
@@ -110,39 +115,41 @@ class Model_Comment extends Document {
     }
 
     /**
-     * Deletes a comment by comment id. An object id will help.
-     *
-     * @todo Delete comment likers as well!
-     * @param string|MongoID $object_id
-     * @param string|MongoID $comment_id
-     * @return type
+     * Extract the post and user id of this comment. Possibly, retrieve the post
+     * object.
      */
-    public function delete($comment_id, $object_id = NULL)
+    public function before_delete()
     {
-        $query = array('_id' => $comment_id);
+        $this->after_delete_fields = $this->as_array();
+    }
 
-        if ($object_id)
+    /**
+     * Job should have a delete function with given params. Updates counts and
+     * deletes potential likers to this comment.
+     */
+    public function after_delete()
+    {
+        $id = Arr::get($this->after_delete_fields, '_id');
+        $post = Arr::get($this->after_delete_fields, 'post');
+        $user = Arr::get($this->after_delete_fields, 'user');
+        $counts = Arr::get($this->after_delete_fields, 'counts');
+
+        $object = parent::factory('post', $post['_id']);
+
+        $object->inc('counts.comments', -1);
+        $object->pull('comments', $this->after_delete_fields);
+        $object->save();
+
+        if($counts && $counts['likers'] > 1)
         {
-            $query['object._id'] = $object_id;
+            parent::factory('interaction')->collection()
+                    ->remove_safe([
+                        'object_id' => $id,
+                        'object_type' => 'comment',
+            ], ['multiple' => true]);
         }
 
-        try
-        {
-            $this->collection(true)->remove_safe($query, ['justOne' => TRUE]);
-
-        }
-        catch (MongoException $e)
-        {
-            Debug::error(
-                  "MongoCursorException while trying to delete comments id: :comment in :post_type post: :post. \n"
-                  . "Error Message- :message \n"
-                  . "Error Code- :code", array(
-               ':page' => $page->_id, ':post_type' => $post->type,
-               ':comment' => $comment_id, ':post' => $post_id,
-               ':message' => $e->getMessage(), ':code' => $e->getCode()
-            ));
-            return FALSE;
-        }
+        parent::factory('user', $user['_id'])->save();
     }
 
     /**
@@ -152,45 +159,26 @@ class Model_Comment extends Document {
      */
     public function after_save($action)
     {
-        $i = parent::factory('interaction', null, (string) $this->current_user->_id);
-        $i->interact('subscribe', $this->object['_id'], $this->object['type']);
-        // guess the update for this interaction.
-        $this->guess_update();
-
-        $count_field = static::$count_field;
-
-        $interactor = $this->get_default_user_fields();
-
-        // fetch the concerned object
-        $object = parent::factory($this->object['type'], $this->object['_id']);
-
-
-        // update the latest interactions in the object
-        if (static::$inc === 1)
+        if ($action === parent::SAVE_INSERT || $action === parent::SAVE_UPSERT)
         {
-            // add this subscriber to the list
-            $object->addToSet('comments', $interactor);
-        }
-        else
-        {
-            // we just remove the interaction.
-            $object->pull('comments', ['_id' => $interactor['_id']]);
-        }
+            $i = parent::factory('interaction', null, $this->user['_id']);
+            $i->interact('subscribe', $this->post['_id'], 'post');
 
-        // increment the count for this interaction
-        $object->inc('counts.comments', static::$inc);
-        $object->save();
+            $object = parent::factory($this->post['type'], $this->post['_id']);
 
-        /*
-         * Small hack to ensure a capped interaction list.
-         * @see https://github.com/colinmollenhour/mongodb-php-odm/issues/27#issuecomment-9950515
-         */
-        if (static::$inc === 1)
-        {
-            $object->collection()->update_safe(
-              ['_id' => $this->object['_id'], 'comments' => ['$size' => 6]],
-              ['$pop' => ['comments' => 1]]
-            );
+            $object->inc('counts.comments');
+            $object->addToSet('comments', $this->as_array());
+            $object->save();
+            /*
+             * Small hack to ensure a capped interaction list.
+             * @see https://github.com/colinmollenhour/mongodb-php-odm/issues/27#issuecomment-9950515
+             */
+            if (static::$inc === 1)
+            {
+                $object->collection()->update_safe(
+                        ['_id'      => $this->_id, 'comments' => ['$size' => 6]], ['$pop' => ['comments' => 1]]
+                );
+            }
         }
 
         // update the user's last active
@@ -215,20 +203,21 @@ class Model_Comment extends Document {
                 ->get($this->object_id, ['user']);
 
         // check if it's the same user
-        if($post->user->_id === $current_user->_id)
+        if ($post->user->_id === $current_user->_id)
         {
             $this->can_delete = true;
         }
 
         // check if it's the same user
-        if($this->user->_id === $current_user->_id)
+        if ($this->user->_id === $current_user->_id)
         {
             $this->can_delete = true;
         }
 
-        $interactions = Model_Document::factory('interaction', NULL, $current_user->_id);
+        $interactions       = Model_Document::factory('interaction', NULL, $current_user->_id);
         $this->interactions = $interactions->interacting($this->_id, 'comment');
     }
 
 }
+
 ?>

@@ -244,7 +244,8 @@ class Model_Image extends Model
      */
     public static function unique_filename($filename, $user)
     {
-        return new MongoID($user->username . uniqid()) . '.' . self::_extension($filename);
+        $name = (string) new MongoID($user->username . uniqid());
+        return $name . '.' . self::_extension($filename);
     }
 
     /**

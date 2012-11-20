@@ -107,7 +107,7 @@ Kohana::modules([
     'devtools'   => MODPATH . 'devtools', // Devtools (route checker etc...)
         // 'codebench'  => MODPATH.'codebench',  // Benchmarking tool
     'database'   => MODPATH.'database',   // Database access
-        // 'image'      => MODPATH.'image',      // Image manipulation
+    'image'      => MODPATH.'image',      // Image manipulation
         // 'orm'        => MODPATH.'orm',        // Object Relationship Mapping
         // 'unittest'   => MODPATH.'unittest',   // Unit testing
         // 'userguide'  => MODPATH.'userguide',  // User guide and API documentation
@@ -125,6 +125,27 @@ Route::set('singpost', 'singpost(/<action>(/<id>))')
 Route::set('user', 'user(/<action>(/<id>))')
         ->defaults([
             'controller' => 'user',
+            'action'     => 'index',
+            'id'         => null
+        ]);
+
+Route::set('post', 'post(/<action>(/<id>))')
+        ->defaults([
+            'controller' => 'post',
+            'action'     => 'index',
+            'id'         => null
+        ]);
+
+Route::set('page', 'page(/<action>(/<id>))')
+        ->defaults([
+            'controller' => 'page',
+            'action'     => 'index',
+            'id'         => null
+        ]);
+
+Route::set('media', 'media(/<action>(/<id>))')
+        ->defaults([
+            'controller' => 'media',
             'action'     => 'index',
             'id'         => null
         ]);

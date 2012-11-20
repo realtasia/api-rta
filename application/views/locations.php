@@ -34,8 +34,8 @@
                         <ul class="dropdown-menu">
                             <li><a href="#" id="sortNewest">Newest</a></li>
                             <li><a href="#" id="sortPopular">Popular</a></li>
-                        </ul>                    
-                    </div>                    
+                        </ul>
+                    </div>
                 </section> <!--  sort button & result count -->
                 <div class="widgetOuterBox relative">
                     <article class="contentArea location widgetContentBG relative">
@@ -44,12 +44,12 @@
                                 <i class="hovercards landed"></i>
                             </div> <!-- locations thumbnail -->
                             <div class="locationRight relative">
-                                <h3><a href="#">Lakeside Grove <a><small>Private Landed</small></a></a></h3>
+                                <h3><a href="#">Lakeside Grove<a><small>Private Landed</small></a></a></h3>
                                 <ul class="locationDetails">
                                     <li><label>Estate</label><span>Jurong</span></li>
                                     <li><label>Locality</label><span>Lakeside</span></li>
-                                    <li><label>Type</label><span>Landed Housing</span></li>                                    
-                                </ul>                                   
+                                    <li><label>Type</label><span>Landed Housing</span></li>
+                                </ul>
                             </div> <!-- locations content -->
                         </div> <!-- main location content -->
                         <div class="postActions">
@@ -76,8 +76,8 @@
                                 <ul class="locationDetails">
                                     <li><label>Estate</label><span>Jurong</span></li>
                                     <li><label>Locality</label><span>Jurong East</span></li>
-                                    <li><label>Type</label><span>Apartments</span></li>                                    
-                                </ul>                                   
+                                    <li><label>Type</label><span>Apartments</span></li>
+                                </ul>
                             </div> <!-- locations content -->
                         </div> <!-- main location content -->
                         <div class="postActions">
@@ -92,7 +92,7 @@
                             </ul>
                         </div> <!-- postActions -->
                     </article>
-                </div> <!-- location -->                
+                </div> <!-- location -->
                 <div class="widgetOuterBox relative">
                     <article class="contentArea location widgetContentBG relative">
                         <div class="mainlocationContent">
@@ -104,8 +104,8 @@
                                 <ul class="locationDetails">
                                     <li><label>Estate</label><span>Jurong</span></li>
                                     <li><label>Locality</label><span>Teban Gardens, Pandan Gardens</span></li>
-                                    <li><label>Type</label><span>Apartment</span></li>                                    
-                                </ul>                                
+                                    <li><label>Type</label><span>Apartment</span></li>
+                                </ul>
                             </div> <!-- locations content -->
                         </div> <!-- main location content -->
                         <div class="postActions">

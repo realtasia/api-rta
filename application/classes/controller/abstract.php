@@ -202,6 +202,8 @@ class Controller_Abstract extends Controller {
             switch ($p) {
                 case 'http://test.jjpc.net':
                 case 'http://test.casa.net':
+                case 'http://beta.jjpc.net':
+                case 'http://beta.casa.net':
                 case 'http://beta.realtasia.com':
                 case 'http://beta.realtasia.com.sg':
                 case 'http://realtasia.com.sg':
@@ -225,6 +227,7 @@ class Controller_Abstract extends Controller {
             $data = static::$params['callback'] . '(' . $data . ')';
         //Debug::log('Made it to body');
         $this->response->body($data);
+        //return parent::after();
     }
 
     /**

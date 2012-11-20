@@ -56,7 +56,7 @@ class Model_Interaction_Collection extends Mongo_Collection {
      * @param int $include if the field is to be included or not
      * @return array
      */
-    protected function fetch(array $args, $field = NULL, $include = 1)
+    public function fetch(array $args, $field = NULL, $include = 1)
     {
         $defaults = [
             'limit' => 15, 'skip' => 0, 'object_id' => NULL,
@@ -85,6 +85,16 @@ class Model_Interaction_Collection extends Mongo_Collection {
                 ->limit($limit)
                 ->skip($skip);
 
+        if($limit !== NULL)
+        {
+            $this->limit($limit);
+        }
+
+        if($skip !== NULL)
+        {
+            $this->skip($skip);
+        }
+
         if($field)
         {
             $results->fields([$field], $include);
@@ -96,7 +106,7 @@ class Model_Interaction_Collection extends Mongo_Collection {
 
             $data = $row->as_array();
 
-            if($field && $include)
+            if($field && $include === 1)
             {
                 $return[] = $row->stringify($data[$field]);
             }

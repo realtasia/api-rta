@@ -1,6 +1,4 @@
-<?php
-
-defined('SYSPATH') or die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');
 
 /**
  * Description of user
@@ -86,10 +84,10 @@ class Model_User extends Document {
                 ':message' => $e->getMessage(),
                 ':code'    => $e->getCode()
             ]);
-            return null;
+            return false;
         }
 
-        return (array) $this->as_array();
+        return $this;
     }
 
     /**
@@ -139,81 +137,30 @@ class Model_User extends Document {
         // add a created
         $this->created = $id->getTimestamp();
 
-        // same, change to iso date
-
-        if ($this->current_user === NULL)
-            return;
-
-        $current_user = (object) $this->get_default_user_fields();
-
-        // check if it's the same user
-        if ((string) $this->_id === (string) $current_user->_id)
+        if ($this->current_user)
         {
-            $this->private_actions = [
-                'can_edit'         => true,
-                'can_like'         => false,
-                'can_subscribe'    => false,
-            ];
-            $this->connections = static::get_all_connection_routes($this->_id);
+            $current_user = (object) $this->get_default_user_fields();
+            if ((string) $this->_id === (string) $current_user->_id)
+            {
+                $this->private_actions = [
+                    'can_edit'         => true,
+                    'can_like'         => false,
+                    'can_subscribe'    => false,
+                ];
+                $this->connections = static::get_all_connection_routes($this->_id);
+            }
+            else
+            {
+                $interactions       = parent::factory('interaction', NULL, $current_user->_id);
+                $this->interactions = $interactions->interacting($this->_id, 'user');
+                $this->actions      = static::get_action_routes($this->_id);
+                $this->connections  = static::get_public_connection_routes($this->_id);
+                return $this->unset_private_fields();
+            }
         }
         else
         {
-            $interactions       = parent::factory('interaction', NULL, $current_user->_id);
-            $this->interactions = $interactions->interacting($this->_id, 'user');
-            $this->actions      = static::get_action_routes($this->_id);
-            $this->connections  = static::get_public_connection_routes($this->_id);
-            $this->password     = '';
-            $this->logins       = [];
-            $this->private_actions = [];
-            $this->modify('settings.billing', NULL);
-        }
-
-        if (isset($this->settings) && !isset($this->private_actions['can_edit']))
-        {
-            switch ($this->settings['privacy']['contacts']['is'])
-            {
-                case 'SUBSCRIBERS':
-                    if ($this->interactions['subscribe'])
-                    {
-                        $this->modify('info.telephone', NULL);
-                        $this->modify('info.social', NULL);
-                        $this->modify('email', NULL);
-                    }
-                    break;
-
-                case 'SELF':
-                    $this->modify('info.telephone', NULL);
-                    $this->modify('info.social', NULL);
-                    $this->modify('email', NULL);
-                    break;
-
-                case 'CUSTOM': //check if current user id is in this list
-                    //$arr['info']['telephone'] = '';
-                    //$arr['info']['social']    = '';
-                    //$arr['email']             = '';
-                    break;
-            }
-            switch ($this->settings['privacy']['personal']['is'])
-            {
-                case 'SUBSCRIBERS':
-                    if (!$this->interactions['subscribe'])
-                    {
-                        $this->modify('info.gender', NULL);
-                        $this->modify('info.birthday', NULL);
-                    }
-                    break;
-
-                case 'SELF':
-                    $this->modify('info.gender', NULL);
-                    $this->modify('info.birthday', NULL);
-                    break;
-
-                case 'CUSTOM': //check if current user id is in this list
-                    //$arr['info']['telephone'] = '';
-                    //$arr['info']['social']    = '';
-                    //$arr['email']             = '';
-                    break;
-            }
+            return $this->unset_private_fields();
         }
 
         return $this;
@@ -390,7 +337,7 @@ class Model_User extends Document {
     {
         $actions = [];
 
-        foreach (['privacy', 'notifications'] as $k => $v)
+        foreach (['privacy', 'notifications', 'inbox', 'library'] as $v)
         {
             $actions[$v] = Router::user($v, $user_id);
         }
@@ -407,8 +354,17 @@ class Model_User extends Document {
     protected static function get_public_connection_routes($user_id)
     {
         $actions = [];
+        $routes = [
+            'likers',
+            'avatar',
+            'subscribers',
+            'info',
+            'listings',
+            'feed',
+            'testimonials'
+        ];
 
-        foreach (['likers', 'avatar', 'subscribers', 'info'] as $k => $v)
+        foreach ($routes as $v)
         {
             $actions[$v] = Router::user($v, $user_id);
         }
@@ -416,41 +372,72 @@ class Model_User extends Document {
         return $actions;
     }
 
-    public function typecast($array, $type)
+    /**
+     * Checks privacy and unsets all important private fields. This is called
+     * when there is no logged in user or when the current user is requesting
+     * for public information.
+     *
+     * @return \Model_User
+     */
+    public function unset_private_fields()
     {
-        foreach ($array as $key => $value)
+        $settings = isset($this->settings) ? $this->settings : NULL;
+        if ($settings)
         {
-            if (is_array($value))
+            switch ($settings['privacy']['contacts']['is'])
             {
-                $array[$key] = $this->typecast($value, $type);
-            }
+                case 'SUBSCRIBERS':
+                    if ($this->interactions['subscribe'])
+                    {
+                        $this->modify('info.telephone', NULL);
+                        $this->modify('info.social', NULL);
+                        $this->modify('email', NULL);
+                    }
+                    break;
 
-            switch ($type)
+                case 'SELF':
+                    $this->modify('info.telephone', NULL);
+                    $this->modify('info.social', NULL);
+                    $this->modify('email', NULL);
+                    break;
+
+                case 'CUSTOM': //check if current user id is in this list
+                    //$arr['info']['telephone'] = '';
+                    //$arr['info']['social']    = '';
+                    //$arr['email']             = '';
+                    break;
+            }
+            switch ($settings['privacy']['personal']['is'])
             {
-                case 'bool' :
-                    if (is_numeric($value))
+                case 'SUBSCRIBERS':
+                    if (!$this->interactions['subscribe'])
                     {
-                        $array[$key] = (bool) $value;
+                        $this->modify('info.gender', NULL);
+                        $this->modify('info.birthday', NULL);
                     }
                     break;
-                case 'int' :
-                    if (is_numeric($value))
-                    {
-                        $array[$key] = (int) $value;
-                    }
+
+                case 'SELF':
+                    $this->modify('info.gender', NULL);
+                    $this->modify('info.birthday', NULL);
                     break;
-                case 'upper' :
-                    if (is_numeric($value))
-                    {
-                        $array[$key] = strtoupper((string) $value);
-                    }
-                    break;
-                default :
-                    $array[$key] = $value;
+
+                case 'CUSTOM': //check if current user id is in this list
+                    //$arr['info']['telephone'] = '';
+                    //$arr['info']['social']    = '';
+                    //$arr['email']             = '';
                     break;
             }
         }
-        return $array;
+
+        $this->password = '';
+        $this->logins   = [];
+        $this->private_actions = [];
+        $this->modify('settings.billing', NULL);
+
+        $this->modify('settings.privacy', NULL);
+
+        return $this;
     }
 
     /**
@@ -462,6 +449,7 @@ class Model_User extends Document {
         'password'               => false,
         'settings.billing'       => false,
         'settings.notifications' => false,
+        //'settings.privacy'       => false, // needed to decide what fields to show. Unset later.
         'logins'                 => false
     ];
 
@@ -544,17 +532,23 @@ class Model_User extends Document {
         'uri'         => '',
         'subscribers' => [],
         'likers' => [],
+        'library' => [],
         'active' => '',
         'counts' => [
-            'attachments'  => 0,
-            'comments'     => 0,
-            'events'       => 0,
-            'likers'       => 0,
-            'listings'     => 0,
-            'posts'        => 0,
-            'subscribers'  => 0,
-            'testimonials' => 0,
-            'messages'     => 0
+            'albums'        => 0,
+            'attachments'   => 0,
+            'checkins'      => 0,
+            'conversations' => 0,
+            'events'        => 0,
+            'likers'        => 0,
+            'listings'      => 0,
+            'pages'         => 0,
+            'posts'         => 0,
+            'subscribers'   => 0,
+            'testimonials'  => [
+                'received'   => 0,
+                'written'    => 0,
+            ]
         ],
         'info'         => [
             'telephone' => ['mobile'    => ''],

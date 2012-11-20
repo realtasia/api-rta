@@ -29,11 +29,11 @@ class Controller_User extends Controller_Resource {
         if(parent::logged_in())
         {
             static::$model =
-                    Mongo_Document::factory('user', null, static::$user_id);
+                    Document::factory('user', null, static::$user_id);
         }
         else
         {
-            static::$model = Mongo_Document::factory('user');
+            static::$model = Document::factory('user');
         }
     }
 
@@ -86,6 +86,7 @@ class Controller_User extends Controller_Resource {
      */
     public function action_update()
     {
+        $id = $this->request->param('id');
         // get the type of request
         $type = Arr::get(static::$params, 'request_type');
 
@@ -111,7 +112,7 @@ class Controller_User extends Controller_Resource {
             && method_exists($this, $type))
         {
 
-            if(static::logged_in_is_id($id))
+            if($type === 'password_reset' || static::logged_in_is_id($id))
             {
                 return $this->{$type}();
             }
@@ -132,7 +133,7 @@ class Controller_User extends Controller_Resource {
         if(!$token)
             return $this->error('invalid_request');
 
-        $s = Mongo_Document::factory('oauth2_session');
+        $s = Document::factory('oauth2_session');
 
         return $s->destroy($token) ? $this->data(['success' => 1]) : $this->error('invalid_request');
     }
@@ -149,7 +150,7 @@ class Controller_User extends Controller_Resource {
         static::$params['object_id'] = $this->request->param('id');
         static::$params['object_type'] = 'user';
 
-        $data = Mongo_Document::factory('interaction')
+        $data = Document::factory('interaction')
                 ->collection()
                 ->likers(static::$params);
 
@@ -164,7 +165,7 @@ class Controller_User extends Controller_Resource {
         static::$params['object_id'] = $this->request->param('id');
         static::$params['object_type'] = 'user';
 
-        $data = Mongo_Document::factory('interaction')
+        $data = Document::factory('interaction')
                 ->collection()
                 ->subscribers(static::$params);
 
@@ -179,7 +180,7 @@ class Controller_User extends Controller_Resource {
     {
         static::$params['user_id'] = $this->request->param('id');
 
-        $data = Mongo_Document::factory('interaction')
+        $data = Document::factory('interaction')
                 ->collection()
                 ->subscriptions(static::$params);
 
@@ -194,7 +195,7 @@ class Controller_User extends Controller_Resource {
         $id = $this->request->param('id');
         static::$params['user_id'] = $id;
 
-        $posts = Mongo_Collection::factory('post');
+        $posts = Collection::factory('post');
 
         /*
          * 1. if user is logged in and ids are the same (or admin or client)
@@ -223,9 +224,12 @@ class Controller_User extends Controller_Resource {
             default :
                 // need a client or user token.
                 if (parent::is_client() || parent::logged_in())
+                {
+                    static::$params['privacy'] = 'PUBLIC';
                     return $this->data(
                             $posts->listings(static::$params, static::$user_id)
                     );
+                }
 
                 // oops. zip token.
                 return $this->error('access_denied');
@@ -307,6 +311,8 @@ class Controller_User extends Controller_Resource {
                 // need a client or user token.
                 if (parent::is_client() || parent::logged_in())
                 {
+                    // only publically viewable posts
+                    static::$params['privacy'] = 'PUBLIC';
                     // we include posts written on his page
                     static::$params['page_id'] = $id;
                     return $this->data(
@@ -365,9 +371,13 @@ class Controller_User extends Controller_Resource {
             default :
                 // need a client or user token.
                 if (parent::is_client() || parent::logged_in())
+                {
+                    static::$params['privacy'] = 'PUBLIC';
                     return $this->data(
                             $posts->testimonials(static::$params, static::$user_id)
                     );
+                }
+
 
                 // oops. zip token.
                 return $this->error('access_denied');
@@ -382,17 +392,17 @@ class Controller_User extends Controller_Resource {
     public function action_privacy()
     {
         $id    = $this->request->param('id');
-        if ($this->is_GET() && (parent::logged_in() || parent::is_client()))
+        if ($this->is_GET() && (static::logged_in_is_id($id) || parent::is_client()))
         {
             $user = static::$model;
             $user->load($this->request->param('id'), ['settings' => 1]);
-            $this->data(
+            return $this->data(
                     $user->stringify($user->as_array()['settings']['privacy'])
             );
         }
         else
         {
-            if(static::logged_in_is_id($id))
+            if(static::logged_in_is_id($id) || parent::has_role('admin'))
             {
                 // update user by his/her specific field
                 if($this->is_POST())
@@ -402,7 +412,7 @@ class Controller_User extends Controller_Resource {
                 return true;
             }
         }
-
+        return $this->error('access_denied');
     }
 
     /**
@@ -411,7 +421,7 @@ class Controller_User extends Controller_Resource {
     public function action_billing()
     {
         $id    = $this->request->param('id');
-        if ($this->is_GET() && (parent::logged_in() || parent::is_client()))
+        if ($this->is_GET() && (static::logged_in_is_id($id) || parent::has_role('admin')))
         {
             $user = static::$model;
             $user->load($this->request->param('id'), ['settings' => 1]);
@@ -441,7 +451,7 @@ class Controller_User extends Controller_Resource {
     public function action_notifications()
     {
         $id = $this->request->param('id');
-        if ($this->is_GET() && (parent::logged_in() || parent::is_client()))
+        if ($this->is_GET() && (static::logged_in_is_id($id) || parent::is_client()))
         {
             $user = static::$model;
             $user->load($this->request->param('id'), ['settings' => 1]);
@@ -451,7 +461,7 @@ class Controller_User extends Controller_Resource {
         }
         else
         {
-            if(static::logged_in_is_id($id))
+            if(static::logged_in_is_id($id) || parent::has_role('admin'))
             {
                 // update user by his/her specific field
                 if($this->is_POST())
@@ -472,7 +482,7 @@ class Controller_User extends Controller_Resource {
         if ($this->is_GET() && (parent::logged_in() || parent::is_client()))
         {
             $user = static::$model;
-            $user->load($this->request->param('id'), ['info' => 1]);
+            $user->load($this->request->param('id'), ['info' => 1, 'settings' => 1]);
             $this->data($user->stringify($user->as_array()['info']));
         }
         else
@@ -495,6 +505,20 @@ class Controller_User extends Controller_Resource {
     public function action_avatar()
     {
 
+    }
+
+    /**
+     * Gets the user's media library
+     */
+    public function action_library()
+    {
+        $id = Arr::get($this->request->param(), 'id');
+        if($this->is_GET())
+        {
+            $page = Document::factory('page', ['user._id' => $id]);
+            $page->load();
+            return $page->stringify($page->as_array());
+        }
     }
 
 
@@ -601,10 +625,10 @@ class Controller_User extends Controller_Resource {
     protected function search()
     {
         if(parent::logged_in())
-            $users = Mongo_Collection::factory('user')
+            $users = Collection::factory('user')
                                     ->search(static::$params, static::$user_id);
         else
-            $users = Mongo_Collection::factory('user')
+            $users = Collection::factory('user')
                                     ->search(static::$params);
 
         return $this->data($users);
@@ -652,6 +676,7 @@ class Controller_User extends Controller_Resource {
 
             if ($u = static::$model->create(static::$params))
             {
+                static::create_user_defaults($u);
                 unset($u['password']);
                 $r = static::$params;
                 $this->admin_email(
@@ -661,11 +686,11 @@ class Controller_User extends Controller_Resource {
                 $this->user_email(
                         $r,
                         'We received your submission',
-                        Kohana::message('register/info', 'thank_you_beta_email')
+                        Kohana::message('user/registration', 'info.thank_you_beta_email')
                 );
 
                 $this->send_sms(
-                        'Thank you for you submission',
+                        'Thank you for registering',
                         $params['info.telephone.mobile']
                 );
 
@@ -688,7 +713,7 @@ class Controller_User extends Controller_Resource {
      */
     protected function beta_interest()
     {
-        $user = Mongo_Document::factory('beta');
+        $user = Document::factory('beta');
 
         $validation = Validation::factory(static::$params)
                 ->rule('message', 'not_empty')
@@ -743,7 +768,7 @@ class Controller_User extends Controller_Resource {
      */
     protected function password_reset()
     {
-        $id = $this->param->user('id');
+        $id = $this->request->param('id');
         $model = static::$model;
 
         if(!isset(static::$params['old_password'])
@@ -788,11 +813,12 @@ class Controller_User extends Controller_Resource {
 
     /**
      * Activate a user. Used by paypal return method or called directly by an admin.
+     * @todo Subscribe user to admins
      */
     protected function activate()
     {
         $id = $this->request->param('id');
-        $user = Mongo_Document::factory('user', $id);
+        $user = Document::factory('user', $id);
 
         //static::$model->load_values(['_id' => new MongoID($id)]);
         $user->status = 'active';
@@ -806,7 +832,7 @@ class Controller_User extends Controller_Resource {
     protected function terminate()
     {
         $id = $this->request->param('id');
-        $user = Mongo_Document::factory('user', $id);
+        $user = Document::factory('user', $id);
 
         //static::$model->load_values(['_id' => new MongoID($id)]);
         $user->status = 'terminate';
@@ -820,7 +846,7 @@ class Controller_User extends Controller_Resource {
     protected function suspend()
     {
         $id = $this->request->param('id');
-        $user = Mongo_Document::factory('user', $id);
+        $user = Document::factory('user', $id);
 
         //static::$model->load_values(['_id' => new MongoID($id)]);
         $user->status = 'suspended';
@@ -863,31 +889,21 @@ class Controller_User extends Controller_Resource {
     {
         $params = static::extract_privacy_values(static::$params);
         $validation = Validation::factory($params)
-                ->rule('contacts.is', 'Privacy::valid', [
-                    ':value', ':field', ':validation'
-                ])
+                ->rule('is', 'Privacy::valid', [':value', ':field', ':validation'])
+                ->rule('is', 'not_empty')
+                ->rule('personal.is', 'Privacy::valid', [':value', ':field', ':validation'])
+                ->rule('personal.is', 'not_empty')
+                ->rule('contacts.is', 'Privacy::valid', [':value', ':field', ':validation'])
                 ->rule('contacts.is', 'not_empty')
-                ->rule('subscriptions.is', 'Privacy::valid', [
-                    ':value', ':field', ':validation'
-                ])
+                ->rule('subscriptions.is', 'Privacy::valid', [':value', ':field', ':validation'])
                 ->rule('subscriptions.is', 'not_empty')
-                ->rule('messages.is', 'Privacy::valid', [
-                    ':value', ':field', ':validation'
-                ])
+                ->rule('messages.is', 'Privacy::valid', [':value', ':field', ':validation'])
                 ->rule('messages.is', 'not_empty')
-                ->rule('mentions.is', 'Privacy::valid', [
-                    ':value', ':field', ':validation'
-                ])
+                ->rule('mentions.is', 'Privacy::valid', [':value', ':field', ':validation'])
                 ->rule('mentions.is', 'not_empty')
-                ->rule('wallposts.others_posts.is',
-                       'Privacy::valid', [
-                            ':value', ':field', ':validation'
-                ])
+                ->rule('wallposts.others_posts.is','Privacy::valid', [':value', ':field', ':validation'])
                 ->rule('wallposts.others_posts.is', 'not_empty')
-                ->rule('wallposts.others_posts_visibility.is',
-                       'Privacy::valid', [
-                            ':value', ':field', ':validation'
-                ])
+                ->rule('wallposts.others_posts_visibility.is','Privacy::valid', [':value', ':field', ':validation'])
                 ->rule('wallposts.others_posts_visibility.is', 'not_empty');
 
 
@@ -1069,8 +1085,53 @@ class Controller_User extends Controller_Resource {
     }
 
     /**************************************************************************
+     * Public STATIC Utility Methods
+     *************************************************************************/
+
+    /**
+     * A check to validate a user
+     *
+     * @param string|MongoID $id
+     * @return boolean
+     */
+    public static function valid_user($id)
+    {
+        $user = Document::factory('user', $id);
+        $user->load();
+        return $user->loaded();
+    }
+
+    /**************************************************************************
      * Protected STATIC Utility Methods
      *************************************************************************/
+
+    protected static function create_user_defaults($user)
+    {
+                $library = [
+                    'type' => 'library',
+                    'uri'  => Router::user('library', $user['_id']),
+                    'user' => ['_id' => $user['_id'], 'name' => $user['name']],
+                ];
+                $lib = Document::factory('page')->create($library);
+                if($lib)
+                {
+                    $uploads = [
+                        'name' => 'Uploads',
+                        'message' => 'This is your default private album. All uploads come here unless otherwise specified',
+                        'privacy' => ['is' => 'PRIVATE'],
+                        'user' => ['_id' => $user['_id'], 'name' => $user['name']],
+                        'page' => ['_id' => $lib['_id'], 'name' => 'library', 'type' => 'library']
+                    ];
+                    $album = Document::factory('post')->create_album($uploads);
+                    if($album)
+                    {
+                        $lib->inc('counts.albums.private');
+                        $lib->save();
+                        $user->library = ['_id' => $lib['_id']];
+                        $user->save();
+                    }
+                }
+    }
 
     /**
      * Sends an admin email.
@@ -1170,6 +1231,8 @@ class Controller_User extends Controller_Resource {
         $return = [];
 
         $return['contacts.is'] =
+                        Arr::path($array, 'contacts.is');
+        $return['personal.is'] =
                         Arr::path($array, 'contacts.is');
         $return['subscriptions.is'] =
                         Arr::path($array, 'subscriptions.is');

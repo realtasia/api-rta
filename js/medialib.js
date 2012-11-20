@@ -5,13 +5,14 @@ if (location.host.indexOf('casa') > 1)
     common = 'http://casa.net/common/js';
 }
 
-function File(id, name, size)
+function File(params)
 {
+    ko.mapping.fromJS(params, {}, this);
+    var params = params || {};
     var self = this;
-    this.id = id || null;
-    this.size = size || null;
-    this.src = ko.observable(false);
-    this.name = ko.observable(name || 'Description...');
+
+    this.src = ko.observable('/images/135x110.gif');
+    this.name = ko.observable(params.name || 'Caption...');
     this.queued = ko.observable(true);
     this.uploading = ko.observable(false);
     this.uploaded = ko.observable(false);
@@ -29,134 +30,142 @@ function File(id, name, size)
     this.progress = ko.observable(0);
 }
 
-function Lib()
-{
+function Lib(data) {
+    ko.mapping.fromJS(data, {}, this);
     var self = this;
     this.files = ko.observableArray([]);
     this.isDroppable = ko.observable(false);
+    this.uploading = ko.observable(false);
+    this.isShowingUpload = ko.observable(false);
+    this.progress = ko.observable(0);
     this.droppable = ko.computed(function() {
         return this.isDroppable() && this.files().length === 0;
-    }, this)
+    }, this);
+    //this.counts = ko.mapping.fromJS(data, this);
+    this.allMedia = ko.computed(function() {
+        return this.counts.pictures() + this.counts.videos() + this.counts.documents();
+    }, this);
+    this.allAlbums = ko.computed(function() {
+        return this.counts.albums.private() + this.counts.albums.public();
+    }, this);
+    this.showUpload = ko.computed({
+        read: function() {
+            return self.isShowingUpload();
+        },
+        write: function(value) {
+            self.isShowingUpload(true);
+            $('#uploadPopUp').modal({backdrop: 'static', show: true})
+            self.uploader.init();
+        }
+    });
+    this.hideUpload = ko.computed({
+        read: function() {
+            return self.isShowingUpload();
+        },
+        write: function(value) {
+            self.isShowingUpload(false);
+            $('#uploadPopUp').modal('hide')
+            self.uploader.destroy();
+            return self;
+        }
+    });
+    this.uploader = new Uploader(this);
+    this.uploader.bind('Init', function(up, pars) {
+        if (self.files().length === 0)
+        {
+            $('#dropzone').css('height', $('#droppable').innerHeight());
+        }
+        if (typeof FileReader !== 'undefined' && !((pars.runtime === "flash") || (pars.runtime === "silverlight")))
+        {
+            self.isDroppable(true);
+        }
+        log(pars.runtime);
+    })
 }
 
-$(document).ready(function() {
-    var lib = new Lib();
+function Uploader(VM) {
 
-    ko.applyBindings(lib);
-
-    function log() {
-        var str = "";
-
-        plupload.each(arguments, function(arg) {
-            var row = "";
-
-            if (typeof(arg) != "string") {
-                plupload.each(arg, function(value, key) {
-                    // Convert items in File objects to human readable form
-                    if (arg instanceof plupload.File) {
-                        // Convert status to human readable
-                        switch (value) {
-                            case plupload.QUEUED:
-                                value = 'QUEUED';
-                                break;
-
-                            case plupload.UPLOADING:
-                                value = 'UPLOADING';
-                                break;
-
-                            case plupload.FAILED:
-                                value = 'FAILED';
-                                break;
-
-                            case plupload.DONE:
-                                value = 'DONE';
-                                break;
-                        }
-                    }
-
-                    if (typeof(value) != "function") {
-                        row += (row ? ', ' : '') + key + '=' + value;
-                    }
-                });
-
-                str += row + " ";
-            } else {
-                str += arg + " ";
-            }
-        });
-
-        $('#log').append(str + "\n");
-    }
-
-    var uploader = new plupload.Uploader({
-        runtimes: 'gears,html5,flash,silverlight,browserplus',
+    return new plupload.Uploader({
+        runtimes: 'gears,html5,flash,silverlight',
         browse_button: 'pickfiles',
-        container: 'thumbnails',
-        drop_element: 'droppable',
-        max_file_size: '10mb',
-        url: '/upload.php',
-        flash_swf_url: common + '/plupload/js/plupload.flash.swf',
-        silverlight_xap_url: common + '/plupload/js/plupload.silverlight.xap',
+        container: 'uploadPopUp',
+        multipart: true,
+        drop_element: 'dropzone',
+        max_file_size: '20mb',
+        chunk_size: '2mb',
+        url: domain + '/media/upload',
+        flash_swf_url: domain + '/js/plupload.flash.swf',
+        silverlight_xap_url: domain + '/js/plupload.silverlight.xap',
         filters: [
-            {title: "Images", extensions: "jpg,gif,png"},
-            {title: "Documents", extensions: "zip"}
+            {title: "Images", extensions: "jpg,gif,png,jpeg"},
+            {title: "Documents", extensions: "pdf"}
         ],
-        //resize: {width: 320, height: 240, quality: 90},
-        // PreInit events, bound before any internal events
-// Post init events, bound after the internal events
         init: {
             Refresh: function(up) {
-                // Called when upload shim is moved
-                log('[Refresh]');
+
             },
             StateChanged: function(up) {
                 var uploading = (up.state === plupload.STARTED);
-
-                ko.utils.arrayForEach(lib.files(), function(item) {
-                    item.uploading(uploading);
-                });
+                VM.uploading(uploading);
             },
             QueueChanged: function(up) {
-                // Called when the files in queue are changed by adding/removing files
-                //log('[QueueChanged]');
             },
             UploadProgress: function(up, file) {
-                var found = ko.utils.arrayFirst(lib.files(), function(item) {
-                    return file.id === item.id;
+                var found = ko.utils.arrayFirst(VM.files(), function(item) {
+                    return file.id === item.id();
                 });
-
                 found.progress(file.percent);
+                VM.progress(up.total.percent);
             },
-            FilesAdded: function(up, files) {
-                ko.utils.arrayForEach(files, function(file) {
-                    lib.files.push(new File(file.id, file.name, plupload.formatSize(file.size)));
+            FilesAdded: function(up, upFiles) {
+                ko.utils.arrayForEach(upFiles, function(item) {
+                    var fileParams = {
+                        id : item.id, name : item.name, size : plupload.formatSize(item.size)
+                    },
+                    new_file = new File(fileParams);
+                    new_file.uploading(true);
+                    new_file.queued(true);
+                    VM.files.push(new_file);
                 });
                 up.refresh(); // Reposition Flash/Silverlight
-                uploader.start();
+                $('#dropzone').removeClass('hover').addClass('uploadMenu');
+                console.log(VM.files())
+                up.start();
             },
-            FilesRemoved: function(up, files) {
-                // Called when files where removed from queue
-                //log('[FilesRemoved]');
+            FilesRemoved: function(up, upFiles) {
+                if (VM.files().length === 0)
+                {
+                    $('#dropzone').removeClass('uploadMenu');
+                }
 
-                plupload.each(files, function(file) {
+                plupload.each(upFiles, function(file) {
                     log('  File:', file);
                 });
             },
             FileUploaded: function(up, file, info) {
                 // Called when a file has finished uploading
                 log('[FileUploaded] File:', file, "Info:", info);
-                var found = ko.utils.arrayFirst(lib.files(), function(item) {
-                    return file.id === item.id;
+
+                var found = ko.utils.arrayFirst(VM.files(), function(item) {
+                    return file.id === item.id();
                 });
 
+                found.progress(100);
                 found.uploaded(true);
                 found.uploading(false);
                 found.queued(false);
-                found.src(domain + '/uploads/' + file.name);
+                if (info.response)
+                {
+                    found.src('http://' + info.response);
+                }
+
             },
             ChunkUploaded: function(up, file, info) {
-                // Called when a file chunk has finished uploading
-                log('[ChunkUploaded] File:', file, "Info:", info);
+                var found = ko.utils.arrayFirst(VM.files(), function(item) {
+                    return file.id === item.id();
+                });
+                found.progress(file.percent);
+                VM.progress(up.total.percent);
             },
             Error: function(up, args) {
                 // Called when a error has occured
@@ -165,26 +174,77 @@ $(document).ready(function() {
         }
     });
 
-    uploader.bind('Init', function(up, params) {
-        if (!!FileReader && !((params.runtime === "flash") || (params.runtime === "silverlight")))
-        {
-            lib.isDroppable(true);
+}
+
+var dat = {
+    counts: {
+        pictures: 0,
+        videos: 0,
+        documents: 0,
+        albums: {
+            private: 0,
+            public: 0
         }
-    })
+    }
+};
+function log() {
+    var str = "";
 
-    uploader.init();
+    plupload.each(arguments, function(arg) {
+        var row = "";
 
-    $("#thumbnails").delegate(".deleteFile", "click", function() {
+        if (typeof(arg) != "string") {
+            plupload.each(arg, function(value, key) {
+                // Convert items in File objects to human readable form
+                if (arg instanceof plupload.File) {
+                    // Convert status to human readable
+                    switch (value) {
+                        case plupload.QUEUED:
+                            value = 'QUEUED';
+                            break;
+
+                        case plupload.UPLOADING:
+                            value = 'UPLOADING';
+                            break;
+
+                        case plupload.FAILED:
+                            value = 'FAILED';
+                            break;
+
+                        case plupload.DONE:
+                            value = 'DONE';
+                            break;
+                    }
+                }
+
+                if (typeof(value) != "function") {
+                    row += (row ? ', ' : '') + key + '=' + value;
+                }
+            });
+
+            str += row + " ";
+        } else {
+            str += arg + " ";
+        }
+    });
+
+    $('#log').append(str + "<br>");
+}
+
+$(document).ready(function() {
+    var lib = new Lib(dat);
+
+    ko.applyBindings(lib);
+    //lib.uploader.init();
+
+    $(".thumbnails").delegate(".deleteFile", "click", function() {
         //retrieve the context
         var file = ko.dataFor(this);
-        if (file.uploaded())
-        {
+        if (file.uploaded()){
             log("File uploaded. Send request to server for deletion");
-        }
-        else
-        {
+        }else{
             log("Removing file " + file.id + " from queue");
-            uploader.splice(file.id, 1)
+            lib.uploader.splice(file.id, 1)
             lib.files.remove(file);
         }
 
@@ -198,9 +258,19 @@ $(document).ready(function() {
         }
     });
 
-    lib.files.push(new File());
-    lib.files.push(new File());
-    lib.files.push(new File());
+    $('#dropzone')
+            .live('dragover drop', function(e) {
+        $(this).addClass('hover');
+        e.preventDefault();
+    })
+            .live('dragexit dragleave', function(e) {
+        $(this).removeClass('hover');
+        e.preventDefault();
+    });
+
+//    lib.files.push(new File());
+//    lib.files.push(new File());
+//    lib.files.push(new File());
 
 });
 
@@ -247,3 +317,9 @@ ko.bindingHandlers.selectAndFocus = {
         }, 0);
     }
 };
+ko.bindingHandlers.flash = {
+    update: function(element, valueAccessor) {
+        ko.utils.unwrapObservable(valueAccessor());  //unwrap to get subscription
+        $(element).hide().fadeIn(500);
+    }
+}

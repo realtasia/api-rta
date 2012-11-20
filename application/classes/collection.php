@@ -33,7 +33,7 @@ class Collection extends Mongo_Collection {
     {
         if ($user_id)
         {
-            $user = Mongo_Document::factory('user', $user_id);
+            $user = Document::factory('user', $user_id);
             $user->load(null, ['_id', 'name']);
             return $user;
         }

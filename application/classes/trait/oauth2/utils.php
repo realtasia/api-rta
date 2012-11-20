@@ -9,7 +9,7 @@
  */
 trait Trait_Oauth2_Utils {
 
-    public function stringify(array $arr)
+    public function stringify($arr = [])
     {
         foreach($arr as $k => $v)
         {
@@ -23,7 +23,7 @@ trait Trait_Oauth2_Utils {
                 $arr[$k] = $this->stringify($v);
             }
         }
-        
+
         return $arr;
     }
 
@@ -42,7 +42,7 @@ trait Trait_Oauth2_Utils {
 
         if($_id instanceof MongoID)
         {
-            $page = Mongo_Document::factory('page')
+            $page = Document::factory('page')
                     ->get($_id, $fields)
                     ->as_array();
 

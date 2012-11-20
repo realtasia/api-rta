@@ -11,6 +11,8 @@
  */
 class Model_Post extends Document {
 
+    protected $after_delete_fields;
+
     /**
      * Retrieve a single post
      *
@@ -19,7 +21,7 @@ class Model_Post extends Document {
      */
     public function get($id, array $fields = [], $object = TRUE)
     {
-        if($this->load($id, $fields))
+        if ($this->load($id, $fields))
         {
             $ret = $this->stringify($this->as_array());
             return $object ? (object) $ret : $ret;
@@ -36,14 +38,17 @@ class Model_Post extends Document {
     public function create($params)
     {
         $this->collection()->ensureIndex([
-            'status' => 1, 'user._id' => 1, 'page._id' => 1, 'privacy.is' => 1, 'modified' => -1
-        ], ['name' => 'post_id_fields', 'safe' => true]);
+            'status'     => 1, 'user._id'   => 1, 'privacy.is' => 1, 'modified'   => -1
+                ], ['name' => 'post_id_fields', 'safe' => true]);
         $this->collection()->ensureIndex([
             'page_parent._id' => 1
-        ], ['sparse' => true, 'safe' => true]);
+                ], ['sparse' => true, 'safe'   => true]);
+        $this->collection()->ensureIndex([
+            'page._id' => 1
+                ], ['sparse' => true, 'safe'   => true]);
         $this->collection()->ensureIndex([
             'to._id' => 1
-        ], ['sparse' => true, 'safe' => true]);
+                ], ['sparse' => true, 'safe'   => true]);
         $this->collection()->ensureIndex([
             'type' => 1,
         ]);
@@ -51,19 +56,19 @@ class Model_Post extends Document {
             'listing.unit' => 1,
         ]);
         $this->collection()->ensureIndex([
-            'listing.type' => 1, 'listing.price' => 1, 'listing.rooms' => 1,
-            'listing.built_size' => 1, 'listing.property_type' => 1
+            'listing.type'          => 1, 'listing.price'         => 1, 'listing.rooms'         => 1,
+            'listing.built_size'    => 1, 'listing.property_type' => 1
         ]);
         // overwrite defaults
-        $data                     = Arr::overwrite(static::$post_fields, $params);
+        $data                   = Arr::overwrite(static::$post_fields, $params);
         // merge with defaults
-        $data                     = Arr::merge(static::$post_fields, $data);
+        $data                   = Arr::merge(static::$post_fields, $data);
 
         // sort - for some sanity in debugging.. :-)
         ksort($data);
 
         // if an id is present, this is an update.
-        if(isset($data['_id']))
+        if (isset($data['_id']))
         {
             $this->atomic($data['_id']);
             unset($params['_id']);
@@ -72,31 +77,79 @@ class Model_Post extends Document {
         // load the document
         $this->load_values($data);
 
-        $this->save();
+        try
+        {
+            // save
+            $this->save();
+        } catch (MongoException $e)
+        {
+            Debug::error(
+                    "MongoException while trying to create post: :post \n"
+                    . "Error Message- :message \n"
+                    . "Error Code- :code", [
+                ':post'    => print_r($data, TRUE),
+                ':message' => $e->getMessage(),
+                ':code'    => $e->getCode()
+            ]);
+            return false;
+        }
 
-        return $this->save() ?  $this->as_array() : false;
+        return $this;
     }
 
+    /**
+     * A conversation is special. It is a post with no message. Messages are
+     * added via comments. This method automatically creates a comment.
+     *
+     * @param array $params
+     * @return array|boolean
+     */
     public function create_conversation($params)
     {
         $message = $params['message'];
         unset($params['message']);
 
-        if($this->create($params))
+        if ($this->create($params))
         {
             $msg = parent::factory('comment');
 
-            $params['post'] = ['_id' => $this->_id, 'type' => $this->type];
+            $params['post'] = [
+                '_id'  => $this->_id,
+                'type' => $this->type
+            ];
+
             $params['message'] = $message;
 
-            if($msg->create_message($params))
+            if ($msg->create_message($params))
             {
-                return $msg->to_array();
+                return $msg;
             }
         }
 
         return false;
     }
+
+    /**
+     * An album is special. An album is a post because it has comments, privacy
+     * and counts (of attachments)
+     */
+    public function create_album($params)
+    {
+        $defaults = [
+            'name' => '',
+            'message' => '',
+            'privacy' => ['is' => 'PUBLIC'],
+            'user' => [],
+            'page' => [],
+            'type' => 'album',
+        ];
+
+        return $this->create(Arr::merge($defaults, $params));
+    }
+
+    /**
+     *
+     */
 
     /**
      * Searches for a document that has unique values. Returns false if none is
@@ -124,23 +177,18 @@ class Model_Post extends Document {
     {
         if ($action === parent::SAVE_INSERT || $action === parent::SAVE_UPSERT)
         {
-            $pages = [Arr::get($this->page, '_id')];
+            $pages = [];
 
-            if (isset($this->parent))
-                $pages[] = Arr::get($this->parent, '_id');
+            if (isset($this->page))
+                $pages[] = $this->page;
 
-            $pages = array_filter($pages);
+            if (isset($this->to))
+                $pages[] = $this->to;
 
-            foreach ($pages as $page_id)
-            {
-                $page = parent::factory('page', $page_id);
-                $page->inc('counts.' . parent::plural($this->type));
-                $page->save();
-            }
+            if (isset($this->page_parent))
+                $pages[] = $this->page_parent;
 
-            $user = parent::factory('user', $this->user->_id);
-            $user->inc('counts.' . parent::plural($this->type));
-            $user->save();
+            return $this->process_counts(['pages' => $pages, 'privacy' => $this->privacy], $this->type, $this->user);
         }
     }
 
@@ -150,10 +198,10 @@ class Model_Post extends Document {
      */
     public function before_save($action)
     {
+        $this->modified = time();
         // Updates
         if ($action === parent::SAVE_UPDATE)
         {
-            $this->modified = time();
 
             // during testing a whole lot of counts went into negative. Just a
             // small sanity check.
@@ -167,11 +215,11 @@ class Model_Post extends Document {
                     }
                 }
             }
-            foreach(['interactions', 'private_actions', 'connections', 'actions', 'created'] as $v)
+            foreach (['interactions', 'private_actions', 'connections', 'actions', 'created'] as $v)
             {
-                if( !isset($this->_changed[$v]) && isset( $this->{$v} ) )
+                if (!isset($this->_changed[$v]) && isset($this->{$v}))
                 {
-                    unset( $this->{$v} );
+                    unset($this->{$v});
                 }
             }
         }
@@ -226,8 +274,8 @@ class Model_Post extends Document {
         // check if it's the same user
         if ((string) $this->user['_id'] === (string) $current_user->_id)
         {
-            $this->private_actions = ['can_edit' => true];
-            $this->connections   = static::get_all_connection_routes($this->_id);
+            $this->private_actions = ['can_edit'         => true];
+            $this->connections = static::get_all_connection_routes($this->_id);
         }
         else
         {
@@ -239,12 +287,12 @@ class Model_Post extends Document {
 
         // we should trigger the comment model's formatting so each comment in
         // this post is properly formatted.
-        if(!empty($this->comments))
+        if (!empty($this->comments))
         {
             foreach ($this->comments as $key => $value)
             {
                 $comment = parent::factory('comment');
-                if($current_user)
+                if ($current_user)
                 {
                     // check if there is a current user
                     $comment->current_user = $current_user;
@@ -252,6 +300,162 @@ class Model_Post extends Document {
                 // now each comment in the post is properly formatted.
                 $this->set("comments.$key", $comment->stringify($comment->to_array()));
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Extract the user, post_id and pages.
+     *
+     */
+    public function before_delete()
+    {
+        $this->after_delete_fields = [
+            '_id'         => $this->_id,
+            'user'        => $this->user,
+            'type'        => $this->type,
+            'counts'      => $this->counts,
+            'page'        => $this->page,
+            'page_parent' => $this->page_parent,
+            'to'          => $this->to,
+            'privacy'     => $this->privacy,
+        ];
+    }
+
+    /**
+     * Process counts, remove comments and interactions.
+     *
+     * @return type
+     */
+    public function after_delete()
+    {
+        $id   = $this->after_delete_fields['_id'];
+        $user = $this->after_delete_fields['user'];
+        $type = $this->after_delete_fields['type'];
+        $counts = $this->after_delete_fields['counts'];
+        $privacy = $this->after_delete_fields['privacy'];
+
+        unset(
+                $this->after_delete_fields['_id'],
+                $this->after_delete_fields['user'],
+                $this->after_delete_fields['type'],
+                $this->after_delete_fields['counts'],
+                $this->after_delete_fields['privacy']
+        );
+        $pages = [];
+
+        foreach ($this->after_delete_fields as $key => $array)
+        {
+            if (!empty($array))
+                $pages[] = $array;
+        }
+
+        $this->process_counts(['pages' => $pages, 'privacy' => $privacy], $type, $user, -1);
+
+        // remove all embedded documents
+        if(isset($counts))
+        {
+            if($counts['subscribers'] > 0 || $counts['likers'] > 0)
+            {
+                parent::factory('interaction')->collection()
+                        ->remove_safe([
+                            'object_id' => $id,
+                            'object_type' => 'post',
+                ], ['multiple' => true]);
+            }
+
+            if($counts['comments'] > 0)
+            {
+                parent::factory('comment')->collection()
+                        ->remove_safe([
+                            'post._id' => $id
+                ], ['multiple' => true]);
+            }
+        }
+
+    }
+
+    /**
+     * This updates all respective counts of a post's user and a post's pages
+     * depending the type of post and the increment.
+     *
+     * @param array $pages all possible pages [page, page_parent, to]
+     * @param string $type this post typer
+     * @param array $user this post's creator
+     * @param int $inc increase or decrease
+     * @return \Model_Post
+     */
+    public function process_counts($params, $type, $user, $inc = 1)
+    {
+        $pages = $params['pages'];
+        $privacy = $params['privacy'];
+        if (!empty($pages))
+        {
+            foreach ($pages as $page)
+            {
+                switch ($type)
+                {
+                    case 'testimonial' :
+                        // get the page type
+                        $page_type = $page['type'] === 'user' ? 'user' : 'page';
+
+                        parent::factory($page_type, $page['_id'])
+                                ->inc('counts.testimonials.received', $inc)
+                                ->save();
+                        break;
+
+                    case 'listing' :
+                    case 'wallpost' :
+                    case 'checkin' :
+                    case 'attachment' :
+                    case 'event' :
+                    case 'post' :
+                        $type = $type === 'wallpost' ? 'posts' : Inflector::plural($type);
+                        // for other kinds of posts, we don't update the
+                        // user whose page was written on.
+                        if ($page['type'] !== 'user')
+                        {
+                            parent::factory('page', $page['_id'])
+                                    ->inc('counts.' . $type, $inc)
+                                    ->save();
+                            break;
+                        }
+                    case 'conversation' :
+                        // conversations, we update both. Because we need
+                        // the number of total conversations in each user's
+                        // inbox.
+                        parent::factory('user', $page['_id'])
+                                ->inc('counts.conversations', $inc)
+                                ->save();
+                        break;
+                    case 'album' :
+                        // albums are organised by private and public
+                        $field = $privacy['is'] === 'PUBLIC' ? 'albums.public' : 'albums.private';
+                        parent::factory('page', $page['_id'])
+                                ->inc('counts.' .$field, $inc)
+                                ->save();
+                        break;
+                }
+            }
+        } // pages
+        // now we update the user that created the post
+        switch ($type)
+        {
+            case 'testimonial' :
+                // update the user's count
+                parent::factory('user', $user['_id'])
+                        ->inc('counts.testimonials.written', $inc)
+                        ->save();
+                break;
+
+            default :
+                $type = $type === 'wallpost' ? 'posts' : Inflector::plural($type);
+
+                parent::factory('user', $user['_id'])
+                        ->inc('counts.' . $type, $inc)
+                        ->save();
+                break;
         }
 
         return $this;
@@ -266,16 +470,40 @@ class Model_Post extends Document {
      */
     public function update_privacy($params, $_id)
     {
-        $field = static::$post_fields['privacy'];
+        $field  = static::$post_fields['privacy'];
         $values = Arr::overwrite($field, $params);
 
         $this->load_values([
-            '_id' => new MongoID($_id),
+            '_id'     => new MongoID($_id),
             'privacy' => $values,
         ]);
         $this->save();
 
         return $values;
+    }
+
+    /**
+     * returns a document with fields specific to what the Job::factory needs.
+     *
+     * @return \Document
+     */
+    public function job_fields()
+    {
+        return $this->load([], [
+                    'user'         => 1, // '_id', 'name' of the user who created this
+                    'to'           => 1, // '_id', 'name' of the user this message was sent to (for messages)
+                    'page'         => 1, // '_id', 'name', 'type' the page it was written on (location, user profile etc...)
+                    'page_parent'  => 1, // '_id', 'name', 'type' the page's parent (company or estate)
+                    'listing'      => 1, // '_id'
+                    'message'      => 1, // the content
+                    'message_tags' => 1, // names of existing people within the content are parsed
+                    'type'         => 1, // wallpost, testimonial, conversation, listing, checkin, event, album, image
+                    'status'       => 1, // pending, active, expired,
+                    'uri'          => 1,
+                    'modified'     => 1,
+                    'privacy'      => 1,
+                    'counts'       => 1
+                ]);
     }
 
     /**
@@ -289,7 +517,7 @@ class Model_Post extends Document {
     {
         $actions = [];
 
-        foreach(['like', 'unlike', 'subscribe', 'unsubscribe', 'comment'] as $k => $v)
+        foreach (['like', 'unlike', 'subscribe', 'unsubscribe', 'comment'] as $k => $v)
         {
             $actions[$v] = Router::post($v, $user_id);
         }
@@ -306,7 +534,7 @@ class Model_Post extends Document {
      */
     protected static function get_all_connection_routes($_id)
     {
-        $actions = ['privacy' => Router::post('privacy', $_id)] ;
+        $actions = ['privacy' => Router::post('privacy', $_id)];
 
         return Arr::merge($actions, static::get_public_connection_routes($_id));
     }
@@ -321,7 +549,7 @@ class Model_Post extends Document {
     {
         $actions = [];
 
-        foreach(['likers', 'comments', 'subscribers'] as $k => $v)
+        foreach (['likers', 'comments', 'subscribers'] as $k => $v)
         {
             $actions[$v] = Router::post($v, $_id);
         }
@@ -340,7 +568,7 @@ class Model_Post extends Document {
         'page' => [], // '_id', 'name', 'type' the page it was written on (location, user profile etc...)
         'page_parent' => [], // '_id', 'name', 'type' the page's parent (company or estate)
         'listing' => [
-            'type'         => '',
+            'type'          => '',
             'price'         => 0,
             'rooms'         => 1,
             'built_size'    => 0,
@@ -351,16 +579,17 @@ class Model_Post extends Document {
             'cobroke'       => 0,
             'unit'          => '',
         ], // '_id'
+        'name'          => '', // the content
         'message'       => '', // the content
         'message_tags'  => [], // names of existing people within the content are parsed
         'picture' => '', // if this post has an image, this will be the url
         'link'    => [], // 'name', 'caption', 'description', 'source' the original link if there is one
         'video' => [], // 'name', 'caption', 'description', 'source', 'properties' if this post has a video
-        'type'     => 'wallpost', // wallpost, testimonial, conversation, listing, checkin, event, album, image
+        'type'     => 'post', // wallpost, testimonial, conversation, listing, checkin, event, album
         'status'   => 'active', // pending, active, expired,
         'uri'      => '',
         'modified' => 0,
-        'privacy'  => ['is' => 'PUBLIC'],
+        'privacy'  => ['is'     => 'PUBLIC'],
         'counts' => [
             'attachments' => 0,
             'comments'    => 0,
