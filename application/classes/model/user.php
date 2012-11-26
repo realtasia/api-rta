@@ -121,8 +121,12 @@ class Model_User extends Document {
                     unset($this->_object[$v]);
                 }
             }
+            if(isset($this->_object['password']) && $this->_object['password'] === null)
+            {
+                unset($this->_object['password'], $this->_object['private_actions']);
+                unset($this->_changed['password'], $this->_changed['private_actions']);
+            }
         }
-        //Debug::log('Exiting before_save ' . count($this->_operations));
     }
 
     /**
@@ -137,33 +141,66 @@ class Model_User extends Document {
         // add a created
         $this->created = $id->getTimestamp();
 
-        if ($this->current_user)
+//        if ($this->current_user)
+//        {
+//            $current_user = (object) $this->get_default_user_fields();
+//            if ((string) $this->_id === (string) $current_user->_id)
+//            {
+//                $this->private_actions = [
+//                    'can_edit'         => true,
+//                    'can_like'         => false,
+//                    'can_subscribe'    => false,
+//                ];
+//                $this->connections = static::get_all_connection_routes($this->_id);
+//            }
+//            else
+//            {
+//                $interactions       = parent::factory('interaction', NULL, $current_user->_id);
+//                $this->interactions = $interactions->interacting($this->_id, 'user');
+//                $this->actions      = static::get_action_routes($this->_id);
+//                $this->connections  = static::get_public_connection_routes($this->_id);
+//                return $this->unset_private_fields();
+//            }
+//        }
+//        else
+//        {
+//            return $this->unset_private_fields();
+//        }
+
+        return $this;
+    }
+
+    public function stringify($arr = [])
+    {
+        $arr = parent::stringify($arr);
+        if ($this->current_user && isset($arr['_id']))
         {
+                //die(json_encode(['status' => 'success', 'data' => $arr]));
             $current_user = (object) $this->get_default_user_fields();
-            if ((string) $this->_id === (string) $current_user->_id)
+            if ((string) $arr['_id'] === (string) $current_user->_id)
             {
-                $this->private_actions = [
+                $arr['private_actions'] = [
                     'can_edit'         => true,
                     'can_like'         => false,
                     'can_subscribe'    => false,
                 ];
-                $this->connections = static::get_all_connection_routes($this->_id);
+                $arr['connections'] = static::get_all_connection_routes($arr['_id']);
             }
             else
             {
-                $interactions       = parent::factory('interaction', NULL, $current_user->_id);
-                $this->interactions = $interactions->interacting($this->_id, 'user');
-                $this->actions      = static::get_action_routes($this->_id);
-                $this->connections  = static::get_public_connection_routes($this->_id);
-                return $this->unset_private_fields();
+                $interactions        = parent::factory('interaction', NULL, $current_user->_id);
+                $arr['interactions'] = $interactions->interacting($arr['_id'], 'user');
+                $arr['actions']      = static::get_action_routes($arr['_id']);
+                $arr['connections']  = static::get_public_connection_routes($arr['_id']);
+                return $this->unset_private_fields($arr);
             }
         }
         else
         {
-            return $this->unset_private_fields();
+            return $this->unset_private_fields($arr);
         }
 
-        return $this;
+        return $arr;
     }
 
     /**
@@ -379,26 +416,22 @@ class Model_User extends Document {
      *
      * @return \Model_User
      */
-    public function unset_private_fields()
+    public function unset_private_fields($arr)
     {
-        $settings = isset($this->settings) ? $this->settings : NULL;
+        $settings = isset($arr['settings']) ? $arr['settings'] : NULL;
         if ($settings)
         {
             switch ($settings['privacy']['contacts']['is'])
             {
                 case 'SUBSCRIBERS':
-                    if ($this->interactions['subscribe'])
+                    if ($arr->interactions['subscribe'])
                     {
-                        $this->modify('info.telephone', NULL);
-                        $this->modify('info.social', NULL);
-                        $this->modify('email', NULL);
+                        unset($arr['info']['telephone'], $arr['info']['social'], $arr['email']);
                     }
                     break;
 
                 case 'SELF':
-                    $this->modify('info.telephone', NULL);
-                    $this->modify('info.social', NULL);
-                    $this->modify('email', NULL);
+                    unset($arr['info']['telephone'], $arr['info']['social'], $arr['email']);
                     break;
 
                 case 'CUSTOM': //check if current user id is in this list
@@ -412,14 +445,12 @@ class Model_User extends Document {
                 case 'SUBSCRIBERS':
                     if (!$this->interactions['subscribe'])
                     {
-                        $this->modify('info.gender', NULL);
-                        $this->modify('info.birthday', NULL);
+                        unset($arr['info']['gender'], $arr['info']['birthday']);
                     }
                     break;
 
                 case 'SELF':
-                    $this->modify('info.gender', NULL);
-                    $this->modify('info.birthday', NULL);
+                    unset($arr['info']['gender'], $arr['info']['birthday']);
                     break;
 
                 case 'CUSTOM': //check if current user id is in this list
@@ -430,14 +461,12 @@ class Model_User extends Document {
             }
         }
 
-        $this->password = '';
-        $this->logins   = [];
-        $this->private_actions = [];
-        $this->modify('settings.billing', NULL);
+        unset($arr['password'],
+                $arr['logins'],
+                $arr['private_actions'],
+                $arr['settings']['billing']);
 
-        $this->modify('settings.privacy', NULL);
-
-        return $this;
+        return $arr;
     }
 
     /**

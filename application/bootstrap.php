@@ -97,6 +97,7 @@ Kohana::$config->attach(new Config_File);
 Kohana::modules([
     'event'      => MODPATH . 'event', // Kohana 3 event class
     'rt_core'    => MODPATH . 'rt_core', // Core RT classes
+    'queue'      => MODPATH . 'queue', // Core RT classes
     'interact'   => MODPATH . 'interact', // Interaction Models
     'auth'       => MODPATH . 'auth', // Basic authentication
     'cache'      => MODPATH . 'cache', // Caching with multiple backends
@@ -122,7 +123,7 @@ Route::set('singpost', 'singpost(/<action>(/<id>))')
             'id'         => null
         ]);
 
-Route::set('user', 'user(/<action>(/<id>))')
+Route::set('user', 'user(/<action>(/<id>))', ['id' => '[^/,;?]++'])
         ->defaults([
             'controller' => 'user',
             'action'     => 'index',

@@ -577,9 +577,11 @@ class Controller_User extends Controller_Resource {
         if(!$type || !$value)
             return $this->error('invalid_request');
 
-        if(static::$model->get([$type => $value]))
+        Debug::log(print_r(static::$model->get($value), true));
+
+        if(static::$model->get($value))
             return $this->fail(
-                    'register/user', 'username.' . $type . '_not_available'
+                    'user/registration', $type . '_not_available'
             );
 
         return $this->data(['success' => 1]);

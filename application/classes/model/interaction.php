@@ -95,8 +95,8 @@ class Model_Interaction extends Document {
 
 
         $results = $this->collection(true)->find([
-                    'user._id'  => $this->current_user->_id,
-                    'object_id' => $object_id,
+                    'user._id'  => parent::check_id($this->current_user->_id),
+                    'object_id' => parent::check_id($object_id),
                     'object_type' => $object_type
                 ]);
         $return = ['like' => false, 'subscribe' => false];
@@ -213,7 +213,7 @@ class Model_Interaction extends Document {
         $this->collection()->ensureIndex(['interaction' => 1]);
         $this->collection()->ensureIndex(['object_id' => 1]);
         $this->collection()->ensureIndex(['user._id' => 1]);
-        
+
         if (!$this->current_user->loaded())
             return false;
 

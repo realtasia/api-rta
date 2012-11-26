@@ -125,10 +125,6 @@ class Controller_Abstract extends Controller {
             $this->return->session = [
                 'access_token' => static::$current_session['access_token']
             ];
-            if(isset(static::$current_session['state']))
-            {
-                $this->return->session['state'] = static::$current_session['state'];
-            }
         }
 
 //        $header   = http_build_query($this->return);
@@ -220,6 +216,11 @@ class Controller_Abstract extends Controller {
                     //Debug::log('Made it to CORS');
                     break;
             }
+        }
+
+        if(Arr::get(static::$params, 'state'))
+        {
+            $this->return->session['state'] = static::$params['state'];
         }
         $this->response->headers('Content-Type', 'application/javascript');
         $data = json_encode($this->return, JSON_PRETTY_PRINT);

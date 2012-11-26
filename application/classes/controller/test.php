@@ -683,4 +683,9 @@ EOD;
         die();
     }
 
+    public function action_password()
+    {
+        echo static::hash('121481');
+    }
+
 }

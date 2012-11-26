@@ -4,10 +4,6 @@
 class Model_Oauth2_Session extends Document {
     protected $name = 'oauth2_sessions';
 
-    /**
-     * @var integer time to live
-     */
-    public static $ttl = 3600; // 1 hour
 
     /**
      * Gets a stored session for the given token.
@@ -103,7 +99,7 @@ class Model_Oauth2_Session extends Document {
             'user_id'      => isset($params['user_id']) ? $params['user_id'] : NULL,
             'code'         => isset($params['code']) ? $params['code'] : NULL,
             'access_token' => $access_token,
-            'expires_in'   => time() + static::$ttl,
+            'expires_in'   => isset($params['user_id']) ? Date::MONTH * 2 : Date::HOUR * 2,
             'grant_type'   => $params['grant_type'],
             'stage'        => isset($params['stage']) ? $params['stage'] : 'granted',
         ];
@@ -130,12 +126,15 @@ class Model_Oauth2_Session extends Document {
     /**
      * Utility to check if a token expired.
      *
-     * @param integer $ttl the current expiry timestamp.
+     * @param integer $expires the current expiry timestamp.
      * @return boolean
      */
-    public static function expired($ttl)
+    public static function expired($expires, $id)
     {
-        return time() - $ttl > static::$ttl;
+        //Debug::log(parent::check_id($id)->getTimestamp());
+        //Debug::log($expires);
+        //Debug::log(time());
+        return (int) $expires + parent::check_id($id)->getTimestamp() <= time();
     }
 
 }
