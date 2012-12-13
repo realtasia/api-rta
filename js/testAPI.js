@@ -190,7 +190,7 @@ Load = function(settings, params, model)
         return false;
     }
 
-    var domain = 'http://rta.jjpc.net';
+    var domain = 'http://rta.casa.net';
     if (location.host.indexOf('casa') > 1)
     {
         domain = 'http://rta.casa.net';

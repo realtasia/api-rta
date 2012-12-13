@@ -1,4 +1,4 @@
-var domain = 'http://rta.jjpc.net', common = 'http://jjpc.net/common/js', app;
+var domain = 'http://rta.casa.net', common = 'http://jjpc.net/common/js', app;
 if (location.host.indexOf('casa') > 1)
 {
     domain = 'http://rta.casa.net';

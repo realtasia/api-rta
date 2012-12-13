@@ -252,8 +252,15 @@ class Controller_Testpad extends Controller {
 
                 $output = exec('mongoimport --db db --collection ' . $collection . ' --file ' . $filename);
 
-                unlink($tmp);
-                unlink($filename);
+                if(@file_exists($tmp))
+                {
+                    unlink($tmp);
+                }
+                
+                if(@file_exists($filename))
+                {
+                    unlink($filename);
+                }
             }
 
             $this->response->body($output);
