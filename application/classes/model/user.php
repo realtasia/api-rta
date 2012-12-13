@@ -595,11 +595,7 @@ class Model_User extends Document {
         'license'     => '',
         'roles'       => ['user'],
         'summary'     => '',
-        'avatar' => [
-            150           => 'beta.realtasia.com.sg/assets/images/avatar-150X150.jpg',
-            60            => 'beta.realtasia.com.sg/assets/images/avatar-60X60.jpg',
-            32            => 'beta.realtasia.com.sg/assets/images/avatar-32X32.jpg',
-        ],
+        'avatar'      => null,
         'uri'         => '',
         'subscribers' => [],
         'likers' => [],

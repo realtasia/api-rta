@@ -163,7 +163,7 @@ Route::set('clean', 'clean(/<action>(/<id>))')
             'action'     => 'index',
             'id'         => null
         ]);
-Route::set('avatar', 'avatar(/<action>(/<id>(/<size>)))')
+Route::set('avatar', 'avatar(/<id>(/<size>))')
         ->defaults([
             'controller' => 'avatar',
             'action'     => 'index',

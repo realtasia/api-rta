@@ -15,21 +15,25 @@ class Controller_Avatar extends Controller {
 
     public function action_index()
     {
-        $this->response->headers([
-            'X-Accel-Redirect' => '/s3/static2.realtasia.com.sg/avatars/F150.png'
-        ]);
+        $url = '/s3/';
+        $bucket = 'static2.realtasia.com.sg/';
+
         $this->response->send_headers();
-//        $id   = $this->request->param('id');
-//        $size = (int) $this->request->query('size');
-//        $user = Document::factory('user', $id);
-//        $user->load(null, [
-//            'info.gender' =>1, 'avatar' =>1
-//        ]);
-//
-//        if($user->avatar)
-//        {
-//            $url = $user->avatar . '-' . $size;
-//        }
+        $id   = $this->request->param('id');
+        $size = (int) $this->request->param('size');
+        $user = Document::factory('user')->collection();
+        $u = (object) $user->findOne(['_id' => $id], ['info.gender' =>1, 'avatar' =>1]);
+
+        if($u->avatar && strlen($u->avatar) > 0)
+        {
+            return $this->response->headers([
+                'X-Accel-Redirect' => $url . $u->avatar . $size
+            ]);
+        }
+
+        return $this->response->headers([
+            'X-Accel-Redirect' => $url . $bucket . ucfirst(substr($u->info['gender'], 0, 1)) . $size
+        ]);
 
     }
 
