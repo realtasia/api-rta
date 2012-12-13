@@ -18,7 +18,7 @@ class Controller_Avatar extends Controller {
         $this->response->headers([
             'X-Accel-Redirect' => '/s3/static2.realtasia.com.sg/avatars/F150.png'
         ]);
-        $this->reponse->send_headers();
+        $this->response->send_headers();
 //        $id   = $this->request->param('id');
 //        $size = (int) $this->request->query('size');
 //        $user = Document::factory('user', $id);
