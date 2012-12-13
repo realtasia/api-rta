@@ -23,10 +23,8 @@ class Controller_Avatar extends Controller {
         $size = (int) $this->request->param('size');
         $user = Document::factory('user')->collection();
         $u = $user->findOne(['_id' => new MongoID($id)], ['info.gender' =>1, 'avatar' =>1]);
-        var_dump($u);
-        die();
 
-        if($u->avatar && !empty($u->avatar))
+        if($u['avatar'] && !empty($u['avatar']))
         {
             return $this->response->headers([
                 'X-Accel-Redirect' => $url . $u->avatar . $size
@@ -34,7 +32,7 @@ class Controller_Avatar extends Controller {
         }
 
         return $this->response->headers([
-            'X-Accel-Redirect' => $url . $bucket . ucfirst(substr($u->info['gender'], 0, 1)) . $size . '.png'
+            'X-Accel-Redirect' => $url . $bucket . ucfirst(substr($u['info']['gender'], 0, 1)) . $size . '.png'
         ]);
 
     }
