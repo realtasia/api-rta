@@ -50,7 +50,14 @@ class Model_Page extends Document {
 
         if(isset($params['name']))
         {
-            $params['uri'] = "/$type/$subtype/" . URL::title($params['name']);
+            // library has no uri, for now...
+            if($params['type'] !== 'library')
+            {
+                $params['uri'] = "/$type";
+                $params['uri'] .= empty($subtype) ? '' : "/$subtype";
+                $params['uri'] .= "/" . URL::title($params['name']);
+            }
+
             $params['slug'] = URL::title($params['name']);
         }
 

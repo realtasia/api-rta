@@ -107,6 +107,10 @@ class Model_Interaction extends Document {
                 if ($k == 'interaction')
                 {
                     $return[$v] = true;
+//                    if($v === 'subscribe')
+//                    {
+//                        $return['subscribing'] = true;
+//                    }
                 }
             }
         }

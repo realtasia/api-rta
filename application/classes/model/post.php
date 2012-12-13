@@ -11,7 +11,7 @@
  */
 class Model_Post extends Document {
 
-    protected $after_delete_fields;
+    protected static $after_delete_fields;
 
     /**
      * Retrieve a single post
@@ -37,41 +37,31 @@ class Model_Post extends Document {
      */
     public function create($params)
     {
+        $sparse = array_fill_keys(['sparse', 'safe'], true);
         $this->collection()->ensureIndex([
             'status'     => 1, 'user._id'   => 1, 'privacy.is' => 1, 'modified'   => -1
                 ], ['name' => 'post_id_fields', 'safe' => true]);
-        $this->collection()->ensureIndex([
-            'page_parent._id' => 1
-                ], ['sparse' => true, 'safe'   => true]);
-        $this->collection()->ensureIndex([
-            'page._id' => 1
-                ], ['sparse' => true, 'safe'   => true]);
-        $this->collection()->ensureIndex([
-            'to._id' => 1
-                ], ['sparse' => true, 'safe'   => true]);
-        $this->collection()->ensureIndex([
-            'type' => 1,
-        ]);
-        $this->collection()->ensureIndex([
-            'listing.unit' => 1,
-        ]);
-        $this->collection()->ensureIndex([
-            'listing.type'          => 1, 'listing.price'         => 1, 'listing.rooms'         => 1,
-            'listing.built_size'    => 1, 'listing.property_type' => 1
-        ]);
+        $this->collection()->ensureIndex(['page_parent._id' => 1], $sparse);
+        $this->collection()->ensureIndex(['page._id' => 1], $sparse);
+        $this->collection()->ensureIndex(['to._id' => 1], $sparse);
+        $this->collection()->ensureIndex(['type' => 1]);
+        $this->collection()->ensureIndex(['listing.unit' => 1]);
+        $this->collection()->ensureIndex(array_fill_keys([
+            'listing.type', 'listing.price', 'listing.rooms',
+            'listing.built_size', 'listing.property_type'
+        ], 1));
         // overwrite defaults
-        $data                   = Arr::overwrite(static::$post_fields, $params);
+        $data = Arr::overwrite(static::post_fields(), $params);
         // merge with defaults
-        $data                   = Arr::merge(static::$post_fields, $data);
+        $data = Arr::merge(static::post_fields(), $data);
 
         // sort - for some sanity in debugging.. :-)
         ksort($data);
 
         // if an id is present, this is an update.
-        if (isset($data['_id']))
+        if (isset($params['_id']))
         {
-            $this->atomic($data['_id']);
-            unset($params['_id']);
+            $this->atomic($params['_id']);
         }
 
         // load the document
@@ -113,10 +103,7 @@ class Model_Post extends Document {
         {
             $msg = parent::factory('comment');
 
-            $params['post'] = [
-                '_id'  => $this->_id,
-                'type' => $this->type
-            ];
+            $params['post'] = [ '_id'  => $this->_id, 'type' => $this->type];
 
             $params['message'] = $message;
 
@@ -136,23 +123,19 @@ class Model_Post extends Document {
     public function create_album($params)
     {
         $defaults = [
-            'name' => '',
+            'name'    => '',
             'message' => '',
             'privacy' => ['is' => 'PUBLIC'],
-            'user' => [],
-            'page' => [],
-            'type' => 'album',
+            'user'    => [],
+            'page'    => [],
+            'type'    => 'album',
         ];
 
         return $this->create(Arr::merge($defaults, $params));
     }
 
     /**
-     *
-     */
-
-    /**
-     * Searches for a document that has unique values. Returns false if none is
+     * Searches for a listing that has unique values. Returns false if none is
      * found and the id of the document if found.
      *
      * @param array $params
@@ -188,7 +171,7 @@ class Model_Post extends Document {
             if (isset($this->page_parent))
                 $pages[] = $this->page_parent;
 
-            return $this->process_counts(['pages' => $pages, 'privacy' => $this->privacy], $this->type, $this->user);
+            return $this->process_counts(['pages'   => $pages, 'privacy' => $this->privacy], $this->type, $this->user);
         }
     }
 
@@ -256,9 +239,7 @@ class Model_Post extends Document {
     }
 
     /**
-     * Converts timestamps to dates.
-     * Checks and sets current user attributes. (if user returned is the user logged in)
-     * Otherwise, checks current user's interaction with the returned user
+     * Sets created timestamp
      */
     public function after_load()
     {
@@ -266,43 +247,50 @@ class Model_Post extends Document {
 
         $this->created = $id->getTimestamp();
         // if there is no current user, no further formatting required.
-        if ($this->current_user === NULL)
-            return $this;
 
-        $current_user = (object) $this->get_default_user_fields();
+        return $this;
+    }
 
-        // check if it's the same user
-        if ((string) $this->user['_id'] === (string) $current_user->_id)
+    /**
+     * Converts timestamps to dates.
+     * Checks and sets current user attributes. (if user returned is the user logged in)
+     * Otherwise, checks current user's interaction with the returned user
+     */
+    public function stringify($arr = [])
+    {
+        // get the current user
+        $cu                     = $this->current_user && $this->get_default_user_fields();
+        $arr                    = parent::stringify($arr);
+        $arr['connections']     = static::get_public_connection_routes($arr['_id']);
+        $arr['generated_title'] = static::generate_title($arr);
+
+        if ($cu && $u_id = Arr::get($arr['user'], '_id'))
         {
-            $this->private_actions = ['can_edit'         => true];
-            $this->connections = static::get_all_connection_routes($this->_id);
-        }
-        else
-        {
-            $interactions       = parent::factory('interaction', NULL, $current_user->_id);
-            $this->interactions = $interactions->interacting($this->_id, 'post');
-            $this->actions      = static::get_action_routes($this->_id);
-            $this->connections  = static::get_public_connection_routes($this->_id);
+            $cu_id                = (string) $cu['_id'];
+            $arr['is_owner']      = (string) $u_id === $cu_id;
+            $arr['is_page_owner'] = (string) Arr::get($arr['page'], '_id') === $cu_id;
+
+            $arr['is_owner'] && $arr['connections'] = static::get_all_connection_routes($arr['_id']);
+
+            $interactions        = parent::factory('interaction', NULL, $cu->_id);
+            $arr['interactions'] = $interactions->interacting($arr['_id'], 'post');
+            $arr['actions']      = static::get_action_routes($arr['_id']);
         }
 
         // we should trigger the comment model's formatting so each comment in
         // this post is properly formatted.
-        if (!empty($this->comments))
+        if (!empty($arr['comments']))
         {
-            foreach ($this->comments as $key => $value)
+            foreach ($arr['comments'] as $key => $value)
             {
                 $comment = parent::factory('comment');
-                if ($current_user)
-                {
-                    // check if there is a current user
-                    $comment->current_user = $current_user;
-                }
+                $comment->current_user = $cu;
                 // now each comment in the post is properly formatted.
-                $this->set("comments.$key", $comment->stringify($comment->to_array()));
+                $arr['comments'][$key] = $comment->stringify($comment->to_array());
             }
         }
 
-        return $this;
+        return $arr;
     }
 
     /**
@@ -311,7 +299,7 @@ class Model_Post extends Document {
      */
     public function before_delete()
     {
-        $this->after_delete_fields = [
+        static::$after_delete_processing = [
             '_id'         => $this->_id,
             'user'        => $this->user,
             'type'        => $this->type,
@@ -330,50 +318,44 @@ class Model_Post extends Document {
      */
     public function after_delete()
     {
-        $id   = $this->after_delete_fields['_id'];
-        $user = $this->after_delete_fields['user'];
-        $type = $this->after_delete_fields['type'];
-        $counts = $this->after_delete_fields['counts'];
-        $privacy = $this->after_delete_fields['privacy'];
+        $f       = static::$after_delete_processing;
+        $id      = $f['_id'];
+        $user    = $f['user'];
+        $type    = $f['type'];
+        $counts  = $f['counts'];
+        $privacy = $f['privacy'];
 
-        unset(
-                $this->after_delete_fields['_id'],
-                $this->after_delete_fields['user'],
-                $this->after_delete_fields['type'],
-                $this->after_delete_fields['counts'],
-                $this->after_delete_fields['privacy']
-        );
+        unset($f['_id'], $f['user'], $f['type'], $f['counts'], $f['privacy']);
         $pages = [];
 
-        foreach ($this->after_delete_fields as $key => $array)
+        foreach ($f as $key => $array)
         {
             if (!empty($array))
                 $pages[] = $array;
         }
 
-        $this->process_counts(['pages' => $pages, 'privacy' => $privacy], $type, $user, -1);
+        $this->process_counts(['pages'   => $pages, 'privacy' => $privacy], $type, $user, -1);
 
         // remove all embedded documents
-        if(isset($counts))
+        if (isset($counts))
         {
-            if($counts['subscribers'] > 0 || $counts['likers'] > 0)
+            if ($counts['subscribers'] > 0 || $counts['likers'] > 0)
             {
                 parent::factory('interaction')->collection()
                         ->remove_safe([
-                            'object_id' => $id,
+                            'object_id'   => $id,
                             'object_type' => 'post',
-                ], ['multiple' => true]);
+                                ], ['multiple' => true]);
             }
 
-            if($counts['comments'] > 0)
+            if ($counts['comments'] > 0)
             {
                 parent::factory('comment')->collection()
                         ->remove_safe([
                             'post._id' => $id
-                ], ['multiple' => true]);
+                                ], ['multiple' => true]);
             }
         }
-
     }
 
     /**
@@ -388,7 +370,7 @@ class Model_Post extends Document {
      */
     public function process_counts($params, $type, $user, $inc = 1)
     {
-        $pages = $params['pages'];
+        $pages   = $params['pages'];
         $privacy = $params['privacy'];
         if (!empty($pages))
         {
@@ -433,7 +415,7 @@ class Model_Post extends Document {
                         // albums are organised by private and public
                         $field = $privacy['is'] === 'PUBLIC' ? 'albums.public' : 'albums.private';
                         parent::factory('page', $page['_id'])
-                                ->inc('counts.' .$field, $inc)
+                                ->inc('counts.' . $field, $inc)
                                 ->save();
                         break;
                 }
@@ -470,7 +452,7 @@ class Model_Post extends Document {
      */
     public function update_privacy($params, $_id)
     {
-        $field  = static::$post_fields['privacy'];
+        $field  = static::post_fields()['privacy'];
         $values = Arr::overwrite($field, $params);
 
         $this->load_values([
@@ -513,13 +495,23 @@ class Model_Post extends Document {
      * @param string|MongoID $user_id
      * @return array
      */
-    protected static function get_action_routes($user_id)
+    protected static function get_action_routes($post)
     {
+        switch ($post['type'])
+        {
+            case 'testimonial' :
+                $all = ['like', 'unlike'];
+                break;
+            default:
+                $all = ['like', 'unlike', 'subscribe', 'unsubscribe', 'comment', 'share'];
+                break;
+        }
+
         $actions = [];
 
-        foreach (['like', 'unlike', 'subscribe', 'unsubscribe', 'comment'] as $k => $v)
+        foreach ($all as $v)
         {
-            $actions[$v] = Router::post($v, $user_id);
+            $actions[$v] = Router::post($v, $post['_id']);
         }
 
         return $actions;
@@ -558,48 +550,75 @@ class Model_Post extends Document {
     }
 
     /**
+     * Generate the post title based on the post type and activity.
+     *
+     * @param array $post
+     * @return string
+     */
+    protected static function generate_title($post)
+    {
+        // some empty vars
+        $own_wall  = $other_wall = FALSE;
+
+        $page_title = "Go to the {$post['page']['name']} {$post['page']['type']} page";
+        if ($post['page']['type'] == 'user')
+        {
+            $page_title = "Go to {$post['page']['name']}'s profile page";
+            if ((string) $post['page']['_id'] === (string) $post['user']['_id'])
+                $own_wall   = TRUE;
+            else
+                $other_wall = TRUE;
+        }
+
+        $page_link = html::anchor($post['page']['uri'], $post['page']['name'], ['title' => $page_title]);
+
+        switch ($post['type'])
+        {
+            // wallpost, testimonial, conversation, listing, checkin, event, album
+            case "checkin": return "checked in to $page_link.";
+            case "testimonial": return "wrote a testimonial about $page_link.";
+            case "listing": return "created a listing in $page_link.";
+            case "event": return "created an event in $page_link.";
+            case "attachment": return "uploaded some media " . $own_wall ? '.' : "in $page_link.";
+            case ("post" || 'wallpost'): return "wrote on " . $own_wall ? "his profile page." : "$page_link's profile.";
+            default: return "shared a post in $page_link.";
+        }
+    }
+
+    /**
      * The standard post document.
      *
-     * @var array
+     * @return array
      */
-    private static $post_fields = [
-        'user' => [], // '_id', 'name' of the user who created this
-        'to' => [], // '_id', 'name' of the user this message was sent to (for messages)
-        'page' => [], // '_id', 'name', 'type' the page it was written on (location, user profile etc...)
-        'page_parent' => [], // '_id', 'name', 'type' the page's parent (company or estate)
-        'listing' => [
-            'type'          => '',
-            'price'         => 0,
-            'rooms'         => 1,
-            'built_size'    => 0,
-            'property_type' => '',
-            'tenure'        => 0,
-            'land_size'     => 0,
-            'value'         => 0,
-            'cobroke'       => 0,
-            'unit'          => '',
-        ], // '_id'
-        'name'          => '', // the content
-        'message'       => '', // the content
-        'message_tags'  => [], // names of existing people within the content are parsed
-        'picture' => '', // if this post has an image, this will be the url
-        'link'    => [], // 'name', 'caption', 'description', 'source' the original link if there is one
-        'video' => [], // 'name', 'caption', 'description', 'source', 'properties' if this post has a video
-        'type'     => 'post', // wallpost, testimonial, conversation, listing, checkin, event, album
-        'status'   => 'active', // pending, active, expired,
-        'uri'      => '',
-        'modified' => 0,
-        'privacy'  => ['is'     => 'PUBLIC'],
-        'counts' => [
-            'attachments' => 0,
-            'comments'    => 0,
-            'events'      => 0,
-            'likers'      => 0,
-            'subscribers' => 0
-        ],
-        'comments'    => [],
-        'subscribers' => [],
-        'likers' => []
-    ];
+    protected static function post_fields()
+    {
+        return [
+            'user'         => [], // '_id', 'name' of the user who created this
+            'to'           => [], // '_id', 'name' of the user this message was sent to (for messages)
+            'page'         => [], // '_id', 'name', 'type' the page it was written on (location, user profile etc...)
+            'page_parent'  => [], // '_id', 'name', 'type' the page's parent (company or estate)
+            'listing'      => array_fill_keys([
+                'type', 'price', 'rooms', 'built_size', 'property_type', 'tenure',
+                'land_size', 'value', 'cobroke', 'unit'
+                    ], 0),
+            'name'         => '', // the content
+            'message'      => '', // the content
+            'message_tags' => [], // names of existing people within the content are parsed
+            'picture'      => null, // if this post has an image, this will be the url
+            'link'         => [], // 'name', 'description', 'source' the original link if there is one.
+            'video'        => [], // 'name', 'description', 'source', 'properties' if this post has a video
+            'type'         => 'post', // wallpost, testimonial, conversation, listing, checkin, event, album
+            'status'       => 'active', // pending, active, expired,
+            'uri'          => '',
+            'modified'     => 0,
+            'privacy'      => ['is' => 'PUBLIC'],
+            'counts'       => array_fill_keys([
+                'attachments', 'comments', 'events', 'likers', 'subscribers', 'attachments'
+                    ], 0),
+            'comments'     => [],
+            'subscribers'  => [],
+            'likers'       => []
+        ];
+    }
 
 }

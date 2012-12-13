@@ -102,6 +102,7 @@ class Model_Oauth2_Session extends Document {
             'expires_in'   => isset($params['user_id']) ? Date::MONTH * 2 : Date::HOUR * 2,
             'grant_type'   => $params['grant_type'],
             'stage'        => isset($params['stage']) ? $params['stage'] : 'granted',
+            'modified'     => time(),
         ];
 
         $return = $this->collection(true)->findAndModify([
@@ -129,12 +130,9 @@ class Model_Oauth2_Session extends Document {
      * @param integer $expires the current expiry timestamp.
      * @return boolean
      */
-    public static function expired($expires, $id)
+    public static function expired($expires, $modified)
     {
-        //Debug::log(parent::check_id($id)->getTimestamp());
-        //Debug::log($expires);
-        //Debug::log(time());
-        return (int) $expires + parent::check_id($id)->getTimestamp() <= time();
+        return (int) $expires + (int) $modified <= time();
     }
 
 }

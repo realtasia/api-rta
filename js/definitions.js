@@ -8,14 +8,14 @@ ko.bindingHandlers.timeago = {
     update: function(element, valueAccessor) {
         var value = ko.utils.unwrapObservable(valueAccessor());
         var $this = $(element);
-        
+
         $this.attr('title', value);
-        
+
         if ($this.data('timeago')) {
             var datetime = $.timeago.datetime($this);
             var distance = (new Date().getTime() - datetime.getTime());
             var inWords = $.timeago.inWords(distance);
-            
+
             $this.data('timeago', { 'datetime': datetime });
             $this.text(inWords);
         } else {
@@ -45,14 +45,15 @@ function updateObservables(obj, obs){
     return obs;
 }
 /**
+ * @param opts {Object} from Server
  * @returns {viewModelUser}
  */
 function User(opts) {
-    opts = (typeof opts == 'object') ? opts : {};
-    var optionCounts  = (typeof opts.counts == 'object') ? opts.counts : {},
-        optionAvatar  = (typeof opts.avatar == 'object') ? opts.avatar : {},
-        optionCropped = (typeof optionAvatar.cropped == 'object') ? optionAvatar.cropped : {};
-    
+    opts = (typeof opts === 'object') ? opts : {};
+    var optionCounts  = (typeof opts.counts === 'object') ? opts.counts : {},
+        optionAvatar  = (typeof opts.avatar === 'object') ? opts.avatar : {},
+        optionCropped = (typeof optionAvatar.cropped === 'object') ? optionAvatar.cropped : {};
+
     this.id = opts.id || null;
     this.avatar = {
         cropped: {

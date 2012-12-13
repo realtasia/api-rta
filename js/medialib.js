@@ -84,6 +84,15 @@ function Lib(data) {
 }
 
 function Uploader(VM) {
+    var self = this;
+
+    this.files = VM.files();
+    this.logs = ko.observableArray();
+    this.currentFile = function(file){
+        return ko.utils.arrayFirst(self.files, function(i){
+            return file.id === ko.isObservable(i) ? i.id() : i.id;
+        });
+    };
 
     return new plupload.Uploader({
         runtimes: 'gears,html5,flash,silverlight',
@@ -102,22 +111,23 @@ function Uploader(VM) {
         ],
         init: {
             Refresh: function(up) {
-
+                self.logs.push({'[Refresh] Uploader:': up});
             },
             StateChanged: function(up) {
+                self.logs.push({'[StateChanged] Uploader:': up});
                 var uploading = (up.state === plupload.STARTED);
                 VM.uploading(uploading);
             },
             QueueChanged: function(up) {
+                self.logs.push({'[QueueChanged] Uploader:': up});
             },
             UploadProgress: function(up, file) {
-                var found = ko.utils.arrayFirst(VM.files(), function(item) {
-                    return file.id === item.id();
-                });
-                found.progress(file.percent);
+                self.logs.push({'[UploadProgress] Uploader:': up, "File:": file});
+                self.currentFile(file).progress(file.percent);
                 VM.progress(up.total.percent);
             },
             FilesAdded: function(up, upFiles) {
+                self.logs.push({'[FilesAdded] Uploader:': up, "Files:": upFiles});
                 ko.utils.arrayForEach(upFiles, function(item) {
                     var fileParams = {
                         id : item.id, name : item.name, size : plupload.formatSize(item.size)
@@ -129,10 +139,10 @@ function Uploader(VM) {
                 });
                 up.refresh(); // Reposition Flash/Silverlight
                 $('#dropzone').removeClass('hover').addClass('uploadMenu');
-                console.log(VM.files())
                 up.start();
             },
             FilesRemoved: function(up, upFiles) {
+                self.logs.push({'[FilesRemoved] Uploader:': up, "Files:": upFiles});
                 if (VM.files().length === 0)
                 {
                     $('#dropzone').removeClass('uploadMenu');
@@ -143,33 +153,26 @@ function Uploader(VM) {
                 });
             },
             FileUploaded: function(up, file, info) {
-                // Called when a file has finished uploading
-                log('[FileUploaded] File:', file, "Info:", info);
+                self.logs.push({'[FileUploaded] File:': file, "Info:": info});
 
-                var found = ko.utils.arrayFirst(VM.files(), function(item) {
-                    return file.id === item.id();
-                });
+                var found = self.currentFile(file);
 
                 found.progress(100);
                 found.uploaded(true);
                 found.uploading(false);
                 found.queued(false);
-                if (info.response)
-                {
+                if (info.response){
                     found.src('http://' + info.response);
                 }
 
             },
             ChunkUploaded: function(up, file, info) {
-                var found = ko.utils.arrayFirst(VM.files(), function(item) {
-                    return file.id === item.id();
-                });
-                found.progress(file.percent);
+                self.logs.push({'[ChunkUploaded] File:': file, "Info:": info});
+                self.currentFile(file).progress(file.percent);
                 VM.progress(up.total.percent);
             },
             Error: function(up, args) {
-                // Called when a error has occured
-                log('[error] ', args);
+                self.logs.push({'[ERROR] Uploader:': up, "Args:": args});
             }
         }
     });

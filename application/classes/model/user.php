@@ -11,6 +11,7 @@
  */
 class Model_User extends Document {
 
+    static $new_user_has_company = false;
     /**
      * Retrieve a user by email, username or id
      *
@@ -52,20 +53,61 @@ class Model_User extends Document {
         {
             // retrieve the company
             $company = parent::factory('page');
-            $company->load($params['company'], ['_id'  => 1, 'name' => 1]);
+            $company->load($params['company'], ['_id'  => 1, 'name' => 1, 'uri' => 1]);
 
             // set the user's company
             $params['company'] = $company->to_array();
         }
 
-        // overwrite defaults
-        $data                     = Arr::overwrite(static::$user_fields, $params);
-        // merge with defaults
-        $data                     = Arr::merge(static::$user_fields, $data);
-        $data['password']         = static::hash($data['password']);
-        $data['info']['birthday'] = (int) $data['info']['birthday'];
-        ksort($data);
+        if(isset($params['username']))
+        {
+            $params['uri'] = "/{$params['username']}";
+        }
 
+        // overwrite defaults
+        $data = Arr::overwrite(static::$user_fields, $params);
+        // merge with defaults
+        $data = Arr::merge(static::$user_fields, $data);
+
+        if (isset($data['password']))
+        {
+            $data['password'] = static::hash($data['password']);
+        }
+        $data['info']['birthday'] = (int) $data['info']['birthday'];
+
+        // beta users have a message, an interested field and a rep field (for)
+        // sales representatives.
+        /**
+         * @todo remove these fields after beta
+         */
+        if(isset($params['message']))
+        {
+            $data['message'] = $params['message'];
+        }
+
+        // this field is only used for users who joined the program via the website
+        if(isset($params['interested']))
+        {
+            $data['interested'] = (int) $params['interested'];
+        }
+
+        // this needs to exists for a newly registered user.
+        if(isset($params['rep']) && is_array($params['rep']))
+        {
+            $data['rep'] = $params['rep'];
+        }
+
+        if(
+                isset($params['company']) &&
+                is_array($params['company']) &&
+                (bool) Arr::get($data, 'interested', 0) &&
+                (bool) Arr::get($data, 'rep', false)
+        )
+        {
+            static::$new_user_has_company = $params['company'];
+        }
+
+        ksort($data);
 
         // load the document
         $this->load_values($data);
@@ -121,18 +163,38 @@ class Model_User extends Document {
                     unset($this->_object[$v]);
                 }
             }
-            if(isset($this->_object['password']) && $this->_object['password'] === null)
-            {
-                unset($this->_object['password'], $this->_object['private_actions']);
-                unset($this->_changed['password'], $this->_changed['private_actions']);
-            }
         }
     }
 
+
+    public function after_save($action)
+    {
+        if(static::$new_user_has_company)
+        {
+            if(!isset($this->name) || empty($this->name))
+            {
+                $user = $this->collection()->findOne(['_id' => $this->_id], ['_id' => 1, 'name' => 1]);
+                $user = (object) $this->stringify($user);
+            }
+            else
+            {
+                $user = clone $this;
+            }
+            $company = parent::factory('page', static::$new_user_has_company['_id']);
+            $company->addToSet('members', ['_id' => $user->_id, 'name' => $user->name]);
+            $company->inc('counts.members', 1);
+            $company->save();
+            $company->collection()->update(
+              ['_id' => $company->_id, 'members' => ['$size' => 11]],
+              ['$pop' => ['members' => 1]]
+            );
+        }
+
+        static::$new_user_has_company = false;
+    }
+
     /**
-     * Converts timestamps to dates.
-     * Checks and sets current user attributes. (if user returned is the user logged in)
-     * Otherwise, checks current user's interaction with the returned user
+     * Sets created timestamp
      */
     public function after_load()
     {
@@ -141,38 +203,20 @@ class Model_User extends Document {
         // add a created
         $this->created = $id->getTimestamp();
 
-//        if ($this->current_user)
-//        {
-//            $current_user = (object) $this->get_default_user_fields();
-//            if ((string) $this->_id === (string) $current_user->_id)
-//            {
-//                $this->private_actions = [
-//                    'can_edit'         => true,
-//                    'can_like'         => false,
-//                    'can_subscribe'    => false,
-//                ];
-//                $this->connections = static::get_all_connection_routes($this->_id);
-//            }
-//            else
-//            {
-//                $interactions       = parent::factory('interaction', NULL, $current_user->_id);
-//                $this->interactions = $interactions->interacting($this->_id, 'user');
-//                $this->actions      = static::get_action_routes($this->_id);
-//                $this->connections  = static::get_public_connection_routes($this->_id);
-//                return $this->unset_private_fields();
-//            }
-//        }
-//        else
-//        {
-//            return $this->unset_private_fields();
-//        }
-
         return $this;
     }
 
+    /**
+     * Set defaults if it was ever turned into an array.
+     *
+     * @param array $arr
+     * @return array
+     */
     public function stringify($arr = [])
     {
         $arr = parent::stringify($arr);
+        $arr['connections']  = static::get_public_connection_routes($arr['_id']);
+
         if ($this->current_user && isset($arr['_id']))
         {
                 //die(json_encode(['status' => 'success', 'data' => $arr]));
@@ -185,22 +229,18 @@ class Model_User extends Document {
                     'can_subscribe'    => false,
                 ];
                 $arr['connections'] = static::get_all_connection_routes($arr['_id']);
+                return $arr;
             }
             else
             {
                 $interactions        = parent::factory('interaction', NULL, $current_user->_id);
                 $arr['interactions'] = $interactions->interacting($arr['_id'], 'user');
                 $arr['actions']      = static::get_action_routes($arr['_id']);
-                $arr['connections']  = static::get_public_connection_routes($arr['_id']);
                 return $this->unset_private_fields($arr);
             }
         }
-        else
-        {
-            return $this->unset_private_fields($arr);
-        }
 
-        return $arr;
+        return $this->unset_private_fields($arr);
     }
 
     /**
@@ -552,7 +592,9 @@ class Model_User extends Document {
         'status'      => 'active',
         'company'     => [],
         'designation' => '',
+        'license'     => '',
         'roles'       => ['user'],
+        'summary'     => '',
         'avatar' => [
             150           => 'beta.realtasia.com.sg/assets/images/avatar-150X150.jpg',
             60            => 'beta.realtasia.com.sg/assets/images/avatar-60X60.jpg',

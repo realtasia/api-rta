@@ -15,17 +15,17 @@ trait Trait_Oauth2_Utils {
         {
             if($v instanceof MongoID)
             {
-                $arr[$k] = $v->__toString();
+                $arr[$k] = (string) $v;
             }
-
-            if(is_array($v))
+            elseif(is_array($v))
             {
-                $arr[$k] = $this->stringify($v);
+                $arr[$k] = self::stringify($v);
             }
         }
 
         return $arr;
     }
+
 
     protected function get_default_user_fields()
     {

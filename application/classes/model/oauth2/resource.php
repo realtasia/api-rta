@@ -25,7 +25,8 @@ class Model_Oauth2_Resource extends Document {
                 array('username' => $username),
                 array('email'    => $username),
             ),
-            'password' => static::hash($password));
+            'password' => static::hash($password)
+                );
 
         $user = Document::factory('user');
         if($user->load($params, ['_id']));

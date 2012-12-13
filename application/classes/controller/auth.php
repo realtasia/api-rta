@@ -85,7 +85,17 @@ class Controller_Auth extends Controller_Abstract {
             $check['state'] = $params['state'];
         }
 
-        return static::is_error($check) ? $this->error($check) : $this->data($check);
+        if(static::is_error($check))
+        {
+            return $this->error($check);
+        }
+        else
+        {
+            static::$current_session = $check;
+            return $this->data(['success' => 1]);
+        }
+
+        //return static::is_error($check) ? $this->error($check) : $this->data($check);
     }
 
     /**
@@ -110,8 +120,16 @@ class Controller_Auth extends Controller_Abstract {
         {
             $check['state'] = $params['state'];
         }
-
-        return static::is_error($check) ? $this->error($check) : $this->data($check);
+        if(static::is_error($check))
+        {
+            return $this->error($check);
+        }
+        else
+        {
+            static::$current_session = $check;
+            return $this->data(['success' => 1]);
+        }
+        //return static::is_error($check) ? $this->error($check) : $this->data($check);
     }
 
     /**

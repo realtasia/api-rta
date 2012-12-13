@@ -71,11 +71,11 @@ var RTA = {
                 self.removeClass('hovering');
             }else{
                 if(self.hasClass('active')){
-                    self.removeClass('active')
-                    self.addClass('hovering')
+                    self.removeClass('active');
+                    self.addClass('hovering');
                 }else{
-                    self.addClass('active')
-                    self.removeClass('hovering')
+                    self.addClass('active');
+                    self.removeClass('hovering');
                 }
             }
             return false;
@@ -88,12 +88,12 @@ function MenuItem(label, css, state, callback){
     this.hovering = ko.observable(false);
     this.active = ko.observable(false);
     this.disabled = ko.observable(false);
-    if(typeof state == 'object'){
+    if(typeof state === 'object'){
         for(var key in state){
-            if(typeof state[key] == 'function'){
-                self[key](state[key].call(this))
+            if(typeof state[key] === 'function'){
+                self[key](state[key].call(this));
             }
-            self[key](state[key])
+            self[key](state[key]);
         }
     }
     this.css   = css || {
@@ -102,7 +102,7 @@ function MenuItem(label, css, state, callback){
     };
     this.label = label;
     this.id    = 'RTA_MenuItem_' + label;
-    if(typeof callback == 'function'){
+    if(typeof callback === 'function'){
         this.callback = callback;
     }
 }
@@ -216,7 +216,7 @@ jQuery.fn.blindToggle = function(speed, easing, callback) {
     }, speed, easing, callback);
 };
 
-ko.bindingHandlers['class'] = {
+ko.bindingHandlers.class = {
     'update': function(element, valueAccessor) {
         if (element['__ko__previousClassValue__']) {
             ko.utils.toggleDomNodeCssClass(element, element['__ko__previousClassValue__'], false);
@@ -228,7 +228,7 @@ ko.bindingHandlers['class'] = {
 };
 
 
-ko.bindingHandlers['checkedButtons'] = {
+ko.bindingHandlers.checkedButtons = {
     'init': function (element, valueAccessor, allBindingsAccessor) {
         var type = element.getAttribute('data-toggle') || 'radio';
         var updateHandler = function () {

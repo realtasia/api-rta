@@ -3,7 +3,6 @@
 defined('SYSPATH') or die('No direct script access.');
 
 return [
-
     'username_not_available' => 'This username is already registered, please choose another one.',
     'email_not_available'    => 'This email is already registered, please choose another one.',
     'email'     => [

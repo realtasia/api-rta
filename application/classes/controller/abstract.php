@@ -108,7 +108,7 @@ class Controller_Abstract extends Controller {
     protected function error($key, $status = 200)
     {
         $this->response->headers([
-            'Cache-Control' => 'no-cache, must-revalidate',
+            'Cache-Control' => 'must-revalidate',
             'Expires' => date('c', time()),
         ]);
         $this->response->status(200);
@@ -147,7 +147,7 @@ class Controller_Abstract extends Controller {
     protected function fail($file = NULL, $key = NULL, $status = 200)
     {
         $this->response->headers([
-            'Cache-Control' => 'no-cache, must-revalidate',
+            'Cache-Control' => 'must-revalidate',
             'Expires' => date('c', time()),
         ]);
         $this->response->status($status);

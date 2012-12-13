@@ -169,7 +169,7 @@ class Oauth2_Authentication {
         if($session)
         {
             // check if the token expired.
-            if(static::$mSession->expired($session['expires_in'], $session['_id']))
+            if(static::$mSession->expired($session['expires_in'], $session['modified']))
             {
                 // token expired. generate a new one and return the token.
                 $update_session = static::$mSession->set_token($session, $new);

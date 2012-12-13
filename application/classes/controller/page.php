@@ -46,7 +46,7 @@ class Controller_Page extends Controller_Resource {
      * Fetch requested post and check relation to logged_in user
      *
      * GET post
-     * Usage: Issue a GET to /post/index/{id}
+     * Usage: Issue a GET to /page/index/{id}
      *
      * @return json data
      */

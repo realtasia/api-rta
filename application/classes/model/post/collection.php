@@ -33,7 +33,7 @@ class Model_Post_Collection extends Collection {
         extract(Arr::merge($defaults, $args), EXTR_SKIP);
 
         $query['status'] = $status;
-        // looking for a specific role
+        // looking for a specific type
         if ($type)
         {
             $query['type'] = $type;

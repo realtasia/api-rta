@@ -15,6 +15,147 @@ class Controller_Testpad extends Controller {
 
     use Trait_Oauth2_Utils;
 
+    public function action_insert()
+    {
+        $docs = [];
+        $one = new MongoID(1);
+        $two = new MongoID(2);
+        // website, no followup
+        $doc = [
+            'status' => 'pending',
+            'interested' => 1
+        ];
+        for($i = 0;$i < 11; $i++){$doc['i'] = time() + .1;sleep(.1);$docs[] = $doc;}
+
+
+        // website, registration, no payment, chris
+        $doc = [
+            'status' => 'pending',
+            'interested' => 0,
+            'rep' => [
+                'id' => $two,
+                'name' => 'Chris',
+                'type' => 'website'
+            ]
+        ];
+        for($i = 0;$i < 121; $i++){$doc['i'] = time() + .1;sleep(.1);$docs[] = $doc;}
+
+        // website, registration, no payment, jason
+        $doc = [
+            'status' => 'pending',
+            'interested' => 0,
+            'rep' => [
+                'id' => $one,
+                'name' => 'Jason',
+                'type' => 'website'
+            ]
+        ];
+        for($i = 0;$i < 151; $i++){$doc['i'] = time() + .1;sleep(.1);$docs[] = $doc;}
+
+        // website, registration, active, chris
+        $doc = [
+            'status' => 'active',
+            'interested' => 0,
+            'rep' => [
+                'id' => $two,
+                'name' => 'Chris',
+                'type' => 'website'
+            ]
+        ];
+        for($i = 0;$i < 51; $i++){$doc['i'] = time() + .1;sleep(.1);$docs[] = $doc;}
+
+        // website, registration, active, jason
+        $doc = [
+            'status' => 'active',
+            'interested' => 0,
+            'rep' => [
+                'id' => $one,
+                'name' => 'Jason',
+                'type' => 'website'
+            ]
+        ];
+        for($i = 0;$i < 11; $i++){$doc['i'] = time() + .1;sleep(.1);$docs[] = $doc;}
+
+        // presentation, registration, no payment, chris
+        $doc = [
+            'status' => 'pending',
+            'interested' => 0,
+            'rep' => [
+                'id' => $two,
+                'name' => 'Chris',
+                'type' => 'presentation'
+            ]
+        ];
+        for($i = 0;$i < 71; $i++){$doc['i'] = time() + .1;sleep(.1);$docs[] = $doc;}
+
+        // presentation, registration, no payment, jason
+        $doc = [
+            'status' => 'pending',
+            'interested' => 0,
+            'rep' => [
+                'id' => $one,
+                'name' => 'Jason',
+                'type' => 'presentation'
+            ]
+        ];
+        for($i = 0;$i < 31; $i++){$doc['i'] = time() + .1;sleep(.1);$docs[] = $doc;}
+
+        // presentation, registration, active, chris
+        $doc = [
+            'status' => 'active',
+            'interested' => 0,
+            'rep' => [
+                'id' => $two,
+                'name' => 'Chris',
+                'type' => 'presentation'
+            ]
+        ];
+        for($i = 0;$i < 1301; $i++){$doc['i'] = time() + .1;sleep(.1);$docs[] = $doc;}
+
+        // presentation, registration, active, chris
+        $doc = [
+            'status' => 'active',
+            'interested' => 0,
+            'rep' => [
+                'id' => $one,
+                'name' => 'Jason',
+                'type' => 'presentation'
+            ]
+        ];
+        for($i = 0;$i < 1101; $i++){$doc['i'] = time() + .1;sleep(.1);$docs[] = $doc;}
+
+        echo "<pre>";
+        //print_r($docs);
+//        $db = new MongoClient;
+//        $db = new MongoClient;
+        Collection::factory('test')->batchInsert($docs, ['safe' => true, 'continueOnError' => true]);
+    }
+
+    public function action_counts()
+    {
+        echo "<pre>";
+        $query = [
+            'interested' => 1
+        ];
+        echo "<h1>Pending</h1>";
+        $r = Collection::factory('test')->find($query)->limit(2);
+        print_r($r->count(false));
+        while($r->hasNext())
+        {
+            print_r($r->getNext()->as_array());
+        }
+
+        //print_r($r->getNext()->as_array());
+//        $query = [
+//            'rep' => ['$exists' => true],
+//            'rep.name' => 'Chris'
+//        ];
+//        echo "<h1>Chris Contacted</h1>";
+//        $r = Collection::factory('test')->find($query)->limit(2)->count(false);
+//        print_r($r);
+
+    }
+
     public function action_plural()
     {
         echo "<pre>";

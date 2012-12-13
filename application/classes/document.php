@@ -208,5 +208,4 @@ class Document extends Mongo_Document {
             case 'subscriber': return 'subscribers';
         }
     }
-
 }

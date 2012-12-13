@@ -34,6 +34,7 @@ abstract class Controller_Resource extends Controller_Abstract{
             static::$params = $this->request->post();
             $token = $this->request->post('access_token');
         }
+        //Debug::log(print_r(static::$params, true));
         //var_dump($this->validate_token($token));
 
         // Still nothing, return an error
@@ -128,7 +129,7 @@ abstract class Controller_Resource extends Controller_Abstract{
     protected function interact($interaction, $object_type)
     {
         $id = $this->request->param('id');
-        // 
+        //
         if($this->logged_in())
         {
             $interact = Document::factory('interaction', null, static::$user_id);

@@ -38,12 +38,24 @@ class Model_User_Collection extends Collection {
         $this->collection()->ensureIndex([
             'company._id' => 1
         ], ['sparse' => true, 'safe' => true]);
+        $this->collection()->ensureIndex([
+            'rep._id' => 1
+        ], ['sparse' => true, 'safe' => true]);
+        $this->collection()->ensureIndex([
+            'rep.type' => 1
+        ], ['sparse' => true, 'safe' => true]);
+        $this->collection()->ensureIndex([
+            'rep.token' => 1
+        ], ['sparse' => true, 'safe' => true]);
+        $this->collection()->ensureIndex([
+            'company.name' => 1
+        ], ['sparse' => true, 'safe' => true]);
         $logged_in_user = $user_search_fields_hint = false;
 //
         $defaults = [
            'limit' => 11, 'skip' => 0, 'roles' => [], 'sort' => 'alpha',
            's' => '', 'include_ids' => [], 'status' => ['$ne' => 'terminated'],
-            'privacy' => NULL, 'company' => null
+            'privacy' => NULL
         ];
 
         // set some empty arrays
@@ -75,7 +87,7 @@ class Model_User_Collection extends Collection {
         }
         if($company)
         {
-            $query['company._id'] = $company;
+            $query['company.name'] = new MongoRegex('/^'.  strtoupper($company) .'/');
         }
 
         // looking for a specific role
@@ -92,13 +104,20 @@ class Model_User_Collection extends Collection {
         {
             // this time it's a regex search. Since it is a "start with", ie ^,
             // indexes should work... Hopefully.
-            $s = new MongoRegex("/^$s/i");
+            $telephone = SMS::valid($s);
+            $company = new MongoRegex('/^'.  strtoupper($s) .'/');
+            $s = new MongoRegex("/^$s/");
             $query['$or'] = [
                     ['username' => $s],
                     ['email' => $s],
-                    ['info.telephone.mobile' => $s],
+                    ['company.name' => $company],
                     ['name' => $s]
                 ];
+            if($telephone)
+            {
+                $query['$or'][] = ['info.telephone.mobile' => $telephone];
+            }
+            //print_r($query);
             // we change the hint now as these are more relevant. Can we use
             // all the fields?
             $user_search_fields_hint = [
@@ -136,7 +155,7 @@ class Model_User_Collection extends Collection {
         {
             $results->hint($user_id_fields_hint);
         }
-
+        //die(Debug::Vars($query));
         while($results->hasNext())
         {
             $row = $results->getNext();
