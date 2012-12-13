@@ -16,7 +16,7 @@ class Controller_Avatar extends Controller {
     public function action_index()
     {
         $url = '/s3/';
-        $bucket = 'static2.realtasia.com.sg/';
+        $bucket = 'static2.realtasia.com.sg/avatars/';
 
         $this->response->send_headers();
         $id   = $this->request->param('id');
@@ -24,7 +24,7 @@ class Controller_Avatar extends Controller {
         $user = Document::factory('user')->collection();
         $u = (object) $user->findOne(['_id' => $id], ['info.gender' =>1, 'avatar' =>1]);
 
-        if($u->avatar && strlen($u->avatar) > 0)
+        if($u->avatar && !empty($u->avatar))
         {
             return $this->response->headers([
                 'X-Accel-Redirect' => $url . $u->avatar . $size
