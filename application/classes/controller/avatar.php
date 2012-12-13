@@ -32,7 +32,7 @@ class Controller_Avatar extends Controller {
         }
 
         return $this->response->headers([
-            'X-Accel-Redirect' => $url . $bucket . ucfirst(substr($u->info['gender'], 0, 1)) . $size
+            'X-Accel-Redirect' => $url . $bucket . ucfirst(substr($u->info['gender'], 0, 1)) . $size . '.png'
         ]);
 
     }
