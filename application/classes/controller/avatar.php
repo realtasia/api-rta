@@ -22,7 +22,9 @@ class Controller_Avatar extends Controller {
         $id   = $this->request->param('id');
         $size = (int) $this->request->param('size');
         $user = Document::factory('user')->collection();
-        $u = (object) $user->findOne(['_id' => $id], ['info.gender' =>1, 'avatar' =>1]);
+        $u = $user->findOne(['_id' => new MongoID($id)], ['info.gender' =>1, 'avatar' =>1]);
+        //var_dump($u);
+        //die();
 
         if($u->avatar && !empty($u->avatar))
         {
