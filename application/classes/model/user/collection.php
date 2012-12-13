@@ -54,7 +54,7 @@ class Model_User_Collection extends Collection {
 //
         $defaults = [
            'limit' => 11, 'skip' => 0, 'roles' => [], 'sort' => 'alpha',
-           's' => '', 'include_ids' => [], 'status' => ['$ne' => 'terminated'],
+           's' => null, 'include_ids' => [], 'status' => ['$ne' => 'terminated'],
             'privacy' => NULL
         ];
 
