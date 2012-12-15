@@ -945,7 +945,8 @@ class Controller_User extends Controller_Resource {
         // first round
         if (!$validation->check())
         {
-            $this->errors = $validation->errors('user/info');
+            Debug::log('validation failed');
+            $this->errors = $validation->errors();
             return $this->fail();
         }
 
@@ -956,6 +957,7 @@ class Controller_User extends Controller_Resource {
         {
             if(Arr::get($params, 'confirmPassword') !== 'password')
             {
+                Debug::log('password exists and do not match');
                 $this->errors = ['passwords' => 'password do not match'];
                 return $this->fail();
             }
@@ -987,12 +989,13 @@ class Controller_User extends Controller_Resource {
         }
 
         $fields = Arr::overwrite($possible_fields, array_filter(static::$params));
-
+        Debug::log('All set, going to save');
         if ($info = static::$model->update_info($fields, static::$user_id))
         {
             return $this->data($info->stringify($info->as_array()));
         }
 
+        Debug::log('nada for saving. fail');
         $this->errors = $validation->errors();
         return $this->fail();
     }
