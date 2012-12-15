@@ -129,6 +129,8 @@ class Model_Post extends Document {
             'page'      => [],
             'type'      => 'attachment',
         ];
+
+        return $this->create(Arr::merge($defaults, $params));
     }
 
     /**
@@ -396,10 +398,36 @@ class Model_Post extends Document {
                         $type = $type === 'wallpost' ? 'posts' : Inflector::plural($type);
                         // for other kinds of posts, we don't update the
                         // user whose page was written on.
-                        if ($page['type'] !== 'user')
+                        if ($page['type'] !== 'user' && $page['type'] !== 'album')
                         {
                             parent::factory('page', $page['_id'])
                                     ->inc('counts.' . $type, $inc)
+                                    ->save();
+                            break;
+                        }
+                        if ($page['type'] === 'album')
+                        {
+                            parent::factory('post', $page['_id'])
+                                    ->inc('counts.' . $type, $inc)
+                                    ->save();
+                            break;
+                        }
+                        if ($page['type'] === 'library' && $this->type === 'attachment')
+                        {
+                            if(empty($this->mediainfo))
+                                break;
+
+                            if(strpos($this->mediainfo['mime'], 'image') !== false)
+                            {
+                                $count_type = 'pictures';
+                            }
+                            else
+                            {
+                                $count_type = 'documents';
+                            }
+
+                            parent::factory('page', $page['_id'])
+                                    ->inc('counts.' . $count_type, $inc)
                                     ->save();
                             break;
                         }

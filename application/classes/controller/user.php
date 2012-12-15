@@ -865,52 +865,6 @@ class Controller_User extends Controller_Resource {
      * Protected Actions - UPDATES
      * *********************************************************************** */
 
-    protected function update_avatar()
-    {
-        $uid       = $this->request->param('id');
-        $picture   = Arr::get(static::$params, 'picture');
-
-        $album = Document::factory('post');
-        $query = ['user._id' => new MongoID($uid), 'name' => 'Avatars', 'type' => 'album'];
-
-        // either retrieve the avatar album or create one
-        if(!$album->load($query))
-        {
-            $user = Document::factory('user', $uid);
-
-            if ($user->load(null, ['_id' => 1, 'library' => 1, 'counts' => 1]))
-            {
-                $avatars = [
-                    'name'    => 'Avatars',
-                    'message' => 'Your uploaded profile pictures',
-                    'user'    => ['_id'  => $user->_id, 'name' => $user->name],
-                    'page'    => $user->library,
-                    'type'    => 'album',
-                ];
-                $album = $album->create_album($avatars);
-            }
-        }
-
-        if(!$album)
-            return $this->fail('user/generic', 'server_error');
-
-        $attachment = [
-            'name'        => Arr::get(static::$params, 'name'),
-            'mediainfo'   => Arr::get(static::$params, 'mediainfo'),
-            'picture'     => $picture,
-            'user'        => ['_id'  => $user->_id, 'name' => $user->name],
-            'page'        => ['_id'  => $album->_id, 'name' => $album->name],
-            'page_parent' => $user->library
-        ];
-
-        if(Document::factory('post')->create_attachment($attachment))
-        {
-            $user->avatar = $picture;
-            $user->save();
-            return $this->data(['success' => 1]);
-        }
-    }
-
     /**
      * Performs a password reset. Front-end app must authenticate user first
      * using a API sms call
@@ -1104,6 +1058,54 @@ class Controller_User extends Controller_Resource {
 
         $this->errors = $validation->errors('user/info');
         return $this->fail();
+    }
+
+
+    protected function update_avatar()
+    {
+        $uid       = $this->request->param('id');
+        $picture   = Arr::get(static::$params, 'picture');
+
+        $album = Document::factory('post');
+        $query = ['user._id' => new MongoID($uid), 'name' => 'Avatars', 'type' => 'album'];
+        $user = Document::factory('user', $uid);
+
+        // either retrieve the avatar album or create one
+        if(!$album->load($query))
+        {
+
+            if ($user->load(null, ['_id' => 1, 'library' => 1, 'counts' => 1]))
+            {
+                $avatars = [
+                    'name'    => 'Avatars',
+                    'message' => 'Your uploaded profile pictures',
+                    'user'    => ['_id'  => $user->_id, 'name' => $user->name],
+                    'page'    => Arr::merge(['type' => 'library'], $user->library),
+                    'type'    => 'album',
+                ];
+                $album = $album->create_album($avatars);
+            }
+        }
+
+        if(!$album)
+            return $this->fail('user/generic', 'server_error');
+
+        $attachment = [
+            'name'        => Arr::get(static::$params, 'name'),
+            'mediainfo'   => Arr::get(static::$params, 'mediainfo'),
+            'picture'     => $picture,
+            'user'        => ['_id'  => $user->_id, 'name' => $user->name],
+            'page'        => ['_id'  => $album->_id, 'name' => $album->name, 'type' => 'album'],
+            'page_parent' => Arr::merge(['type' => 'library'], $user->library)
+        ];
+        //Debug::log(print_r($attachment, true));
+
+        if(Document::factory('post')->create_attachment($attachment))
+        {
+            $user->avatar = $picture;
+            $user->save();
+            return $this->data(['success' => 1]);
+        }
     }
 
     /**
