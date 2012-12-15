@@ -335,16 +335,17 @@ class Model_User extends Document {
      * @param string|MongoID $user_id
      * @return type
      */
-    public function update_info($params, $user_id)
+    public function update_info($params)
     {
         if(isset($params['password']))
         {
             $params['password'] = static::hash($params['password']);
         }
 
-        $this->clear();
-        $this->atomic($user_id);
-        $this->load_values($params);
+        foreach($params as $k => $v)
+        {
+            $this->set($k, $v);
+        }
         $this->info = Arr::overwrite(static::$user_fields['info'], $params['info']);
         $this->info['birthday']  = (int) $this->info['birthday'];
 

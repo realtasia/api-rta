@@ -945,7 +945,7 @@ class Controller_User extends Controller_Resource {
         // first round
         if (!$validation->check())
         {
-            Debug::log('validation failed');
+            Debug::log('info fields validation failed');
             $this->errors = $validation->errors();
             return $this->fail();
         }
@@ -989,13 +989,10 @@ class Controller_User extends Controller_Resource {
         }
 
         $fields = Arr::overwrite($possible_fields, array_filter(static::$params));
-        Debug::log('All set, going to save');
-        if ($info = static::$model->update_info($fields, static::$user_id))
-        {
+        $info = Document::factory('user', static::$user_id)->update_info($fields);
+        if ($info)
             return $this->data($info->stringify($info->as_array()));
-        }
 
-        Debug::log('nada for saving. fail');
         $this->errors = $validation->errors();
         return $this->fail();
     }
