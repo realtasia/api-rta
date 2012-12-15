@@ -29,7 +29,7 @@ class Controller_User extends Controller_Resource {
     ];
     private static $valid_user_actions        = [
         'create_social_login', 'password_reset', 'update_social_login', 'is_unique',
-        'update_avatar'
+        'update_avatar', 'update_info'
     ];
 
     public function before()
