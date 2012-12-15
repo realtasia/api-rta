@@ -16,12 +16,13 @@ class Model_Post extends Document {
     /**
      * Retrieve a single post
      *
-     * @param MongoID|string|array $id or an array of query params
+     * @param array $query the mongo query array
+     * @param array $fields the subset of fields to retrieve
      * @return array|null
      */
-    public function get($id, array $fields = [], $object = TRUE)
+    public function get(array $query = [], array $fields = [], $object = TRUE)
     {
-        if ($this->load($id, $fields))
+        if ($this->load($query, $fields))
         {
             $ret = $this->stringify($this->as_array());
             return $object ? (object) $ret : $ret;
@@ -74,12 +75,12 @@ class Model_Post extends Document {
         } catch (MongoException $e)
         {
             Debug::error(
-                    "MongoException while trying to create post: :post \n"
-                    . "Error Message- :message \n"
-                    . "Error Code- :code", [
-                ':post'    => print_r($data, TRUE),
-                ':message' => $e->getMessage(),
-                ':code'    => $e->getCode()
+                "MongoException while trying to create post: :post \n"
+                . "Error Message- :message \n"
+                . "Error Code- :code", [
+                    ':post'    => print_r($data, TRUE),
+                    ':message' => $e->getMessage(),
+                    ':code'    => $e->getCode()
             ]);
             return false;
         }
@@ -134,6 +135,19 @@ class Model_Post extends Document {
         return $this->create(Arr::merge($defaults, $params));
     }
 
+
+    public function create_attachment($params)
+    {
+        $defaults = [
+            'mediainfo' => [],
+            'picture'   => '',
+            'privacy'   => ['is' => 'PUBLIC'],
+            'user'      => [],
+            'page'      => [],
+            'type'      => 'attachment',
+        ];
+    }
+
     /**
      * Searches for a listing that has unique values. Returns false if none is
      * found and the id of the document if found.
@@ -171,7 +185,7 @@ class Model_Post extends Document {
             if (isset($this->page_parent))
                 $pages[] = $this->page_parent;
 
-            return $this->process_counts(['pages'   => $pages, 'privacy' => $this->privacy], $this->type, $this->user);
+            return $this->process_counts(['pages' => $pages, 'privacy' => $this->privacy], $this->type, $this->user);
         }
     }
 
@@ -363,19 +377,22 @@ class Model_Post extends Document {
      * depending the type of post and the increment.
      *
      * @param array $pages all possible pages [page, page_parent, to]
-     * @param string $type this post typer
+     * @param string $type this post type
      * @param array $user this post's creator
      * @param int $inc increase or decrease
      * @return \Model_Post
      */
-    public function process_counts($params, $type, $user, $inc = 1)
+    public function process_counts( array $params, $type, $user, $inc = 1)
     {
         $pages   = $params['pages'];
         $privacy = $params['privacy'];
+        // not empty seem redundant, just in case there are no pages.
+        // future posts maybe?
         if (!empty($pages))
         {
             foreach ($pages as $page)
             {
+                // we do different page updates based on the post type
                 switch ($type)
                 {
                     case 'testimonial' :
@@ -579,7 +596,7 @@ class Model_Post extends Document {
             case "testimonial": return "wrote a testimonial about $page_link.";
             case "listing": return "created a listing in $page_link.";
             case "event": return "created an event in $page_link.";
-            case "attachment": return "uploaded some media " . $own_wall ? '.' : "in $page_link.";
+            case "attachment": return "uploaded new media " . $own_wall ? '.' : "in $page_link.";
             case ("post" || 'wallpost'): return "wrote on " . $own_wall ? "his profile page." : "$page_link's profile.";
             default: return "shared a post in $page_link.";
         }
@@ -595,8 +612,8 @@ class Model_Post extends Document {
         return [
             'user'         => [], // '_id', 'name' of the user who created this
             'to'           => [], // '_id', 'name' of the user this message was sent to (for messages)
-            'page'         => [], // '_id', 'name', 'type' the page it was written on (location, user profile etc...)
-            'page_parent'  => [], // '_id', 'name', 'type' the page's parent (company or estate)
+            'page'         => [], // '_id', 'name', 'type' the page it was written on (location, user profile, album etc...)
+            'page_parent'  => [], // '_id', 'name', 'type' the page's parent (company, estate or library)
             'listing'      => array_fill_keys([
                 'type', 'price', 'rooms', 'built_size', 'property_type', 'tenure',
                 'land_size', 'value', 'cobroke', 'unit'
@@ -605,6 +622,7 @@ class Model_Post extends Document {
             'message'      => '', // the content
             'message_tags' => [], // names of existing people within the content are parsed
             'picture'      => null, // if this post has an image, this will be the url
+            'mediainfo'    => [], // if this post has an image, this will be the url
             'link'         => [], // 'name', 'description', 'source' the original link if there is one.
             'video'        => [], // 'name', 'description', 'source', 'properties' if this post has a video
             'type'         => 'post', // wallpost, testimonial, conversation, listing, checkin, event, album

@@ -28,7 +28,8 @@ class Controller_User extends Controller_Resource {
         'admin_delete_session', 'admin_get_feedback'
     ];
     private static $valid_user_actions        = [
-        'create_social_login', 'password_reset', 'update_social_login', 'is_unique'
+        'create_social_login', 'password_reset', 'update_social_login', 'is_unique',
+        'update_avatar'
     ];
 
     public function before()
@@ -111,7 +112,11 @@ class Controller_User extends Controller_Resource {
 
         // no type. we need a type
         if (!$type)
+        {
+            Debug::log('Invalid invoked because no request type');
             return $this->error('invalid_request');
+        }
+
 
         // let's check if it's valid and run it
         if (in_array($type, static::$valid_user_actions) && method_exists($this, $type))
@@ -150,6 +155,7 @@ class Controller_User extends Controller_Resource {
         }
 
         // nope, return an error
+        Debug::log('Invalid invoked request type is not valid');
         return $this->error('invalid_request');
     }
 
@@ -859,6 +865,52 @@ class Controller_User extends Controller_Resource {
      * Protected Actions - UPDATES
      * *********************************************************************** */
 
+    protected function update_avatar()
+    {
+        $uid       = $this->request->param('id');
+        $picture   = Arr::get(static::$params, 'picture');
+
+        $album = Document::factory('post');
+        $query = ['user._id' => new MongoID($uid), 'name' => 'Avatars', 'type' => 'album'];
+
+        // either retrieve the avatar album or create one
+        if(!$album->load($query))
+        {
+            $user = Document::factory('user', $uid);
+
+            if ($user->load(null, ['_id' => 1, 'library' => 1, 'counts' => 1]))
+            {
+                $avatars = [
+                    'name'    => 'Avatars',
+                    'message' => 'Your uploaded profile pictures',
+                    'user'    => ['_id'  => $user->_id, 'name' => $user->name],
+                    'page'    => $user->library,
+                    'type'    => 'album',
+                ];
+                $album = $album->create_album($avatars);
+            }
+        }
+
+        if(!$album)
+            return $this->fail('user/generic', 'server_error');
+
+        $attachment = [
+            'name'        => Arr::get(static::$params, 'name'),
+            'mediainfo'   => Arr::get(static::$params, 'mediainfo'),
+            'picture'     => $picture,
+            'user'        => ['_id'  => $user->_id, 'name' => $user->name],
+            'page'        => ['_id'  => $album->_id, 'name' => $album->name],
+            'page_parent' => $user->library
+        ];
+
+        if(Document::factory('post')->create_attachment($attachment))
+        {
+            $user->avatar = $picture;
+            $user->save();
+            return $this->data(['success' => 1]);
+        }
+    }
+
     /**
      * Performs a password reset. Front-end app must authenticate user first
      * using a API sms call
@@ -1179,6 +1231,7 @@ class Controller_User extends Controller_Resource {
             }
         }
     }
+
 
     /**
      * Sends a user an email. Normally for registrations purposes. The official

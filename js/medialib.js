@@ -80,7 +80,7 @@ function Lib(data) {
             self.isDroppable(true);
         }
         log(pars.runtime);
-    })
+    });
 }
 
 function Uploader(VM) {
