@@ -337,19 +337,21 @@ class Model_User extends Document {
      */
     public function update_info($params, $user_id)
     {
-        $field = static::$user_fields['info'];
-
-        $params['birthday'] = (int) $params['birthday'];
-
-        $values = Arr::overwrite($field, $params);
+        if(isset($params['password']))
+        {
+            $params['password'] = static::hash($params['password']);
+        }
 
         $this->clear();
         $this->atomic($user_id);
-        $this->info = $values;
+        $this->load_values($params);
+        $this->info = Arr::overwrite(static::$user_fields['info'], $params['info']);
+        $this->info['birthday']  = (int) $this->info['birthday'];
 
-        $this->save();
+        if($this->save())
+            return $this;
 
-        return $this->info;
+        return false;
     }
 
     /**

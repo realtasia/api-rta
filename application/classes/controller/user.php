@@ -916,19 +916,81 @@ class Controller_User extends Controller_Resource {
      */
     protected function update_info()
     {
-        $validation = Validation::factory(static::$params)
-                ->rule('telephone', 'is_array')
-                ->rule('birthday', 'numeric')
-                ->rule('gender', 'not_empty')
-                ->rule('gender', 'in_array', [':value', ['male', 'female']]);
+        $params = static::extract_info_values(static::$params);
+        $possible_fields = array_fill_keys([
+            'first_name', 'last_name', 'username', 'uri', 'email', 'name', 'designation', 'license'
+        ], null);
+        $possible_fields['company'] = [];
+        $possible_fields['info'] = [];
+        // a few checks, first the basic check.
+        $validation = Validation::factory($params)
+                ->rule('first_name', 'alpha')
+                ->rule('first_name', 'not_empty')
+                ->rule('last_name', 'alpha')
+                ->rule('last_name', 'not_empty')
+                ->rule('username', 'not_empty')
+                ->rule('uri', 'not_empty')
+                ->rule('info.gender', 'in_array', [':value', ['male', 'female']])
+                ->rule('info.telephone.mobile', 'not_empty')
+                ->rule('info.birthday', 'numeric')
+                ->rule('info.languages', 'is_array')
+                ->rule('info.achievements', 'is_array')
+                ->rule('info.education', 'is_array')
+                ->rule('info.social', 'is_array')
+                ->rule('email', 'not_empty')
+                ->rule('email', 'email')
+                ->rule('email', 'email_domain');
 
-        if ($validation->check())
+
+        // first round
+        if (!$validation->check())
         {
-            if ($info = static::$model->update_info(static::$params, static::$user_id))
+            $this->errors = $validation->errors('user/info');
+            return $this->fail();
+        }
+
+        $password = Arr::get($params, 'password');
+
+        // if we have a password, check it.
+        if($password)
+        {
+            if(Arr::get($params, 'confirmPassword') !== 'password')
             {
-                return $this->data($info);
+                $this->errors = ['passwords' => 'password do not match'];
+                return $this->fail();
             }
-            return $this->error('server_error');
+
+            $possible_fields['password'] = $password;
+        }
+        // clean everything!
+        foreach(static::$params as $key => $value)
+        {
+            switch($key)
+            {
+                case 'first_name':
+                case 'last_name':
+                case 'info':
+                case 'designation':
+                case 'license':
+                case 'company':
+                    if(!empty($value))
+                    {
+                        static::$params[$key] = Security::xss_clean($value);
+                    }
+                    else
+                    {
+                        // set to null so as to filter
+                        static::$params[$key] = is_array($value) ? $value : null;
+                    }
+                break;
+            }
+        }
+
+        $fields = Arr::overwrite($possible_fields, array_filter(static::$params));
+
+        if ($info = static::$model->update_info($fields, static::$user_id))
+        {
+            return $this->data($info);
         }
 
         $this->errors = $validation->errors('user/info');
@@ -1546,6 +1608,21 @@ class Controller_User extends Controller_Resource {
 
         return Arr::merge($return, $array);
     }
+
+    protected static function extract_info_values($array)
+    {
+        $return = [];
+        $return['info.gender']            = Arr::path($array, 'info.gender');
+        $return['info.telephone.mobile']  = Arr::path($array, 'info.telephone.mobile');
+        $return['info.birthday']          = Arr::path($array, 'info.birthday');
+        $return['info.languages']         = Arr::path($array, 'info.languages');
+        $return['info.achievements']      = Arr::path($array, 'info.achievements');
+        $return['likers.education']       = Arr::path($array, 'likers.education');
+        $return['likers.social']          = Arr::path($array, 'likers.social');
+
+        return Arr::merge($return, $array);
+    }
+
 
     protected static function extract_registration_values($array)
     {
