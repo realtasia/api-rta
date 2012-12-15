@@ -14,23 +14,6 @@ class Model_Post extends Document {
     protected static $after_delete_fields;
 
     /**
-     * Retrieve a single post
-     *
-     * @param array $query the mongo query array
-     * @param array $fields the subset of fields to retrieve
-     * @return array|null
-     */
-    public function get(array $query = [], array $fields = [], $object = TRUE)
-    {
-        if ($this->load($query, $fields))
-        {
-            $ret = $this->stringify($this->as_array());
-            return $object ? (object) $ret : $ret;
-        }
-        return false;
-    }
-
-    /**
      * Create a default post with new values.
      *
      * @param array $params
