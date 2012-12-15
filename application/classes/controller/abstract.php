@@ -218,10 +218,6 @@ class Controller_Abstract extends Controller {
             }
         }
 
-        if(Arr::get(static::$params, 'state'))
-        {
-            $this->return->session['state'] = static::$params['state'];
-        }
         $this->response->headers('Content-Type', 'application/javascript');
         $data = json_encode($this->return, JSON_PRETTY_PRINT);
         if(isset(static::$params['callback']))
