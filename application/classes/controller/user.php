@@ -990,10 +990,10 @@ class Controller_User extends Controller_Resource {
 
         if ($info = static::$model->update_info($fields, static::$user_id))
         {
-            return $this->data($info);
+            return $this->data($info->stringify($info->as_array()));
         }
 
-        $this->errors = $validation->errors('user/info');
+        $this->errors = $validation->errors();
         return $this->fail();
     }
 
