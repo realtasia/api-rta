@@ -989,9 +989,10 @@ class Controller_User extends Controller_Resource {
         }
 
         $fields = Arr::overwrite($possible_fields, array_filter(static::$params));
-        $info = Document::factory('user', static::$user_id)->update_info($fields);
-        if ($info)
-            return $this->data($info->stringify($info->as_array()));
+        $user = Document::factory('user', static::$user_id);
+        $user->update_info($fields);
+        if ($user)
+            return $this->data($user->stringify($user->as_array()));
 
         $this->errors = $validation->errors();
         return $this->fail();

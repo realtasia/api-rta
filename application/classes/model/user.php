@@ -341,13 +341,10 @@ class Model_User extends Document {
         {
             $params['password'] = static::hash($params['password']);
         }
-
-        foreach($params as $k => $v)
-        {
-            $this->set($k, $v);
-        }
         $this->info = Arr::overwrite(static::$user_fields['info'], $params['info']);
         $this->info['birthday']  = (int) $this->info['birthday'];
+        unset($params['info']);
+        $this->load_values($params);
 
         if($this->save())
             return $this;
