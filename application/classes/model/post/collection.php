@@ -18,7 +18,7 @@ class Model_Post_Collection extends Collection {
      * @param array $args
      * @return self Sets the $cursor property and returns itself
      */
-    public function search($args = array(), $user_id = NULL)
+    public function search($args = array(), $uid = NULL)
     {
         $defaults = [
            'status' => 'active', 'skip' => 0, 'limit' => 11, 'sort' => 'active',
@@ -52,23 +52,23 @@ class Model_Post_Collection extends Collection {
         }
 
         if($user_id)
-            $query['user._id'] = $user_id;
+            $query['user._id'] = Document::check_id($user_id);
 
         if($page_id)
-            $query['page._id'] = $page_id;
+            $query['page._id'] = Document::check_id($page_id);
 
         if($privacy)
             $query['privacy.is'] = $privacy;
 
         if($parent_id)
-            $query['parent._id'] = $parent_id;
+            $query['parent._id'] = Document::check_id($parent_id);
 
         if($to_id)
-            $query['to._id'] = $to_id;
+            $query['to._id'] = Document::check_id($to_id);
 
         // iterate through the $ids and make sure they're all MongoID objects
         if (!empty($ids))
-            $query['_id']['$in'] = $ids;
+            $query['_id']['$in'] = Arr::map('Document::check_id', $ids);
 
         if(!is_array($sort))
         {
@@ -79,17 +79,18 @@ class Model_Post_Collection extends Collection {
                 default: $sort = ['_id' => -1]; break;
             }
         }
-
+        //die(json_encode(['data' => $query]));
         $results = $this
                 ->find($query)
                 ->limit($limit)
                 ->sort($sort)
                 ->skip($skip);
-
+        //die(json_encode(['data' =>$results->hasNext()]));
         while($results->hasNext())
         {
+            //die(json_encode(['data' => iterator_to_array($results)]));
             $row = $results->getNext();
-            if($user_id && $usr = $this->get_user($user_id))
+            if($uid && $usr = $this->get_user($uid))
             {
                 $row->current_user = $usr;
                 $row->after_load();

@@ -685,7 +685,7 @@ EOD;
 
     public function action_password()
     {
-        echo static::hash('121481') . '<br>';
+        //echo static::hash('121481') . '<br>';
         echo static::hash('90250056') . '<br>';
     }
 

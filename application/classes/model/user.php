@@ -250,20 +250,30 @@ class Model_User extends Document {
      * @param string|MongoID $user_id
      * @return type
      */
-    public function update_privacy($params, $user_id)
+    public function update_settings($params, $user_id)
     {
-        $field  = static::$user_fields['settings']['privacy'];
-        $values = Arr::overwrite($field, $params);
-        $values = $this->typecast($values, 'upper');
+        $privacy  = static::$user_fields['settings']['privacy'];
+        $privacy  = Arr::overwrite($privacy, $params['privacy']);
+        $privacy  = $this->typecast($privacy, 'upper');
+
+        $notifications  = static::$user_fields['settings']['notifications'];
+        $notifications  = Arr::overwrite($notifications, $params['notifications']);
+        $notifications  = $this->typecast($notifications, 'bool');
+
 
         $this->clear();
+
         $this->atomic($user_id);
+        $this->set('settings.notifications', $notifications);
+        $this->set('settings.privacy', $privacy);
 
-        $this->set('settings.privacy', $values);
+        if($this->save())
+        {
+            return $this;
+        }
 
-        $this->save();
+        return false;
 
-        return $this->settings['privacy'];
     }
 
     /**
@@ -341,9 +351,8 @@ class Model_User extends Document {
         {
             $params['password'] = static::hash($params['password']);
         }
-        $this->info = Arr::overwrite(static::$user_fields['info'], $params['info']);
-        $this->info['birthday']  = (int) $this->info['birthday'];
-        unset($params['info']);
+        $params['info'] = Arr::overwrite(static::$user_fields['info'], $params['info']);
+        $params['info']['birthday']  = (int) $this->info['birthday'];
         $this->load_values($params);
 
         if($this->save())
@@ -509,6 +518,14 @@ class Model_User extends Document {
         return $arr;
     }
 
+
+    public function check_password($id, $password)
+    {
+        $r = $this->collection()->findOne(['_id' => parent::check_id($id)], ['password' => 1]);
+
+        return $r['password'] === static::hash($password);
+    }
+
     /**
      * These are fields that are not needed for public consumption.
      *
@@ -624,8 +641,7 @@ class Model_User extends Document {
             'gender'       => '',
             'achievements' => [],
             'education' => [],
-            'social' => [],
-            'websites' => []
+            'social' => []
         ]
     ];
 

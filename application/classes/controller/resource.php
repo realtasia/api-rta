@@ -34,6 +34,12 @@ abstract class Controller_Resource extends Controller_Abstract{
             static::$params = $this->request->post();
             $token = $this->request->post('access_token');
         }
+
+        if(isset(static::$params['JSON']))
+        {
+            static::$params = Arr::merge(static::$params, json_decode(static::$params['JSON'], true));
+        }
+
         //Debug::log(print_r(static::$params, true));
         //var_dump($this->validate_token($token));
 

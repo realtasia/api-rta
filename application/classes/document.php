@@ -176,9 +176,16 @@ class Document extends Mongo_Document {
      * @param string|MongoID $id
      * @return type
      */
-    public static function check_id($id)
+    public static function check_id($val)
     {
-        return ($id instanceof MongoID) ? $id : new MongoID($id);
+        if($val instanceof MongoID)
+            return $val;
+
+        if(is_string($val) && strlen($val) === 24)
+        {
+            $id = new MongoID($val);
+        }
+        return ((string) $id === $val) ? $id : $val;
     }
 
     /**

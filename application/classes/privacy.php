@@ -134,7 +134,7 @@ class Privacy {
      */
     public static function valid($value, $field = null, $validation = null)
     {
-        if (in_array($value, ['PUBLIC', 'SUBSCRIBERS', 'SELF', 'CUSTOM']))
+        if (in_array($value, ['PUBLIC', 'SUBSCRIBERS', 'PRIVATE', 'CUSTOM']))
         {
             return true;
         }

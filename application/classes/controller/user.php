@@ -29,7 +29,7 @@ class Controller_User extends Controller_Resource {
     ];
     private static $valid_user_actions        = [
         'create_social_login', 'password_reset', 'update_social_login', 'is_unique',
-        'update_avatar', 'update_info'
+        'update_avatar', 'update_info','send_sms', 'validate_password', 'update_settings'
     ];
 
     public function before()
@@ -300,9 +300,9 @@ class Controller_User extends Controller_Resource {
     {
         $id = $this->request->param('id');
 
-        static::$params['user_id'] = $id;
+        static::$params['page_id'] = $id;
 
-        static::$params['type'] = ['$ne' => 'conversation'];
+        //static::$params['type'] = ['$ne' => 'conversation'];
 
         $posts = Mongo_Collection::factory('post');
 
@@ -347,7 +347,7 @@ class Controller_User extends Controller_Resource {
                 if (parent::is_client() || parent::logged_in())
                 {
                     // only publically viewable posts
-                    static::$params['privacy'] = 'PUBLIC';
+                    static::$params['privacy'] = static::logged_in_is_id($id) ? null : 'PUBLIC';
                     // we include posts written on his page
                     static::$params['page_id'] = $id;
                     return $this->data(
@@ -627,6 +627,27 @@ class Controller_User extends Controller_Resource {
 
         return $this->data(['success' => 1]);
     }
+
+    /**
+     * Checks for unique username or email or mobile.
+     *
+     * @param string static::$params['type'] decides whether it is username or email
+     * @param string $request->param['id'] the username or email to check
+     */
+    protected function validate_password()
+    {
+        $password = $this->request->param('id');
+
+        if (!$password)
+            return $this->error('invalid_request');
+        if(Document::factory('user')->check_password(static::$user_id, $password))
+        {
+            return $this->data(['success' => 1]);
+        }
+
+        return $this->fail('user/registration', 'password_don_match');
+    }
+
 
     /**
      * 1. Returns a user's public information if not logged in.
@@ -955,7 +976,7 @@ class Controller_User extends Controller_Resource {
         // if we have a password, check it.
         if($password)
         {
-            if(Arr::get($params, 'confirmPassword') !== 'password')
+            if(Arr::get($params, 'confirmPassword') !== $password)
             {
                 Debug::log('password exists and do not match');
                 $this->errors = ['passwords' => 'password do not match'];
@@ -964,6 +985,7 @@ class Controller_User extends Controller_Resource {
 
             $possible_fields['password'] = $password;
         }
+
         // clean everything!
         foreach(static::$params as $key => $value)
         {
@@ -982,13 +1004,20 @@ class Controller_User extends Controller_Resource {
                     else
                     {
                         // set to null so as to filter
-                        static::$params[$key] = is_array($value) ? $value : null;
+                        static::$params[$key] = is_array($value) ? (array) $value : null;
                     }
                 break;
             }
         }
 
+        // make the phone number a singapore number
+        if ($n = Arr::get($params, 'info.telephone.mobile'))
+        {
+            static::$params['info']['telephone']['mobile'] = SMS::valid($n);
+        }
+
         $fields = Arr::overwrite($possible_fields, array_filter(static::$params));
+        //die(print_r($fields, true));
         $user = Document::factory('user', static::$user_id);
         $user->update_info($fields);
         if ($user)
@@ -1003,36 +1032,62 @@ class Controller_User extends Controller_Resource {
      *
      * @return boolean
      */
-    protected function update_privacy_settings()
+    protected function update_settings()
     {
         $params     = static::extract_privacy_values(static::$params);
+        $params     = static::extract_notification_values($params);
+        //die(print_r($params, true));
         $validation = Validation::factory($params)
-                ->rule('is', 'Privacy::valid', [':value', ':field', ':validation'])
-                ->rule('is', 'not_empty')
-                ->rule('personal.is', 'Privacy::valid', [':value', ':field', ':validation'])
-                ->rule('personal.is', 'not_empty')
-                ->rule('contacts.is', 'Privacy::valid', [':value', ':field', ':validation'])
-                ->rule('contacts.is', 'not_empty')
-                ->rule('subscriptions.is', 'Privacy::valid', [':value', ':field', ':validation'])
-                ->rule('subscriptions.is', 'not_empty')
-                ->rule('messages.is', 'Privacy::valid', [':value', ':field', ':validation'])
-                ->rule('messages.is', 'not_empty')
-                ->rule('mentions.is', 'Privacy::valid', [':value', ':field', ':validation'])
-                ->rule('mentions.is', 'not_empty')
-                ->rule('wallposts.others_posts.is', 'Privacy::valid', [':value', ':field', ':validation'])
-                ->rule('wallposts.others_posts.is', 'not_empty')
-                ->rule('wallposts.others_posts_visibility.is', 'Privacy::valid', [':value', ':field', ':validation'])
-                ->rule('wallposts.others_posts_visibility.is', 'not_empty');
+//                ->rule('notifications.email', 'email')
+//                ->rule('notifications.email', 'email_domain')
+                ->rule('notifications.likers.own_post', 'not_empty')
+                ->rule('notifications.likers.own_post', 'range', [':value', 0, 1])
+                ->rule('notifications.likers.other_posts', 'not_empty')
+                ->rule('notifications.likers.other_posts', 'range', [':value', 0, 1])
+                ->rule('notifications.likers.profile', 'range', [':value', 0, 1])
+                ->rule('notifications.likers.profile', 'not_empty')
+                ->rule('notifications.subscribers.own_post', 'range', [':value', 0, 1])
+                ->rule('notifications.subscribers.own_post', 'not_empty')
+                ->rule('notifications.subscribers.other_posts', 'range', [':value', 0, 1])
+                ->rule('notifications.subscribers.other_posts', 'not_empty')
+                ->rule('notifications.subscribers.profile', 'range', [':value', 0, 1])
+                ->rule('notifications.subscribers.profile', 'not_empty')
+                ->rule('notifications.comments.own_post', 'range', [':value', 0, 1])
+                ->rule('notifications.comments.own_post', 'not_empty')
+                ->rule('notifications.comments.other_posts', 'range', [':value', 0, 1])
+                ->rule('notifications.comments.other_posts', 'not_empty')
+                ->rule('notifications.mentions', 'range', [':value', 0, 1])
+                ->rule('notifications.mentions', 'not_empty')
+                ->rule('notifications.testimonial', 'range', [':value', 0, 1])
+                ->rule('notifications.testimonial', 'not_empty')
+                ->rule('notifications.wallpost', 'range', [':value', 0, 1])
+                ->rule('notifications.wallpost', 'not_empty')
+                ->rule('notifications.messages', 'range', [':value', 0, 1])
+                ->rule('notifications.messages', 'not_empty')
+                ->rule('notifications.pages', 'not_empty')
+                ->rule('notifications.pages', 'in_array', [':value', ['Daily', 'Weekly']])
+                ->rule('privacy.is', 'Privacy::valid', [':value', ':field', ':validation'])
+                ->rule('privacy.is', 'not_empty')
+                ->rule('privacy.personal.is', 'Privacy::valid', [':value', ':field', ':validation'])
+                ->rule('privacy.personal.is', 'not_empty')
+                ->rule('privacy.contacts.is', 'Privacy::valid', [':value', ':field', ':validation'])
+                ->rule('privacy.contacts.is', 'not_empty')
+                ->rule('privacy.subscriptions.is', 'Privacy::valid', [':value', ':field', ':validation'])
+                ->rule('privacy.subscriptions.is', 'not_empty')
+                ->rule('privacy.messages.is', 'Privacy::valid', [':value', ':field', ':validation'])
+                ->rule('privacy.messages.is', 'not_empty')
+                ->rule('privacy.mentions.is', 'Privacy::valid', [':value', ':field', ':validation'])
+                ->rule('privacy.mentions.is', 'not_empty')
+                ->rule('privacy.wallposts.others_posts.is', 'Privacy::valid', [':value', ':field', ':validation'])
+                ->rule('privacy.wallposts.others_posts.is', 'not_empty')
+                ->rule('privacy.wallposts.others_posts_visibility.is', 'Privacy::valid', [':value', ':field', ':validation'])
+                ->rule('privacy.wallposts.others_posts_visibility.is', 'not_empty');
 
 
         if ($validation->check())
         {
-            if ($privacy = static::$model->update_privacy(
-                    static::$params, $this->request->param('id')
-            ))
-            {
-                return $this->data($privacy);
-            }
+            if ($privacy = static::$model->update_settings(static::$params, static::$user_id))
+                return $this->data((array) $privacy->settings);
 
             return $this->error('server_error');
         }
@@ -1259,11 +1314,12 @@ class Controller_User extends Controller_Resource {
      * @param string|MongoID $id
      * @return boolean
      */
-    public static function valid($id)
+    public static function valid($u, $field, Validation $v)
     {
-        $user = Document::factory('user', $id);
-        $user->load();
-        return $user->loaded();
+        $id = is_array($u) ? $u['_id'] : $u;
+        $id = is_object($u) && isset($u->_id) ? $u->_id : $u;
+
+        return Document::factory('user', $id)->load(['_id' => $id], ['_id' => 1]) ? true : $v->error($field, 'Not a Valid User', $u);
     }
 
     /*     * ************************************************************************
@@ -1583,13 +1639,14 @@ class Controller_User extends Controller_Resource {
     {
         $return = [];
 
-        $return['contacts.is']                          = Arr::path($array, 'contacts.is');
-        $return['personal.is']                          = Arr::path($array, 'contacts.is');
-        $return['subscriptions.is']                     = Arr::path($array, 'subscriptions.is');
-        $return['messages.is']                          = Arr::path($array, 'messages.is');
-        $return['wallposts.others_posts.is']            = Arr::path($array, 'wallposts.others_posts.is');
-        $return['wallposts.others_posts_visibility.is'] = Arr::path($array, 'wallposts.others_posts_visibility.is');
-        $return['mentions.is']                          = Arr::path($array, 'mentions.is');
+        $return['privacy.is']                                   = Arr::path($array, 'privacy.is');
+        $return['privacy.contacts.is']                          = Arr::path($array, 'privacy.contacts.is');
+        $return['privacy.personal.is']                          = Arr::path($array, 'privacy.contacts.is');
+        $return['privacy.subscriptions.is']                     = Arr::path($array, 'privacy.subscriptions.is');
+        $return['privacy.messages.is']                          = Arr::path($array, 'privacy.messages.is');
+        $return['privacy.wallposts.others_posts.is']            = Arr::path($array, 'privacy.wallposts.others_posts.is');
+        $return['privacy.wallposts.others_posts_visibility.is'] = Arr::path($array, 'privacy.wallposts.others_posts_visibility.is');
+        $return['privacy.mentions.is']                          = Arr::path($array, 'privacy.mentions.is');
 
         return Arr::merge($return, $array);
     }
@@ -1598,14 +1655,19 @@ class Controller_User extends Controller_Resource {
     {
         $return = [];
 
-        $return['likers.own_post']        = Arr::path($array, 'likers.own_post');
-        $return['likers.other_post']      = Arr::path($array, 'likers.other_post');
-        $return['likers.profile']         = Arr::path($array, 'likers.profile');
-        $return['subscribers.own_post']   = Arr::path($array, 'subscribers.own_post');
-        $return['subscribers.other_post'] = Arr::path($array, 'subscribers.other_post');
-        $return['subscribers.profile']    = Arr::path($array, 'subscribers.profile');
-        $return['comments.own_post']      = Arr::path($array, 'comments.own_post');
-        $return['comments.other_post']    = Arr::path($array, 'comments.other_post');
+        $return['notifications.likers.own_post']        = Arr::path($array, 'notifications.likers.own_post');
+        $return['notifications.likers.other_posts']      = Arr::path($array, 'notifications.likers.other_posts');
+        $return['notifications.likers.profile']         = Arr::path($array, 'notifications.likers.profile');
+        $return['notifications.subscribers.own_post']   = Arr::path($array, 'notifications.subscribers.own_post');
+        $return['notifications.subscribers.other_posts'] = Arr::path($array, 'notifications.subscribers.other_posts');
+        $return['notifications.subscribers.profile']    = Arr::path($array, 'notifications.subscribers.profile');
+        $return['notifications.comments.own_post']      = Arr::path($array, 'notifications.comments.own_post');
+        $return['notifications.comments.other_posts']    = Arr::path($array, 'notifications.comments.other_posts');
+        $return['notifications.mentions']               = Arr::path($array, 'notifications.mentions');
+        $return['notifications.wallpost']               = Arr::path($array, 'notifications.wallpost');
+        $return['notifications.testimonial']            = Arr::path($array, 'notifications.testimonial');
+        $return['notifications.messages']               = Arr::path($array, 'notifications.messages');
+        $return['notifications.pages']                  = Arr::path($array, 'notifications.pages');
 
         return Arr::merge($return, $array);
     }

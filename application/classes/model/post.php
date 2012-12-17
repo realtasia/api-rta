@@ -19,7 +19,7 @@ class Model_Post extends Document {
      * @param array $params
      * @return boolean
      */
-    public function create($params)
+    public function create(array $params)
     {
         $sparse = array_fill_keys(['sparse', 'safe'], true);
         $this->collection()->ensureIndex([
@@ -35,7 +35,7 @@ class Model_Post extends Document {
             'listing.built_size', 'listing.property_type'
         ], 1));
         // overwrite defaults
-        $data = Arr::overwrite(static::post_fields(), $params);
+        $data = Arr::overwrite(static::post_fields(), static::validate_ids($params));
         // merge with defaults
         $data = Arr::merge(static::post_fields(), $data);
 
@@ -78,7 +78,7 @@ class Model_Post extends Document {
      * @param array $params
      * @return array|boolean
      */
-    public function create_conversation($params)
+    public function create_conversation(array $params)
     {
         $message = $params['message'];
         unset($params['message']);
@@ -104,7 +104,7 @@ class Model_Post extends Document {
      * An album is special. An album is a post because it has comments, privacy
      * and counts (of attachments)
      */
-    public function create_album($params)
+    public function create_album(array $params)
     {
         $defaults = [
             'name'    => '',
@@ -119,7 +119,7 @@ class Model_Post extends Document {
     }
 
 
-    public function create_attachment($params)
+    public function create_attachment(array $params)
     {
         $defaults = [
             'mediainfo' => [],
@@ -273,7 +273,7 @@ class Model_Post extends Document {
 
             $interactions        = parent::factory('interaction', NULL, $cu->_id);
             $arr['interactions'] = $interactions->interacting($arr['_id'], 'post');
-            $arr['actions']      = static::get_action_routes($arr['_id']);
+            $arr['actions']      = static::get_action_routes($arr);
         }
 
         // we should trigger the comment model's formatting so each comment in
@@ -586,19 +586,16 @@ class Model_Post extends Document {
     protected static function generate_title($post)
     {
         // some empty vars
-        $own_wall  = $other_wall = FALSE;
 
         $page_title = "Go to the {$post['page']['name']} {$post['page']['type']} page";
-        if ($post['page']['type'] == 'user')
+        if ($post['page']['type'] === 'user')
         {
             $page_title = "Go to {$post['page']['name']}'s profile page";
-            if ((string) $post['page']['_id'] === (string) $post['user']['_id'])
-                $own_wall   = TRUE;
-            else
-                $other_wall = TRUE;
         }
 
-        $page_link = html::anchor($post['page']['uri'], $post['page']['name'], ['title' => $page_title]);
+        $own_wall = (string) $post['page']['_id'] === (string) $post['user']['_id'];
+
+        $page_link = html::anchor($post['page']['uri'], $post['page']['name'], ['title' => $page_title, 'class' => 'hoverCard']);
 
         switch ($post['type'])
         {
@@ -607,9 +604,25 @@ class Model_Post extends Document {
             case "testimonial": return "wrote a testimonial about $page_link.";
             case "listing": return "created a listing in $page_link.";
             case "event": return "created an event in $page_link.";
-            case "attachment": return "uploaded new media " . $own_wall ? '.' : "in $page_link.";
-            case ("post" || 'wallpost'): return "wrote on " . $own_wall ? "his profile page." : "$page_link's profile.";
-            default: return "shared a post in $page_link.";
+            case "attachment": return "uploaded new media " . ($own_wall ? '.' : "in $page_link.");
+            case ("post" || 'wallpost'):
+                $link = Arr::get($post, 'link');
+                if($link)
+                {
+                    switch($link['type'])
+                    {
+                        case 'rich':
+                            return "shared a document" . ($own_wall ? "." : " on $page_link's profile page.");
+                        case 'video':
+                            return "shared a video" . ($own_wall ? "." : " on $page_link's profile page.");
+                        case 'photo':
+                            return "shared a photo" . ($own_wall ? "." : " on $page_link's profile page.");
+                        case 'link':
+                            return "shared a link" . ($own_wall ? "." : " on $page_link's profile page.");
+                    }
+                }
+                return "wrote a post" . ($own_wall ? "." : " on $page_link's profile page.");
+            default: return "shared in $page_link.";
         }
     }
 
@@ -648,6 +661,38 @@ class Model_Post extends Document {
             'subscribers'  => [],
             'likers'       => []
         ];
+    }
+
+    protected static function validate_ids($data)
+    {
+        foreach($data as $key => $value)
+        {
+            switch($key)
+            {
+                case 'user':
+                case 'to':
+                case 'page':
+                case 'company':
+                case 'page_parent':
+                    if(is_array($value))
+                    {
+                        foreach($value as $k => $v)
+                        {
+                            if($k === '_id')
+                            {
+                                $value[$k] = parent::check_id($v);
+                            }
+                        }
+                    }
+                    $data[$key] = $value;
+                    break;
+                case '_id':
+                    $data[$key] = parent::check_id($value);
+                    break;
+            }
+        }
+
+        return $data;
     }
 
 }

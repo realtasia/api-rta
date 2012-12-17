@@ -327,8 +327,8 @@ class Controller_Post extends Controller_Resource {
             static::$params['message'] = nl2br(HTML::chars(static::$params['message']));
             if ($comment = static::$model->create_conversation(Arr::merge($defaults, static::$params)))
             {
-                Job::add($comment['post']['_id'], 'post', static::$user_id)
-                        ->private_message($comment['_id']);
+                Job::add($comment->post['_id'], 'post', static::$user_id)
+                        ->private_message($comment->_id);
 
                 return $this->data($post);
             }
@@ -389,13 +389,13 @@ class Controller_Post extends Controller_Resource {
             {
                 if ($update && $params['status'] === 'active')
                 {
-                    Job::add($post['_id'], 'post')
-                            ->approve_testimonial($post['user']['_id']);
+                    Job::add($post->_id, 'post')
+                            ->approve_testimonial($post->user['_id']);
                 }
                 else
                 {
-                    Job::add($post['_id'], 'post', static::$user_id)
-                            ->testimonial($post['page']['_id']);
+                    Job::add($post_id, 'post', static::$user_id)
+                            ->testimonial($post->page['_id']);
                 }
                 return $this->data($post);
             }
@@ -489,8 +489,8 @@ class Controller_Post extends Controller_Resource {
                     ':value', ':field', ':validation'
                 ])
                 ->rule('page', 'not_empty')
-                ->rule('page', 'Controller_User::valid_user', [':value', ':field', ':validation'])
-                ->rule('page_parent', 'Controller_Post::valid_page', [':value', ':field', ':validation']);
+                ->rule('page', 'Controller_User::valid', [':value', ':field', ':validation'])
+                ->rule('page_parent', 'Controller_Page::valid', [':value', ':field', ':validation']);
 
         $defaults = [
             'type'   => 'wallpost', 'status' => 'active'
@@ -501,10 +501,10 @@ class Controller_Post extends Controller_Resource {
             // this is a little different. we merge params with defaults to force defaults
             if ($post = static::$model->create(Arr::merge(static::$params, $defaults)))
             {
-                Job::add($post['_id'], 'post', static::$user_id)
-                        ->wallpost($post['page']['_id']);
+                Job::add($post->_id, 'post', static::$user_id)
+                        ->wallpost($post->page['_id']);
 
-                return $this->data($post);
+                return $this->data($post->stringify($post->as_array()));
             }
 
             return $this->error('server_error');
@@ -540,15 +540,15 @@ class Controller_Post extends Controller_Resource {
                     ':value', ':field', ':validation'
                 ])
                 ->rule('page', 'not_empty')
-                ->rule('page', 'Controller_Post::valid_page', [':value', ':field', ':validation'])
-                ->rule('page_parent', 'Controller_Post::valid_page', [':value', ':field', ':validation']);
+                ->rule('page', 'Controller_Page::valid', [':value', ':field', ':validation'])
+                ->rule('page_parent', 'Controller_Page::valid', [':value', ':field', ':validation']);
 
         $defaults = [
             'type'   => 'wallpost', 'status' => 'active'
         ];
         if ($validation->check())
         {
-            static::$params['message'] = nl2br(HTML::chars(static::$params['message']));
+            static::$params['message'] = nl2br(Security::xss_clean(static::$params['message']));
 
             if ($post = static::$model->create(Arr::merge($defaults, static::$params)))
             {
@@ -638,7 +638,7 @@ class Controller_Post extends Controller_Resource {
         $params['post']['_id']  = $this->request->param('id');
         $params['post']['type'] = static::$params['post_type'];
 
-        $params['message'] = nl2br(HTML::chars(static::$params['message']));
+        $params['message'] = nl2br(Security::xss_clean(static::$params['message']));
         $params['type']    = 'comment';
         $params['status']  = static::$params['status'];
 

@@ -354,6 +354,17 @@ class Controller_Page extends Controller_Resource {
         return $this->data($pages);
     }
 
+    public static function valid($page, $field, Validation $v)
+    {
+        if(!$page)
+            return true;
+        
+        $id = is_array($page) ? $page['_id'] : $page;
+        $id = is_object($page) && isset($page->_id) ? $page->_id : $page;
+
+        return Document::factory('page', $id)->load(['_id' => $id], ['_id' => 1]) ? true : $v->error($field, 'Not a Valid Page', $u);
+    }
+
     /*     * ************************************************************************
      * TestPad methods
      * *********************************************************************** */

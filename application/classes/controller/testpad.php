@@ -15,6 +15,19 @@ class Controller_Testpad extends Controller {
 
     use Trait_Oauth2_Utils;
 
+    public function action_title()
+    {
+        $test = true;
+
+        echo $this->the_title();
+    }
+
+    public function the_title()
+    {
+        $test = true;
+        return 'Start the sentence and continue with' . ($test ? ' a test.' : ' a failure.');
+    }
+
     public function action_insert()
     {
         $docs = [];
@@ -256,7 +269,7 @@ class Controller_Testpad extends Controller {
                 {
                     unlink($tmp);
                 }
-                
+
                 if(@file_exists($filename))
                 {
                     unlink($filename);
