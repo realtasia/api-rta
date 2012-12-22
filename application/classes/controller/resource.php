@@ -153,5 +153,18 @@ abstract class Controller_Resource extends Controller_Abstract{
 
         return $this->error('access_denied');
     }
+
+
+    /**
+     * Utility to check if logged in user id is the same as given id
+     *
+     * @param string $id
+     * @return type
+     */
+    protected static function logged_in_is_id($id)
+    {
+        // casting as string in case a MongoID was given
+        return static::$user_id && (string) static::$user_id === (string) $id;
+    }
 }
 // End Welcome

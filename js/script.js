@@ -376,7 +376,7 @@ jQuery(document).ready(function($){
 
         tooltip += 'Middle';
 
-        if((typeof cssClass == 'string' && cssClass.length > 0) && cssClass == 'large'){
+        if((typeof cssClass === 'string' && cssClass.length > 0) && cssClass == 'large'){
             width = 420;
         }
 
@@ -450,7 +450,7 @@ jQuery(document).ready(function($){
     tips.each(function(index) {
         var tipContent = $(this).parent().parent().find('.hoverCard'),
         cssClass = tipContent.hasClass('large') ? 'large' : 'regular',
-        csswidth = cssClass == 'large' ? '420' : '330',
+        csswidth = cssClass === 'large' ? '420' : '330',
         direction = {
             tooltip : 'bottom',
             target : 'top',

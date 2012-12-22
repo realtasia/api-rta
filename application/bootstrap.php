@@ -80,6 +80,7 @@ if (isset($_SERVER['KOHANA_ENV']))
  */
 Kohana::init([
     'base_url' => '/',
+    'index_file' => '',
 ]);
 /**
  * Attach the file write to logging. Multiple writers are supported.
@@ -133,6 +134,13 @@ Route::set('user', 'user(/<action>(/<id>))', ['id' => '[^/,;?]++'])
 Route::set('post', 'post(/<action>(/<id>))')
         ->defaults([
             'controller' => 'post',
+            'action'     => 'index',
+            'id'         => null
+        ]);
+
+Route::set('comment', 'comment(/<action>(/<id>))')
+        ->defaults([
+            'controller' => 'comment',
             'action'     => 'index',
             'id'         => null
         ]);

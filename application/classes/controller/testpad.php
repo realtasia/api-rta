@@ -15,6 +15,16 @@ class Controller_Testpad extends Controller {
 
     use Trait_Oauth2_Utils;
 
+    public function action_pop()
+    {
+        echo "<pre>";
+        //50d134c7b90fb80c0a0000bb
+        //['$pop' => ['comments' => -1]]
+        $f = Collection::factory('comment')->fetch( ['post._id' => Document::check_id('50d134c7b90fb80c0a0000bb'), 'status' => 'active', 'type' => 'comment']
+        );
+        print_r($f);
+    }
+
     public function action_title()
     {
         $test = true;
@@ -31,117 +41,162 @@ class Controller_Testpad extends Controller {
     public function action_insert()
     {
         $docs = [];
-        $one = new MongoID(1);
-        $two = new MongoID(2);
+        $one  = new MongoID(1);
+        $two  = new MongoID(2);
         // website, no followup
-        $doc = [
-            'status' => 'pending',
+        $doc  = [
+            'status'     => 'pending',
             'interested' => 1
         ];
-        for($i = 0;$i < 11; $i++){$doc['i'] = time() + .1;sleep(.1);$docs[] = $doc;}
+        for ($i = 0; $i < 11; $i++)
+        {
+            $doc['i'] = time() + .1;
+            sleep(.1);
+            $docs[]   = $doc;
+        }
 
 
         // website, registration, no payment, chris
         $doc = [
-            'status' => 'pending',
+            'status'     => 'pending',
             'interested' => 0,
-            'rep' => [
-                'id' => $two,
+            'rep'        => [
+                'id'   => $two,
                 'name' => 'Chris',
                 'type' => 'website'
             ]
         ];
-        for($i = 0;$i < 121; $i++){$doc['i'] = time() + .1;sleep(.1);$docs[] = $doc;}
+        for ($i = 0; $i < 121; $i++)
+        {
+            $doc['i'] = time() + .1;
+            sleep(.1);
+            $docs[]   = $doc;
+        }
 
         // website, registration, no payment, jason
         $doc = [
-            'status' => 'pending',
+            'status'     => 'pending',
             'interested' => 0,
-            'rep' => [
-                'id' => $one,
+            'rep'        => [
+                'id'   => $one,
                 'name' => 'Jason',
                 'type' => 'website'
             ]
         ];
-        for($i = 0;$i < 151; $i++){$doc['i'] = time() + .1;sleep(.1);$docs[] = $doc;}
+        for ($i = 0; $i < 151; $i++)
+        {
+            $doc['i'] = time() + .1;
+            sleep(.1);
+            $docs[]   = $doc;
+        }
 
         // website, registration, active, chris
         $doc = [
-            'status' => 'active',
+            'status'     => 'active',
             'interested' => 0,
-            'rep' => [
-                'id' => $two,
+            'rep'        => [
+                'id'   => $two,
                 'name' => 'Chris',
                 'type' => 'website'
             ]
         ];
-        for($i = 0;$i < 51; $i++){$doc['i'] = time() + .1;sleep(.1);$docs[] = $doc;}
+        for ($i = 0; $i < 51; $i++)
+        {
+            $doc['i'] = time() + .1;
+            sleep(.1);
+            $docs[]   = $doc;
+        }
 
         // website, registration, active, jason
         $doc = [
-            'status' => 'active',
+            'status'     => 'active',
             'interested' => 0,
-            'rep' => [
-                'id' => $one,
+            'rep'        => [
+                'id'   => $one,
                 'name' => 'Jason',
                 'type' => 'website'
             ]
         ];
-        for($i = 0;$i < 11; $i++){$doc['i'] = time() + .1;sleep(.1);$docs[] = $doc;}
+        for ($i = 0; $i < 11; $i++)
+        {
+            $doc['i'] = time() + .1;
+            sleep(.1);
+            $docs[]   = $doc;
+        }
 
         // presentation, registration, no payment, chris
         $doc = [
-            'status' => 'pending',
+            'status'     => 'pending',
             'interested' => 0,
-            'rep' => [
-                'id' => $two,
+            'rep'        => [
+                'id'   => $two,
                 'name' => 'Chris',
                 'type' => 'presentation'
             ]
         ];
-        for($i = 0;$i < 71; $i++){$doc['i'] = time() + .1;sleep(.1);$docs[] = $doc;}
+        for ($i = 0; $i < 71; $i++)
+        {
+            $doc['i'] = time() + .1;
+            sleep(.1);
+            $docs[]   = $doc;
+        }
 
         // presentation, registration, no payment, jason
         $doc = [
-            'status' => 'pending',
+            'status'     => 'pending',
             'interested' => 0,
-            'rep' => [
-                'id' => $one,
+            'rep'        => [
+                'id'   => $one,
                 'name' => 'Jason',
                 'type' => 'presentation'
             ]
         ];
-        for($i = 0;$i < 31; $i++){$doc['i'] = time() + .1;sleep(.1);$docs[] = $doc;}
+        for ($i = 0; $i < 31; $i++)
+        {
+            $doc['i'] = time() + .1;
+            sleep(.1);
+            $docs[]   = $doc;
+        }
 
         // presentation, registration, active, chris
         $doc = [
-            'status' => 'active',
+            'status'     => 'active',
             'interested' => 0,
-            'rep' => [
-                'id' => $two,
+            'rep'        => [
+                'id'   => $two,
                 'name' => 'Chris',
                 'type' => 'presentation'
             ]
         ];
-        for($i = 0;$i < 1301; $i++){$doc['i'] = time() + .1;sleep(.1);$docs[] = $doc;}
+        for ($i = 0; $i < 1301; $i++)
+        {
+            $doc['i'] = time() + .1;
+            sleep(.1);
+            $docs[]   = $doc;
+        }
 
         // presentation, registration, active, chris
         $doc = [
-            'status' => 'active',
+            'status'     => 'active',
             'interested' => 0,
-            'rep' => [
-                'id' => $one,
+            'rep'        => [
+                'id'   => $one,
                 'name' => 'Jason',
                 'type' => 'presentation'
             ]
         ];
-        for($i = 0;$i < 1101; $i++){$doc['i'] = time() + .1;sleep(.1);$docs[] = $doc;}
+        for ($i = 0; $i < 1101; $i++)
+        {
+            $doc['i'] = time() + .1;
+            sleep(.1);
+            $docs[]   = $doc;
+        }
 
         echo "<pre>";
         //print_r($docs);
 //        $db = new MongoClient;
 //        $db = new MongoClient;
-        Collection::factory('test')->batchInsert($docs, ['safe' => true, 'continueOnError' => true]);
+        Collection::factory('test')->batchInsert($docs, ['safe'            => true, 'continueOnError' => true]);
     }
 
     public function action_counts()
@@ -151,9 +206,9 @@ class Controller_Testpad extends Controller {
             'interested' => 1
         ];
         echo "<h1>Pending</h1>";
-        $r = Collection::factory('test')->find($query)->limit(2);
+        $r     = Collection::factory('test')->find($query)->limit(2);
         print_r($r->count(false));
-        while($r->hasNext())
+        while ($r->hasNext())
         {
             print_r($r->getNext()->as_array());
         }
@@ -166,7 +221,6 @@ class Controller_Testpad extends Controller {
 //        echo "<h1>Chris Contacted</h1>";
 //        $r = Collection::factory('test')->find($query)->limit(2)->count(false);
 //        print_r($r);
-
     }
 
     public function action_plural()
@@ -177,7 +231,7 @@ class Controller_Testpad extends Controller {
             'checkin', 'subscriber', 'like', 'event', 'conversation', 'subscription',
             'liker', 'page', 'user', 'interaction', 'action', 'album', 'library'
         ];
-        foreach($types as $type)
+        foreach ($types as $type)
         {
             print_r(Inflector::plural($type));
             echo "<br>";
@@ -186,14 +240,14 @@ class Controller_Testpad extends Controller {
 
     public function action_password()
     {
-        $out   = '<h2>Type in your password to hash it</h2>';
-        $out   .= Form::open($this->request->uri(), ['enctype' => 'multipart/form-data', 'method' => 'GET']);
-        $out   .= Form::input('password');
-        $out   .= Form::submit('submit', 'Get Hash');
-        $out   .= Form::close();
-        $out   .= '<br>';
+        $out = '<h2>Type in your password to hash it</h2>';
+        $out .= Form::open($this->request->uri(), ['enctype' => 'multipart/form-data', 'method'  => 'GET']);
+        $out .= Form::input('password');
+        $out .= Form::submit('submit', 'Get Hash');
+        $out .= Form::close();
+        $out .= '<br>';
 
-        $query   = $this->request->query();
+        $query = $this->request->query();
         if ($query)
         {
             $password = Arr::get($query, 'password');
@@ -219,7 +273,7 @@ class Controller_Testpad extends Controller {
             $out .= '<li>' . HTML::anchor('/testpad/export/?collection=' . substr($col, 3), $col, ['target' => '_blank']) . '</li>';
         }
         $out .= '</ul>';
-        $query   = $this->request->query();
+        $query = $this->request->query();
         if ($query)
         {
             $collection = Arr::get($query, 'collection');
@@ -239,8 +293,8 @@ class Controller_Testpad extends Controller {
         echo Form::file('json');
         echo Form::submit('submit', 'Upload');
         echo Form::close();
-        $file     = Arr::get($_FILES, 'json');
-        $output   = '';
+        $file   = Arr::get($_FILES, 'json');
+        $output = '';
 
         if ($file)
         {
@@ -265,12 +319,12 @@ class Controller_Testpad extends Controller {
 
                 $output = exec('mongoimport --db db --collection ' . $collection . ' --file ' . $filename);
 
-                if(@file_exists($tmp))
+                if (@file_exists($tmp))
                 {
                     unlink($tmp);
                 }
 
-                if(@file_exists($filename))
+                if (@file_exists($filename))
                 {
                     unlink($filename);
                 }
@@ -313,7 +367,7 @@ class Controller_Testpad extends Controller {
                     'type'    => 'searchEaAlpha'
                 ])
                 ->method(HTTP_Request::POST);
-        $body     = $req->execute();
+        $body   = $req->execute();
         file_put_contents($file, $body);
         $this->response->body($body);
     }
@@ -415,7 +469,7 @@ class Controller_Testpad extends Controller {
         /*
          * Request 5 : Get the damn results.
          */
-        $ch5 = curl_init('http://www.cea.gov.sg/cea/app/newimplpublicregister/searchPublicRegister.jspa');
+        $ch5    = curl_init('http://www.cea.gov.sg/cea/app/newimplpublicregister/searchPublicRegister.jspa');
         curl_setopt($ch5, CURLOPT_HTTPHEADER, [
             'Host: www.cea.gov.sg',
             'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:16.0) Gecko/20100101 Firefox/16.0',
@@ -430,7 +484,7 @@ class Controller_Testpad extends Controller {
             'X-Requested-With: XMLHttpRequest',
             'x-insight: activate'
         ]);
-        $post = [
+        $post   = [
             'type'      => 'searchSls',
             'slsName'   => '',
             'slsEaName' => '',
@@ -445,7 +499,7 @@ class Controller_Testpad extends Controller {
         //curl_setopt($ch5, CURLOPT_AUTOREFERER, true );
         curl_setopt($ch5, CURLOPT_FOLLOWLOCATION, true);
         //curl_setopt($ch5, CURLOPT_COOKIEJAR, $cookie);
-        $output     = curl_exec($ch5);
+        $output = curl_exec($ch5);
 //
 //
         print_r($output);
@@ -455,52 +509,51 @@ class Controller_Testpad extends Controller {
     {
         foreach (range('A', 'Z') as $value)
         {
-        $sep   = DIRECTORY_SEPARATOR;
-        $s     = SimpleHTML::file_get_html($_SERVER['DOCUMENT_ROOT'] . "/company/$value.html");
-        $table = $s->find('table', 0);
-        //die(Debug::vars($table));
-        $trs   = $table->find('tr');
-        for ($t = 1; $t < count($trs); $t++)
-        {
-            $tds = $trs[$t]->children();
-            //echo count($tds);t
-            for ($i = 0; $i < count($tds); $i++)
+            $sep   = DIRECTORY_SEPARATOR;
+            $s     = SimpleHTML::file_get_html($_SERVER['DOCUMENT_ROOT'] . "/company/$value.html");
+            $table = $s->find('table', 0);
+            //die(Debug::vars($table));
+            $trs   = $table->find('tr');
+            for ($t = 1; $t < count($trs); $t++)
             {
-                if ($tds[$i]->find('a'))
-                    $td = $tds[$i]->children(0);
-                else
-                    $td = $tds[$i];
+                $tds = $trs[$t]->children();
+                //echo count($tds);t
+                for ($i = 0; $i < count($tds); $i++)
+                {
+                    if ($tds[$i]->find('a'))
+                        $td = $tds[$i]->children(0);
+                    else
+                        $td = $tds[$i];
 
-                switch ($i)
-                {
-                    case 0: $key = 'license';
-                        break;
-                    case 1: $key = 'name';
-                        break;
-                    case 2: $key = 'expiry';
-                        break;
-                }
-                if ($key === 'expiry')
-                {
-                    $expiry = explode('to                      <br />', trim($td->innertext()));
-                    foreach ($expiry as $k => $v)
+                    switch ($i)
                     {
-                        $ts[$t]['expire'][$k] = strtotime(trim($v));
+                        case 0: $key = 'license';
+                            break;
+                        case 1: $key = 'name';
+                            break;
+                        case 2: $key = 'expiry';
+                            break;
+                    }
+                    if ($key === 'expiry')
+                    {
+                        $expiry = explode('to                      <br />', trim($td->innertext()));
+                        foreach ($expiry as $k => $v)
+                        {
+                            $ts[$t]['expire'][$k] = strtotime(trim($v));
+                        }
+                    }
+                    else
+                    {
+                        $ts[$t][$key]      = trim($td->innertext());
                     }
                 }
-                else
-                {
-                    $ts[$t][$key]   = trim($td->innertext());
-                }
+                $ts[$t]['type']    = 'company';
+                $ts[$t]['subtype'] = 'agency';
+                echo Debug::vars(Document::factory('page')->create($ts[$t]));
             }
-            $ts[$t]['type'] = 'company';
-            $ts[$t]['subtype'] = 'agency';
-            echo Debug::vars(Document::factory('page')->create($ts[$t]));
-        }
         }
         die();
     }
-
 
     //put your code here
 

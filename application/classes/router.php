@@ -12,7 +12,7 @@ class Router {
     public static function __callStatic($name, $arguments)
     {
         $action = $arguments[0];
-        $id     = $arguments[1];
+        $id     = $arguments[1] ? $arguments[1] : '';
         //return print_r($arguments, true);
         return Route::url($name, [
             'controller' => $name,

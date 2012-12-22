@@ -21,10 +21,10 @@ class Model_Post_Collection extends Collection {
     public function search($args = array(), $uid = NULL)
     {
         $defaults = [
-           'status' => 'active', 'skip' => 0, 'limit' => 11, 'sort' => 'active',
+           'status' => null, 'skip' => 0, 'limit' => 11, 'sort' => 'active',
            's' => '', 'include_ids' => [], 'page_id' => null, 'parent_id' => null,
            'user_id' => null, 'type' => null, 'listing' => [], 'to_id' => null,
-            'privacy' => NULL,
+            'privacy' => NULL, 'feed' => false
         ];
 
         // set some empty arrays
@@ -32,7 +32,10 @@ class Model_Post_Collection extends Collection {
 
         extract(Arr::merge($defaults, $args), EXTR_SKIP);
 
-        $query['status'] = $status;
+        if ($status && strlen($status) > 0)
+        {
+            $query['status'] = $status;
+        }
         // looking for a specific type
         if ($type)
         {
@@ -51,11 +54,19 @@ class Model_Post_Collection extends Collection {
             $query['message'] = new MongoRegex("/$s/i");
         }
 
-        if($user_id)
+        if ($user_id && $page_id)
+        {
+            $query['$or'][] = ['user._id' => Document::check_id($user_id)];
+            $query['$or'][] = ['page._id' => Document::check_id($page_id)];
+        }
+        elseif($user_id)
+        {
             $query['user._id'] = Document::check_id($user_id);
-
-        if($page_id)
+        }
+        elseif($page_id)
+        {
             $query['page._id'] = Document::check_id($page_id);
+        }
 
         if($privacy)
             $query['privacy.is'] = $privacy;
@@ -79,7 +90,7 @@ class Model_Post_Collection extends Collection {
                 default: $sort = ['_id' => -1]; break;
             }
         }
-        //die(json_encode(['data' => $query]));
+        //return $query;
         $results = $this
                 ->find($query)
                 ->limit($limit)
@@ -113,7 +124,7 @@ class Model_Post_Collection extends Collection {
      */
     public function testimonials($args = array(), $user_id = NULL)
     {
-        $defaults = ['status' => 'active', 'type' => 'testimonial'];
+        $defaults = ['type' => 'testimonial'];
 
         return $this->search(Arr::merge($defaults, $args), $user_id);
     }

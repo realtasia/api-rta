@@ -14,6 +14,7 @@ defined('SYSPATH') or die('No direct script access.');
 class Model_Comment extends Document {
 
     protected $after_delete_fields = [];
+    public $current_post;
 
     /**
      * Creates a comment.
@@ -39,11 +40,11 @@ class Model_Comment extends Document {
             $this->atomic($params['_id']);
             unset($params['_id']);
         }
-
+        //return $params;
         $this->load_values($params);
 
         if ($this->save())
-            return $this;
+            return $this->after_load();
 
         return false;
     }
@@ -58,9 +59,9 @@ class Model_Comment extends Document {
     public function create_message($params)
     {
         $args = [
-            'post' => [
-                '_id'     => $params['post']['_id'],
-                'type'    => $params['post']['type'],
+            'post'    => [
+                '_id'  => $params['post']['_id'],
+                'type' => $params['post']['type'],
             ],
             'message' => $params['message'],
             'user'    => $params['user'],
@@ -87,31 +88,20 @@ class Model_Comment extends Document {
      * @param array $params
      * @return boolean
      */
-    protected static function check_params(array $params)
+    protected function check_params(array $params)
     {
         if (!$this->current_user->loaded())
             return false;
 
-        $pars                = $params;
-        $pars['post._id']  = Arr::path($params, 'post._id');
-        $pars['post.type'] = Arr::path($params, 'post.type');
+        $pars = $params;
 
-        $comment = Validation::factory($pars)
-                ->rule('post._id', 'not_empty')
-                ->rule('post.type', 'not_empty')
-                ->rule('message', 'not_empty')
-                ->rule('type', 'not_empty');
+        $user = (array) $this->get_default_user_fields();
 
-        $user = (object) $this->get_current_user_fields();
-
-        if ($comment->check())
-        {
-            $params['user']   = isset($params['user']) ? $params['user'] : $user;
-            $params['counts'] = ['likers'          => 0];
-            $params['likers'] = [];
-            $params['status'] = isset($params['status']) ? $params['status'] : 'active';
-            return $params;
-        }
+        $params['user']   = isset($params['user']) ? $params['user'] : $user;
+        $params['counts'] = ['likers' => 0];
+        $params['likers'] = [];
+        $params['status'] = isset($params['status']) ? $params['status'] : 'active';
+        return static::validate_ids($params);
     }
 
     /**
@@ -129,24 +119,24 @@ class Model_Comment extends Document {
      */
     public function after_delete()
     {
-        $id = Arr::get($this->after_delete_fields, '_id');
-        $post = Arr::get($this->after_delete_fields, 'post');
-        $user = Arr::get($this->after_delete_fields, 'user');
+        $id     = Arr::get($this->after_delete_fields, '_id');
+        $post   = Arr::get($this->after_delete_fields, 'post');
+        $user   = Arr::get($this->after_delete_fields, 'user');
         $counts = Arr::get($this->after_delete_fields, 'counts');
 
         $object = parent::factory('post', $post['_id']);
 
         $object->inc('counts.comments', -1);
-        $object->pull('comments', $this->after_delete_fields);
+        //$object->pull('comments', $this->after_delete_fields);
         $object->save();
 
-        if($counts && $counts['likers'] > 1)
+        if ($counts && $counts['likers'] > 1)
         {
             parent::factory('interaction')->collection()
                     ->remove_safe([
-                        'object_id' => $id,
+                        'object_id'   => $id,
                         'object_type' => 'comment',
-            ], ['multiple' => true]);
+                            ], ['multiple' => true]);
         }
 
         parent::factory('user', $user['_id'])->save();
@@ -162,27 +152,27 @@ class Model_Comment extends Document {
         if ($action === parent::SAVE_INSERT || $action === parent::SAVE_UPSERT)
         {
             $i = parent::factory('interaction', null, $this->user['_id']);
-            $i->interact('subscribe', $this->post['_id'], 'post');
+            $i->subscribe($this->post['_id'], 'post');
 
-            $object = parent::factory($this->post['type'], $this->post['_id']);
+            $object = parent::factory('post', $this->post['_id']);
 
             $object->inc('counts.comments');
-            $object->addToSet('comments', $this->as_array());
+            //$object->addToSet('comments', $this->as_array());
             $object->save();
             /*
              * Small hack to ensure a capped interaction list.
              * @see https://github.com/colinmollenhour/mongodb-php-odm/issues/27#issuecomment-9950515
              */
-            if (static::$inc === 1)
-            {
-                $object->collection()->update_safe(
-                        ['_id'      => $this->_id, 'comments' => ['$size' => 6]], ['$pop' => ['comments' => 1]]
-                );
-            }
+//            Collection::factory('post')->update_safe(
+//                    ['_id'      => parent::check_id($this->post['_id']), 'comments' => ['$size' => 6]], ['$pop' => ['comments' => -1]]
+//            );
         }
 
         // update the user's last active
-        $this->current_user->save();
+        if ($this->current_user instanceof Document)
+        {
+            $this->current_user->save();
+        }
 
         return $this;
     }
@@ -193,29 +183,96 @@ class Model_Comment extends Document {
      */
     public function after_load()
     {
-        if ($this->current_user == NULL)
-            return;
 
-        $current_user = (object) $this->get_current_user_fields();
+        $id = parent::check_id($this->_id);
 
-        // fetch only the required field
-        $post = Model_Document::factory($this->object_type)
-                ->get($this->object_id, ['user']);
+        $this->created = $id->getTimestamp();
 
-        // check if it's the same user
-        if ($post->user->_id === $current_user->_id)
+        return $this;
+    }
+
+    public function stringify($arr = [])
+    {
+        // get the current user
+        $cu    = $this->current_user ? $this->get_default_user_fields() : false;
+        $cu_id = $cu ? (string) $cu['_id'] : false;
+        $arr   = parent::stringify($arr);
+        $post  = $this->current_post;
+        if (!$post)
+            $post  = Document::factory('post', $arr['_id'])->load(null, ['user' => 1, 'page' => 1]);
+
+        $u_id = Arr::get($arr['user'], '_id');
+
+        $arr['is_owner']      = $cu_id && $u_id && ($u_id === $cu_id);
+        $arr['is_post_owner'] = $cu_id && $u_id && ((string) $post->_id === $cu_id);
+        $arr['is_user_page']  = $cu_id && $u_id && ((string) $post->page['_id'] === $cu_id);
+        $arr['actions']       = $arr['is_owner'] || $arr['is_post_owner'] || $arr['is_user_page'] ? static::get_all_action_routes($arr) : static::get_action_routes($arr);
+
+        $arr['connections'] = ['likers' => Router::comment('likers', $arr['_id'])];
+
+        if ($cu)
         {
-            $this->can_delete = true;
+            $arr['interactions'] = parent::factory('interaction', NULL, $cu_id)->interacting($arr['_id'], 'comment');
         }
 
-        // check if it's the same user
-        if ($this->user->_id === $current_user->_id)
+        return $arr;
+    }
+
+    public function get_action_routes($comment)
+    {
+        $all = [];
+        switch ($comment['type'])
         {
-            $this->can_delete = true;
+            case 'comment' :
+                $all = ['like', 'unlike'];
+                break;
         }
 
-        $interactions       = Model_Document::factory('interaction', NULL, $current_user->_id);
-        $this->interactions = $interactions->interacting($this->_id, 'comment');
+        $actions = [];
+
+        foreach ($all as $v)
+        {
+            $actions[$v] = Router::comment($v, $comment['_id']);
+        }
+
+        return $actions;
+    }
+
+    public function get_all_action_routes($comment)
+    {
+        $actions = ['delete' => Router::comment('delete', $comment['_id'])];
+        return Arr::merge($actions, static::get_action_routes($comment));
+    }
+
+    protected static function validate_ids($data)
+    {
+        foreach ($data as $key => $value)
+        {
+            switch ($key)
+            {
+                case 'user':
+                case 'post':
+                case 'page':
+                case 'page_parent':
+                    if (is_array($value))
+                    {
+                        foreach ($value as $k => $v)
+                        {
+                            if ($k === '_id')
+                            {
+                                $value[$k]  = parent::check_id($v);
+                            }
+                        }
+                    }
+                    $data[$key] = $value;
+                    break;
+                case '_id':
+                    $data[$key] = parent::check_id($value);
+                    break;
+            }
+        }
+
+        return $data;
     }
 
 }

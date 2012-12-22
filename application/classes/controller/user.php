@@ -300,14 +300,12 @@ class Controller_User extends Controller_Resource {
     {
         $id = $this->request->param('id');
 
-        static::$params['page_id'] = $id;
-
-        //static::$params['type'] = ['$ne' => 'conversation'];
+        static::$params['type'] = ['$nin' => ['conversation', 'album']];
 
         $posts = Mongo_Collection::factory('post');
 
         /*
-         * 1. if user is logged in and ids are the same (or admin or client)
+         * 1. if user is logged in and ids are the same (or admin)
          *      - all statuses allowed.
          * 2. if not
          *      - only active statuses allowed.
@@ -325,19 +323,14 @@ class Controller_User extends Controller_Resource {
                 // belong to him
                 if (static::logged_in_is_id($id))
                 {
-                    return $this->data(
-                                    $posts->search(static::$params, static::$user_id)
-                    );
+                    $p = Arr::merge(static::$params, ['user_id' => static::$user_id]);
+                    return $this->data($posts->search($p, static::$user_id));
                 }
 
                 // admin sees everything
                 if (parent::has_role('admin'))
-                {
-                    static::$params['page_id'] = $id;
-                    return $this->data(
-                                    $posts->search(static::$params, static::$user_id)
-                    );
-                }
+                    return $this->data($posts->search(static::$params, static::$user_id));
+
                 // clients only see active (public) posts
                 return $this->error('access_denied');
 
@@ -349,13 +342,8 @@ class Controller_User extends Controller_Resource {
                     // only publically viewable posts
                     static::$params['privacy'] = static::logged_in_is_id($id) ? null : 'PUBLIC';
                     // we include posts written on his page
-                    static::$params['page_id'] = $id;
-                    return $this->data(
-                                    $posts->search(static::$params, static::$user_id)
-                    );
+                    return $this->data($posts->search(static::$params, static::$user_id));
                 }
-                // oops. zip token.
-                return $this->error('access_denied');
         }
 
         return $this->error('invalid_request');
@@ -386,7 +374,9 @@ class Controller_User extends Controller_Resource {
          *      - only active statuses allowed (with a valid token).
          */
 
-        $status = Arr::get(static::$params, 'status', 'active');
+        $status = Arr::get(static::$params, 'status', null);
+
+        //return $this->data(static::$params);
 
         switch ($status)
         {
@@ -394,10 +384,9 @@ class Controller_User extends Controller_Resource {
             case 'archived':
             case 'draft':
             case 'trashed':
+            case null:
                 if (static::logged_in_is_id($id) || parent::has_role('admin'))
-                    return $this->data(
-                                    $posts->testimonials(static::$params, static::$user_id)
-                    );
+                    return $this->data($posts->testimonials(static::$params, static::$user_id));
 
                 // clients only see 'active' (public) posts
                 return $this->error('access_denied');
@@ -408,14 +397,8 @@ class Controller_User extends Controller_Resource {
                 if (parent::is_client() || parent::logged_in())
                 {
                     static::$params['privacy'] = 'PUBLIC';
-                    return $this->data(
-                                    $posts->testimonials(static::$params, static::$user_id)
-                    );
+                    return $this->data($posts->testimonials(static::$params, static::$user_id));
                 }
-
-
-                // oops. zip token.
-                return $this->error('access_denied');
         }
 
         return $this->error('invalid_request');
@@ -1388,18 +1371,6 @@ class Controller_User extends Controller_Resource {
                 ->from('[REDACTED]', 'Realtasia Beta Program');
 
         return $email->send();
-    }
-
-    /**
-     * Utility to check if logged in user id is the same as given id
-     *
-     * @param string $id
-     * @return type
-     */
-    protected static function logged_in_is_id($id)
-    {
-        // casting as string in case a MongoID was given
-        return static::$user_id && (string) static::$user_id === (string) $id;
     }
 
     /*     * **********************************************************************************

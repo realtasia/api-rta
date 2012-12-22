@@ -201,7 +201,7 @@ class Model_User extends Document {
         $id = parent::check_id($this->_id);
 
         // add a created
-        $this->created = $id->getTimestamp();
+        $this->created = $id instanceof MongoID ? $id->getTimestamp() : 0;
 
         return $this;
     }
@@ -402,7 +402,7 @@ class Model_User extends Document {
      */
     protected static function get_action_routes($user_id)
     {
-        $actions = [];
+        $actions = ['post' => Router::post('update', $user_id)];
 
         foreach (['like', 'unlike', 'subscribe', 'unsubscribe'] as $k => $v)
         {

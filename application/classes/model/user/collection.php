@@ -53,7 +53,7 @@ class Model_User_Collection extends Collection {
         $logged_in_user = $user_search_fields_hint = false;
 //
         $defaults = [
-           'limit' => 11, 'skip' => 0, 'roles' => [], 'sort' => 'alpha',
+           'limit' => 11, 'skip' => 0, 'roles' => [], 'sort' => null,
            's' => null, 'include_ids' => [], 'status' => ['$ne' => 'terminated'],
             'privacy' => NULL
         ];
@@ -87,7 +87,7 @@ class Model_User_Collection extends Collection {
         }
         if($company)
         {
-            $query['company.name'] = new MongoRegex('/^'.  strtoupper($company) .'/');
+            $query['company.name'] = new MongoRegex('/^'. strtoupper($company) .'/');
         }
 
         // looking for a specific role
@@ -105,13 +105,12 @@ class Model_User_Collection extends Collection {
             // this time it's a regex search. Since it is a "start with", ie ^,
             // indexes should work... Hopefully.
             $telephone = SMS::valid($s);
-            $company = new MongoRegex('/^'.  strtoupper($s) .'/');
-            $s = new MongoRegex("/^$s/");
+            $keyword = new MongoRegex("/^$s/");
             $query['$or'] = [
-                    ['username' => $s],
-                    ['email' => $s],
-                    ['company.name' => $company],
-                    ['name' => $s]
+                    ['username' => $keyword],
+                    ['email' => $keyword],
+                    ['company.name' => new MongoRegex('/^'. strtoupper($s) .'/')],
+                    ['name' => new MongoRegex("/^".ucfirst($s)."/")],
                 ];
             if($telephone)
             {
@@ -132,7 +131,7 @@ class Model_User_Collection extends Collection {
         switch($sort)
         {
             case 'alpha': $sort = ['name' => 1]; break;
-            case 'active': $sort = ['active' => -1]; break;
+            case 'active': $sort = ['modified' => -1]; break;
             default: $sort = ['_id' => -1]; break;
         }
         //return $query;

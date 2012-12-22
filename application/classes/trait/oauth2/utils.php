@@ -31,7 +31,7 @@ trait Trait_Oauth2_Utils {
     {
         if(isset($this->current_user))
         {
-            $user = $this->current_user->as_array();
+            $user = $this->current_user instanceof Document ? $this->current_user->as_array() : (array) $this->current_user;
             return Arr::overwrite(['_id' => '', 'name' => ''], $user);
         }
     }

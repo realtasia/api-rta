@@ -11,16 +11,19 @@
 class Model_Comment_Collection extends Mongo_Collection {
     protected $name = 'comments';
 
-    public function fetch($args, $user_id = NULL)
+    public function fetch($args, $user_id = NULL, $current_post = null)
     {
         $defaults = [
            'limit' => 2, 'skip' => 0, 'type' => 'comment', 'sort' => 1,
-           'object_id' => NULL, 'include_ids' => NULL, 'status' => 'publish'
+           'post_id' => NULL, 'include_ids' => NULL, 'status' => 'active'
         ];
 
-        extract(Arr::merge($defaults, $args), EXTR_SKIP);
+        extract(Arr::overwrite($defaults, $args), EXTR_SKIP);
 
         $query = $return = [];
+
+        if($post_id)
+            $query['post._id'] = Document::check_id ($post_id);
 
         if ($include_ids)
         {
@@ -37,15 +40,16 @@ class Model_Comment_Collection extends Mongo_Collection {
                 ->limit($limit)
                 ->sort('_id', $sort)
                 ->skip($skip);
-
+//Debug::log(print_r($results->hasNext(), true));
         while($results->hasNext())
         {
             $row = $results->getNext();
-            if($user_id && $usr = $this->get_user($user_id))
+            if($user_id)
             {
-                $row->current_user = $usr;
-                $row->after_load();
+                $row->current_user = $user_id;
             }
+            $row->current_post = $current_post;
+            $row->after_load();
             $return[] = $row->stringify($row->as_array());
         }
 

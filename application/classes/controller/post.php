@@ -18,7 +18,7 @@ class Controller_Post extends Controller_Resource {
     private static $valid_post_types = [
         'create_testimonial', 'create_listing', 'create_post', 'create_conversation',
         'update_privacy', 'update_testimonial', 'update_listing', 'update_post',
-        'delete_post', 'create_album', 'create_comment', 'create_message',
+        'create_album', 'create_comment', 'create_message',
         'delete_comment', 'create_wallpost'
     ];
 
@@ -98,85 +98,55 @@ class Controller_Post extends Controller_Resource {
     }
 
     /*     * ************************************************************************
-     * Public Connections
+     * Private Actions
      * *********************************************************************** */
-
     /**
-     * Retrieves an array of [user_ids and user names] of people who like this post
+     * Retrieves a post.
+     *  - Checks if post owner is current user.
+     *  - Checks if page itself is the current user.
+     *  - Checks if page owner is current user
+     *  - Checks if admin user.
+     *
+     *  If any thing checks out, we delete the post
      */
-    public function action_likers()
+    public function action_delete()
     {
-        static::$params['object_id'] = $this->request->param('id');
-        static::$params['object_type'] = 'user';
+        $post   = Document::factory('post', $this->request->param('id'));
 
-        $data = Document::factory('interaction')
-                ->collection()
-                ->likers(static::$params);
-
-        return $this->data($data);
-    }
-
-    /**
-     * Retrieves an array of [user_ids and user names] of people who are subscribed to this post
-     */
-    public function action_subscribers()
-    {
-        static::$params['object_id'] = $this->request->param('id');
-        static::$params['object_type'] = 'post';
-
-        $data = Document::factory('interaction')
-                ->collection()
-                ->subscribers(static::$params);
-
-        return $this->data($data);
-    }
-
-    /**
-     * Retrieves listings
-     */
-    public function action_listings()
-    {
-        $posts = Collection::factory('post');
-
-        /*
-         * 1. if user is logged in and ids are the same (or admin or client)
-         *      - all statuses allowed.
-         * 2. if not
-         *      - only active statuses allowed.
-         */
-        $status = Arr::get(static::$params, 'status', 'active');
-
-        switch ($status)
+        // We check the post user
+        if ($post->load(null, array_fill_keys(['user','counts','page','page_parent','to','type'], 1)))
         {
-            case 'pending':
-            case 'archived':
-            case 'draft':
-            case 'trashed':
-                // requested user and logged in user must be the same or must be admin
-                if (static::logged_in_is_id($id) || parent::has_role('admin'))
-                    return $this->data(
-                            $posts->listings(static::$params, static::$user_id)
-                    );
+            $post_user  = (string) $post->user['_id'];
+            $page       = (string) $post->page['_id'];
+            $is_owner   = static::logged_in_is_id($post_user);
+            $page_is_cu = static::logged_in_is_id($page);
 
-                // clients only see 'active' (public) posts
-                return $this->error('access_denied');
-
-            // this is a regular (public) lookup
-            default :
-                // need a client or user token.
-                if (parent::is_client() || parent::logged_in())
+            if ($is_owner || $page_is_cu || parent::has_role('admin'))
+            {
+                if($post->delete())
                 {
-                    static::$params['privacy'] = 'PUBLIC';
-                    return $this->data(
-                            $posts->listings(static::$params, static::$user_id)
-                    );
+                    return $this->data(['success' => 1]);
                 }
+             }
 
-                // oops. zip token.
-                return $this->error('access_denied');
+            $page = Document::factory('page', $page);
+            $page->load(null, ['user' => 1]);
+
+            // now we check if the owner of the page is the current user
+            if ($page->loaded())
+            {
+                $page_user = (string) $page->user['_id'];
+                if (static::$user_id === $page_user)
+                {
+                    if($post->delete())
+                    {
+                        return $this->data(['success' => 1]);
+                    }
+                }
+            }
         }
 
-        return $this->error('invalid_request');
+        return $this->error('access_denied');
     }
 
     /**
@@ -201,12 +171,75 @@ class Controller_Post extends Controller_Resource {
                 // update user by his/her specific field
                 if($this->is_POST())
                 {
-                    $this->update_privacy_settings();
+                    $this->update_privacy();
                 }
                 return true;
             }
         }
         return $this->error('access_denied');
+    }
+
+    /**
+     * Creates a comment for a given post
+     *
+     * @return json data
+     */
+    public function action_comment()
+    {
+        $params['message'] = nl2br(Security::xss_clean(static::$params['message']));
+        $params['type']    = 'comment';
+        $params['status']  = static::$params['status'];
+        $params['user']    = static::$params['user'];
+        $params['post']    = static::$params['post'];
+
+        $c = Document::factory('comment', null, static::$user_id)
+                ->create($params);
+        if ($c)
+        {
+            Job::add($params['post']['_id'], 'post', static::$user_id)
+                    ->comment($c->_id);
+            $ret = $c->as_array();
+            $ret['created'] = $ret['_id']->getTimestamp();
+
+            return $this->data($c->stringify($ret));
+        }
+
+        return $this->error('server_error');
+    }
+
+
+    /*     * ************************************************************************
+     * Public Connections
+     * *********************************************************************** */
+
+    /**
+     * Retrieves an array of [user_ids and user names] of people who like this post
+     */
+    public function action_likers()
+    {
+        static::$params['object_id'] = $this->request->param('id');
+        static::$params['object_type'] = 'comment';
+
+        $data = Document::factory('interaction')
+                ->collection()
+                ->likers(static::$params);
+
+        return $this->data($data);
+    }
+
+    /**
+     * Retrieves an array of [user_ids and user names] of people who are subscribed to this post
+     */
+    public function action_subscribers()
+    {
+        static::$params['object_id'] = $this->request->param('id');
+        static::$params['object_type'] = 'post';
+
+        $data = Document::factory('interaction')
+                ->collection()
+                ->subscribers(static::$params);
+
+        return $this->data($data);
     }
 
     /**************************************************************************
@@ -330,7 +363,7 @@ class Controller_Post extends Controller_Resource {
                 Job::add($comment->post['_id'], 'post', static::$user_id)
                         ->private_message($comment->_id);
 
-                return $this->data($post);
+                return $this->data($comment->stringify($comment->as_array()));
             }
 
             return $this->error('server_error');
@@ -358,8 +391,6 @@ class Controller_Post extends Controller_Resource {
         if (!$id && !parent::logged_in())
             return $this->error('invalid_request');
 
-        static::$params['user']['_id'] = $id ? $id : static::$user_id;
-
         static::$params['privacy.is'] = Arr::path(static::$params, 'privacy.is');
         $validation = Validation::factory(static::$params)
                 ->rule('message', 'not_empty')
@@ -367,15 +398,15 @@ class Controller_Post extends Controller_Resource {
                     ':value', ':field', ':validation'
                 ])
                 ->rule('page', 'not_empty')
-                ->rule('page', 'Controller_Post::valid_page', [':value', ':field', ':validation'])
-                ->rule('page_parent', 'Controller_Post::valid_page', [':value', ':field', ':validation']);
+                ->rule('page', 'Controller_User::valid', [':value', ':field', ':validation'])
+                ->rule('page_parent', 'Controller_Page::valid', [':value', ':field', ':validation']);
 
         $defaults = [
             'type'   => 'testimonial', 'status' => 'pending'
         ];
         if ($validation->check())
         {
-            static::$params['message'] = nl2br(HTML::chars(static::$params['message']));
+            static::$params['message'] = nl2br(Security::xss_clean(static::$params['message']));
 
             $params = Arr::merge(static::$params, $defaults);
 
@@ -394,9 +425,10 @@ class Controller_Post extends Controller_Resource {
                 }
                 else
                 {
-                    Job::add($post_id, 'post', static::$user_id)
+                    Job::add($post->_id, 'post', static::$user_id)
                             ->testimonial($post->page['_id']);
                 }
+                $post = $post->stringify($post->as_array());
                 return $this->data($post);
             }
 
@@ -453,6 +485,9 @@ class Controller_Post extends Controller_Resource {
         {
             if ($post = static::$model->create(Arr::merge($defaults, static::$params)))
             {
+                static::creator_interactions($post->_id, 'post');
+                $post = $post->stringify($post->as_array());
+                $post['counts']['subscribers'] = 1;
                 return $this->data($post);
             }
 
@@ -479,8 +514,6 @@ class Controller_Post extends Controller_Resource {
         if (!$id && !parent::logged_in())
             return $this->error('invalid_request');
 
-        static::$params['user']['_id'] = $id ? $id : static::$user_id;
-
         static::$params['privacy.is'] = Arr::path(static::$params, 'privacy.is');
 
         $validation = Validation::factory(static::$params)
@@ -497,14 +530,17 @@ class Controller_Post extends Controller_Resource {
         ];
         if ($validation->check())
         {
-            static::$params['message'] = nl2br(HTML::chars(static::$params['message']));
+            static::$params['message'] = nl2br(Security::xss_clean(static::$params['message']));
             // this is a little different. we merge params with defaults to force defaults
             if ($post = static::$model->create(Arr::merge(static::$params, $defaults)))
             {
                 Job::add($post->_id, 'post', static::$user_id)
                         ->wallpost($post->page['_id']);
 
-                return $this->data($post->stringify($post->as_array()));
+                static::creator_interactions($post->_id, 'post');
+                $post = $post->stringify($post->as_array());
+                $post['counts']['subscribers'] = 1;
+                return $this->data($post);
             }
 
             return $this->error('server_error');
@@ -523,7 +559,7 @@ class Controller_Post extends Controller_Resource {
      *
      * @return json array
      */
-    protected function create_post($update = FALSE)
+    protected function create_post()
     {
         $id = $this->request->param('id');
 
@@ -552,7 +588,9 @@ class Controller_Post extends Controller_Resource {
 
             if ($post = static::$model->create(Arr::merge($defaults, static::$params)))
             {
-
+                static::creator_interactions($post->_id, 'post');
+                $post = $post->stringify($post->as_array());
+                $post['counts']['subscribers'] = 1;
                 return $this->data($post);
             }
 
@@ -561,98 +599,6 @@ class Controller_Post extends Controller_Resource {
 
         $this->errors = $validation->errors('post/post');
         return $this->fail();
-    }
-
-    /**
-     * Retrieves a post.
-     *  - Checks if post owner is current user.
-     *  - Checks if page owner is current user.
-     *  - Checks if admin user.
-     *
-     *  If any thing checks out, we delete the comment
-     */
-    protected function delete_post()
-    {
-        $delete = false;
-        $post   = Document::factory('post', $this->request->param('id'));
-        $post->load([], [
-            'user' => 1,
-            'counts' => 1,
-            'page' => 1,
-            'page_parent' => 1,
-            'to' => 1,
-            'type' => 1,
-         ]);
-
-        // We check the post user
-        if ($post->loaded())
-        {
-            $post_user = (string) $post->user['_id'];
-            if (static::$user_id === $post_user || parent::has_role('admin'))
-            {
-                if($post->delete())
-                {
-                    Document::factory('user', static::$user_id)
-                            ->inc('counts.' . Inflector::plural($post->type), -1)
-                            ->save();
-
-                    // get the page type
-                    $page_type = $post->page['type'] === 'user' ? 'user' : 'page';
-
-                    Document::factory($page_type, $post->page['_id'])
-                            ->inc('counts.' . Inflector::plural($post->type), -1)
-                            ->save();
-
-                    return $this->data(['success' => 1]);
-                }
-             }
-
-            $page = Document::factory('page', $comment->page['_id']);
-            $page->load([], ['user' => 1]);
-
-            // now we check the page user
-            if ($page->loaded())
-            {
-                $page_user = (string) $page->user['_id'];
-                if (static::$user_id === $page_user)
-                {
-                    if($post->delete())
-                    {
-                        return $this->data(['success' => 1]);
-                    }
-                }
-            }
-        }
-
-        return $this->error('access_denied');
-    }
-
-
-    /**
-     * Creates a comment for a given post
-     *
-     * @return json data
-     */
-    protected function create_comment()
-    {
-        $params['post']['_id']  = $this->request->param('id');
-        $params['post']['type'] = static::$params['post_type'];
-
-        $params['message'] = nl2br(Security::xss_clean(static::$params['message']));
-        $params['type']    = 'comment';
-        $params['status']  = static::$params['status'];
-
-        $c = Document::factory('comment', null, static::$user_id)
-                ->create($params);
-        if ($c)
-        {
-            Job::add($params['post']['_id'], 'post', static::$user_id)
-                    ->comment($c['_id']);
-
-            return $this->data($c);
-        }
-
-        return $this->error('server_error');
     }
 
     /**
@@ -678,64 +624,6 @@ class Controller_Post extends Controller_Resource {
         }
 
         return $this->error('server_error');
-    }
-
-    /**
-     * Retrieves a comment.
-     *  - Checks if the comment author is current user.
-     *  - Checks if post owner is current user.
-     *  - Checks if page owner is current user.
-     *  - Checks if admin user.
-     *
-     *  If any thing checks out, we delete the comment
-     */
-    protected function delete_comment()
-    {
-        $id = $this->request->param('id');
-
-        $comment = Document::factory('comment', $id);
-        $comment->load([], ['_id'  => 1, 'user' => 1, 'post' => 1, 'counts' => 1]);
-
-        // one by one. First we check the comment user
-        if ($comment->loaded())
-        {
-            $comment_user = (string) $comment->user['_id'];
-            if (static::$user_id === $comment_user || parent::has_role('admin'))
-            {
-                $comment->delete();
-                return $this->data(['success' => 1]);
-            }
-
-            $post = Document::factory('post', $comment->post['_id']);
-            $post->load([], ['user' => 1, 'page' => 1]);
-
-            // now we check the post user
-            if ($post->loaded())
-            {
-                $post_user = (string) $post->user['_id'];
-                if (static::$user_id === $post_user)
-                {
-                    $comment->delete();
-                    return $this->data(['success' => 1]);
-                }
-
-                $page = Document::factory('page', $post->page['_id']);
-                $page->load([], ['user' => 1]);
-
-                // now we check the page user
-                if ($page->loaded())
-                {
-                    $page_user = (string) $page->user['_id'];
-                    if (static::$user_id === $page_user)
-                    {
-                        $comment->delete();
-                        return $this->data(['success' => 1]);
-                    }
-                }
-            }
-        }
-
-        return $this->error('access_denied');
     }
 
     /*****************************************************"*********************
@@ -794,21 +682,21 @@ class Controller_Post extends Controller_Resource {
      */
     protected function update_privacy()
     {
-        $params     = static::extract_privacy_values(static::$params);
-        $validation = Validation::factory($params)
-                ->rule('is', 'Privacy::valid', [':value', ':field', ':validation']);
-
-        if ($validation->check())
+        $privacy = Arr::path(static::$params, 'privacy.is');
+        if(!in_array($privacy, ['PUBLIC', 'PRIVATE']))
         {
-            $this->data(static::$model->update_privacy(static::$params, static::$user_id));
-        }
-        else
-        {
-            $this->errors = $validation->errors('user/privacy');
-            $this->fail();
+            $this->errors = ['privacy' => "We do not recognise this value"];
+            return $this->fail();
         }
 
-        return true;
+        $d = Document::factory('post', $this->request->param('id'));
+        $d->set('privacy.is', $privacy);
+        if($d->save())
+        {
+            return $this->data(['success' => 1]);
+        }
+
+        return $this->error('invalid_request');
     }
 
     /**************************************************************************
@@ -879,6 +767,12 @@ class Controller_Post extends Controller_Resource {
 
 
         return Arr::merge($return, $array);
+    }
+
+    protected static function creator_interactions($id, $objtype)
+    {
+        $i = Document::factory('interaction', null, static::$user_id);
+        $i->subscribe($id, $objtype);
     }
 
 }

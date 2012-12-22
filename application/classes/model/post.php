@@ -11,7 +11,7 @@
  */
 class Model_Post extends Document {
 
-    protected static $after_delete_fields;
+    protected static $after_delete_processing;
 
     /**
      * Create a default post with new values.
@@ -244,7 +244,7 @@ class Model_Post extends Document {
     {
         $id = parent::check_id($this->_id);
 
-        $this->created = $id->getTimestamp();
+        $this->created = $id instanceof MongoID ? $id->getTimestamp() : 0;
         // if there is no current user, no further formatting required.
 
         return $this;
@@ -258,36 +258,33 @@ class Model_Post extends Document {
     public function stringify($arr = [])
     {
         // get the current user
-        $cu                     = $this->current_user && $this->get_default_user_fields();
+        $cu                     = $this->current_user ? $this->get_default_user_fields() : false;
+        $cu_id                  = $cu ? (string) $cu['_id'] : false;
         $arr                    = parent::stringify($arr);
-        $arr['connections']     = static::get_public_connection_routes($arr['_id']);
+        $u_id                   = Arr::get($arr['user'], '_id');
         $arr['generated_title'] = static::generate_title($arr);
+        $arr['is_owner']        = $cu_id && $u_id && ($u_id === $cu_id);
+        $arr['is_page_owner']   = $cu_id && $u_id && ((string)Arr::get($arr['page'], '_id') === $cu_id);
+        $arr['actions']         = $arr['is_owner'] ? static::get_owner_action_routes($arr) : static::get_action_routes($arr);
 
-        if ($cu && $u_id = Arr::get($arr['user'], '_id'))
+        if(!$arr['is_owner'])
         {
-            $cu_id                = (string) $cu['_id'];
-            $arr['is_owner']      = (string) $u_id === $cu_id;
-            $arr['is_page_owner'] = (string) Arr::get($arr['page'], '_id') === $cu_id;
+            $arr['actions'] = $arr['is_page_owner'] ? static::get_page_owner_action_routes($arr) : static::get_action_routes($arr);
+        }
 
-            $arr['is_owner'] && $arr['connections'] = static::get_all_connection_routes($arr['_id']);
+        $arr['connections']     = static::get_connection_routes($arr['_id']);
 
-            $interactions        = parent::factory('interaction', NULL, $cu->_id);
-            $arr['interactions'] = $interactions->interacting($arr['_id'], 'post');
-            $arr['actions']      = static::get_action_routes($arr);
+        if ($cu)
+        {
+            $arr['interactions'] = parent::factory('interaction', NULL, $cu_id)->interacting($arr['_id'], 'post');
         }
 
         // we should trigger the comment model's formatting so each comment in
         // this post is properly formatted.
-        if (!empty($arr['comments']))
-        {
-            foreach ($arr['comments'] as $key => $value)
-            {
-                $comment = parent::factory('comment');
-                $comment->current_user = $cu;
-                // now each comment in the post is properly formatted.
-                $arr['comments'][$key] = $comment->stringify($comment->to_array());
-            }
-        }
+        $arr['comments'] = Collection::factory('comment')->fetch([
+            'post_id' => $arr['_id'], 'status' => 'active', 'type' => 'comment',
+            'skip' => static::get_initial_comment_skip($arr['counts']['comments'])
+        ], $this->current_user, $arr);
 
         return $arr;
     }
@@ -546,17 +543,29 @@ class Model_Post extends Document {
     }
 
     /**
-     * Gets all connection links, including private ones that a logged in user
+     * Gets all action links, including private ones that a logged in user
      * can perform on this post
      *
      * @param string|MongoID $user_id
      * @return array
      */
-    protected static function get_all_connection_routes($_id)
+    protected static function get_owner_action_routes($post)
     {
-        $actions = ['privacy' => Router::post('privacy', $_id)];
+        $actions = ['privacy' => Router::post('privacy', $post['_id'])];
+        return Arr::merge($actions, static::get_page_owner_action_routes($post));
+    }
 
-        return Arr::merge($actions, static::get_public_connection_routes($_id));
+    /**
+     * Gets all action links, including private ones that a logged in user
+     * can perform on this post
+     *
+     * @param string|MongoID $user_id
+     * @return array
+     */
+    protected static function get_page_owner_action_routes($post)
+    {
+        $actions = ['delete' => Router::post('delete', $post['_id'])];
+        return Arr::merge($actions, static::get_action_routes($post));
     }
 
     /**
@@ -565,9 +574,9 @@ class Model_Post extends Document {
      * @param string|MongoID $user_id
      * @return array
      */
-    protected static function get_public_connection_routes($_id)
+    protected static function get_connection_routes($_id)
     {
-        $actions = [];
+        $actions = ['getComments' => Router::comment('get', $_id)];
 
         foreach (['likers', 'comments', 'subscribers'] as $k => $v)
         {
@@ -594,6 +603,7 @@ class Model_Post extends Document {
         }
 
         $own_wall = (string) $post['page']['_id'] === (string) $post['user']['_id'];
+        $ohw = ' on his profile page.';
 
         $page_link = html::anchor($post['page']['uri'], $post['page']['name'], ['title' => $page_title, 'class' => 'hoverCard']);
 
@@ -612,16 +622,16 @@ class Model_Post extends Document {
                     switch($link['type'])
                     {
                         case 'rich':
-                            return "shared a document" . ($own_wall ? "." : " on $page_link's profile page.");
+                            return "shared a document" . ($own_wall ? $ohw : " on $page_link's profile page.");
                         case 'video':
-                            return "shared a video" . ($own_wall ? "." : " on $page_link's profile page.");
+                            return "shared a video" . ($own_wall ? $ohw : " on $page_link's profile page.");
                         case 'photo':
-                            return "shared a photo" . ($own_wall ? "." : " on $page_link's profile page.");
+                            return "shared a photo" . ($own_wall ? $ohw : " on $page_link's profile page.");
                         case 'link':
-                            return "shared a link" . ($own_wall ? "." : " on $page_link's profile page.");
+                            return "shared a link" . ($own_wall ? $ohw : " on $page_link's profile page.");
                     }
                 }
-                return "wrote a post" . ($own_wall ? "." : " on $page_link's profile page.");
+                return "wrote a post" . ($own_wall ? $ohw : " on $page_link's profile page.");
             default: return "shared in $page_link.";
         }
     }
@@ -693,6 +703,12 @@ class Model_Post extends Document {
         }
 
         return $data;
+    }
+
+    protected static function get_initial_comment_skip($count)
+    {
+        if($count <= 2) return 0;
+        if($count > 2) return $count - 2;
     }
 
 }
