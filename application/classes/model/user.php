@@ -229,6 +229,7 @@ class Model_User extends Document {
                     'can_subscribe'    => false,
                 ];
                 $arr['connections'] = static::get_all_connection_routes($arr['_id']);
+                $arr['actions']      = static::get_action_routes($arr['_id']);
                 return $arr;
             }
             else

@@ -20,18 +20,17 @@ class Model_Oauth2_Resource extends Document {
      */
     public function check_password($username, $password)
     {
-        $params = array(
-            '$or' => array(
-                array('username' => $username),
-                array('email'    => $username),
-            ),
+        $params = [
+            '$or'      => [
+                ['username' => $username],
+                ['email' => $username]
+            ],
             'password' => static::hash($password)
-                );
+        ];
 
-        $user = Document::factory('user');
-        if($user->load($params, ['_id']));
+        $user = parent::factory('user');
 
-        return $user->loaded() ? $this->stringify($user->as_array()) : false;
+        return $user->load($params, ['_id']) ? $this->stringify($user->as_array()) : false;
     }
 
 

@@ -75,7 +75,6 @@ class Controller_Auth extends Controller_Abstract {
             if (!$params = $this->check_headers())
                 return;
         }
-
         $check = static::$auth->login($params, true);
         unset($check['_id']);
 
@@ -92,9 +91,8 @@ class Controller_Auth extends Controller_Abstract {
         else
         {
             static::$current_session = $check;
-            return $this->data(['success' => 1]);
+            return $this->data(['success' => $params]);
         }
-
         //return static::is_error($check) ? $this->error($check) : $this->data($check);
     }
 
@@ -148,16 +146,8 @@ class Controller_Auth extends Controller_Abstract {
             return $this->error('invalid_request');
         }
 
-        if (empty($post))
-        {
-            static::$params = $get;
-            //Debug::log('invalid called because request params are empty');
-        }
-        else
-        {
-            static::$params = $post;
-            //Debug::log(print_r($post, true));
-        }
+        static::$params = empty($post) ? $get : $post;
+
 
         switch (true)
         {
