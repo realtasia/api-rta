@@ -59,7 +59,7 @@ class Model_Interaction_Collection extends Mongo_Collection {
     public function fetch(array $args, $field = NULL, $include = 1)
     {
         $defaults = [
-            'limit' => 15, 'skip' => 0, 'object_id' => NULL,
+            'limit' => 11, 'skip' => 0, 'object_id' => NULL,
             'object_type' => NULL, 'interaction' => NULL, 'user_id' => NULL
         ];
         $return = [];
@@ -74,26 +74,16 @@ class Model_Interaction_Collection extends Mongo_Collection {
 
         if($object_id)
         {
-            $query['object_id'] = $object_id;
+            $query['object_id'] = Document::check_id($object_id);
         }
         else if($user_id)
         {
-            $query['user_id'] = $user_id;
+            $query['user._id'] = Document::check_id($user_id);
         }
-
+        //return $query;
         $results = $this->find($query)
                 ->limit($limit)
                 ->skip($skip);
-
-        if($limit !== NULL)
-        {
-            $this->limit($limit);
-        }
-
-        if($skip !== NULL)
-        {
-            $this->skip($skip);
-        }
 
         if($field)
         {

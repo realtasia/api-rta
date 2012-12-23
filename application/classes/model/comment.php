@@ -110,6 +110,9 @@ class Model_Comment extends Document {
      */
     public function before_delete()
     {
+        if(!$this->loaded())
+            $this->load();
+
         $this->after_delete_fields = $this->as_array();
     }
 
@@ -134,7 +137,7 @@ class Model_Comment extends Document {
         {
             parent::factory('interaction')->collection()
                     ->remove_safe([
-                        'object_id'   => $id,
+                        'object_id'   => parent::check_id($id),
                         'object_type' => 'comment',
                             ], ['multiple' => true]);
         }

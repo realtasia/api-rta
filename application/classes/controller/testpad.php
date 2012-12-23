@@ -25,6 +25,13 @@ class Controller_Testpad extends Controller {
         print_r($f);
     }
 
+    public function action_education()
+    {
+        $u = Document::factory('user', '50b7620ab90fb8e884000009');
+        $u->set('info.education', []);
+        $u->save();
+    }
+
     public function action_title()
     {
         $test = true;

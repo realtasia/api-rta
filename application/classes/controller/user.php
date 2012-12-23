@@ -110,6 +110,8 @@ class Controller_User extends Controller_Resource {
         // get the type of request
         $type = Arr::get(static::$params, 'request_type');
 
+        $valid = true;
+
         // no type. we need a type
         if (!$type)
         {
@@ -127,7 +129,8 @@ class Controller_User extends Controller_Resource {
                 return $this->{$type}();
             }
 
-            return $this->error('access_denied');
+            Debug::log('Access Denied invoked because no valid user');
+            $valid = false;
         }
 
         // let's check if it's valid and run it
@@ -139,7 +142,7 @@ class Controller_User extends Controller_Resource {
             }
 
             Debug::log('Access Denied invoked because no admin user or not client');
-            return $this->error('access_denied');
+            $valid = false;
         }
 
         // let's check if it's valid and run it
@@ -151,6 +154,10 @@ class Controller_User extends Controller_Resource {
             }
 
             Debug::log('Access Denied invoked because no admin user or not client');
+            $valid = false;
+        }
+        if(!$valid)
+        {
             return $this->error('access_denied');
         }
 
@@ -209,7 +216,7 @@ class Controller_User extends Controller_Resource {
 
     /**
      * Retrieves an array of subscription interactions for this user
-     * Should at least have an object type
+     * Should at least have an object_type
      */
     public function action_subscriptions()
     {
@@ -665,9 +672,9 @@ class Controller_User extends Controller_Resource {
                 ]);
         if($user)
         {
-            if((int) $user->interested === 1)
+            if((int) $user['interested'] === 1)
             {
-                return $this->data(static::$model->stringify($user));
+                return $this->data($user);
             }
             else
             {
@@ -729,7 +736,7 @@ class Controller_User extends Controller_Resource {
             $users = Collection::factory('user')
                     ->search(static::$params);
         //die(Debug::vars(static::$params));
-        return $this->data($users);
+        return $this->data($users ? $users : []);
     }
 
     /*     * ************************************************************************
@@ -983,6 +990,21 @@ class Controller_User extends Controller_Resource {
                     if(!empty($value))
                     {
                         static::$params[$key] = Security::xss_clean($value);
+                        if(is_array($value))
+                        {
+                            foreach($value as $label => $val)
+                            {
+                                if(empty($val) || strlen($val) === 0)
+                                {
+                                    unset($value[$label]);
+                                }
+                            }
+                            if(empty($value))
+                            {
+                                $value = [];
+                            }
+                            static::$params[$key] = $value;
+                        }
                     }
                     else
                     {
@@ -991,6 +1013,7 @@ class Controller_User extends Controller_Resource {
                     }
                 break;
             }
+
         }
 
         // make the phone number a singapore number
@@ -1185,6 +1208,8 @@ class Controller_User extends Controller_Resource {
                     'type'    => 'album',
                 ];
                 $album = $album->create_album($avatars);
+                $album->uri = '/post.php?id=' . (string) $album->_id;
+                $album->save();
             }
         }
 
@@ -1194,19 +1219,24 @@ class Controller_User extends Controller_Resource {
         $attachment = [
             'name'        => Arr::get(static::$params, 'name'),
             'mediainfo'   => Arr::get(static::$params, 'mediainfo'),
+            'subtype'     => 'avatar',
             'picture'     => $picture,
             'user'        => ['_id'  => $user->_id, 'name' => $user->name],
-            'page'        => ['_id'  => $album->_id, 'name' => $album->name, 'type' => 'album'],
+            'page'        => ['_id'  => $album->_id, 'name' => $album->name, 'type' => 'album', 'uri' => $album->uri],
             'page_parent' => Arr::merge(['type' => 'library'], $user->library)
         ];
         //Debug::log(print_r($attachment, true));
 
-        if(Document::factory('post')->create_attachment($attachment))
+        if($attachment = Document::factory('post')->create_attachment($attachment))
         {
+            $attachment->uri = '/post.php?id=' . (string) $attachment->_id;
+            $attachment->save();
             $user->avatar = $picture;
             $user->save();
             return $this->data(['success' => 1]);
         }
+
+        return $this->fail('user/generic', 'server_error');
     }
 
     /**
@@ -1313,7 +1343,7 @@ class Controller_User extends Controller_Resource {
     {
         $library = [
             'type' => 'library',
-            'uri'  => Router::user('library', (string) $user->_id),
+            'uri'  => (string) $user->_id . '/library',
             'user' => ['_id'  => $user->_id, 'name' => $user->name],
             'name' => "{$user->name}'s Media Library"
         ];
@@ -1328,9 +1358,11 @@ class Controller_User extends Controller_Resource {
                 'page'    => ['_id'  => $lib->_id, 'name' => "{$user->name}'s Media Library", 'type' => 'library']
             ];
             $album   = Document::factory('post')->create_album($uploads);
+            $album->uri = '/post.php?id=' . (string) $album->_id;
+            $album->save();
             if ($album)
             {
-                $user->library = ['_id'  => $lib->_id, 'name' => $lib->name];
+                $user->library = ['_id'  => $lib->_id, 'name' => $lib->name, 'uri' => $lib->uri];
                 $user->save();
             }
         }
@@ -1426,9 +1458,9 @@ class Controller_User extends Controller_Resource {
         $role = $this->request->post('role');
 
         if (!in_array($role, ['admin', 'agent', 'user']))
-            return false;
+            return $this->error('invalid_request');
 
-        $user = Document::factory('user', $id);
+        $user = Document::factory('user', Document::check_id($id));
         $user->load(null, ['counts' => 1]);
 
         $user->roles = [$role];
@@ -1562,6 +1594,8 @@ class Controller_User extends Controller_Resource {
             $return['token'] = Collection::factory('user')->find(['rep.token' => $token]);
         }
 
+        $s  = Arr::get(static::$params, 's');
+
         $types = array_keys($return);
         $type = Arr::get(static::$params, 'type');
 
@@ -1575,6 +1609,23 @@ class Controller_User extends Controller_Resource {
 
         foreach ($types as $t)
         {
+            if($s)
+            {
+                $telephone = SMS::valid($s);
+                $keyword = new MongoRegex("/^$s/");
+                $query = [
+                        ['username' => $keyword],
+                        ['email' => $keyword],
+                        ['company.name' => new MongoRegex('/^'. strtoupper($s) .'/')],
+                        ['name' => new MongoRegex("/^".ucfirst($s)."/")],
+                    ];
+                if($telephone)
+                {
+                    $query[] = ['info.telephone.mobile' => $telephone];
+                }
+
+                $return[$t]->find(['$or' => $query]);
+            }
             $c  = $return[$t]->limit($limit)->skip($skip);
             unset($return[$t]);
             $return[$t]['count'] = $c->count(false);

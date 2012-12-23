@@ -424,7 +424,7 @@ class Model_User extends Document {
     {
         $actions = [];
 
-        foreach (['privacy', 'notifications', 'inbox', 'library'] as $v)
+        foreach (['privacy', 'notifications', 'inbox', 'library', 'subscriptions'] as $v)
         {
             $actions[$v] = Router::user($v, $user_id);
         }
@@ -607,7 +607,7 @@ class Model_User extends Document {
         'middle_name' => '',
         'last_name'   => '',
         'name'        => '',
-        'status'      => 'active',
+        'status'      => 'pending',
         'company'     => [],
         'designation' => '',
         'license'     => '',

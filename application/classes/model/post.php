@@ -339,7 +339,7 @@ class Model_Post extends Document {
             {
                 parent::factory('interaction')->collection()
                         ->remove_safe([
-                            'object_id'   => $id,
+                            'object_id'   => parent::check_id($id),
                             'object_type' => 'post',
                                 ], ['multiple' => true]);
             }
@@ -602,10 +602,28 @@ class Model_Post extends Document {
             $page_title = "Go to {$post['page']['name']}'s profile page";
         }
 
+        if ($post['page']['type'] === 'album')
+        {
+            $page_title = "See {$post['user']['name']}'s {$post['page']['name']} album";
+        }
+
+        if ($post['page']['type'] === 'library')
+        {
+            $page_title = "See {$post['user']['name']}'s library";
+        }
+
         $own_wall = (string) $post['page']['_id'] === (string) $post['user']['_id'];
         $ohw = ' on his profile page.';
 
-        $page_link = html::anchor($post['page']['uri'], $post['page']['name'], ['title' => $page_title, 'class' => 'hoverCard']);
+        if(isset($post['page']['uri']))
+        {
+            $page_link = html::anchor($post['page']['uri'], $post['page']['name'], ['title' => $page_title, 'class' => 'hoverCard']);
+        }
+        else
+        {
+            // this is a user...
+            $page_link = html::anchor('/' . $post['page']['_id'], $post['page']['name'], ['title' => $page_title, 'class' => 'hoverCard']);
+        }
 
         switch ($post['type'])
         {
@@ -614,7 +632,13 @@ class Model_Post extends Document {
             case "testimonial": return "wrote a testimonial about $page_link.";
             case "listing": return "created a listing in $page_link.";
             case "event": return "created an event in $page_link.";
-            case "attachment": return "uploaded new media " . ($own_wall ? '.' : "in $page_link.");
+            case "attachment":
+                $subtype = Arr::get($post, 'subtype');
+                if($subtype === 'avatar')
+                {
+                    return "uploaded a new profile picture.";
+                }
+                return "uploaded new media " . ($own_wall ? '.' : "in $page_link.");
             case ("post" || 'wallpost'):
                 $link = Arr::get($post, 'link');
                 if($link)
@@ -660,6 +684,7 @@ class Model_Post extends Document {
             'link'         => [], // 'name', 'description', 'source' the original link if there is one.
             'video'        => [], // 'name', 'description', 'source', 'properties' if this post has a video
             'type'         => 'post', // wallpost, testimonial, conversation, listing, checkin, event, album
+            'subtype'      => '', // wallpost, testimonial, conversation, listing, checkin, event, album
             'status'       => 'active', // pending, active, expired,
             'uri'          => '',
             'modified'     => 0,

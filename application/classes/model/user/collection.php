@@ -122,11 +122,15 @@ class Model_User_Collection extends Collection {
             $user_search_fields_hint = [
                 'username' => 1, 'email' => 1, 'info.telephone.mobile' => 1
             ];
+
+//            if (!empty($ids))
+//                $query['$or'][] = ['$and' => [['_id'] => ['$in' => Arr::map('Document::check_id', $ids)]]];
+
         }
 
         // iterate through the $ids and make sure they're all MongoID objects
         if (!empty($ids))
-            $query['_id']['$in'] = $ids;
+            $query['_id'] = ['$in' => Arr::map('Document::check_id', $ids)];
 
         switch($sort)
         {

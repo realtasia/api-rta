@@ -19,7 +19,7 @@ class Model_Interaction extends Document {
     private static $inc = 1;
     private static $count_field;
     private static $valid_interactions = ['like', 'unlike', 'subscribe', 'unsubscribe'];
-    private static $valid_objects = ['post', 'page', 'comment', 'user'];
+    private static $valid_objects = ['post', 'page', 'comment', 'user', 'listing'];
 
     /**
      * Proxy method to self::interact
