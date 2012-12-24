@@ -97,7 +97,7 @@ class Privacy {
             return $this->{$name};
         }
 
-        if (!$this->read_only)
+        if (!$this->read_only && !$this->document->loaded())
         {
             $this->document->load([], ['settings.privacy']);
             $privacy = $this->document->settings['privacy'];

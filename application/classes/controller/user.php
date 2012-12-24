@@ -76,18 +76,19 @@ class Controller_User extends Controller_Resource {
             else
             // yeap, you guessed it.
                 $this->fail('user/generic', 'server_error');
-        }
 
-        // let's check if it's valid and run it
-        if (in_array($type, static::$valid_admin_actions) && method_exists($this, $type))
-        {
-            if (parent::has_role('admin'))
+            // let's check if it's valid and run it
+            if (in_array($type, static::$valid_admin_actions) && method_exists($this, $type))
             {
-                return $this->{$type}();
+                if (parent::has_role('admin'))
+                {
+                    return $this->{$type}();
+                }
+
+                Debug::log('Access Denied invoked because no admin user or not client');
+                return $this->error('access_denied');
             }
 
-            Debug::log('Access Denied invoked because no admin user or not client');
-            return $this->error('access_denied');
         }
 
         // no type, let's try id
@@ -552,10 +553,15 @@ class Controller_User extends Controller_Resource {
         $u = Document::factory('user', $id);
         if($u->load(null, array_fill_keys(array_reverse($f), 1)))
         {
-
             $privacy = Privacy::factory($u);
+            $values = $u->stringify($u->as_array());
 
-            
+            switch(true)
+            {
+                case $privacy->is === 'PUBLIC': break;
+            }
+
+
 
             foreach($values as $key => $value)
             {
