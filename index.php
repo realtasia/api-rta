@@ -111,7 +111,7 @@ require APPPATH.'bootstrap'.EXT;
 //            ->body();
 try
 {
-    ob_start('ob_gzhandler');
+    //ob_start('ob_gzhandler');
     echo Request::factory()
             ->execute()
             ->send_headers()
