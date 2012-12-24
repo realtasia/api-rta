@@ -1070,11 +1070,13 @@ class Controller_User extends Controller_Resource {
         {
             if(is_array($v) && isset($v['value']))
             {
-                if(empty(trim($v['value'])))
+                $v['value'] = trim($v['value']);
+                if(empty($v['value']))
                 {
                     unset($edu[$k]);
                 }
-                if(empty(trim($v['date'])) || !is_numeric($v['date']))
+                $v['date'] = trim($v['date']);
+                if(empty($v['date']) || !is_numeric($v['date']))
                 {
                     unset($edu[$k]);
                 }
@@ -1087,13 +1089,15 @@ class Controller_User extends Controller_Resource {
         {
             if(is_array($v) && isset($v['value']))
             {
-                if(empty(trim($v['value'])))
+                $v['value'] = trim($v['value']);
+                if(empty($v['value']))
                 {
-                    unset($ach[$k]);
+                    unset($edu[$k]);
                 }
-                if(empty(trim($v['date'])) || !is_numeric($v['date']))
+                $v['date'] = trim($v['date']);
+                if(empty($v['date']) || !is_numeric($v['date']))
                 {
-                    unset($ach[$k]);
+                    unset($edu[$k]);
                 }
             }
         }
