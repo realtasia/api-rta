@@ -994,14 +994,21 @@ class Controller_User extends Controller_Resource {
                         {
                             foreach($value as $label => $val)
                             {
-                                if(empty($val) || strlen($val) === 0)
+                                if(empty($val))
                                 {
                                     unset($value[$label]);
                                 }
-                            }
-                            if(empty($value))
-                            {
-                                $value = [];
+                                if(is_array($val))
+                                {
+                                    foreach($val as $l => $v)
+                                    {
+                                        if(empty($v))
+                                        {
+                                            unset($val[$l]);
+                                        }
+                                    }
+                                    $value[$label] = $val;
+                                }
                             }
                             static::$params[$key] = $value;
                         }
