@@ -1028,9 +1028,12 @@ class Controller_User extends Controller_Resource {
 
         foreach($edu as $k => $v)
         {
-            if(empty($v))
+            if(is_array($v) && isset($v['value']))
             {
-                unset($edu[$k]);
+                if(empty($v['value']))
+                {
+                    unset($edu[$k]);
+                }
             }
         }
 
