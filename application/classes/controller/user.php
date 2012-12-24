@@ -544,6 +544,40 @@ class Controller_User extends Controller_Resource {
         }
     }
 
+    protected function generate_qrcode(\QRcode $qr, $values)
+    {
+
+        $id = $this->request->param('id');
+        $f = ['name', 'info', 'email', 'settings.privacy', 'avatar'];
+        $u = Document::factory('user', $id);
+        if($u->load(null, array_fill_keys(array_reverse($f), 1)))
+        {
+
+            $privacy = Privacy::factory($u);
+
+            
+
+            foreach($values as $key => $value)
+            {
+                switch($key)
+                {
+                    case 'name': $qr->fullName($value);break;
+                    case 'gender': $qr->gender($value);break;
+                    case 'title': $qr->title($value);break;
+                    case 'role': $qr->role($value);break;
+                    case 'company': $qr->company($value);break;
+                    case 'birthday': $qr->birthday($value);break;
+                    case 'mobile': $qr->mobile($value);$qr->sms($value);break;
+                    case 'email': $qr->email($value);break;
+                    case 'avatar': $qr->photo($value);break;
+                    case 'url': $qr->url($value);break;
+                    case 'info': break;
+                }
+            }
+        }
+    }
+
+
     /*     * ************************************************************************
      * Public Actions
      * *********************************************************************** */
@@ -739,7 +773,7 @@ class Controller_User extends Controller_Resource {
         return $this->data($users ? $users : []);
     }
 
-    /*     * ************************************************************************
+    /*************************************************************************
      * Protected Actions - CREATES
      * *********************************************************************** */
 
@@ -1030,14 +1064,35 @@ class Controller_User extends Controller_Resource {
         {
             if(is_array($v) && isset($v['value']))
             {
-                if(empty($v['value']))
+                if(empty(trim($v['value'])))
+                {
+                    unset($edu[$k]);
+                }
+                if(empty(trim($v['date'])) || !is_numeric($v['date']))
                 {
                     unset($edu[$k]);
                 }
             }
         }
 
-        static::$params['info']['education'] = array_filter($edu);
+        $ach = Arr::path(static::$params, 'info.achievements', []);
+
+        foreach($ach as $k => $v)
+        {
+            if(is_array($v) && isset($v['value']))
+            {
+                if(empty(trim($v['value'])))
+                {
+                    unset($ach[$k]);
+                }
+                if(empty(trim($v['date'])) || !is_numeric($v['date']))
+                {
+                    unset($ach[$k]);
+                }
+            }
+        }
+
+        static::$params['info']['achievements'] = array_filter($ach);
 
         // make the phone number a singapore number
         if ($n = Arr::get($params, 'info.telephone.mobile'))

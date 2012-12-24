@@ -407,7 +407,7 @@ class Controller_Post extends Controller_Resource {
         ];
         if ($validation->check())
         {
-            static::$params['message'] = nl2br(Security::xss_clean(static::$params['message']));
+            static::$params['message'] = nl2br(Security::xss_clean(trim(static::$params['message'])));
 
             $params = Arr::merge(static::$params, $defaults);
 
@@ -533,7 +533,7 @@ class Controller_Post extends Controller_Resource {
         ];
         if ($validation->check())
         {
-            static::$params['message'] = nl2br(static::extract_links(static::$params['message']));
+            static::$params['message'] = nl2br(static::extract_links(trim(static::$params['message'])));
             // this is a little different. we merge params with defaults to force defaults
             if ($post = static::$model->create(Arr::merge(static::$params, $defaults)))
             {
@@ -587,7 +587,7 @@ class Controller_Post extends Controller_Resource {
         ];
         if ($validation->check())
         {
-            static::$params['message'] = nl2br(Security::xss_clean(static::$params['message']));
+            static::$params['message'] = nl2br(static::extract_links(trim(static::$params['message'])));
 
             if ($post = static::$model->create(Arr::merge($defaults, static::$params)))
             {
