@@ -989,16 +989,8 @@ class Controller_User extends Controller_Resource {
                 case 'company':
                     if(!empty($value))
                     {
-                        static::$params[$key] = Security::xss_clean($value);
                         if(is_array($value))
                         {
-                            if(array_keys($value, 'education'))
-                            {
-                                if(!Arr::get($value, 'value'))
-                                {
-                                    unset(static::$params[$key]);
-                                }
-                            }
                             foreach($value as $label => $val)
                             {
                                 if(empty($val))
@@ -1020,6 +1012,7 @@ class Controller_User extends Controller_Resource {
                             static::$params[$key] = $value;
                         }
 
+                        static::$params[$key] = Security::xss_clean($value);
                     }
                     else
                     {
@@ -1030,6 +1023,18 @@ class Controller_User extends Controller_Resource {
             }
 
         }
+
+        $edu = Arr::path(static::$params, 'info.education', []);
+
+        foreach($edu as $k => $v)
+        {
+            if(empty($v))
+            {
+                unset($edu[$k]);
+            }
+        }
+
+        static::$params['info']['education'] = array_filter($edu);
 
         // make the phone number a singapore number
         if ($n = Arr::get($params, 'info.telephone.mobile'))
