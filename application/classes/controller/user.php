@@ -714,7 +714,7 @@ class Controller_User extends Controller_Resource {
         {
             if((int) $user['interested'] === 1)
             {
-                return $this->data($user);
+                return $this->data(Document::stringify($user));
             }
             else
             {
@@ -1065,7 +1065,6 @@ class Controller_User extends Controller_Resource {
         }
 
         $edu = Arr::path(static::$params, 'info.education', []);
-
         foreach($edu as $k => $v)
         {
             if(is_array($v) && isset($v['value']))
@@ -1082,9 +1081,9 @@ class Controller_User extends Controller_Resource {
                 }
             }
         }
+        static::$params['info']['education'] = array_filter($edu);
 
         $ach = Arr::path(static::$params, 'info.achievements', []);
-
         foreach($ach as $k => $v)
         {
             if(is_array($v) && isset($v['value']))
@@ -1101,7 +1100,6 @@ class Controller_User extends Controller_Resource {
                 }
             }
         }
-
         static::$params['info']['achievements'] = array_filter($ach);
 
         // make the phone number a singapore number
@@ -1451,9 +1449,38 @@ class Controller_User extends Controller_Resource {
             if ($album)
             {
                 $user->library = ['_id'  => $lib->_id, 'name' => $lib->name, 'uri' => $lib->uri];
-                $user->save();
             }
         }
+        $u = $user->as_array();
+        $u['gender'] = strtoupper(substr(Arr::get($u['info'], 'gender'), 0, 1));
+        $u['birthday'] = date('c', $u['info']['birthday']);
+        $u['mobile'] = $u['info']['telephone']['mobile'];
+        $u['email'] = $u['email'];
+        switch(true)
+        {
+            case ($u['roles'][0] === 'admin'): $u['role'] = 'Realt Staff'; break;
+            case ($u['roles'][0] === 'agent'): $u['role'] = 'Realt Agent'; break;
+            case ($u['roles'][0] === 'user'): $u['role'] = 'Realt User'; break;
+            case !empty($u['company']):
+                $u['company'] = Arr::get($u['company'], 'name', false);
+                $u['title'] = Arr::get($u, 'designation', false);
+                break;
+        }
+
+
+//                    case 'name': $qr->fullName($value);break;
+//                    case 'gender': $qr->gender($value);break;
+//                    case 'title': $qr->title($value);break;
+//                    case 'role': $qr->role($value);break;
+//                    case 'company': $qr->company($value);break;
+//                    case 'birthday': $qr->birthday($value);break;
+//                    case 'mobile': $qr->mobile($value);$qr->sms($value);break;
+//                    case 'email': $qr->email($value);break;
+//                    case 'avatar': $qr->photo($value);break;
+//                    case 'url': $qr->url($value);break;
+//                    case 'info': break;
+
+        $user->set('info.qrcode', $this->generate_qrcode(QRCode::factory(), $user->as_array()));
     }
 
 

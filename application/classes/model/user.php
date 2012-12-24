@@ -12,6 +12,7 @@
 class Model_User extends Document {
 
     static $new_user_has_company = false;
+    static $after_delete_fields = [];
     /**
      * Retrieve a user by email, username or id
      *
@@ -64,7 +65,7 @@ class Model_User extends Document {
             $params['uri'] = "/{$params['username']}";
         }
 
-        // overwrite defaults
+        // overwrite defaults to remove unwanted params
         $data = Arr::overwrite(static::$user_fields, $params);
         // merge with defaults
         $data = Arr::merge(static::$user_fields, $data);
@@ -171,26 +172,28 @@ class Model_User extends Document {
     {
         if(static::$new_user_has_company)
         {
-            if(!isset($this->name) || empty($this->name))
-            {
-                $user = $this->collection()->findOne(['_id' => $this->_id], ['_id' => 1, 'name' => 1]);
-                $user = (object) $this->stringify($user);
-            }
-            else
-            {
-                $user = clone $this;
-            }
-            $company = parent::factory('page', static::$new_user_has_company['_id']);
-            $company->addToSet('members', ['_id' => $user->_id, 'name' => $user->name]);
-            $company->inc('counts.members', 1);
-            $company->save();
-            $company->collection()->update(
-              ['_id' => $company->_id, 'members' => ['$size' => 11]],
-              ['$pop' => ['members' => 1]]
-            );
+            $this->add_to_company(static::$new_user_has_company, $this->_id);
         }
 
         static::$new_user_has_company = false;
+    }
+
+    public function before_delete()
+    {
+        if(!$this->loaded())
+            $this->load();
+
+        static::$after_delete_fields = $this->as_array();
+    }
+
+    public function after_delete()
+    {
+        $id = static::$after_delete_fields['_id'];
+        parent::factory('comment')->collection()->remove_safe(['user._id' => parent::check_id($id)], ['multiple' => true]);
+        parent::factory('interaction')->collection()->remove_safe(['user._id' => parent::check_id($id)], ['multiple' => true]);
+        parent::factory('post')->collection()->remove_safe(['user._id' => parent::check_id($id)], ['multiple' => true]);
+        parent::factory('page')->collection()->remove_safe(['user._id' => parent::check_id($id)], ['multiple' => true]);
+        $this->remove_from_company(static::$after_delete_fields['company'], $id);
     }
 
     /**
@@ -354,6 +357,15 @@ class Model_User extends Document {
         }
         $params['info'] = Arr::overwrite(static::$user_fields['info'], $params['info']);
         $params['info']['birthday']  = (int) $this->info['birthday'];
+
+        if(isset($params['company']) && is_array($params['company']))
+        {
+            static::$new_user_has_company = $params['company'];
+
+            $this->load(null, ['company' => 1]);
+            $this->remove_from_company($this->company, $this->_id);
+        }
+        $this->clear();
         $this->load_values($params);
 
         if($this->save())
@@ -457,6 +469,47 @@ class Model_User extends Document {
         }
 
         return $actions;
+    }
+
+    protected function remove_from_company($c, $uid)
+    {
+        if(empty($c))
+            return false;
+
+        if(!isset($this->name) || empty($this->name))
+        {
+            $user = $this->collection()->findOne(['_id' => parent::check_id($uid)], ['_id' => 1, 'name' => 1]);
+            $user = (object) $this->stringify($user);
+        }
+        else
+        {
+            $user = clone $this;
+        }
+        $company = parent::factory('page', $c['_id']);
+        $company->pull('members', ['_id' => parent::check_id($user->_id), 'name' => $user->name]);
+        $company->inc('counts.members', -1);
+        $company->save();
+    }
+
+    protected function add_to_company($c, $uid)
+    {
+        if(!isset($this->name) || empty($this->name))
+        {
+            $user = $this->collection()->findOne(['_id' => parent::check_id($uid)], ['_id' => 1, 'name' => 1]);
+            $user = (object) $this->stringify($user);
+        }
+        else
+        {
+            $user = clone $this;
+        }
+        $company = parent::factory('page', $c['_id']);
+        $company->addToSet('members', ['_id' => parent::check_id($user->_id), 'name' => $user->name]);
+        $company->inc('counts.members', 1);
+        $company->save();
+        $company->collection()->update(
+          ['_id' => $company->_id, 'members' => ['$size' => 11]],
+          ['$pop' => ['members' => -1]]
+        );
     }
 
     /**

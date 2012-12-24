@@ -1,6 +1,6 @@
-<?php
-
-defined('SYSPATH') or die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');
+ini_set("max_execution_time", 0);
+ini_set('memory_limit', '2000M');
 
 /**
  * Description of testpad
@@ -14,6 +14,41 @@ defined('SYSPATH') or die('No direct script access.');
 class Controller_Testpad extends Controller {
 
     use Trait_Oauth2_Utils;
+
+
+    public function action_pages()
+    {
+        $rows = [];
+        $m = new  Mongo('localhost:27017');
+        $c = $m->selectCollection('db','singpost');
+        //$pages  = Mongo_collection::factory('singpost');
+        if (($handle = fopen("apt.csv", "r")) !== FALSE) {
+            while (($data = fgetcsv($handle, 0, ",")) !== FALSE) {
+                //$rows[] = $data;
+                $p = $c->findOne(['building' => trim($data[1])]);
+                if(!$p)
+                {
+                    $rows[] = $data;
+                    //$rows[] = Arr::merge($data, $p);
+                }
+                else
+                {
+                    //$rows[] = $data;
+                }
+//    "name" => array(5) (
+//        1 => string(4) "Name"
+//        2 => string(4) "Type"
+//        3 => string(3) "URL"
+//        4 => string(8) "Comments"
+//        5 => string(5) "Extra"
+//    )
+            }
+            fclose($handle);
+        }
+                //$p = $c->findOne(['building' => trim($rows[1][1])]);
+                //echo Debug::vars($p);
+        echo Debug::vars($rows);
+    }
 
     public function action_pop()
     {
