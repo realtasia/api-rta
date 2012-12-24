@@ -992,6 +992,13 @@ class Controller_User extends Controller_Resource {
                         static::$params[$key] = Security::xss_clean($value);
                         if(is_array($value))
                         {
+                            if(array_keys($value, 'education'))
+                            {
+                                if(!Arr::get($value, 'value'))
+                                {
+                                    unset(static::$params[$key]);
+                                }
+                            }
                             foreach($value as $label => $val)
                             {
                                 if(empty($val))
@@ -1012,6 +1019,7 @@ class Controller_User extends Controller_Resource {
                             }
                             static::$params[$key] = $value;
                         }
+
                     }
                     else
                     {
