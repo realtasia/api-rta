@@ -224,6 +224,8 @@ class Model_User extends Document {
         {
                 //die(json_encode(['status' => 'success', 'data' => $arr]));
             $current_user = (object) $this->get_default_user_fields();
+
+            $arr['cu'] = $current_user;
             if ((string) $arr['_id'] === (string) $current_user->_id)
             {
                 $arr['private_actions'] = [
