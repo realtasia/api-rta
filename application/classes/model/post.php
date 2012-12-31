@@ -21,19 +21,19 @@ class Model_Post extends Document {
      */
     public function create(array $params)
     {
-        $sparse = array_fill_keys(['sparse', 'safe'], true);
-        $this->collection()->ensureIndex([
-            'status'     => 1, 'user._id'   => 1, 'privacy.is' => 1, 'modified'   => -1
-                ], ['name' => 'post_id_fields', 'safe' => true]);
-        $this->collection()->ensureIndex(['page_parent._id' => 1], $sparse);
-        $this->collection()->ensureIndex(['page._id' => 1], $sparse);
-        $this->collection()->ensureIndex(['to._id' => 1], $sparse);
-        $this->collection()->ensureIndex(['type' => 1]);
-        $this->collection()->ensureIndex(['listing.unit' => 1]);
-        $this->collection()->ensureIndex(array_fill_keys([
-            'listing.type', 'listing.price', 'listing.rooms',
-            'listing.built_size', 'listing.property_type'
-        ], 1));
+//        $sparse = array_fill_keys(['sparse', 'safe'], true);
+//        $this->collection()->ensureIndex([
+//            'status'     => 1, 'user._id'   => 1, 'privacy.is' => 1, 'modified'   => -1
+//                ], ['name' => 'post_id_fields', 'safe' => true]);
+//        $this->collection()->ensureIndex(['page_parent._id' => 1], $sparse);
+//        $this->collection()->ensureIndex(['page._id' => 1], $sparse);
+//        $this->collection()->ensureIndex(['to._id' => 1], $sparse);
+//        $this->collection()->ensureIndex(['type' => 1]);
+//        $this->collection()->ensureIndex(['listing.unit' => 1]);
+//        $this->collection()->ensureIndex(array_fill_keys([
+//            'listing.type', 'listing.price', 'listing.rooms',
+//            'listing.built_size', 'listing.property_type'
+//        ], 1));
         // overwrite defaults
         $data = Arr::overwrite(static::post_fields(), static::validate_ids($params));
         // merge with defaults
@@ -576,13 +576,11 @@ class Model_Post extends Document {
      */
     protected static function get_connection_routes($_id)
     {
-        $actions = ['getComments' => Router::comment('get', $_id)];
-
-        foreach (['likers', 'comments', 'subscribers'] as $k => $v)
+        foreach (['likers', 'subscribers'] as $k => $v)
         {
             $actions[$v] = Router::post($v, $_id);
         }
-
+        $actions['comments'] = Router::comment('get', $_id);
         return $actions;
     }
 
@@ -595,24 +593,29 @@ class Model_Post extends Document {
     protected static function generate_title($post)
     {
         // some empty vars
-
         $page_title = "Go to the {$post['page']['name']} {$post['page']['type']} page";
+
+        // for user type pages
         if ($post['page']['type'] === 'user')
         {
             $page_title = "Go to {$post['page']['name']}'s profile page";
         }
 
+        // for album type pages
         if ($post['page']['type'] === 'album')
         {
             $page_title = "See {$post['user']['name']}'s {$post['page']['name']} album";
         }
 
+        // for library type pages
         if ($post['page']['type'] === 'library')
         {
             $page_title = "See {$post['user']['name']}'s library";
         }
 
+        // boolean if the post was written on on the author's wall
         $own_wall = (string) $post['page']['_id'] === (string) $post['user']['_id'];
+        // used in case it was wriiten on his wall
         $ohw = ' on his profile page.';
 
         if(isset($post['page']['uri']))
@@ -632,13 +635,8 @@ class Model_Post extends Document {
             case "testimonial": return "wrote a testimonial about $page_link.";
             case "listing": return "created a listing in $page_link.";
             case "event": return "created an event in $page_link.";
-            case "attachment":
-                $subtype = Arr::get($post, 'subtype');
-                if($subtype === 'avatar')
-                {
-                    return "uploaded a new profile picture.";
-                }
-                return "uploaded new media " . ($own_wall ? '.' : "in $page_link.");
+            // for avatar uploads, state so, if not default to new media
+            case "attachment": return Arr::get($post, 'subtype') === 'avatar' ? "uploaded a new profile picture." : "uploaded new media " . ($own_wall ? '.' : "in $page_link.");
             case ("post" || 'wallpost'):
                 $link = Arr::get($post, 'link');
                 if($link)

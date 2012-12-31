@@ -590,9 +590,7 @@ class Model_User extends Document {
     private static $protected_fields = [
         'password'               => false,
         'settings.billing'       => false,
-        'settings.notifications' => false,
-        //'settings.privacy'       => false, // needed to decide what fields to show. Unset later.
-        'logins'                 => false
+        'settings.notifications' => false
     ];
 
     /**

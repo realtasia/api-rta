@@ -211,7 +211,6 @@ class Controller_User extends Controller_Resource {
         $data = Document::factory('interaction')
                 ->collection()
                 ->subscribers(static::$params);
-
         return $this->data($data);
     }
 

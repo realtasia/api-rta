@@ -19,7 +19,19 @@ class Model_Page extends Document {
      */
     public function get($id, array $fields = [], $object = TRUE)
     {
-        if($this->load($id, $fields))
+        $id = parent::check_id($id);
+        if($id instanceof MongoID)
+        {
+            $query = ['_id' => $id];
+        }
+        else
+        {
+            $query = ['slug' => $id];
+        }
+
+        $query['privacy.is'] = 'PUBLIC';
+
+        if($this->load($query, $fields))
         {
             $ret = $this->stringify($this->as_array());
             return $object ? (object) $ret : $ret;
@@ -162,29 +174,34 @@ class Model_Page extends Document {
 
         $this->created = $id->getTimestamp();
 
-        // if there is no current user, no further formatting required.
-        if ($this->current_user === NULL)
-            return $this;
-
-        $current_user = (object) $this->get_default_user_fields();
-
-        // check if it's the same user
-        if ((string) $this->user['_id'] === (string) $current_user->_id)
-        {
-            $this->can_edit      = true;
-            $this->connections   = static::get_all_connection_routes($this->_id, $this->type, $this->subtype);
-        }
-        else
-        {
-            $interactions       = parent::factory('interaction', NULL, $current_user->_id);
-            $this->interactions = $interactions->interacting($this->_id, 'page');
-            $this->actions      = static::get_action_routes($this->_id);
-            $this->connections  = static::get_public_connection_routes($this->_id, $this->type, $this->subtype);
-        }
-        // comments processing in stringify
-
         return $this;
     }
+
+    /**
+     * Converts timestamps to dates.
+     * Checks and sets current user attributes. (if user returned is the user logged in)
+     * Otherwise, checks current user's interaction with the returned user
+     */
+    public function stringify($arr = [])
+    {
+        // get the current user
+        $cu                     = $this->current_user ? $this->get_default_user_fields() : false;
+        $cu_id                  = $cu ? (string) $cu['_id'] : false;
+        $arr                    = parent::stringify($arr);
+        $u_id                   = Arr::get($arr['user'], '_id');
+        $arr['is_owner']        = $cu_id && $u_id && ($u_id === $cu_id);
+        $arr['is_page_owner']   = $cu_id && $u_id && ((string)Arr::get($arr['page'], '_id') === $cu_id);
+        $arr['connections']     = static::get_connection_routes($arr['_id'], $arr['type'], $arr['subtype']);
+
+        if ($cu)
+        {
+            $arr['interactions'] = parent::factory('interaction', NULL, $cu_id)->interacting($arr['_id'], 'page');
+            $arr['actions']      = static::get_action_routes($arr['_id']);
+        }
+
+        return $arr;
+    }
+
 
     /**
      * Updates privacy settings of a post.
@@ -227,49 +244,36 @@ class Model_Page extends Document {
     }
 
     /**
-     * Gets all connection links, including private ones that a logged in user
-     * can perform on this post
-     *
-     * @param string|MongoID $user_id
-     * @return array
-     */
-    protected static function get_all_connection_routes($_id, $type, $subtype = NULL)
-    {
-        $actions = ['privacy' => Router::page('privacy', $_id)] ;
-
-        return Arr::merge($actions, static::get_public_connection_routes($_id, $type));
-    }
-
-    /**
      * Gets all publically available connection links for a given post.
      *
      * @param string|MongoID $user_id
      * @return array
      */
-    protected static function get_public_connection_routes($_id, $type, $subtype = NULL)
+    protected static function get_connection_routes($_id, $type, $subtype = NULL)
     {
-        $actions = [
+        $routes = [
             'likers',
             'feed',
             'subscribers',
             'testimonials',
         ];
+        $actions = [];
 
         switch($type)
         {
             case 'location':
                 if($subtype && $subtype === 'estate')
                 {
-                    $actions[] = 'child-locations';
+                    $routes[] = 'child-locations';
                 }
-                $actions[] = 'pictures';
+                $routes[] = 'pictures';
                 break;
             case 'company':
-                $actions[] = 'members';
+                $routes[] = 'members';
                 break;
         }
 
-        foreach($actions as $v)
+        foreach($routes as $v)
         {
             $actions[$v] = Router::page($v, $_id);
         }

@@ -227,7 +227,6 @@ class Model_User_Collection extends Collection {
         'password',
         'settings.notifications',
         'settings.billing',
-        'logins'
-        ];
+    ];
 
 }

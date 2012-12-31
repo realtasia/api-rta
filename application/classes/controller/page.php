@@ -15,19 +15,13 @@ ini_set('memory_limit', '2000M');
  */
 class Controller_Page extends Controller_Resource {
 
-    /**
-     * This method extracts the token from the request params and sets global
-     * variables for consumption by all child classes.
-     *
-     * @return void
-     */
+
     public function before()
     {
         parent::before();
         if (parent::logged_in())
         {
-            static::$model =
-                    Document::factory('page', null, static::$user_id);
+            static::$model = Document::factory('page', null, static::$user_id);
         }
         else
         {
@@ -52,30 +46,7 @@ class Controller_Page extends Controller_Resource {
      */
     public function action_index()
     {
-        // we retrieve the request_type from params
-        $type = Arr::get(static::$params, 'request_type', false);
-
-        // if we have a type
-        if ($type)
-        {
-            // we check if it is valid and the method exists
-            if (in_array($type, static::$valid_get_types) && method_exists($this, $type))
-            // run it
-                return $this->{$type}();
-            // ok, why do we have a type and not a method???
-            else
-            // yeap, you guessed it.
-                return $this->fail('user/generic', 'server_error');
-        }
-
-        // try id
-        $id = $this->request->param('id');
-
-        if ($id)
-            return $this->get($id);
-        else
-            // no id, this is a search
-            return $this->search();
+        return $this->data(static::$model->get($this->request->param('id')));
     }
 
     /**
@@ -305,6 +276,60 @@ class Controller_Page extends Controller_Resource {
 
     }
 
+    public function action_feed()
+    {
+        $id = $this->request->param('id');
+
+        static::$params['type'] = ['$nin' => ['conversation', 'album']];
+
+        $posts = Mongo_Collection::factory('post');
+
+        /*
+         * 1. if user is logged in and ids are the same (or admin)
+         *      - all statuses allowed.
+         * 2. if not
+         *      - only active statuses allowed.
+         */
+
+        $status = Arr::get(static::$params, 'status', 'active');
+
+        switch ($status)
+        {
+            case 'pending':
+            case 'archived':
+            case 'draft':
+            case 'trashed':
+                // logged in user does not see other statuses if posts don't
+                // belong to him
+                if (static::logged_in_is_id($id))
+                {
+                    $p = Arr::merge(static::$params, ['user_id' => static::$user_id]);
+                    return $this->data($posts->search($p, static::$user_id));
+                }
+
+                // admin sees everything
+                if (parent::has_role('admin'))
+                    return $this->data($posts->search(static::$params, static::$user_id));
+
+                // clients only see active (public) posts
+                return $this->error('access_denied');
+
+            // this is a regular (public) lookup
+            default :
+                // need a client or user token.
+                if (parent::is_client() || parent::logged_in())
+                {
+                    // only publically viewable posts
+                    static::$params['privacy'] = static::logged_in_is_id($id) ? null : 'PUBLIC';
+                    // we include posts written on his page
+                    return $this->data($posts->search(static::$params, static::$user_id));
+                }
+        }
+
+        return $this->error('invalid_request');
+    }
+
+
     /*     * ************************************************************************
      * Public Actions
      * *********************************************************************** */
@@ -358,7 +383,7 @@ class Controller_Page extends Controller_Resource {
     {
         if(!$page)
             return true;
-        
+
         $id = is_array($page) ? $page['_id'] : $page;
         $id = is_object($page) && isset($page->_id) ? $page->_id : $page;
 

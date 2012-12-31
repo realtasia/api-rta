@@ -1,0 +1,2688 @@
+[
+    {
+        "_id": {
+            "$id": "50a0b182b90fb870790004db"
+        },
+        "estate": "Chinatown",
+        "child": null,
+        "address": "Apartment",
+        "number": "42",
+        "street": "MOSQUE STREET",
+        "postal": "059520",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.844740",
+            "lat": "1.283840"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": " ",
+                "HBRN": "42 MOSQUE STREET",
+                "PostalCode": "059520"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b182b90fb870790004dd"
+        },
+        "estate": "Chinatown",
+        "child": null,
+        "address": "Apartment",
+        "number": "44",
+        "street": "MOSQUE STREET",
+        "postal": "059522",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.844740",
+            "lat": "1.283840"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": " ",
+                "HBRN": "44 MOSQUE STREET",
+                "PostalCode": "059522"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b182b90fb870790004de"
+        },
+        "estate": "Chinatown",
+        "child": null,
+        "address": "Apartment",
+        "number": "45",
+        "street": "MOSQUE STREET",
+        "postal": "059523",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.844740",
+            "lat": "1.283840"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": " ",
+                "HBRN": "45 MOSQUE STREET",
+                "PostalCode": "059523"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b182b90fb870790008b5"
+        },
+        "estate": "Outram",
+        "child": null,
+        "address": "Apartment",
+        "number": "143",
+        "street": "NEIL ROAD",
+        "postal": "088872",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.838290",
+            "lat": "1.276840"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "143 NEIL ROAD",
+                "PostalCode": "088872"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b183b90fb87079001374"
+        },
+        "estate": "Pasir Panjang",
+        "child": null,
+        "address": "Apartment",
+        "number": "97",
+        "street": "PASIR PANJANG HILL",
+        "postal": "118900",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.784783",
+            "lat": "1.282827"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "118900",
+                "HBRN": "",
+                "PostalCode": ""
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b183b90fb87079002084"
+        },
+        "estate": "Buona Vista",
+        "child": null,
+        "address": "Apartment",
+        "number": "11",
+        "street": "WESTBOURNE ROAD",
+        "postal": "138947",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.795754",
+            "lat": "1.295856"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "11 WESTBOURNE ROAD",
+                "PostalCode": "138947"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b184b90fb8707900272e"
+        },
+        "estate": "Outram",
+        "child": null,
+        "address": "Apartment",
+        "number": "10",
+        "street": "ENG HOON STREET",
+        "postal": "169760",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.835086",
+            "lat": "1.283424"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "TIONG BAHRU ESTATE",
+                "HBRN": "10B ENG HOON STREET",
+                "PostalCode": "169760"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b184b90fb8707900272f"
+        },
+        "estate": "Outram",
+        "child": null,
+        "address": "Apartment",
+        "number": "11",
+        "street": "ENG HOON STREET",
+        "postal": "169761",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.834008",
+            "lat": "1.283659"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "11 ENG HOON STREET",
+                "PostalCode": "169761"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b184b90fb87079002b17"
+        },
+        "estate": "City Hall",
+        "child": null,
+        "address": "Apartment",
+        "number": "1",
+        "street": "FRASER STREET",
+        "postal": "189350",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.857960",
+            "lat": "1.300440"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "189350",
+                "HBRN": "",
+                "PostalCode": ""
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b184b90fb870790031ae"
+        },
+        "estate": "Lavender",
+        "child": null,
+        "address": "Apartment",
+        "number": "32",
+        "street": "PENHAS ROAD",
+        "postal": "208191",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.862215",
+            "lat": "1.309437"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "32 PENHAS ROAD",
+                "PostalCode": "208191"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b184b90fb87079003652"
+        },
+        "estate": "Little India",
+        "child": null,
+        "address": "Apartment",
+        "number": "38",
+        "street": "TRURO ROAD",
+        "postal": "217578",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.849850",
+            "lat": "1.313940"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "38 TRURO ROAD",
+                "PostalCode": "217578"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b185b90fb8707900392d"
+        },
+        "estate": "Little India",
+        "child": null,
+        "address": "Apartment",
+        "number": "378",
+        "street": "RACE COURSE ROAD",
+        "postal": "218646",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.857110",
+            "lat": "1.314925"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "RACE COURSE ROAD\/OWEN ROAD CONSERVATION AREA",
+                "HBRN": "378 RACE COURSE ROAD",
+                "PostalCode": "218646"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b185b90fb87079003b2b"
+        },
+        "estate": "Little India",
+        "child": null,
+        "address": "Apartment",
+        "number": "85",
+        "street": "CARLISLE ROAD",
+        "postal": "219651",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.846920",
+            "lat": "1.314780"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "219651",
+                "HBRN": "",
+                "PostalCode": ""
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b185b90fb87079003b7c"
+        },
+        "estate": "Little India",
+        "child": null,
+        "address": "Apartment",
+        "number": "32",
+        "street": "CAMBRIDGE ROAD",
+        "postal": "219756",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.847513",
+            "lat": "1.313668"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "219756",
+                "HBRN": "",
+                "PostalCode": ""
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b185b90fb87079003c00"
+        },
+        "estate": "Dhoby Ghaut",
+        "child": null,
+        "address": "Apartment",
+        "number": "62",
+        "street": "WILKIE ROAD",
+        "postal": "228066",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.848044",
+            "lat": "1.302674"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "62 WILKIE ROAD",
+                "PostalCode": "228066"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b185b90fb87079003c39"
+        },
+        "estate": "Dhoby Ghaut",
+        "child": null,
+        "address": "Apartment",
+        "number": "96",
+        "street": "SOPHIA ROAD",
+        "postal": "228164",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.847280",
+            "lat": "1.302285"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "96 SOPHIA ROAD",
+                "PostalCode": "228164"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b185b90fb87079003c4f"
+        },
+        "estate": "Dhoby Ghaut",
+        "child": null,
+        "address": "Apartment",
+        "number": "80",
+        "street": "SOPHIA ROAD",
+        "postal": "228190",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.847440",
+            "lat": "1.302090"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": " ",
+                "HBRN": "80 SOPHIA ROAD",
+                "PostalCode": "228190"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b185b90fb87079004224"
+        },
+        "estate": "River Valley",
+        "child": null,
+        "address": "Apartment",
+        "number": "18",
+        "street": "MOHAMED SULTAN ROAD",
+        "postal": "238967",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.841574",
+            "lat": "1.293451"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "18 MOHAMED SULTAN ROAD",
+                "PostalCode": "238967"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b185b90fb870790043a1"
+        },
+        "estate": "Orchard",
+        "child": null,
+        "address": "Apartment",
+        "number": "2",
+        "street": "DUBLIN ROAD",
+        "postal": "239786",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.839273",
+            "lat": "1.298424"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "2 DUBLIN ROAD",
+                "PostalCode": "239786"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b185b90fb8707900472e"
+        },
+        "estate": "Orchard",
+        "child": null,
+        "address": "Apartment",
+        "number": "28",
+        "street": "JERVOIS ROAD",
+        "postal": "249006",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.823925",
+            "lat": "1.293686"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": " ",
+                "HBRN": "28 JERVOIS ROAD",
+                "PostalCode": "249006"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b185b90fb870790047d8"
+        },
+        "estate": "Orchard",
+        "child": null,
+        "address": "Apartment",
+        "number": "2A",
+        "street": "JALAN MUTIARA",
+        "postal": "249227",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.828610",
+            "lat": "1.295720"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "249227",
+                "HBRN": "",
+                "PostalCode": ""
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b185b90fb870790048c7"
+        },
+        "estate": "Orchard",
+        "child": null,
+        "address": "Apartment",
+        "number": "120",
+        "street": "GRANGE ROAD",
+        "postal": "249600",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.825381",
+            "lat": "1.299871"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "120 GRANGE ROAD",
+                "PostalCode": "249600"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b185b90fb87079004905"
+        },
+        "estate": "Orchard",
+        "child": null,
+        "address": "Apartment",
+        "number": "3",
+        "street": "CUSCADEN ROAD",
+        "postal": "249728",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.826330",
+            "lat": "1.305050"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "249728",
+                "HBRN": "",
+                "PostalCode": ""
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b185b90fb87079004906"
+        },
+        "estate": "Orchard",
+        "child": null,
+        "address": "Apartment",
+        "number": "5",
+        "street": "CUSCADEN ROAD",
+        "postal": "249729",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.826330",
+            "lat": "1.305050"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "249729",
+                "HBRN": "",
+                "PostalCode": ""
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b186b90fb87079004be9"
+        },
+        "estate": "Orchard",
+        "child": null,
+        "address": "Apartment",
+        "number": "49",
+        "street": "NASSIM ROAD",
+        "postal": "258435",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.818929",
+            "lat": "1.313469"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "49 NASSIM ROAD",
+                "PostalCode": "258435"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b186b90fb87079004c16"
+        },
+        "estate": "Orchard",
+        "child": null,
+        "address": "Apartment",
+        "number": "8",
+        "street": "NASSIM HILL",
+        "postal": "258484",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.821080",
+            "lat": "1.307130"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": " ",
+                "HBRN": "8 NASSIM HILL",
+                "PostalCode": "258484"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b186b90fb87079005868"
+        },
+        "estate": "Bukit Timah",
+        "child": null,
+        "address": "Apartment",
+        "number": "20A",
+        "street": "DUCHESS ROAD",
+        "postal": "269031",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.807337",
+            "lat": "1.324609"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "20A DUCHESS ROAD",
+                "PostalCode": "269031"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b186b90fb87079005869"
+        },
+        "estate": "Bukit Timah",
+        "child": null,
+        "address": "Apartment",
+        "number": "20B",
+        "street": "DUCHESS ROAD",
+        "postal": "269032",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.807490",
+            "lat": "1.324636"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "20B DUCHESS ROAD",
+                "PostalCode": "269032"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b186b90fb8707900586a"
+        },
+        "estate": "Bukit Timah",
+        "child": null,
+        "address": "Apartment",
+        "number": "20C",
+        "street": "DUCHESS ROAD",
+        "postal": "269033",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.807724",
+            "lat": "1.324455"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "20C DUCHESS ROAD",
+                "PostalCode": "269033"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b188b90fb87079007a32"
+        },
+        "estate": "Novena",
+        "child": null,
+        "address": "Apartment",
+        "number": "8",
+        "street": "LINCOLN ROAD",
+        "postal": "308363",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.842868",
+            "lat": "1.314428"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "8 LINCOLN ROAD",
+                "PostalCode": "308363"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b188b90fb8707900834e"
+        },
+        "estate": "Toa Payoh",
+        "child": null,
+        "address": "Apartment",
+        "number": "18",
+        "street": "KIM KEAT ROAD",
+        "postal": "328846",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.853031",
+            "lat": "1.324039"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "18 KIM KEAT ROAD",
+                "PostalCode": "328846"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b188b90fb870790084b0"
+        },
+        "estate": "Toa Payoh",
+        "child": null,
+        "address": "Apartment",
+        "number": "3",
+        "street": "BHAMO ROAD",
+        "postal": "329633",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.849841",
+            "lat": "1.324708"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "329633",
+                "HBRN": "",
+                "PostalCode": ""
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b189b90fb87079009025"
+        },
+        "estate": "Potong Pasir",
+        "child": null,
+        "address": "Apartment",
+        "number": "1",
+        "street": "SOMMERVILLE ROAD",
+        "postal": "358225",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.870176",
+            "lat": "1.344094"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "358225",
+                "HBRN": "",
+                "PostalCode": ""
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b18ab90fb87079009baa"
+        },
+        "estate": "Geylang",
+        "child": null,
+        "address": "Apartment",
+        "number": "21",
+        "street": "LORONG TAHAR",
+        "postal": "387757",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.875675",
+            "lat": "1.312665"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "21 LORONG TAHAR",
+                "PostalCode": "387757"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b18ab90fb87079009c14"
+        },
+        "estate": "Geylang",
+        "child": null,
+        "address": "Apartment",
+        "number": "34",
+        "street": "LORONG 33 GEYLANG",
+        "postal": "387989",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.887869",
+            "lat": "1.315314"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "34 LORONG 33 GEYLANG",
+                "PostalCode": "387989"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b18ab90fb87079009dd4"
+        },
+        "estate": "Geylang",
+        "child": null,
+        "address": "Apartment",
+        "number": "21",
+        "street": "LORONG 9 GEYLANG",
+        "postal": "388763",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.876224",
+            "lat": "1.312963"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "21 LORONG 9 GEYLANG",
+                "PostalCode": "388763"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b18ab90fb87079009ddd"
+        },
+        "estate": "Geylang",
+        "child": null,
+        "address": "Apartment",
+        "number": "8",
+        "street": "LORONG 7 GEYLANG",
+        "postal": "388792",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.875990",
+            "lat": "1.312620"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "CENTRA RESIDENCE",
+                "HBRN": "8 LORONG 7 GEYLANG",
+                "PostalCode": "388792"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b18ab90fb8707900a1f4"
+        },
+        "estate": "Geylang",
+        "child": null,
+        "address": "Apartment",
+        "number": "24",
+        "street": "LORONG 36 GEYLANG",
+        "postal": "398159",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.888058",
+            "lat": "1.313343"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "24 LORONG 36 GEYLANG",
+                "PostalCode": "398159"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b18ab90fb8707900a269"
+        },
+        "estate": "Geylang",
+        "child": null,
+        "address": "Apartment",
+        "number": "36",
+        "street": "LORONG 30 GEYLANG",
+        "postal": "398369",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.886108",
+            "lat": "1.311996"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "36 LORONG 30 GEYLANG",
+                "PostalCode": "398369"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b18ab90fb8707900a47e"
+        },
+        "estate": "Geylang",
+        "child": null,
+        "address": "Apartment",
+        "number": "11",
+        "street": "LORONG 4 GEYLANG",
+        "postal": "399268",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.876062",
+            "lat": "1.310766"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "11 LORONG 4 GEYLANG",
+                "PostalCode": "399268"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b18bb90fb8707900b276"
+        },
+        "estate": "Kembangan",
+        "child": null,
+        "address": "Apartment",
+        "number": "21",
+        "street": "JALAN MASJID",
+        "postal": "418946",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.912158",
+            "lat": "1.320242"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "21 JALAN MASJID",
+                "PostalCode": "418946"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b18bb90fb8707900bc5e"
+        },
+        "estate": "Katong",
+        "child": null,
+        "address": "Apartment",
+        "number": "94A",
+        "street": "LORONG M TELOK KURAU",
+        "postal": "425400",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.915312",
+            "lat": "1.311426"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "425400",
+                "HBRN": "",
+                "PostalCode": ""
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b18bb90fb8707900bcf4"
+        },
+        "estate": "Katong",
+        "child": null,
+        "address": "Apartment",
+        "number": "120",
+        "street": "LORONG L TELOK KURAU",
+        "postal": "425553",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.914117",
+            "lat": "1.311932"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "120 LORONG L TELOK KURAU",
+                "PostalCode": "425553"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b18cb90fb8707900becf"
+        },
+        "estate": "Katong",
+        "child": null,
+        "address": "Apartment",
+        "number": "59",
+        "street": "LORONG H TELOK KURAU",
+        "postal": "426068",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.910128",
+            "lat": "1.316462"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "59 LORONG H TELOK KURAU",
+                "PostalCode": "426068"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b18cb90fb8707900bf67"
+        },
+        "estate": "Katong",
+        "child": null,
+        "address": "Apartment",
+        "number": "50",
+        "street": "LORONG G TELOK KURAU",
+        "postal": "426233",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.910074",
+            "lat": "1.316833"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "G RESIDENCES",
+                "HBRN": "50 LORONG G TELOK KURAU",
+                "PostalCode": "426233"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b18cb90fb8707900c0a6"
+        },
+        "estate": "Katong",
+        "child": null,
+        "address": "Apartment",
+        "number": "7",
+        "street": "LANGSAT ROAD",
+        "postal": "426693",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.900387",
+            "lat": "1.315088"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "426693",
+                "HBRN": "",
+                "PostalCode": ""
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b18cb90fb8707900c1d3"
+        },
+        "estate": "Katong",
+        "child": null,
+        "address": "Apartment",
+        "number": "126",
+        "street": "KOON SENG ROAD",
+        "postal": "427059",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.906147",
+            "lat": "1.312719"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "TIVOLI GRANDE",
+                "HBRN": "126 KOON SENG ROAD",
+                "PostalCode": "427059"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b18cb90fb8707900c399"
+        },
+        "estate": "Katong",
+        "child": null,
+        "address": "Apartment",
+        "number": "354",
+        "street": "JOO CHIAT ROAD",
+        "postal": "427600",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.902930",
+            "lat": "1.308117"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "354 JOO CHIAT ROAD",
+                "PostalCode": "427600"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b18cb90fb8707900c575"
+        },
+        "estate": "Katong",
+        "child": null,
+        "address": "Apartment",
+        "number": "61",
+        "street": "JOO CHIAT LANE",
+        "postal": "428111",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.903685",
+            "lat": "1.312782"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "61 JOO CHIAT LANE",
+                "PostalCode": "428111"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b18cb90fb8707900cb93"
+        },
+        "estate": "Katong",
+        "child": null,
+        "address": "Apartment",
+        "number": "48",
+        "street": "CARPMAEL ROAD",
+        "postal": "429974",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.897979",
+            "lat": "1.313054"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "THE CARPMAELINA",
+                "HBRN": "48 CARPMAEL ROAD",
+                "PostalCode": "429974"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b18cb90fb8707900cd2c"
+        },
+        "estate": "Marine Parade",
+        "child": null,
+        "address": "Apartment",
+        "number": "92",
+        "street": "TANJONG KATONG ROAD",
+        "postal": "436960",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.894061",
+            "lat": "1.312620"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "92 TANJONG KATONG ROAD",
+                "PostalCode": "436960"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b18db90fb8707900d351"
+        },
+        "estate": "Marine Parade",
+        "child": null,
+        "address": "Apartment",
+        "number": "485",
+        "street": "DUNMAN ROAD",
+        "postal": "439190",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.893593",
+            "lat": "1.309591"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "DUNMAN REGENCY",
+                "HBRN": "485 DUNMAN ROAD",
+                "PostalCode": "439190"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b18fb90fb8707901061e"
+        },
+        "estate": "Changi",
+        "child": null,
+        "address": "Apartment",
+        "number": "31",
+        "street": "CHANGI VILLAGE ROAD",
+        "postal": "506936",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.987370",
+            "lat": "1.383430"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "31 CHANGI VILLAGE ROAD",
+                "PostalCode": "506936"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b18fb90fb8707901061f"
+        },
+        "estate": "Changi",
+        "child": null,
+        "address": "Apartment",
+        "number": "11",
+        "street": "CHANGI VILLAGE ROAD",
+        "postal": "506937",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.987370",
+            "lat": "1.383430"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "11 CHANGI VILLAGE ROAD",
+                "PostalCode": "506937"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b18fb90fb87079010620"
+        },
+        "estate": "Changi",
+        "child": null,
+        "address": "Apartment",
+        "number": "13",
+        "street": "CHANGI VILLAGE ROAD",
+        "postal": "506938",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.987370",
+            "lat": "1.383430"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "13 CHANGI VILLAGE ROAD",
+                "PostalCode": "506938"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b18fb90fb87079010621"
+        },
+        "estate": "Changi",
+        "child": null,
+        "address": "Apartment",
+        "number": "15",
+        "street": "CHANGI VILLAGE ROAD",
+        "postal": "506939",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.987370",
+            "lat": "1.383430"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "15 CHANGI VILLAGE ROAD",
+                "PostalCode": "506939"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b190b90fb87079010eb1"
+        },
+        "estate": "Changi",
+        "child": null,
+        "address": "Apartment",
+        "number": "21",
+        "street": "CHANGI VILLAGE ROAD",
+        "postal": "509922",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.987370",
+            "lat": "1.383430"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "21 CHANGI VILLAGE ROAD",
+                "PostalCode": "509922"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b190b90fb87079010eb2"
+        },
+        "estate": "Changi",
+        "child": null,
+        "address": "Apartment",
+        "number": "23",
+        "street": "CHANGI VILLAGE ROAD",
+        "postal": "509923",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.987370",
+            "lat": "1.383430"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "23 CHANGI VILLAGE ROAD",
+                "PostalCode": "509923"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b190b90fb87079010eb3"
+        },
+        "estate": "Changi",
+        "child": null,
+        "address": "Apartment",
+        "number": "25",
+        "street": "CHANGI VILLAGE ROAD",
+        "postal": "509924",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.987370",
+            "lat": "1.383430"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "25 CHANGI VILLAGE ROAD",
+                "PostalCode": "509924"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b190b90fb87079010eb4"
+        },
+        "estate": "Changi",
+        "child": null,
+        "address": "Apartment",
+        "number": "27",
+        "street": "CHANGI VILLAGE ROAD",
+        "postal": "509925",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.987370",
+            "lat": "1.383430"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "27 CHANGI VILLAGE ROAD",
+                "PostalCode": "509925"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b190b90fb87079010eb5"
+        },
+        "estate": "Changi",
+        "child": null,
+        "address": "Apartment",
+        "number": "29",
+        "street": "CHANGI VILLAGE ROAD",
+        "postal": "509926",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.987370",
+            "lat": "1.383430"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "29 CHANGI VILLAGE ROAD",
+                "PostalCode": "509926"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b190b90fb87079010ebd"
+        },
+        "estate": "Changi",
+        "child": null,
+        "address": "Apartment",
+        "number": "596",
+        "street": "BIGGIN HILL ROAD",
+        "postal": "509948",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.982788",
+            "lat": "1.389547"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "596 BIGGIN HILL ROAD",
+                "PostalCode": "509948"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b191b90fb8707901280c"
+        },
+        "estate": "Hougang",
+        "child": null,
+        "address": "Apartment",
+        "number": "203",
+        "street": "JALAN PELIKAT",
+        "postal": "537653",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.886860",
+            "lat": "1.354530"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "203 JALAN PELIKAT",
+                "PostalCode": "537653"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b191b90fb87079012b8b"
+        },
+        "estate": "Hougang",
+        "child": null,
+        "address": "Apartment",
+        "number": "33",
+        "street": "HOUGANG AVENUE 7",
+        "postal": "538801",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.899130",
+            "lat": "1.367170"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "EVERGREEN PARK",
+                "HBRN": "33 HOUGANG AVENUE 7",
+                "PostalCode": "538801"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b191b90fb87079012b8c"
+        },
+        "estate": "Hougang",
+        "child": null,
+        "address": "Apartment",
+        "number": "35",
+        "street": "HOUGANG AVENUE 7",
+        "postal": "538802",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.899130",
+            "lat": "1.367170"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "EVERGREEN PARK",
+                "HBRN": "35 HOUGANG AVENUE 7",
+                "PostalCode": "538802"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b191b90fb87079012b8d"
+        },
+        "estate": "Hougang",
+        "child": null,
+        "address": "Apartment",
+        "number": "37",
+        "street": "HOUGANG AVENUE 7",
+        "postal": "538803",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.899130",
+            "lat": "1.367170"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "EVERGREEN PARK",
+                "HBRN": "37 HOUGANG AVENUE 7",
+                "PostalCode": "538803"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b192b90fb87079014104"
+        },
+        "estate": "Sengkang",
+        "child": null,
+        "address": "Apartment",
+        "number": "39",
+        "street": "FLOWER ROAD",
+        "postal": "549437",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.880285",
+            "lat": "1.360939"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "39 FLOWER ROAD",
+                "PostalCode": "549437"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b196b90fb870790189cd"
+        },
+        "estate": "Jurong",
+        "child": null,
+        "address": "Apartment",
+        "number": "50",
+        "street": "SAKRA ROAD",
+        "postal": "627646",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": null,
+            "lat": null
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "50 SAKRA ROAD",
+                "PostalCode": "627646"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b198b90fb8707901aa26"
+        },
+        "estate": "Bukit Panjang",
+        "child": null,
+        "address": "Apartment",
+        "number": "840",
+        "street": "UPPER BUKIT TIMAH ROAD",
+        "postal": "678208",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.762866",
+            "lat": "1.374248"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "678208",
+                "HBRN": "",
+                "PostalCode": ""
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b198b90fb8707901aa27"
+        },
+        "estate": "Bukit Panjang",
+        "child": null,
+        "address": "Apartment",
+        "number": "838",
+        "street": "UPPER BUKIT TIMAH ROAD",
+        "postal": "678209",
+        "building": null,
+        "locality": null,
+        "other_name": null,
+        "geo": {
+            "lon": "103.762875",
+            "lat": "1.374221"
+        },
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "678209",
+                "HBRN": "",
+                "PostalCode": ""
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b182b90fb870790006f8"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Tanjong Pagar",
+        "geo": {
+            "lon": 103.8450659,
+            "lat": 1.276802
+        },
+        "locality": null,
+        "modified": 1352710488,
+        "number": "3",
+        "other_name": null,
+        "postal": "078882",
+        "street": "WALLICH STREET",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "078882",
+                "HBRN": "",
+                "PostalCode": ""
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b182b90fb8707900085a"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Tanjong Pagar",
+        "geo": {
+            "lon": 103.8371678,
+            "lat": 1.275682
+        },
+        "locality": null,
+        "modified": 1352710506,
+        "number": "16",
+        "other_name": null,
+        "postal": "088661",
+        "street": "SPOTTISWOODE PARK ROAD",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "SPOTTISWOODE SUITES",
+                "HBRN": "16 SPOTTISWOODE PARK ROAD",
+                "PostalCode": "088661"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b183b90fb87079001ff2"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Buona Vista",
+        "geo": {
+            "lon": 103.7736682,
+            "lat": 1.3082567
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "22",
+        "other_name": null,
+        "postal": "138595",
+        "street": "COLLEGE AVENUE EAST",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "CINNAMON COLLEGE (UNIVERSITY TOWN)",
+                "HBRN": "22 COLLEGE AVENUE EAST",
+                "PostalCode": "138595"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b183b90fb87079001ff4"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Buona Vista",
+        "geo": {
+            "lon": 103.7734193,
+            "lat": 1.306237
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "26",
+        "other_name": null,
+        "postal": "138597",
+        "street": "COLLEGE AVENUE EAST",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "TEMBUSU COLLEGE (UNIVERSITY TOWN)",
+                "HBRN": "26 COLLEGE AVENUE EAST",
+                "PostalCode": "138597"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b183b90fb87079001ff7"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Buona Vista",
+        "geo": {
+            "lon": 103.7736682,
+            "lat": 1.3082567
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "36",
+        "other_name": null,
+        "postal": "138600",
+        "street": "COLLEGE AVENUE EAST",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "GRADUATE RESIDENCE (UNIVERSITY TOWN)",
+                "HBRN": "38 COLLEGE AVENUE EAST",
+                "PostalCode": "138600"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b183b90fb87079001ff8"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Buona Vista",
+        "geo": {
+            "lon": 103.7736682,
+            "lat": 1.3082567
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "38",
+        "other_name": null,
+        "postal": "138601",
+        "street": "COLLEGE AVENUE EAST",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "GRADUATE RESIDENCE (UNIVERSITY TOWN)",
+                "HBRN": "36 COLLEGE AVENUE EAST",
+                "PostalCode": "138601"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b183b90fb87079001ffe"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Buona Vista",
+        "geo": {
+            "lon": 103.7734674,
+            "lat": 1.3082181
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "6",
+        "other_name": null,
+        "postal": "138614",
+        "street": "COLLEGE AVENUE EAST",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "KHAYA COLLEGE (UNIVERSITY TOWN)",
+                "HBRN": "6 COLLEGE AVENUE EAST",
+                "PostalCode": "138614"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b183b90fb87079001fff"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Buona Vista",
+        "geo": {
+            "lon": 103.7736682,
+            "lat": 1.3082567
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "8",
+        "other_name": null,
+        "postal": "138615",
+        "street": "COLLEGE AVENUE EAST",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "ANGSANA COLLEGE (UNIVERSITY TOWN)",
+                "HBRN": "8 COLLEGE AVENUE EAST",
+                "PostalCode": "138615"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b183b90fb87079002000"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Buona Vista",
+        "geo": {
+            "lon": 103.7736682,
+            "lat": 1.3082567
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "10",
+        "other_name": null,
+        "postal": "138616",
+        "street": "COLLEGE AVENUE EAST",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "ANGSANA COLLEGE (UNIVERSITY TOWN)",
+                "HBRN": "10 COLLEGE AVENUE EAST",
+                "PostalCode": "138616"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b185b90fb87079003f3b"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Orchard",
+        "geo": {
+            "lon": 103.8413424,
+            "lat": 1.304301
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "65C",
+        "other_name": null,
+        "postal": "229631",
+        "street": "CAVENAGH ROAD",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "WATERSCAPE AT CAVENAGH",
+                "HBRN": "65C CAVENAGH ROAD",
+                "PostalCode": "229631"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b185b90fb87079003f3c"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Orchard",
+        "geo": {
+            "lon": 103.841129,
+            "lat": 1.304138
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "65D",
+        "other_name": null,
+        "postal": "229632",
+        "street": "CAVENAGH ROAD",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "WATERSCAPE AT CAVENAGH",
+                "HBRN": "65D CAVENAGH ROAD",
+                "PostalCode": "229632"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b185b90fb87079003f3d"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Orchard",
+        "geo": {
+            "lon": 103.841114,
+            "lat": 1.304329
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "65E",
+        "other_name": null,
+        "postal": "229633",
+        "street": "CAVENAGH ROAD",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "WATERSCAPE AT CAVENAGH",
+                "HBRN": "65E CAVENAGH ROAD",
+                "PostalCode": "229633"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b185b90fb87079003f3e"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Orchard",
+        "geo": {
+            "lon": 103.841114,
+            "lat": 1.304329
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "65F",
+        "other_name": null,
+        "postal": "229634",
+        "street": "CAVENAGH ROAD",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "WATERSCAPE AT CAVENAGH",
+                "HBRN": "65F CAVENAGH ROAD",
+                "PostalCode": "229634"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b189b90fb870790085b4"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Toa Payoh",
+        "geo": {
+            "lon": 103.8526317,
+            "lat": 1.3224789
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "2",
+        "other_name": null,
+        "postal": "329951",
+        "street": "AVA ROAD",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "VICTORY POINT",
+                "HBRN": "2 AVA ROAD",
+                "PostalCode": "329951"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b189b90fb87079008eca"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Potong Pasir",
+        "geo": {
+            "lon": 103.8700636,
+            "lat": 1.3437449
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "1",
+        "other_name": null,
+        "postal": "357699",
+        "street": "SOMMERVILLE WALK",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "357699",
+                "HBRN": "",
+                "PostalCode": ""
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b189b90fb870790094cb"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Potong Pasir",
+        "geo": {
+            "lon": 103.869544,
+            "lat": 1.3426234
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "28",
+        "other_name": null,
+        "postal": "359966",
+        "street": "BRADDELL ROAD",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "359966",
+                "HBRN": "",
+                "PostalCode": ""
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b189b90fb870790094cc"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Potong Pasir",
+        "geo": {
+            "lon": 103.8693244,
+            "lat": 1.3426357
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "32",
+        "other_name": null,
+        "postal": "359967",
+        "street": "BRADDELL ROAD",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "359967",
+                "HBRN": "",
+                "PostalCode": ""
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b18ab90fb8707900a326"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Geylang",
+        "geo": {
+            "lon": 103.882465,
+            "lat": 1.311826
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "27",
+        "other_name": null,
+        "postal": "398684",
+        "street": "LORONG 22 GEYLANG",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "27 LORONG 22 GEYLANG",
+                "PostalCode": "398684"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b190b90fb87079010a5c"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Changi",
+        "geo": {
+            "lon": 103.982769,
+            "lat": 1.390352
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "39A",
+        "other_name": null,
+        "postal": "508259",
+        "street": "SEALAND ROAD",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "39A SEALAND ROAD",
+                "PostalCode": "508259"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b190b90fb87079010a5d"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Changi",
+        "geo": {
+            "lon": 103.982769,
+            "lat": 1.390352
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "39B",
+        "other_name": null,
+        "postal": "508260",
+        "street": "SEALAND ROAD",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "39B SEALAND ROAD",
+                "PostalCode": "508260"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b190b90fb87079010ec0"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Changi",
+        "geo": {
+            "lon": 103.982862,
+            "lat": 1.38957
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "596A",
+        "other_name": null,
+        "postal": "509951",
+        "street": "BIGGIN HILL ROAD",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "596A BIGGIN HILL ROAD",
+                "PostalCode": "509951"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b195b90fb87079017802"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Upper Bukit Timah",
+        "geo": {
+            "lon": 103.7655352,
+            "lat": 1.3533385
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "2",
+        "other_name": null,
+        "postal": "596160",
+        "street": "LORONG SESUAI",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "2 LORONG SESUAI",
+                "PostalCode": "596160"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b195b90fb87079017803"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Upper Bukit Timah",
+        "geo": {
+            "lon": 103.7655352,
+            "lat": 1.3533385
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "4",
+        "other_name": null,
+        "postal": "596161",
+        "street": "LORONG SESUAI",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "4 LORONG SESUAI",
+                "PostalCode": "596161"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b195b90fb87079017804"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Upper Bukit Timah",
+        "geo": {
+            "lon": 103.7655352,
+            "lat": 1.3533385
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "6",
+        "other_name": null,
+        "postal": "596162",
+        "street": "LORONG SESUAI",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "6 LORONG SESUAI",
+                "PostalCode": "596162"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b195b90fb87079017805"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Upper Bukit Timah",
+        "geo": {
+            "lon": 103.7655352,
+            "lat": 1.3533385
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "8",
+        "other_name": null,
+        "postal": "596163",
+        "street": "LORONG SESUAI",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "8 LORONG SESUAI",
+                "PostalCode": "596163"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b195b90fb87079017806"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Upper Bukit Timah",
+        "geo": {
+            "lon": 103.7655352,
+            "lat": 1.3533385
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "10",
+        "other_name": null,
+        "postal": "596164",
+        "street": "LORONG SESUAI",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "10 LORONG SESUAI",
+                "PostalCode": "596164"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b195b90fb87079017807"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Upper Bukit Timah",
+        "geo": {
+            "lon": 103.7655352,
+            "lat": 1.3533385
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "12",
+        "other_name": null,
+        "postal": "596165",
+        "street": "LORONG SESUAI",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "12 LORONG SESUAI",
+                "PostalCode": "596165"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b195b90fb87079017808"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Upper Bukit Timah",
+        "geo": {
+            "lon": 103.7655352,
+            "lat": 1.3533385
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "14",
+        "other_name": null,
+        "postal": "596166",
+        "street": "LORONG SESUAI",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "14 LORONG SESUAI",
+                "PostalCode": "596166"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b195b90fb87079017809"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Upper Bukit Timah",
+        "geo": {
+            "lon": 103.7655352,
+            "lat": 1.3533385
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "16",
+        "other_name": null,
+        "postal": "596167",
+        "street": "LORONG SESUAI",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "16 LORONG SESUAI",
+                "PostalCode": "596167"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b195b90fb8707901780a"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Upper Bukit Timah",
+        "geo": {
+            "lon": 103.7655352,
+            "lat": 1.3533385
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "18",
+        "other_name": null,
+        "postal": "596168",
+        "street": "LORONG SESUAI",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "18 LORONG SESUAI",
+                "PostalCode": "596168"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b195b90fb8707901780b"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Upper Bukit Timah",
+        "geo": {
+            "lon": 103.7655352,
+            "lat": 1.3533385
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "20",
+        "other_name": null,
+        "postal": "596169",
+        "street": "LORONG SESUAI",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "20 LORONG SESUAI",
+                "PostalCode": "596169"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b195b90fb8707901780c"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Upper Bukit Timah",
+        "geo": {
+            "lon": 103.7655352,
+            "lat": 1.3533385
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "22",
+        "other_name": null,
+        "postal": "596170",
+        "street": "LORONG SESUAI",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "22 LORONG SESUAI",
+                "PostalCode": "596170"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b195b90fb8707901780d"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Upper Bukit Timah",
+        "geo": {
+            "lon": 103.7655352,
+            "lat": 1.3533385
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "24",
+        "other_name": null,
+        "postal": "596171",
+        "street": "LORONG SESUAI",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "24 LORONG SESUAI",
+                "PostalCode": "596171"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b195b90fb8707901780e"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Upper Bukit Timah",
+        "geo": {
+            "lon": 103.7655352,
+            "lat": 1.3533385
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "26",
+        "other_name": null,
+        "postal": "596172",
+        "street": "LORONG SESUAI",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "26 LORONG SESUAI",
+                "PostalCode": "596172"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b195b90fb8707901780f"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Upper Bukit Timah",
+        "geo": {
+            "lon": 103.7655352,
+            "lat": 1.3533385
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "28",
+        "other_name": null,
+        "postal": "596173",
+        "street": "LORONG SESUAI",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "28 LORONG SESUAI",
+                "PostalCode": "596173"
+            }
+        ]
+    },
+    {
+        "_id": {
+            "$id": "50a0b195b90fb87079017810"
+        },
+        "address": "Apartment",
+        "building": null,
+        "child": null,
+        "estate": "Upper Bukit Timah",
+        "geo": {
+            "lon": 103.7655352,
+            "lat": 1.3533385
+        },
+        "geo_accuracy": 8,
+        "locality": null,
+        "number": "30",
+        "other_name": null,
+        "postal": "596174",
+        "street": "LORONG SESUAI",
+        "GeoAddrInfo": [
+            {
+                "BLDG_NAME": "",
+                "HBRN": "30 LORONG SESUAI",
+                "PostalCode": "596174"
+            }
+        ]
+    }
+]

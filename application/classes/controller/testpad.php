@@ -1,4 +1,6 @@
-<?php defined('SYSPATH') or die('No direct script access.');
+<?php
+
+defined('SYSPATH') or die('No direct script access.');
 ini_set("max_execution_time", 0);
 ini_set('memory_limit', '2000M');
 
@@ -15,39 +17,315 @@ class Controller_Testpad extends Controller {
 
     use Trait_Oauth2_Utils;
 
+    public static $updates = [
+        ['q' => ['postal' => '539060'], 'u' => ['type' => 'Private Apartments']],
+        ['q' => ['postal' => '387990'], 'u' => ['type' => 'Private Apartments']],
+        ['q' => ['postal' => '259428'], 'u' => ['type' => 'Private Apartments']],
+        ['q' => ['postal' => '259421'], 'u' => ['type' => 'Private Apartments']],
+        ['q' => ['postal' => '059521'], 'u' => ['type' => 'Private Apartments']],
+        ['q' => ['postal' => '239856'], 'u' => ['type' => 'Private Apartments']],
+        ['q' => ['postal' => '218307'], 'u' => ['type' => 'Private Apartments', 'property_type' => 'walkup']],
+        ['q' => ['postal' => '118895'], 'u' => ['type' => 'Private Apartments', 'child' => 'Le Hill Condominium']],
+        ['q' => ['postal' => '118896'], 'u' => ['type' => 'Private Apartments', 'child' => 'Le Hill Condominium']],
+        ['q' => ['postal' => '207555'], 'u' => ['type' => 'Private Apartments', 'child' => 'Tyrwhitt 139']],
+        ['q' => ['postal' => '219757'], 'u' => ['type' => 'Private Apartments', 'child' => "D' CAMBRIDGE"]],
+        ['q' => ['postal' => '219758'], 'u' => ['type' => 'Private Apartments', 'child' => "D' CAMBRIDGE"]],
+        ['q' => ['postal' => '238800'], 'u' => ['type' => 'Private Apartments', 'child' => "ORCHARD PARKSUITES"]],
+        ['q' => ['postal' => '238962'], 'u' => ['type' => 'Private Apartments', 'child' => "ACORN"]],
+        ['q' => ['postal' => '248196'], 'u' => ['type' => 'Private Apartments', 'child' => "STUDIO 3"]],
+        ['q' => ['postal' => '248903'], 'u' => ['type' => 'Private Apartments', 'child' => "MELROSE PARK"]],
+        ['q' => ['postal' => '248904'], 'u' => ['type' => 'Private Apartments', 'child' => "MELROSE PARK"]],
+        ['q' => ['postal' => '249445'], 'u' => ['type' => 'Private Apartments', 'child' => "SEVEN HOLT ROAD"]],
+        ['q' => ['postal' => '257902'], 'u' => ['type' => 'Private Apartments', 'child' => "STEVENS LOFT"]],
+        ['q' => ['postal' => '258117'], 'u' => ['type' => 'Private Apartments', 'child' => "THE HERMITAGE"]],
+        ['q' => ['postal' => '258376'], 'u' => ['type' => 'Private Apartments', 'child' => "NASSIM 9"]],
+        ['q' => ['postal' => '259345'], 'u' => ['type' => 'Private Apartments', 'child' => "CHATEAU LE FAME"]],
+        ['q' => ['postal' => '259811'], 'u' => ['type' => 'Private Apartments', 'child' => "BALMORAL GATE"]],
+        ['q' => ['postal' => '259796'], 'u' => ['type' => 'Private Apartments', 'child' => "BALMORAL MANSIONS"]],
+        ['q' => ['postal' => '277125'], 'u' => ['type' => 'Private Apartments', 'child' => "THE SIERRA"]],
+        ['q' => ['postal' => '278738'], 'u' => ['type' => 'Private Apartments', 'child' => "BLISSFUL VIEW"]],
+        ['q' => ['postal' => '278738'], 'u' => ['type' => 'Private Apartments', 'child' => "BLISSFUL VIEW"]],
+        ['q' => ['postal' => '308107'], 'u' => ['type' => 'Private Apartments', 'child' => "NOVENA SUITES"]],
+        ['q' => ['postal' => '308231'], 'u' => ['type' => 'Private Apartments', 'child' => "MONARCHY APARTMENTS"]],
+        ['q' => ['postal' => '309494'], 'u' => ['type' => 'Private Apartments', 'child' => "CHANCERY ESQUIRE"]],
+        ['q' => ['postal' => '327848'], 'u' => ['type' => 'Private Apartments', 'child' => "TOPAZ MANSIONS"]],
+        ['q' => ['postal' => '329341'], 'u' => ['type' => 'Private Apartments', 'child' => "KEMAMAN VIEW"]],
+        ['q' => ['postal' => '387945'], 'u' => ['type' => 'Private Apartments', 'child' => "REGAL 35"]],
+        ['q' => ['postal' => '388040'], 'u' => ['type' => 'Private Apartments', 'child' => "PLATINUM RESIDENCE"]],
+        ['q' => ['postal' => '388492'], 'u' => ['type' => 'Private Apartments', 'child' => "BOUGAINVILLA APARTMENTS"]],
+        ['q' => ['postal' => '388869'], 'u' => ['type' => 'Private Apartments', 'child' => "CANNE LODGE"]],
+        ['q' => ['postal' => '389781'], 'u' => ['type' => 'Private Apartments', 'child' => "CRYSTAL DEW"]],
+        ['q' => ['postal' => '398922'], 'u' => ['type' => 'Private Apartments', 'child' => "WING FONG COURT"]],
+        ['q' => ['postal' => '398924'], 'u' => ['type' => 'Private Apartments', 'child' => "WING FONG MANSIONS"]],
+        ['q' => ['postal' => '399710'], 'u' => ['type' => 'Private Apartments', 'child' => "NICOLE GREEN"]],
+        ['q' => ['postal' => '424247'], 'u' => ['type' => 'Private Apartments', 'child' => "CHAPEL COURT"]],
+        ['q' => ['postal' => '428693'], 'u' => ['type' => 'Private Apartments', 'child' => "LOTUS AT JOO CHIAT"]],
+        ['q' => ['postal' => '429433'], 'u' => ['type' => 'Private Apartments', 'child' => "CASA AROMA"]],
+        ['q' => ['postal' => '439857'], 'u' => ['type' => 'Private Apartments', 'child' => "ORCHID MANSION"]],
+        ['q' => ['postal' => '449303'], 'u' => ['type' => 'Private Apartments', 'child' => "TAIPAN GRAND"]],
+        ['q' => ['postal' => '466671'], 'u' => ['type' => 'Private Apartments', 'child' => "TANAH MERAH MANSIONS"]],
+        ['q' => ['postal' => '486364'], 'u' => ['type' => 'Private Apartments', 'child' => "EASTWOOD GREEN"]],
+        ['q' => ['postal' => '547289'], 'u' => ['type' => 'Private Apartments', 'child' => "Palm Haven"]],
+        ['q' => ['postal' => '598429'], 'u' => ['type' => 'Private Apartments', 'child' => "PALM RESIDENCE"]],
+        ['q' => ['postal' => '738230'], 'u' => ['type' => 'Private Apartments', 'child' => "THE WOODGROVE"]],
+        ['q' => ['postal' => '538800'], 'u' => ['type' => 'Private Apartments', 'child' => "EVERGREEN PARK"]]
+    ];
+
+
+    public function action_updatechild()
+    {
+        $mc = new Mongo('casa.net:27017');
+        $mj = new Mongo('localhost:27017');
+        $cc = $mc->selectCollection('db', 'singpost');
+        $cj = $mj->selectCollection('db', 'singpost');
+        echo "<pre>";
+
+        $rc = $cc->find(['address' => ['$in' => ['Block', 'Standard']], 'child' => null,'street' => ['$not'   => new MongoRegex('/tuas|industrial/i')], 'estate' => ['$ne' => NULL], 'building' => ['$not'   => new MongoRegex('/school|swimming|station|temple|church|complex|centre|camp|hospital|clinic|shop|library|college|stadium|car park|exchange|depot|commission|polyclinic|mosque|masjid|association|interchange|aia |industrial|office|kindergarden|mrt|lrt|sports|waterworks|hall|brickwork|tldm|brigade|defence|eating|food|shopping|post|police|fire|safety|club|hotel|motel|assembly|cargo|airport|airbase|cinema|ministry|government|parliment|health|driving|technology| ctr|kindergarten|breweries|materials|amphitheatre|storage|factory|warehouse|institute|logistics|hospice|center|innovation|aquarium|lagoon|sport|theatres|theatre|techpark|flight|terminal|operations|operation|embassy|amusement|flatted|general|chij|npc|convent|cathedral|aviation|academy|chapel|prison|methodist|metal|works|synagogue|pte.ltd|resort|store|megastore|distripark|hub|dhl|bank|barrack|enterprise|fraser|division|aged|disabled|hostel|hostels|ite |marine|sewage|works|motors|child|maintenance|dormitory|shipyard|naval|nursery|sewer|buddhist|taxi|old age|old people|home for|supply|chemical|islamiah|majlis|logit|homes for|academy|arts|museum|university|polytechnic|ntuc|restaurant|outward|bank|nursing|refuse|tuas|medical|plant|mission|indstrl|society|zoological|red cross|automative|engineering|instrument|design|customs|leisure|publications|delivery/i')]]);
+        //var_dump($rc->count());
+//var_dump($rc);
+        $i = 1;
+        while($rc->hasNext())
+        {
+            $i = $rc->getNext();
+            echo "$i <br>";
+            var_dump($i);
+            $i++;
+        }
+    }
+
+    public function action_child()
+    {
+        $results = [];
+        $m = new Mongo('localhost:27017');
+        $c = $m->selectCollection('db', 'singpost');
+        echo "<pre>";
+//        $c->ensureIndex(['postal' => 1]);
+//        $c->ensureIndex(['number' => 1]);
+//        $c->ensureIndex(['street' => 1]);
+//        $c->ensureIndex(['address' => 1]);
+        //$projects = $c->distinct('building', ['address' => 'Condominium', 'child' => null]);
+        //$projects = $c->update(['child' => ['$ne' => null], 'type' => null, 'address' => 'HDB']);
+        $projects = $c->find(['child' => ['$ne' => null], 'address' => 'HDB']);
+
+        while($projects->hasNext())
+        {
+            $r = $projects->getNext();
+//            $cursor = $c->update([
+//                '_id' => Document::check_id($r['_id'])
+//                    ], ['$set' => ['child' => null, 'type' => null]], [
+//                'safe' => true
+//                    ]);
+//            var_dump($cursor);
+            if(!empty($r['building']))
+            {
+                var_dump($r);
+            }
+
+
+        }
+//            $r = $projects->getNext();
+//            $cursor = $c->update([
+//                '_id' => Document::check_id($r['_id'])
+//                    ], ['$set' => ['child' => static::format($r['child'])]], [
+//                'safe' => true
+//                    ]);
+//            var_dump($cursor);
+
+    }
+
+    protected static function format($building)
+    {
+
+        if (strpos($building, '@'))
+        {
+            if (strpos($building, ' @ ') !== -1)
+            {
+                $b        = explode('@', $building);
+                $building = $b[0] . ' @ ' . $b[1];
+            }
+
+            $building = str_replace('-', ' ', $building);
+        }
+        if (strpos($building, '-'))
+        {
+            $building = str_replace('-', ' ', $building);
+        }
+        if (strpos($building, ', THE'))
+        {
+            $b        = explode(', ', $building);
+            $building = $b[1] . ' ' . $b[0];
+        }
+
+        $buildings = explode(' ', $building);
+
+        foreach ($buildings as $k => $v)
+        {
+            switch ($v)
+            {
+                case 'ILIV' : $buildings[$k] = 'iLiv';break;
+                case 'AAEV79' : $buildings[$k] = 'Aaev 79'; break;
+                case "D'ELIAS" : $buildings[$k] = "D'Elias"; break;
+                case "D'FOCUS" : $buildings[$k] = "D'Focus"; break;
+                case "D'LEEDON" : $buildings[$k] = "D'Leedon"; break;
+                case "D'MANOR" : $buildings[$k] = "D'Manor"; break;
+                case '1A' :
+                case '3BHC' :
+                case '(HUDC)' :
+                case '(IMM BUILDING)' :
+                case 'UP' :
+                case 'II' :
+                case 'APS' :
+                case 'KM' :
+                case 'DLV' :
+                case 'RV' :
+                case 'RVG' :
+                case 'JLB' :
+                case 'M.T.F.A' : break;
+                default : $buildings[$k] = ucwords(strtolower($v));
+                    break;
+            }
+        }
+
+        return trim(implode(' ', array_filter($buildings)));
+        //return strtoupper($building);
+    }
+
+    public function action_onemap()
+    {
+        echo "<pre>";
+        $a = 'qo/s2TnSUmfLz+32CvLC4RMVkzEFYjxqyti1KhByvEacEdMWBpCuSSQ+IFRT84QjGPBCuz/cBom8PfSm3GjEsGc8PkdEEOEr';
+        $headers = [
+            'Host' => 'www.onemap.sg',
+            'Origin' => 'http://www.onemap.sg',
+            'Referer' => 'http://www.onemap.sg',
+        ];
+
+        $r = Request::factory('http://www.onemap.sg/API/services.svc/basicSearch')
+                ->headers($headers)
+                ->method(HTTP_Request::GET)
+                ->query([
+                    'token' => $a,
+                    'searchVal' => '55 Newton Road',
+                    'returnGeom' => 1,
+                    'otptFlds' => 'SEARCHVAL,CATEGORY,POSTALCODE',
+                ]);
+
+        $this->response->headers('Content-type', 'application/javascript')->body($r->execute());
+    }
+
+    public function action_json()
+    {
+        $m = new Mongo('localhost:27017');
+        $c = $m->selectCollection('db', 'singpost');
+        $f = json_decode(file_get_contents('results.json'), true);
+        echo "<pre>";
+        foreach ($f as $k => $data)
+        {
+            $set    = ['$set' => $data['$set']];
+            $cursor = $c->update([
+                '_id' => new MongoID($data['_id']['$id'])
+                    ], $set, [
+                'safe' => true
+                    ]);
+            var_dump(Arr::merge($cursor, $data, $c->findOne(['_id' => new MongoID($data['_id']['$id'])])));
+            //var_dump($c->findOne(['_id' => new MongoID($data['_id']['$id'])]));
+        }
+        //print_r($f);
+    }
 
     public function action_pages()
     {
-        $rows = [];
-        $m = new  Mongo('localhost:27017');
-        $c = $m->selectCollection('db','singpost');
+        $rows   = [];
+        $m      = new Mongo('localhost:27017');
+        $c      = $m->selectCollection('db', 'singpost');
+        //fwrite(STDOUT, json_encode($c->count(), JSON_PRETTY_PRINT) . "\n");
+        ;
+        $c->ensureIndex(['estate']);
+        $c->ensureIndex(['number']);
+        $c->ensureIndex(['street']);
+        $c->ensureIndex(['child' => 1], ['sparse' => true]);
+        $c->ensureIndex(['building' => 1], ['sparse' => true]);
+        //$c->ensureIndex(['geo' => '2d']);
         //$pages  = Mongo_collection::factory('singpost');
-        if (($handle = fopen("apt.csv", "r")) !== FALSE) {
-            while (($data = fgetcsv($handle, 0, ",")) !== FALSE) {
+        if (($handle = fopen("newapt.csv", "r")) !== FALSE)
+        {
+            while (($data = fgetcsv($handle, 0, ",")) !== FALSE)
+            {
                 //$rows[] = $data;
-                $p = $c->findOne(['building' => trim($data[1])]);
-                if(!$p)
+                $name = $data[1];
+
+                $cursor = $c->find(['child'    => null, 'building' => new MongoRegex("/^".trim($name)."/i")]);
+//                $cursor = $c->update([
+//                    'child' => null, 'building' => $name
+//                ], $this->format_postal($data), [
+//                    'multiple' => true,
+//                    'safe' => true
+//                ]);
+                while ($cursor->hasNext())
                 {
-                    $rows[] = $data;
-                    //$rows[] = Arr::merge($data, $p);
+                    //fwrite(STDOUT, json_encode($cursor->getNext(), JSON_PRETTY_PRINT) . "\n");
+                    $rows[] = Arr::merge($cursor->getNext(), $this->format_postal($data));
                 }
-                else
-                {
-                    //$rows[] = $data;
-                }
-//    "name" => array(5) (
-//        1 => string(4) "Name"
-//        2 => string(4) "Type"
-//        3 => string(3) "URL"
-//        4 => string(8) "Comments"
-//        5 => string(5) "Extra"
-//    )
             }
             fclose($handle);
         }
-                //$p = $c->findOne(['building' => trim($rows[1][1])]);
-                //echo Debug::vars($p);
-        echo Debug::vars($rows);
+
+        file_put_contents('results.json', json_encode($rows, JSON_PRETTY_PRINT));
+        echo "<pre>";
+        print_r(json_encode($rows, JSON_PRETTY_PRINT) . "\n");
+    }
+
+    public function action_newapt()
+    {
+        $rows   = [];
+        $m      = new Mongo('localhost:27017');
+        $c      = $m->selectCollection('db', 'singpost');
+        $write  = fopen('newapt.csv', 'w');
+        if (($handle = fopen("apt.csv", "r")) !== FALSE)
+        {
+            while (($data = fgetcsv($handle, 0, ",")) !== FALSE)
+            {
+                $cursor = $c->findOne(['building' => trim($data[1])]);
+
+                if (!$cursor)
+                {
+                    fputcsv($write, array_map('trim', $data));
+                }
+            }
+            fclose($handle);
+        }
+
+        //file_put_contents('results.json', json_encode($rows, JSON_PRETTY_PRINT));
+        //print_r(json_encode($rows, JSON_PRETTY_PRINT) . "\n");
+    }
+
+    protected function format_postal($data)
+    {
+        $ret         = [];
+        $name        = str_replace('  ', ' ', $data[1]);
+        $name        = str_replace('@', ' @ ', $name);
+        $ret['$set'] = [
+            'child'  => trim($name),
+            'type'   => trim($data[2]),
+            'source' => trim($data[3])
+        ];
+        if (!empty($data[4]))
+        {
+            $ret['$set']['property_type'] = trim($data[4]);
+        }
+        if (!empty($data[5]))
+        {
+            $ret['$set']['comments'] = trim($data[5]);
+        }
+//
+//        unset($data[0]); // number
+//        unset($data[1]); // name
+//        unset($data[2]); // type
+//        unset($data[3]); // source
+//        unset($data[4]); // property type
+//        unset($data[5]); // comments
+//        //$rows[] = $data;
+        return $ret;
     }
 
     public function action_pop()
@@ -55,7 +333,7 @@ class Controller_Testpad extends Controller {
         echo "<pre>";
         //50d134c7b90fb80c0a0000bb
         //['$pop' => ['comments' => -1]]
-        $f = Collection::factory('comment')->fetch( ['post._id' => Document::check_id('50d134c7b90fb80c0a0000bb'), 'status' => 'active', 'type' => 'comment']
+        $f = Collection::factory('comment')->fetch(['post._id' => Document::check_id('50d134c7b90fb80c0a0000bb'), 'status'   => 'active', 'type'     => 'comment']
         );
         print_r($f);
     }
