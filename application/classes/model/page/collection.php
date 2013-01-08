@@ -1,4 +1,7 @@
-<?php defined('SYSPATH') or die('No direct script access.');
+<?php
+
+defined('SYSPATH') or die('No direct script access.');
+
 /**
  * Description of collection
  *
@@ -9,15 +12,33 @@
  * @copyright 2012 Realtasia Pte Ltd
  */
 class Model_Page_Collection extends Mongo_Collection {
+
     protected $name = 'pages';
 
     public function search($args = [], $user_id = NULL)
     {
+
+//        $this->collection()->ensureIndex([
+//            'status'     => 1, 'privacy.is' => 1, 'modified'   => -1
+//                ], ['name' => 'status_privacy_modified', 'safe' => true]);
+//        $this->collection()->ensureIndex([
+//            'parent._id' => 1
+//                ], ['name'   => 'parent_id', 'sparse' => true, 'safe'   => true]);
+//        $this->collection()->ensureIndex([
+//            'slug' => 1, 'name' => 1
+//                ], ['name' => 'page_name', 'safe' => true]);
+//        $this->collection()->ensureIndex([
+//            'parent.name' => 1
+//                ], ['name'   => 'parent_name', 'sparse' => true, 'safe'   => true]);
+//        $this->collection()->ensureIndex([
+//            'type'    => 1, 'subtype' => 1
+//                ], ['name' => 'page_types', 'safe' => true]);
+
         $defaults = array(
-           'limit' => 11, 'offset' => 0, 'type' => '',
-           'subtypes' => [], 'sort' => 'alpha', 'status' => 'active',
-           's' => '', 'include_ids' => FALSE, 'privacy' => NULL,
-           'object_id' => FALSE, 'children' => FALSE
+            'limit'       => 11, 'offset'      => 0, 'type'        => '', 'skip'        => 0,
+            'subtypes'    => [], 'sort'        => 'alpha', 'status'      => 'active',
+            's'           => '', 'include_ids' => FALSE, 'privacy'     => NULL,
+            'object_id'   => FALSE, 'children'    => FALSE
         );
         extract(Arr::merge($defaults, $args), EXTR_SKIP);
 
@@ -28,7 +49,7 @@ class Model_Page_Collection extends Mongo_Collection {
             $this->_user_id = parent::check_id($user_id);
 
         // set some empty arrays
-        $query = $ids =  $return = [];
+        $query  = $ids    = $return = [];
 
         $query['status'] = 'active';
 
@@ -42,28 +63,34 @@ class Model_Page_Collection extends Mongo_Collection {
          *      Company (agency, property-management, developer)
          */
         if (!empty($subtypes))
-            $query['subtype'] = ['$in' => $subtypes];
+            $query['subtype'] = ['$in' => (array) $subtypes];
 
+        $query['subtype']['$ne'] = 'estate';
         // if specific records are needed add to the ids array
         if (!empty($include_ids))
-            $ids = $include_ids;
+            $ids              = $include_ids;
 
-        if($privacy)
+        if ($privacy)
             $query['privacy.is'] = $privacy;
 
         // this is the search term typed.
         if ($s)
-            $query['name'] = new MongoRegex("/^$s/i");
+        {
+            $normalcase   = new MongoRegex("/^" . ucwords(strtolower($s)) . "/");
+            $titledcase   = new MongoRegex("/^" . URL::title($s) . "/");
+            $query['$or'] = [
+                ['name' => $normalcase],
+                ['parent.name' => $normalcase],
+                ['slug' => $titledcase],
+            ];
+        }
 
         // this is different from include_ids as we are looking in the
         // parent_id property to find children. @TODO dbrefs instead?
         if ($children)
         {
-            if (!is_array($children))
-                $children = array($children);
-
             $query['parent._id'] = array(
-               '$in' => array_map('Document::check_id', $children)
+                '$in' => array_map('Document::check_id', (array) $children)
             );
         }
 
@@ -75,13 +102,16 @@ class Model_Page_Collection extends Mongo_Collection {
         if (!empty($ids))
             $query['_id']['$in'] = array_map('Document::check_id', $ids);
 
-        if(!is_array($sort))
+        if (!is_array($sort))
         {
-            switch($sort)
+            switch ($sort)
             {
-                case 'active': $sort = ['modified' => -1]; break;
-                case 'alpha': $sort = ['name' => 1]; break;
-                default: $sort = ['_id' => -1]; break;
+                case 'active': $sort = ['modified' => -1];
+                    break;
+                case 'alpha': $sort = ['name' => 1];
+                    break;
+                default: $sort = ['_id' => -1];
+                    break;
             }
         }
 
@@ -93,22 +123,22 @@ class Model_Page_Collection extends Mongo_Collection {
                 ->sort($sort)
                 ->skip($skip);
 
-        while($results->hasNext())
+        while ($results->hasNext())
         {
             $row = $results->getNext();
-            if($user_id && $usr = $this->get_user($user_id))
+            if ($user_id && $usr = $this->get_user($user_id))
             {
                 $row->current_user = $usr;
                 $row->after_load();
             }
-            $ret = $row->stringify($row->as_array());
+            $ret               = $row->stringify($row->as_array());
 
             $return[] = $ret;
         }
 
         return array_filter($return);
-
     }
 
 }
+
 ?>

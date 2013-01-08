@@ -38,6 +38,7 @@ class Model_Comment_Collection extends Mongo_Collection {
 
         $results = $this->find($query)
                 ->limit($limit)
+                ->fields(['message'], 0)
                 ->sort('_id', $sort)
                 ->skip($skip);
 //Debug::log(print_r($results->hasNext(), true));

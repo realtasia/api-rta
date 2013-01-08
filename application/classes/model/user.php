@@ -23,6 +23,7 @@ class Model_User extends Document {
     {
         if ($this->load(self::_get_one($id), $fields))
         {
+
             $ret = $this->stringify($this->as_array());
             return $object ? (object) $ret : $ret;
         }
@@ -367,7 +368,6 @@ class Model_User extends Document {
             $this->load(null, ['company' => 1]);
             $this->remove_from_company($this->company, $this->_id);
         }
-        $this->clear();
         $this->load_values($params);
 
         if($this->save())

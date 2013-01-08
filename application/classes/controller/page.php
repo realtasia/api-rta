@@ -1,8 +1,7 @@
-<?php
-
-defined('SYSPATH') or die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');
 ini_set("max_execution_time", 0);
 ini_set('memory_limit', '2000M');
+
 /**
  *  1. Authenticate a token request
  *      a. Set a global $session variable for consumption by child controllers.
@@ -14,6 +13,7 @@ ini_set('memory_limit', '2000M');
  *
  */
 class Controller_Page extends Controller_Resource {
+//class Controller_Page extends Controller {
 
 
     public function before()
@@ -367,7 +367,7 @@ class Controller_Page extends Controller_Resource {
     }
 
 
-    protected function search()
+    public function action_search()
     {
         if(parent::logged_in())
             $pages = Collection::factory('page')

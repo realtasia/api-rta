@@ -188,7 +188,7 @@ class Controller_Post extends Controller_Resource {
      */
     public function action_comment()
     {
-        $params['message'] = nl2br(Security::xss_clean(static::$params['message']));
+        $params            = static::format(static::$params, 66, 100);
         $params['type']    = 'comment';
         $params['status']  = static::$params['status'];
         $params['user']    = static::$params['user'];
@@ -533,7 +533,7 @@ class Controller_Post extends Controller_Resource {
         ];
         if ($validation->check())
         {
-            static::$params['message'] = nl2br(static::extract_links(trim(static::$params['message'])));
+            static::$params = static::format(static::$params);
             // this is a little different. we merge params with defaults to force defaults
             if ($post = static::$model->create(Arr::merge(static::$params, $defaults)))
             {
@@ -587,7 +587,7 @@ class Controller_Post extends Controller_Resource {
         ];
         if ($validation->check())
         {
-            static::$params['message'] = nl2br(static::extract_links(trim(static::$params['message'])));
+            static::$params = static::format(static::$params);
 
             if ($post = static::$model->create(Arr::merge($defaults, static::$params)))
             {
@@ -891,4 +891,52 @@ class Controller_Post extends Controller_Resource {
         return $html;
     }
 
+
+    protected static function format($params, $len = 76, $max = 200)
+    {
+        $text   = trim(strip_tags($params['message']));
+        $original = $chunks = explode("\n", $text);
+        $link   = Arr::get($params['link'], $type);
+
+        foreach($chunks as $key => $t)
+        {
+            if(mb_strlen($t) >= 1)
+            {
+                $chunks[$key] = trim(Text::wrap($t, $len));
+            }
+        }
+
+        $chunks = explode("\n", implode("\n", $chunks));
+
+        if($link)
+        {
+            $excerpt = implode("\n", array_slice($chunks, 0, 5));
+        }
+        else
+        {
+            switch(Arr::get($params, 'type'))
+            {
+                case 'attachment':
+                case 'listing':
+                case 'album':
+                    $excerpt = implode("\n", array_slice($chunks, 0, 5));
+                    break;
+                default:
+                    $excerpt = implode("\n", array_slice($chunks, 0, 10));
+                    break;
+            }
+        }
+
+        $message = implode("\n", $original);
+
+        if(count($chunks) >= $max)
+        {
+            $message = implode("\n", array_slice($chunks, 0, $max));
+        }
+
+        $params['message'] = nl2br(static::extract_links(trim($message)));
+        $params['excerpt'] = nl2br(static::extract_links(trim($excerpt)));
+
+        return $params;
+    }
 }

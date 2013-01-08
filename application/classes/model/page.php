@@ -1,4 +1,6 @@
-<?php defined('SYSPATH') or die('No direct script access.');
+<?php
+
+defined('SYSPATH') or die('No direct script access.');
 
 /**
  * Description of user
@@ -12,7 +14,7 @@
 class Model_Page extends Document {
 
     /**
-     * Retrieve a single post
+     * Retrieve a single page
      *
      * @param MongoID|string|array $id or an array of query params
      * @return array|null
@@ -20,18 +22,18 @@ class Model_Page extends Document {
     public function get($id, array $fields = [], $object = TRUE)
     {
         $id = parent::check_id($id);
-        if($id instanceof MongoID)
+        if ($id instanceof MongoID)
         {
-            $query = ['_id' => $id];
+            $query = $id;
         }
         else
         {
-            $query = ['slug' => $id];
+            $query = ['slug' => new MongoRegex("/^" . URL::title($id) . "/")];
         }
 
         $query['privacy.is'] = 'PUBLIC';
 
-        if($this->load($query, $fields))
+        if ($this->load($query, $fields))
         {
             $ret = $this->stringify($this->as_array());
             return $object ? (object) $ret : $ret;
@@ -47,26 +49,16 @@ class Model_Page extends Document {
      */
     public function create($params)
     {
-        $this->collection()->ensureIndex([
-            'status' => 1, 'user._id' => 1, 'privacy.is' => 1, 'modified' => -1
-        ], ['name' => 'post_id_fields', 'safe' => true]);
-        $this->collection()->ensureIndex([
-            'parent._id' => 1
-        ], ['sparse' => true, 'safe' => true]);
-        $this->collection()->ensureIndex([
-            'type' => 1, 'subtype' => 1
-        ]);
-
-        $type = Arr::get($params, 'type');
+        $type    = Arr::get($params, 'type');
         $subtype = Arr::get($params, 'subtype');
 
-        if(isset($params['name']))
+        if (isset($params['name']))
         {
             // library has no uri, for now...
-            if($params['type'] !== 'library')
+            if ($params['type'] !== 'library')
             {
                 $params['uri'] = "/$type";
-                $params['uri'] .= empty($subtype) ? '' : "/$subtype";
+                $params['uri'] .= empty($subtype) ? '' : "/" . URL::title($subtype);
                 $params['uri'] .= "/" . URL::title($params['name']);
             }
 
@@ -75,11 +67,11 @@ class Model_Page extends Document {
 
 
         // overwrite defaults
-        $data                     = Arr::overwrite(static::_page_defaults($type), $params);
+        $data = Arr::overwrite(static::_page_defaults($type, $subtype), $params);
         // merge with defaults
-        $data                     = Arr::merge(static::_page_defaults($type), $data);
+        $data = Arr::merge(static::_page_defaults($type, $subtype), $data);
 
-        if($id = Arr::get($params, '_id'))
+        if ($id = Arr::get($params, '_id'))
         {
             $this->atomic($id);
             unset($params['_id']);
@@ -111,6 +103,10 @@ class Model_Page extends Document {
         return $this;
     }
 
+    public function create_location($params)
+    {
+
+    }
 
     /**
      * Searches for a document that has unique values. Returns false if none is
@@ -137,10 +133,10 @@ class Model_Page extends Document {
      */
     public function before_save($action)
     {
+        $this->modified = time();
+
         if ($action === parent::SAVE_UPDATE)
         {
-            $this->modified = time();
-
             // during testing a whole lot of counts went into negative. Just a
             // small sanity check.
             if (!isset($this->_changed['counts']) && isset($this->counts))
@@ -153,11 +149,11 @@ class Model_Page extends Document {
                     }
                 }
             }
-            foreach(['interactions', 'private_actions', 'connections', 'actions', 'created'] as $v)
+            foreach (['interactions', 'private_actions', 'connections', 'actions', 'created'] as $v)
             {
-                if( !isset($this->_changed[$v]) && isset( $this->{$v} ) )
+                if (!isset($this->_changed[$v]) && isset($this->{$v}))
                 {
-                    unset( $this->{$v} );
+                    unset($this->{$v});
                 }
             }
         }
@@ -172,7 +168,10 @@ class Model_Page extends Document {
     {
         $id = parent::check_id($this->_id);
 
-        $this->created = $id->getTimestamp();
+        if($id instanceof MongoID)
+        {
+            $this->created = $id->getTimestamp();
+        }
 
         return $this;
     }
@@ -185,13 +184,13 @@ class Model_Page extends Document {
     public function stringify($arr = [])
     {
         // get the current user
-        $cu                     = $this->current_user ? $this->get_default_user_fields() : false;
-        $cu_id                  = $cu ? (string) $cu['_id'] : false;
-        $arr                    = parent::stringify($arr);
-        $u_id                   = Arr::get($arr['user'], '_id');
-        $arr['is_owner']        = $cu_id && $u_id && ($u_id === $cu_id);
-        $arr['is_page_owner']   = $cu_id && $u_id && ((string)Arr::get($arr['page'], '_id') === $cu_id);
-        $arr['connections']     = static::get_connection_routes($arr['_id'], $arr['type'], $arr['subtype']);
+        $cu                   = $this->current_user ? $this->get_default_user_fields() : false;
+        $cu_id                = $cu ? (string) $cu['_id'] : false;
+        $arr                  = parent::stringify($arr);
+        $u_id                 = Arr::get($arr['user'], '_id');
+        $arr['is_owner']      = $cu_id && $u_id && ($u_id === $cu_id);
+        $arr['is_page_owner'] = $cu_id && $u_id && ((string) Arr::get($arr['page'], '_id') === $cu_id);
+        $arr['connections']   = static::get_connection_routes($arr['_id'], $arr['type'], $arr['subtype']);
 
         if ($cu)
         {
@@ -202,7 +201,6 @@ class Model_Page extends Document {
         return $arr;
     }
 
-
     /**
      * Updates privacy settings of a post.
      *
@@ -212,11 +210,11 @@ class Model_Page extends Document {
      */
     public function update_privacy($params, $_id)
     {
-        $field = static::$post_fields['privacy'];
+        $field  = static::$post_fields['privacy'];
         $values = Arr::overwrite($field, $params);
 
         $this->load_values([
-            '_id' => new MongoID($_id),
+            '_id'     => new MongoID($_id),
             'privacy' => $values,
         ]);
         $this->save();
@@ -235,7 +233,7 @@ class Model_Page extends Document {
     {
         $actions = [];
 
-        foreach(['like', 'unlike', 'subscribe', 'unsubscribe'] as $v)
+        foreach (['like', 'unlike', 'subscribe', 'unsubscribe'] as $v)
         {
             $actions[$v] = Router::post($v, $user_id);
         }
@@ -251,7 +249,7 @@ class Model_Page extends Document {
      */
     protected static function get_connection_routes($_id, $type, $subtype = NULL)
     {
-        $routes = [
+        $routes  = [
             'likers',
             'feed',
             'subscribers',
@@ -259,10 +257,10 @@ class Model_Page extends Document {
         ];
         $actions = [];
 
-        switch($type)
+        switch ($type)
         {
             case 'location':
-                if($subtype && $subtype === 'estate')
+                if ($subtype && $subtype === 'estate')
                 {
                     $routes[] = 'child-locations';
                 }
@@ -273,7 +271,7 @@ class Model_Page extends Document {
                 break;
         }
 
-        foreach($routes as $v)
+        foreach ($routes as $v)
         {
             $actions[$v] = Router::page($v, $_id);
         }
@@ -281,41 +279,44 @@ class Model_Page extends Document {
         return $actions;
     }
 
-
-    protected static function _page_defaults($type)
+    protected static function _page_defaults($type, $subtype = null)
     {
         $counts = $type == 'library' ? static::library_counts() : static::counts();
-
+        if ($subtype === 'estate')
+        {
+            $counts['locations'] = 0;
+        }
         $defaults = array(
-            'content' => '',
-            'counts'  => $counts,
-            'likers'       => [],
-            'modified' => time(),
-            'parent'   => [],
-            'privacy'   => ['is' => 'PUBLIC'],
-            'stats' => [],
+            'content'     => '',
+            'counts'      => $counts,
+            'likers'      => [],
+            'modified'    => time(),
+            'parent'      => [],
+            'privacy'     => ['is' => 'PUBLIC'],
+            'stats'       => [],
             'status'      => 'active',
             'subscribers' => [],
-            'subtype' => '',
-            'name'    => '',
-            'type'    => $type,
-            'slug'    => '',
-            'uri'     => '',
-            'user'    => [],
+            'subtype'     => '',
+            'name'        => '',
+            'type'        => $type,
+            'slug'        => '',
+            'uri'         => '',
+            'user'        => [],
             'attachments' => [],
         );
 
         switch ($type)
         {
-            case 'location': return Arr::merge($defaults, ['attachments' => []]);
+            case 'location':
+                return Arr::merge($defaults, ['attachments' => [], 'sectors' => []]);
             case 'company' : return Arr::merge($defaults, static::_company_defaults());
-                default: return $defaults;
+            default: return $defaults;
         }
     }
 
     protected static function _company_defaults()
     {
-        return ['license' => '', 'counts' => ['members' => 0], 'members' => []];
+        return ['license' => '', 'counts'  => ['members' => 0], 'members' => []];
     }
 
     protected static function counts()
@@ -336,13 +337,14 @@ class Model_Page extends Document {
     protected static function library_counts()
     {
         return [
-            'pictures'       => 0,
-            'videos'         => 0,
-            'documents'      => 0,
-            'albums' => [
-                'public' => 0,
+            'pictures'  => 0,
+            'videos'    => 0,
+            'documents' => 0,
+            'albums'    => [
+                'public'  => 0,
                 'private' => 0,
             ]
         ];
     }
+
 }

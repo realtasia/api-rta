@@ -44,7 +44,12 @@ class Model_Comment extends Document {
         $this->load_values($params);
 
         if ($this->save())
-            return $this->after_load();
+        {
+            $this->uri = '/comment.php?id=' . (string) $this->_id;
+            $this->excerpt = $this->get_excerpt_link();
+            $this->save();
+            return $this;
+        }
 
         return false;
     }
@@ -93,14 +98,13 @@ class Model_Comment extends Document {
         if (!$this->current_user->loaded())
             return false;
 
-        $pars = $params;
-
         $user = (array) $this->get_default_user_fields();
 
-        $params['user']   = isset($params['user']) ? $params['user'] : $user;
-        $params['counts'] = ['likers' => 0];
-        $params['likers'] = [];
-        $params['status'] = isset($params['status']) ? $params['status'] : 'active';
+        $params['user']    = Arr::get($params, 'user', $user);
+        $params['counts']  = ['likers' => 0];
+        $params['likers']  = [];
+        $params['excerpt'] = Arr::get($params, 'excerpt');
+        $params['status']  = Arr::get($params, 'status', 'active');
         return static::validate_ids($params);
     }
 
@@ -276,6 +280,27 @@ class Model_Comment extends Document {
         }
 
         return $data;
+    }
+
+    protected function get_excerpt_link()
+    {
+        $link = '';
+        if($this->message)
+        {
+            if(strlen($this->message) !== strlen($this->excerpt))
+            {
+                if(strlen($this->message) >= 10000)
+                {
+                    $link = '&nbsp;&hellip;'.HTML::anchor($this->uri, '<small class="muted"><br><br>Continue Reading</small>');
+                }
+                else
+                {
+                    $link = '&nbsp;&hellip;'.HTML::anchor($this->uri, '<small class="muted"><br><br>Continue Reading</small>', ['class' => 'comment_read_more']);
+                }
+            }
+        }
+
+        return $this->excerpt . $link;
     }
 
 }

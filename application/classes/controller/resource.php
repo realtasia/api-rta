@@ -53,7 +53,7 @@ abstract class Controller_Resource extends Controller_Abstract{
             if(is_array($current_session))
             {
                 static::$current_session = $current_session;
-                static::$user_id = static::$current_session['user_id'];
+                static::$user_id = Arr::get(static::$current_session, 'user_id');
                 if(isset(static::$params['state']))
                 {
                     static::$current_session['state'] = static::$params['state'];

@@ -1,6 +1,4 @@
-<?php
-
-defined('SYSPATH') or die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');
 
 /**
  * Description of user
@@ -32,6 +30,9 @@ class Controller_User extends Controller_Resource {
         'update_avatar', 'update_info','send_sms', 'validate_password', 'update_settings'
     ];
 
+    /**
+     * Sets defaults for the user model based on logged in status
+     */
     public function before()
     {
         parent::before();
@@ -688,9 +689,12 @@ class Controller_User extends Controller_Resource {
      */
     protected function get($id)
     {
+        //$r = ['API_LOGGED_IN' => parent::logged_in(), 'API_TOKEN_RECEIVED' => Arr::get(static::$current_session, 'access_token')];
         if (parent::logged_in())
+            //return $this->data(Arr::merge($r, (array) static::$model->get($id)));
             return $this->data(static::$model->get($id));
         else
+            //return $this->data(Arr::merge($r, (array) static::$model->get_public($id)));
             return $this->data(static::$model->get_public($id));
     }
 
@@ -1269,7 +1273,11 @@ class Controller_User extends Controller_Resource {
         return $this->fail();
     }
 
-
+    /**
+     * a method that updates entries in the DB for a newly created avatar.
+     *
+     * @return type
+     */
     protected function update_avatar()
     {
         $uid       = $this->request->param('id');
@@ -1298,9 +1306,11 @@ class Controller_User extends Controller_Resource {
             }
         }
 
+        // cannot continue without an album...
         if(!$album)
             return $this->fail('user/generic', 'server_error');
 
+        // populate the attachment params
         $attachment = [
             'name'        => Arr::get(static::$params, 'name'),
             'mediainfo'   => Arr::get(static::$params, 'mediainfo'),
@@ -1310,9 +1320,14 @@ class Controller_User extends Controller_Resource {
             'page'        => ['_id'  => $album->_id, 'name' => $album->name, 'type' => 'album', 'uri' => $album->uri],
             'page_parent' => Arr::merge(['type' => 'library'], $user->library)
         ];
-        //Debug::log(print_r($attachment, true));
 
-        if($attachment = Document::factory('post')->create_attachment($attachment))
+
+        // try to create it.
+        $attachment = Document::factory('post')->create_attachment($attachment);
+
+        // save the new url and update the user's pic. album and library get
+        // updated automatically on save()
+        if($attachment)
         {
             $attachment->uri = '/post.php?id=' . (string) $attachment->_id;
             $attachment->save();

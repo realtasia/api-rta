@@ -1,4 +1,6 @@
-<?php defined('SYSPATH') or die('No direct script access.');
+<?php
+
+defined('SYSPATH') or die('No direct script access.');
 
 /**
  * Description of user
@@ -55,15 +57,21 @@ class Model_Post extends Document {
         {
             // save
             $this->save();
+            $this->uri = '/post.php?id=' . (string) $this->_id;
+            if($this->message)
+            {
+                $this->excerpt = $this->get_excerpt_link();
+            }
+            $this->save();
         } catch (MongoException $e)
         {
             Debug::error(
-                "MongoException while trying to create post: :post \n"
-                . "Error Message- :message \n"
-                . "Error Code- :code", [
-                    ':post'    => print_r($data, TRUE),
-                    ':message' => $e->getMessage(),
-                    ':code'    => $e->getCode()
+                    "MongoException while trying to create post: :post \n"
+                    . "Error Message- :message \n"
+                    . "Error Code- :code", [
+                ':post'    => print_r($data, TRUE),
+                ':message' => $e->getMessage(),
+                ':code'    => $e->getCode()
             ]);
             return false;
         }
@@ -118,7 +126,13 @@ class Model_Post extends Document {
         return $this->create(Arr::merge($defaults, $params));
     }
 
-
+    /**
+     * An attachment is currently the only post type that is a child of another
+     * post type, (album)
+     *
+     * @param array $params
+     * @return type
+     */
     public function create_attachment(array $params)
     {
         $defaults = [
@@ -170,7 +184,7 @@ class Model_Post extends Document {
             if (isset($this->page_parent))
                 $pages[] = $this->page_parent;
 
-            return $this->process_counts(['pages' => $pages, 'privacy' => $this->privacy], $this->type, $this->user);
+            return $this->process_counts(['pages'   => $pages, 'privacy' => $this->privacy], $this->type, $this->user);
         }
     }
 
@@ -244,7 +258,7 @@ class Model_Post extends Document {
     {
         $id = parent::check_id($this->_id);
 
-        $this->created = $id instanceof MongoID ? $id->getTimestamp() : 0;
+        $this->created = $id->getTimestamp();
         // if there is no current user, no further formatting required.
 
         return $this;
@@ -264,15 +278,21 @@ class Model_Post extends Document {
         $u_id                   = Arr::get($arr['user'], '_id');
         $arr['generated_title'] = static::generate_title($arr);
         $arr['is_owner']        = $cu_id && $u_id && ($u_id === $cu_id);
-        $arr['is_page_owner']   = $cu_id && $u_id && ((string)Arr::get($arr['page'], '_id') === $cu_id);
-        $arr['actions']         = $arr['is_owner'] ? static::get_owner_action_routes($arr) : static::get_action_routes($arr);
-
-        if(!$arr['is_owner'])
+        $arr['is_page_owner']   = $cu_id && $u_id && ((string) Arr::get($arr['page'], '_id') === $cu_id);
+        if ($this->current_user)
         {
-            $arr['actions'] = $arr['is_page_owner'] ? static::get_page_owner_action_routes($arr) : static::get_action_routes($arr);
+            $arr['actions'] = static::get_action_routes($arr);
+            if($arr['is_owner'])
+            {
+                $arr['actions'] = static::get_owner_action_routes($arr);
+            }
+            elseif($arr['is_page_owner'])
+            {
+                $arr['actions'] = static::get_page_owner_action_routes($arr);
+            }
         }
 
-        $arr['connections']     = static::get_connection_routes($arr['_id']);
+        $arr['connections'] = static::get_connection_routes($arr['_id']);
 
         if ($cu)
         {
@@ -282,9 +302,9 @@ class Model_Post extends Document {
         // we should trigger the comment model's formatting so each comment in
         // this post is properly formatted.
         $arr['comments'] = Collection::factory('comment')->fetch([
-            'post_id' => $arr['_id'], 'status' => 'active', 'type' => 'comment',
-            'skip' => static::get_initial_comment_skip($arr['counts']['comments'])
-        ], $this->current_user, $arr);
+            'post_id' => $arr['_id'], 'status'  => 'active', 'type'    => 'comment',
+            'skip'    => static::get_initial_comment_skip($arr['counts']['comments'])
+                ], $this->current_user, $arr);
 
         return $arr;
     }
@@ -364,7 +384,7 @@ class Model_Post extends Document {
      * @param int $inc increase or decrease
      * @return \Model_Post
      */
-    public function process_counts( array $params, $type, $user, $inc = 1)
+    public function process_counts(array $params, $type, $user, $inc = 1)
     {
         $pages   = $params['pages'];
         $privacy = $params['privacy'];
@@ -411,10 +431,10 @@ class Model_Post extends Document {
                         }
                         if ($page['type'] === 'library' && $this->type === 'attachment')
                         {
-                            if(empty($this->mediainfo))
+                            if (empty($this->mediainfo))
                                 break;
 
-                            if(strpos($this->mediainfo['mime'], 'image') !== false)
+                            if (strpos($this->mediainfo['mime'], 'image') !== false)
                             {
                                 $count_type = 'pictures';
                             }
@@ -578,7 +598,7 @@ class Model_Post extends Document {
     {
         foreach (['likers', 'subscribers'] as $k => $v)
         {
-            $actions[$v] = Router::post($v, $_id);
+            $actions[$v]         = Router::post($v, $_id);
         }
         $actions['comments'] = Router::comment('get', $_id);
         return $actions;
@@ -594,6 +614,8 @@ class Model_Post extends Document {
     {
         // some empty vars
         $page_title = "Go to the {$post['page']['name']} {$post['page']['type']} page";
+
+        $uri = $post['uri'];
 
         // for user type pages
         if ($post['page']['type'] === 'user')
@@ -616,9 +638,9 @@ class Model_Post extends Document {
         // boolean if the post was written on on the author's wall
         $own_wall = (string) $post['page']['_id'] === (string) $post['user']['_id'];
         // used in case it was wriiten on his wall
-        $ohw = ' on his profile page.';
+        $ohw      = ' on his profile page.';
 
-        if(isset($post['page']['uri']))
+        if (isset($post['page']['uri']))
         {
             $page_link = html::anchor($post['page']['uri'], $post['page']['name'], ['title' => $page_title, 'class' => 'hoverCard']);
         }
@@ -631,31 +653,36 @@ class Model_Post extends Document {
         switch ($post['type'])
         {
             // wallpost, testimonial, conversation, listing, checkin, event, album
-            case "checkin": return "checked in to $page_link.";
-            case "testimonial": return "wrote a testimonial about $page_link.";
-            case "listing": return "created a listing in $page_link.";
-            case "event": return "created an event in $page_link.";
+            case "checkin": return static::l($uri, 'checked in') . " to $page_link.";
+            case "testimonial": return "wrote a ".static::l($uri, 'testimonial')." about $page_link.";
+            case "listing": return "created a ".static::l($uri, 'listing')." in $page_link.";
+            case "event": return "created an ".static::l($uri, 'event')." in $page_link.";
             // for avatar uploads, state so, if not default to new media
-            case "attachment": return Arr::get($post, 'subtype') === 'avatar' ? "uploaded a new profile picture." : "uploaded new media " . ($own_wall ? '.' : "in $page_link.");
+            case "attachment": return Arr::get($post, 'subtype') === 'avatar' ? "uploaded a new ".static::l($uri, 'profile picture')."." : "uploaded ".static::l($uri, 'new media')." " . ($own_wall ? '.' : "in $page_link.");
             case ("post" || 'wallpost'):
                 $link = Arr::get($post, 'link');
-                if($link)
+                if ($link)
                 {
-                    switch($link['type'])
+                    switch ($link['type'])
                     {
                         case 'rich':
-                            return "shared a document" . ($own_wall ? $ohw : " on $page_link's profile page.");
+                            return "shared a ".static::l($uri, 'document')."" . ($own_wall ? $ohw : " on $page_link's profile page.");
                         case 'video':
-                            return "shared a video" . ($own_wall ? $ohw : " on $page_link's profile page.");
+                            return "shared a ".static::l($uri, 'video')."" . ($own_wall ? $ohw : " on $page_link's profile page.");
                         case 'photo':
-                            return "shared a photo" . ($own_wall ? $ohw : " on $page_link's profile page.");
+                            return "shared a ".static::l($uri, 'photo')."" . ($own_wall ? $ohw : " on $page_link's profile page.");
                         case 'link':
-                            return "shared a link" . ($own_wall ? $ohw : " on $page_link's profile page.");
+                            return "shared a ".static::l($uri, 'link')."" . ($own_wall ? $ohw : " on $page_link's profile page.");
                     }
                 }
-                return "wrote a post" . ($own_wall ? $ohw : " on $page_link's profile page.");
+                return "wrote a ".static::l($uri, 'post'). ($own_wall ? $ohw : " on $page_link's profile page.");
             default: return "shared in $page_link.";
         }
+    }
+
+    protected static function l($uri, $title)
+    {
+        return HTML::anchor($uri, $title, ['onclick' => 'javascript:return false;']);
     }
 
     /**
@@ -669,12 +696,14 @@ class Model_Post extends Document {
             'user'         => [], // '_id', 'name' of the user who created this
             'to'           => [], // '_id', 'name' of the user this message was sent to (for messages)
             'page'         => [], // '_id', 'name', 'type' the page it was written on (location, user profile, album etc...)
-            'page_parent'  => [], // '_id', 'name', 'type' the page's parent (company, estate or library)
+            'page_parent'  => [], // '_id', 'name', 'type' the page's parent (estate or library)
+            'company'      => [], // '_id', 'name', 'type' the user's company if available
             'listing'      => array_fill_keys([
                 'type', 'price', 'rooms', 'built_size', 'property_type', 'tenure',
                 'land_size', 'value', 'cobroke', 'unit'
                     ], 0),
             'name'         => '', // the content
+            'excerpt'      => '', // the content summary (truncated)
             'message'      => '', // the content
             'message_tags' => [], // names of existing people within the content are parsed
             'picture'      => null, // if this post has an image, this will be the url
@@ -698,22 +727,22 @@ class Model_Post extends Document {
 
     protected static function validate_ids($data)
     {
-        foreach($data as $key => $value)
+        foreach ($data as $key => $value)
         {
-            switch($key)
+            switch ($key)
             {
                 case 'user':
                 case 'to':
                 case 'page':
                 case 'company':
                 case 'page_parent':
-                    if(is_array($value))
+                    if (is_array($value))
                     {
-                        foreach($value as $k => $v)
+                        foreach ($value as $k => $v)
                         {
-                            if($k === '_id')
+                            if ($k === '_id')
                             {
-                                $value[$k] = parent::check_id($v);
+                                $value[$k]  = parent::check_id($v);
                             }
                         }
                     }
@@ -730,8 +759,31 @@ class Model_Post extends Document {
 
     protected static function get_initial_comment_skip($count)
     {
-        if($count <= 2) return 0;
-        if($count > 2) return $count - 2;
+        if ($count <= 2)
+            return 0;
+        if ($count > 2)
+            return $count - 2;
+    }
+
+    protected function get_excerpt_link()
+    {
+        $link = '';
+        if($this->message)
+        {
+            if(strlen($this->message) !== strlen($this->excerpt))
+            {
+                if(strlen($this->message) >= 10000)
+                {
+                    $link = '&nbsp;&hellip;'.HTML::anchor($this->uri, '<small class="muted"><br><br>Continue Reading</small>');
+                }
+                else
+                {
+                    $link = '&nbsp;&hellip;'.HTML::anchor($this->uri, '<small class="muted"><br><br>Continue Reading</small>', ['class' => 'post_read_more']);
+                }
+            }
+        }
+
+        return $this->excerpt . $link;
     }
 
 }

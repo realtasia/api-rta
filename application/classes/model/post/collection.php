@@ -20,11 +20,12 @@ class Model_Post_Collection extends Collection {
      */
     public function search($args = array(), $uid = NULL)
     {
+        $this->ensureIndex(['company._id' => 1], ['sparse' => true]);
         $defaults = [
            'status' => null, 'skip' => 0, 'limit' => 11, 'sort' => 'active',
            's' => '', 'include_ids' => [], 'page_id' => null, 'parent_id' => null,
            'user_id' => null, 'type' => null, 'listing' => [], 'to_id' => null,
-            'privacy' => NULL, 'feed' => false
+            'privacy' => NULL, 'feed' => false, 'company_id' => null,
         ];
 
         // set some empty arrays
@@ -72,7 +73,10 @@ class Model_Post_Collection extends Collection {
             $query['privacy.is'] = $privacy;
 
         if($parent_id)
-            $query['parent._id'] = Document::check_id($parent_id);
+            $query['page_parent._id'] = Document::check_id($parent_id);
+
+        if($company_id)
+            $query['company._id'] = Document::check_id($company_id);
 
         if($to_id)
             $query['to._id'] = Document::check_id($to_id);
@@ -90,9 +94,12 @@ class Model_Post_Collection extends Collection {
                 default: $sort = ['_id' => -1]; break;
             }
         }
+
+        unset($fields['message']);
         //return $query;
         $results = $this
                 ->find($query)
+                ->fields(['message' => 0])
                 ->limit($limit)
                 ->sort($sort)
                 ->skip($skip);
