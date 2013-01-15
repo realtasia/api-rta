@@ -34,7 +34,7 @@ class Controller_Locations extends Controller_Resource {
                 ['child.name' => new MongoRegex("/^" . $id . "/")],
                 ['child' => new MongoRegex("/^" . $id . "/")]
             ]
-        ]);
+                ]);
         return $this->data($e);
     }
 
@@ -82,26 +82,76 @@ class Controller_Locations extends Controller_Resource {
 
     public function action_modifyestate()
     {
-        $r      = [];
-        $u      = (object) $this->get_user();
-        $ids    = $this->request->post('ids');
-        $estate = $this->request->post('estate');
+        $u         = (object) $this->get_user();
+        $children  = null;
+        $estate    = trim($this->request->post('estate'));
+        $sector    = trim($this->request->post('sector'));
+
         Collection::factory('singpost')->update_safe(
-                ['_id' => ['$in' => Arr::map('Document::check_id', $ids)]], ['$set' => ['estate' => $estate]], ['multiple' => true]
+                ['postal' => new MongoRegex("/^$sector/")], ['$set' => ['estate' => $estate]], ['multiple' => true]
         );
-        if (!Document::factory('page')->load(['type' => 'location', 'name' => $estate]))
+
+        $new = Document::factory('page');
+        $load = $new->load(['name' => $estate, 'type' => 'location', 'subtype' => 'Estate']);
+
+        if(!$load)
         {
-            $params = ['subtype' => 'estate', 'type'    => 'location', 'user'    => ['_id'  => $u->_id, 'name' => $u->name], 'name'    => $estate];
-            Document::factory('page')->create($params);
+            $new          = $new->create([
+                'subtype' => 'Estate',
+                'type'    => 'location',
+                'user'    => ['_id'  => Document::check_id($u->_id), 'name' => $u->name],
+                'name'    => $estate,
+                'sector'  => $sector,
+            ]);
+
+            $new->load();
         }
 
-        return $this->data(['success' => true]);
-        //return $this->data(Arr::merge($ids, ['estate' => $estate]));
+        if($new->loaded())
+        {
+            $uids = [];
+            $updatekids = Collection::factory('singpost')->find(['postal' => new MongoRegex("/^$sector/")]);
+            while($updatekids->hasNext())
+            {
+                $c = $updatekids->getNext();
+                $cid = Arr::get($c->child, '_id');
+                if($cid)
+                {
+                    $uids[] = $cid;
+                }
+
+            }
+
+            $children = Collection::factory('page')->update_safe(['_id' => ['$in' => $uids]], [
+            '$unset' => ['oldestate' => 1],
+            '$set'   => [
+                'sector' => $sector,
+                'parent' => [
+                    '_id'  => $new->_id,
+                    'name' => $new->name,
+                    'uri'  => $new->uri,
+                    'type' => 'location',
+            ]]], ['multiple' => true]);
+
+            if($children)
+            {
+                $old_count = Arr::get($new->counts, 'locations', 0);
+                $new_count = (int) $children + (int) $old_count;
+                $new->set('counts.locations', $new_count);
+                $new->save();
+            }
+        }
+
+        return $this->data([
+            'children'  => $children,
+            'newcount'  => $new_count,
+            'newestate' => $new->as_array()
+        ]);
     }
 
     public function action_createlocation()
     {
-        $r       = $new     = [];
+        $new     = [];
         $u       = (object) $this->get_user();
         $ids     = $this->request->post('ids');
         $data    = $this->request->post('data');
@@ -113,15 +163,15 @@ class Controller_Locations extends Controller_Resource {
         if (empty($ids) || !$estate || !$name || !$subtype || !in_array($subtype, ['Private Apartments', 'Serviced Apartments', 'Private Landed', 'HDB']))
             return $this->error('invalid_request');
 
+        // retrieve the given estate from the db or throw error if not found
+        $e = Document::factory('page');
+
+        if (!$e->load(['name' => $estate, 'type' => 'location']))
+            return $this->error('invalid_request');
+
         $l = Document::factory('page');
         if (!$l->load(['name' => $name]))
         {
-            // retrieve the given estate from the db or throw error if not found
-            $e = Document::factory('page');
-
-            if (!$e->load(['name' => $estate, 'type' => 'location']))
-                return $this->error('invalid_request');
-
             // populate location data
             $new['parent']        = [
                 '_id'  => $e->_id,
@@ -131,11 +181,11 @@ class Controller_Locations extends Controller_Resource {
             ];
             $new['subtype']       = $subtype;
             $new['name']          = $name;
-            $new['sector']       = (array) Arr::get($data, 'sectors', []);
+            $new['sector']        = (array) Arr::get($data, 'sectors', []);
             $new['property_type'] = Arr::get($data, 'property_type', []);
             $new['content']       = Arr::get($data, 'content');
             $new['type']          = 'location';
-            $new['user']          = ['_id'  => $u->_id, 'name' => $u->name];
+            $new['user']          = ['_id'  => Document::check_id($u->_id), 'name' => $u->name];
 
             // load new values
             $location = Document::factory('page');
@@ -148,6 +198,7 @@ class Controller_Locations extends Controller_Resource {
                 // update singpost table
                 Collection::factory('singpost')->update_safe(
                         ['_id' => ['$in' => Arr::map('Document::check_id', $ids)]], ['$set' => [
+                        'type'  => Arr::get($data, 'property_type'),
                         'child' => [
                             '_id'  => $location->_id,
                             'name' => $location->name,
@@ -159,6 +210,19 @@ class Controller_Locations extends Controller_Resource {
         }
         else
         {
+            $l->name          = $name;
+            $l->subtype       = $subtype;
+            $l->property_type = Arr::get($data, 'property_type', []);
+            $l->content       = Arr::get($data, 'content');
+            $l->parent        = [
+                '_id'  => $e->_id,
+                'name' => $e->name,
+                'uri'  => $e->uri,
+                'type' => 'location',
+            ];
+
+            $l->save();
+
             Collection::factory('singpost')->update_safe(
                     ['_id' => ['$in' => Arr::map('Document::check_id', $ids)]], ['$set' => [
                     'child' => [
@@ -212,7 +276,7 @@ class Controller_Locations extends Controller_Resource {
                         ];
                         $new['subtype']       = 'Private Apartments';
                         $new['name']          = ucwords(strtolower($name));
-                        $new['sector']       = substr($f['postal'], 0, 2);
+                        $new['sector']        = substr($f['postal'], 0, 2);
                         $new['property_type'] = $property_type;
                         $new['content']       = Arr::get($data, 'content');
                         $new['type']          = 'location';
@@ -288,7 +352,7 @@ class Controller_Locations extends Controller_Resource {
                     ];
                     $new['subtype']       = 'Private Apartments';
                     $new['name']          = ucwords(strtolower($name));
-                    $new['sector']       = substr($f['postal'], 0, 2);
+                    $new['sector']        = substr($f['postal'], 0, 2);
                     $new['property_type'] = $property_type;
                     $new['content']       = Arr::get($data, 'content');
                     $new['type']          = 'location';
@@ -507,17 +571,56 @@ class Controller_Locations extends Controller_Resource {
 
         if (isset($q['s']))
         {
+
+            $r['$or'] = [
+                ['building' => new MongoRegex("/^" . strtoupper($q['s']) . "/")],
+                ['child.name' => new MongoRegex("/^" . ucwords(strtolower($q['s'])) . "/")],
+                ['child' => new MongoRegex("/^" . ucwords(strtolower($q['s'])) . "/")]
+            ];
             if (strpos($q['s'], ','))
             {
-                $r['postal'] = ['$in' => explode(',', $q['s'])];
+                $r['$or'][] = ['postal' => ['$in' => explode(',', $q['s'])]];
             }
             else
             {
-                $r['postal'] = $q['s'];
+                $r['$or'][] = ['postal' => new MongoRegex("/^" . ucwords(strtolower($q['s'])) . "/")];
             }
         }
 
         return $r;
+    }
+
+    public function action_correct()
+    {
+        return $this->data(Collection::factory('page')->correct3());
+    }
+
+    public function action_orphans()
+    {
+        $ids = [];
+        echo "<pre>";
+        $estates = Collection::factory('page')->find([
+            'type' => 'location', 'subtype' => 'Estate'
+        ], ['_id' => 1]);
+
+        while($estates->hasNext())
+        {
+            $e = $estates->getNext();
+            $ids[] = Document::check_id($e->_id);
+        }
+
+        $ids = array_filter($ids);
+
+        $children = Collection::factory('page')->remove_safe([
+            'type' => 'location', 'parent._id' => ['$nin' => $ids], 'subtype' => ['$ne' => 'Estate']
+        ], ['multiple' => true]);
+        echo Debug::vars($children);
+
+//        while($children->hasNext())
+//        {
+//            $c= $children->getNext()->as_array();
+//            var_dump(['name' => $c['name'], 'parent' => $c['parent']]);
+//        }
     }
 
 }

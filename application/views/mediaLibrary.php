@@ -1,3 +1,4 @@
+<script type="text/javascript" src="/assets/js/medialib.js"></script>
 <div style="margin:0 auto 10px auto;text-align: center;width:60%;">
 <!--    <textarea id="log" style="height:100px;border:1px solid #999;text-align: left;float:none;overflow:auto;overflow-x:hidden;"></textarea>-->
 </div>

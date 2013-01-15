@@ -1,6 +1,4 @@
-<?php
-
-defined('SYSPATH') or die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');
 
 /**
  * Description of collection
@@ -11,7 +9,7 @@ defined('SYSPATH') or die('No direct script access.');
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */
-class Model_Page_Collection extends Mongo_Collection {
+class Model_Page_Collection extends Collection {
 
     protected $name = 'pages';
 
@@ -46,7 +44,7 @@ class Model_Page_Collection extends Mongo_Collection {
         // if there is a user id, set the class property for interaction
         // retrieval later (subscripts & likes)
         if ($user_id)
-            $this->_user_id = parent::check_id($user_id);
+            $this->_user_id = Document::check_id($user_id);
 
         // set some empty arrays
         $query  = $ids    = $return = [];
@@ -65,7 +63,7 @@ class Model_Page_Collection extends Mongo_Collection {
         if (!empty($subtypes))
             $query['subtype'] = ['$in' => (array) $subtypes];
 
-        $query['subtype']['$ne'] = 'estate';
+        $query['subtype']['$ne'] = 'Estate';
         // if specific records are needed add to the ids array
         if (!empty($include_ids))
             $ids              = $include_ids;
@@ -87,16 +85,12 @@ class Model_Page_Collection extends Mongo_Collection {
 
         // this is different from include_ids as we are looking in the
         // parent_id property to find children. @TODO dbrefs instead?
-        if ($children)
+        if ($object_id)
         {
-            $query['parent._id'] = array(
-                '$in' => array_map('Document::check_id', (array) $children)
-            );
+            $query['parent._id'] = Document::check_id($object_id);
+            $query['_id']['$ne'] = Document::check_id($object_id);
         }
 
-        // similar to the above, we don't return the parent object in results
-        if ($object_id)
-            $query['_id']['$ne'] = $this->check_id($object_id);
 
         // now we validate the consodilated ids and continue building
         if (!empty($ids))
@@ -137,6 +131,47 @@ class Model_Page_Collection extends Mongo_Collection {
         }
 
         return array_filter($return);
+    }
+
+    public function correct()
+    {
+        $ret = [];
+        $estates = $this->find(['subtype' => 'estate'])->fields(['counts', 'name', '_id']);
+
+        while($estates->hasNext())
+        {
+            $e = $estates->getNext();
+            $children = parent::factory('page')->find(['parent._id' => $e->_id])->fields(['_id']);
+            $e->set('oldestate', $children->count());
+            $e->save();
+            $ret[] = [$e->name => $e->counts['locations']];
+        }
+
+        return $ret;
+    }
+
+    public function correct2()
+    {
+        $ret = [];
+        $estates = $this->find(['subtype' => 'estate'])->fields(['counts', 'name', '_id']);
+
+        while($estates->hasNext())
+        {
+            $e = $estates->getNext();
+            $ret[] = parent::factory('page')->update_safe(['parent._id' => $e->_id], ['$set' => ['oldestate' => $e->_id]]);
+        }
+
+        return $ret;
+    }
+
+    public function correct3()
+    {
+        return $this->remove_safe([
+            '$or' => [
+                ['subtype' => 'estate'],
+                ['subtype' => 'Estate'],
+            ]
+        ], ['multiple' => true]);
     }
 
 }

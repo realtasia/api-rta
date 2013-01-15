@@ -13,7 +13,7 @@ defined('SYSPATH') or die('No direct script access.');
  */
 class Controller_Post extends Controller_Resource {
 
-    private static $valid_get_types = [
+    private static $valid_get_types  = [
         'find_unique'
     ];
     private static $valid_post_types = [
@@ -116,17 +116,22 @@ class Controller_Post extends Controller_Resource {
         $post = Document::factory('post', $this->request->param('id'));
 
         // We check the post user
-        if ($post->load(null, array_fill_keys(['user', 'counts', 'page', 'page_parent', 'to', 'type'], 1)))
+        if ($post->load(null, array_fill_keys(['user', 'counts', 'page', 'page_parent', 'to', 'type', 'picture'], 1)))
         {
             $post_user  = (string) $post->user['_id'];
             $page       = (string) $post->page['_id'];
             $is_owner   = static::logged_in_is_id($post_user);
             $page_is_cu = static::logged_in_is_id($page);
+            if ($post->type === 'attachment')
+            {
+                $attachment = $post->as_array();
+            }
 
             if ($is_owner || $page_is_cu || parent::has_role('admin'))
             {
                 if ($post->delete())
                 {
+                    $this->delete_attachment($attachment);
                     return $this->data(['success' => 1]);
                 }
             }
@@ -142,6 +147,7 @@ class Controller_Post extends Controller_Resource {
                 {
                     if ($post->delete())
                     {
+                        $this->delete_attachment($attachment);
                         return $this->data(['success' => 1]);
                     }
                 }
@@ -188,11 +194,11 @@ class Controller_Post extends Controller_Resource {
      */
     public function action_comment()
     {
-        $params            = static::format(static::$params, 66, 100);
-        $params['type']    = 'comment';
-        $params['status']  = static::$params['status'];
-        $params['user']    = static::$params['user'];
-        $params['post']    = static::$params['post'];
+        $params           = static::format(static::$params, 66, 100);
+        $params['type']   = 'comment';
+        $params['status'] = static::$params['status'];
+        $params['user']   = static::$params['user'];
+        $params['post']   = static::$params['post'];
 
         $c = Document::factory('comment', null, static::$user_id)
                 ->create($params);
@@ -277,6 +283,16 @@ class Controller_Post extends Controller_Resource {
     public function action_unsubscribe()
     {
         return parent::interact('unsubscribe', 'post');
+    }
+
+
+    public function action_attachments()
+    {
+        $id = $this->request->param('id');
+
+        $q = Arr::merge(static::$params, ['type' => 'attachment', 'page_id' => $id]);
+
+        return $this->data(Collection::factory('post')->search($q, static::$user_id));
     }
 
     /*     * ************************************************************************
@@ -407,7 +423,7 @@ class Controller_Post extends Controller_Resource {
         ];
         if ($validation->check())
         {
-            static::$params['message'] = nl2br(Security::xss_clean(trim(static::$params['message'])));
+            static::$params = static::format(static::$params);
 
             $params = Arr::merge(static::$params, $defaults);
 
@@ -706,6 +722,21 @@ class Controller_Post extends Controller_Resource {
      * Protected STATIC Utility Methods
      * *********************************************************************** */
 
+    protected static function delete_attachment($post)
+    {
+        $picture = Arr::get($post, 'picture');
+        // not sure if basename() can do relative
+        if (substr($picture, 0, 1) !== '/')
+        {
+            $picture = '/' . $picture;
+        }
+
+        $file = basename($picture);
+
+        $s3 = AWS::s3();
+        return $s3->delete_all_object_versions('static2.realtasia.com.sg', "/$file/i");
+    }
+
     /**
      * Small validation for property types
      *
@@ -747,7 +778,7 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
-     * Creates proper keys for validation. Because params (for Mongo) include
+     * Creates proper keys for validation because params (for Mongo) include
      * sub arrays. But Kohana & Community decided that it should not validate
      * sub arrays. I see their point, but I still think they're full of shit.
      *
@@ -792,14 +823,14 @@ class Controller_Post extends Controller_Resource {
      */
     protected static function extract_links($text)
     {
-/**
- *  $validTlds is an associative array mapping valid TLDs to the value true.
- *  Since the set of valid TLDs is not static, this array should be updated
- *  from time to time.
- *
- *  List source:  http://data.iana.org/TLD/tlds-alpha-by-domain.txt
- *  Last updated: 2012-09-06
- */
+        /**
+         *  $validTlds is an associative array mapping valid TLDs to the value true.
+         *  Since the set of valid TLDs is not static, this array should be updated
+         *  from time to time.
+         *
+         *  List source:  http://data.iana.org/TLD/tlds-alpha-by-domain.txt
+         *  Last updated: 2012-09-06
+         */
         $validTlds = array_fill_keys(explode(" ", ".ac .ad .ae .aero .af .ag .ai .al .am .an .ao .aq .ar .arpa .as .asia .at .au .aw .ax .az .ba .bb .bd .be .bf .bg .bh .bi .biz .bj .bm .bn .bo .br .bs .bt .bv .bw .by .bz .ca .cat .cc .cd .cf .cg .ch .ci .ck .cl .cm .cn .co .com .coop .cr .cu .cv .cw .cx .cy .cz .de .dj .dk .dm .do .dz .ec .edu .ee .eg .er .es .et .eu .fi .fj .fk .fm .fo .fr .ga .gb .gd .ge .gf .gg .gh .gi .gl .gm .gn .gov .gp .gq .gr .gs .gt .gu .gw .gy .hk .hm .hn .hr .ht .hu .id .ie .il .im .in .info .int .io .iq .ir .is .it .je .jm .jo .jobs .jp .ke .kg .kh .ki .km .kn .kp .kr .kw .ky .kz .la .lb .lc .li .lk .lr .ls .lt .lu .lv .ly .ma .mc .md .me .mg .mh .mil .mk .ml .mm .mn .mo .mobi .mp .mq .mr .ms .mt .mu .museum .mv .mw .mx .my .mz .na .name .nc .ne .net .nf .ng .ni .nl .no .np .nr .nu .nz .om .org .pa .pe .pf .pg .ph .pk .pl .pm .pn .post .pr .pro .ps .pt .pw .py .qa .re .ro .rs .ru .rw .sa .sb .sc .sd .se .sg .sh .si .sj .sk .sl .sm .sn .so .sr .st .su .sv .sx .sy .sz .tc .td .tel .tf .tg .th .tj .tk .tl .tm .tn .to .tp .tr .travel .tt .tv .tw .tz .ua .ug .uk .us .uy .uz .va .vc .ve .vg .vi .vn .vu .wf .ws .xn--0zwm56d .xn--11b5bs3a9aj6g .xn--3e0b707e .xn--45brj9c .xn--80akhbyknj4f .xn--80ao21a .xn--90a3ac .xn--9t4b11yi5a .xn--clchc0ea0b2g2a9gcd .xn--deba0ad .xn--fiqs8s .xn--fiqz9s .xn--fpcrj9c3d .xn--fzc2c9e2c .xn--g6w251d .xn--gecrj9c .xn--h2brj9c .xn--hgbk6aj7f53bba .xn--hlcj6aya9esc7a .xn--j6w193g .xn--jxalpdlp .xn--kgbechtv .xn--kprw13d .xn--kpry57d .xn--lgbbat1ad8j .xn--mgb9awbf .xn--mgbaam7a8h .xn--mgbayh7gpa .xn--mgbbh1a71e .xn--mgbc0a9azcg .xn--mgberp4a5d4ar .xn--o3cw4h .xn--ogbpf8fl .xn--p1ai .xn--pgbs0dh .xn--s9brj9c .xn--wgbh1c .xn--wgbl6a .xn--xkc2al3hye2a .xn--xkc2dl3a5ee0h .xn--yfro4i67o .xn--ygbi2ammx .xn--zckzah .xxx .ye .yt .za .zm .zw"), true);
 
         /*
@@ -868,7 +899,7 @@ class Controller_Post extends Controller_Resource {
                     $linkText    = "$domain$port$path";
                 }
 
-                $linkHtml = html::anchor($completeUrl, htmlspecialchars($linkText), ['title' => 'Visit link in new tab', 'target' => '_blank']);
+                $linkHtml = html::anchor($completeUrl, htmlspecialchars($linkText), ['title'  => 'Visit link in new tab', 'target' => '_blank']);
 
                 // Cheap e-mail obfuscation to trick the dumbest mail harvesters.
                 $linkHtml = str_replace('@', '&#64;', $linkHtml);
@@ -891,30 +922,33 @@ class Controller_Post extends Controller_Resource {
         return $html;
     }
 
-
     protected static function format($params, $len = 76, $max = 200)
     {
-        $text   = trim(strip_tags($params['message']));
-        $original = $chunks = explode("\n", $text);
-        $link   = Arr::get($params['link'], $type);
+        $text     = trim(Security::xss_clean($params['message']));
+        $original = $chunks   = explode("\n", $text);
+        $link     = Arr::get($params['link'], $type);
 
-        foreach($chunks as $key => $t)
+        foreach ($chunks as $key => $t)
         {
-            if(mb_strlen($t) >= 1)
+            if (mb_strlen($t) >= 1)
             {
                 $chunks[$key] = trim(Text::wrap($t, $len));
             }
         }
 
+        // after all the wrapping, more line breaks occurs. join & split again
+        // for accuracy
         $chunks = explode("\n", implode("\n", $chunks));
 
-        if($link)
+        // if this is a link-type post, the excerpt is shorter
+        if ($link)
         {
             $excerpt = implode("\n", array_slice($chunks, 0, 5));
         }
         else
         {
-            switch(Arr::get($params, 'type'))
+            // special post types have shorter excerpts
+            switch (Arr::get($params, 'type'))
             {
                 case 'attachment':
                 case 'listing':
@@ -927,9 +961,11 @@ class Controller_Post extends Controller_Resource {
             }
         }
 
+        // we default to the original text
         $message = implode("\n", $original);
 
-        if(count($chunks) >= $max)
+        // unless the original post was too long
+        if (count($chunks) >= $max)
         {
             $message = implode("\n", array_slice($chunks, 0, $max));
         }
@@ -939,4 +975,5 @@ class Controller_Post extends Controller_Resource {
 
         return $params;
     }
+
 }

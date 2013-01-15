@@ -234,7 +234,7 @@ class Model_User extends Document {
                     'can_like'         => false,
                     'can_subscribe'    => false,
                 ];
-                $arr['connections'] = static::get_all_connection_routes($arr['_id']);
+                $arr['connections'] = static::get_all_connection_routes($arr);
                 $arr['actions']      = static::get_action_routes($arr['_id']);
                 return $arr;
             }
@@ -434,16 +434,19 @@ class Model_User extends Document {
      * @param string|MongoID $user_id
      * @return array
      */
-    protected static function get_all_connection_routes($user_id)
+    protected static function get_all_connection_routes($user)
     {
         $actions = [];
+        $uid = $user['_id'];
+        $lid = Arr::path($user, 'library._id');
 
-        foreach (['privacy', 'notifications', 'inbox', 'library', 'subscriptions'] as $v)
+        foreach (['privacy', 'notifications', 'inbox', 'subscriptions'] as $v)
         {
             $actions[$v] = Router::user($v, $user_id);
         }
 
-        return Arr::merge($actions, static::get_public_connection_routes($user_id));
+        $actions['library'] = Router::user('library', $lid);
+        return Arr::merge($actions, static::get_public_connection_routes($uid));
     }
 
     /**
@@ -462,6 +465,7 @@ class Model_User extends Document {
             'info',
             'listings',
             'feed',
+            'albums',
             'testimonials'
         ];
 

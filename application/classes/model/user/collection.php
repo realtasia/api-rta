@@ -26,36 +26,36 @@ class Model_User_Collection extends Collection {
      */
     public function search($args = array(), $user_id = NULL)
     {
-        $this->collection()->ensureIndex([
-            'status' => 1, 'name' => 1, 'roles' => 1, 'settings.privacy.is' => 1, 'active' => -1
-        ], ['name' => 'user_search_fields', 'safe' => true]);
-        $this->collection()->ensureIndex([
-            'username' => 1, 'email' => 1, 'info.telephone.mobile' => 1
-        ], ['name' => 'user_id_fields', 'safe' => true]);
-        $this->collection()->ensureIndex([
-            'logins.user_id' => 1
-        ], ['sparse' => true, 'safe' => true]);
-        $this->collection()->ensureIndex([
-            'company._id' => 1
-        ], ['sparse' => true, 'safe' => true]);
-        $this->collection()->ensureIndex([
-            'rep._id' => 1
-        ], ['sparse' => true, 'safe' => true]);
-        $this->collection()->ensureIndex([
-            'rep.type' => 1
-        ], ['sparse' => true, 'safe' => true]);
-        $this->collection()->ensureIndex([
-            'rep.token' => 1
-        ], ['sparse' => true, 'safe' => true]);
-        $this->collection()->ensureIndex([
-            'company.name' => 1
-        ], ['sparse' => true, 'safe' => true]);
+//        $this->collection()->ensureIndex([
+//            'status' => 1, 'name' => 1, 'roles' => 1, 'settings.privacy.is' => 1, 'active' => -1
+//        ], ['name' => 'user_search_fields', 'safe' => true]);
+//        $this->collection()->ensureIndex([
+//            'username' => 1, 'email' => 1, 'info.telephone.mobile' => 1
+//        ], ['name' => 'user_id_fields', 'safe' => true]);
+//        $this->collection()->ensureIndex([
+//            'logins.user_id' => 1
+//        ], ['sparse' => true, 'safe' => true]);
+//        $this->collection()->ensureIndex([
+//            'company._id' => 1
+//        ], ['sparse' => true, 'safe' => true]);
+//        $this->collection()->ensureIndex([
+//            'rep._id' => 1
+//        ], ['sparse' => true, 'safe' => true]);
+//        $this->collection()->ensureIndex([
+//            'rep.type' => 1
+//        ], ['sparse' => true, 'safe' => true]);
+//        $this->collection()->ensureIndex([
+//            'rep.token' => 1
+//        ], ['sparse' => true, 'safe' => true]);
+//        $this->collection()->ensureIndex([
+//            'company.name' => 1
+//        ], ['sparse' => true, 'safe' => true]);
         $logged_in_user = $user_search_fields_hint = false;
 //
         $defaults = [
            'limit' => 11, 'skip' => 0, 'roles' => [], 'sort' => null,
            's' => null, 'include_ids' => [], 'status' => ['$ne' => 'terminated'],
-            'privacy' => NULL
+           'privacy' => NULL, 'company' => NULL, 'company_id' => NULL
         ];
 
         // set some empty arrays
@@ -85,11 +85,16 @@ class Model_User_Collection extends Collection {
             $logged_in_user = $this->get_user($user_id);
             // $query['_id']['$ne'] = new MongoID($user_id);
         }
+
         if($company)
         {
             $query['company.name'] = new MongoRegex('/^'. strtoupper($company) .'/');
         }
 
+        if($company_id)
+        {
+            $query['company._id'] = Document::check_id($company_id);
+        }
         // looking for a specific role
         if (!empty($roles))
             $query['roles'] = array('$in' => $roles);

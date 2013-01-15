@@ -536,13 +536,47 @@ class Controller_User extends Controller_Resource {
      */
     public function action_library()
     {
-        $id = Arr::get($this->request->param(), 'id');
-        if ($this->is_GET())
+        return $this->data(Document::factory('page')->get($this->request->param('id')));
+    }
+
+    public function action_albums()
+    {
+//        $test = Collection::factory('post')->find(['type' => ['$in' => ['album', 'library']]]);
+//        while($test->hasNext())
+//        {
+//            $p = $test->getNext();
+//            $p->set('excerpt', $p->message);
+//            $p->save();
+//        }
+//        $test->reset();
+        $id = $this->request->param('id');
+
+        static::$params['type'] = 'album';
+        static::$params['user_id'] = $id;
+
+        if (static::logged_in_is_id($id))
         {
-            $page = Document::factory('page', ['user._id' => $id]);
-            $page->load();
-            return $page->stringify($page->as_array());
+            $albums = Collection::factory('post')->search(static::$params, static::$user_id);
         }
+
+        // admin sees everything
+        if (parent::has_role('admin'))
+            $albums = Collection::factory('post')->search(static::$params, static::$user_id);
+
+        if (parent::is_client() || parent::logged_in())
+        {
+            // only publically viewable posts
+            static::$params['privacy'] = static::logged_in_is_id($id) ? null : 'PUBLIC';
+            // we include posts written on his page
+            $albums = Collection::factory('post')->search(static::$params, static::$user_id);
+        }
+
+        if($albums)
+        {
+            return $this->data($albums);
+        }
+
+        return $this->error('invalid_request');
     }
 
     protected function generate_qrcode(\QRcode $qr, $values)
@@ -1331,6 +1365,8 @@ class Controller_User extends Controller_Resource {
         {
             $attachment->uri = '/post.php?id=' . (string) $attachment->_id;
             $attachment->save();
+            $album->set('picture', $picture);
+            $album->save();
             $user->avatar = $picture;
             $user->save();
             return $this->data(['success' => 1]);

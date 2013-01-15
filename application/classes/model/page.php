@@ -24,7 +24,7 @@ class Model_Page extends Document {
         $id = parent::check_id($id);
         if ($id instanceof MongoID)
         {
-            $query = $id;
+            $query['_id'] = $id;
         }
         else
         {
@@ -195,14 +195,14 @@ class Model_Page extends Document {
         if ($cu)
         {
             $arr['interactions'] = parent::factory('interaction', NULL, $cu_id)->interacting($arr['_id'], 'page');
-            $arr['actions']      = static::get_action_routes($arr['_id']);
+            $arr['actions']      = static::get_action_routes($arr);
         }
 
         return $arr;
     }
 
     /**
-     * Updates privacy settings of a post.
+     * Updates privacy settings of a page.
      *
      * @param array $params
      * @param string|MongoID $user_id
@@ -229,13 +229,20 @@ class Model_Page extends Document {
      * @param string|MongoID $user_id
      * @return array
      */
-    protected static function get_action_routes($_id)
+    protected static function get_action_routes($post)
     {
+        $a = ['like', 'unlike'];
         $actions = [];
 
-        foreach (['like', 'unlike', 'subscribe', 'unsubscribe'] as $v)
+        if(strtolower($post['type']) !== 'company' && strtolower($post['subtype']) !== 'estate')
         {
-            $actions[$v] = Router::post($v, $user_id);
+            $a[] = 'subscribe';
+            $a[] = 'unsubscribe';
+        }
+
+        foreach ($a as $v)
+        {
+            $actions[$v] = Router::page($v, $post['_id']);
         }
 
         return $actions;
@@ -308,7 +315,7 @@ class Model_Page extends Document {
         switch ($type)
         {
             case 'location':
-                return Arr::merge($defaults, ['attachments' => [], 'sectors' => []]);
+                return Arr::merge($defaults, ['attachments' => [], 'sector' => '']);
             case 'company' : return Arr::merge($defaults, static::_company_defaults());
             default: return $defaults;
         }

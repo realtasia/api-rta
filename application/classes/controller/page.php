@@ -339,7 +339,7 @@ class Controller_Page extends Controller_Resource {
      */
     public function action_like()
     {
-        return parent::interact('like', 'post');
+        return parent::interact('like', 'page');
     }
 
     /**
@@ -347,7 +347,7 @@ class Controller_Page extends Controller_Resource {
      */
     public function action_unlike()
     {
-        return parent::interact('unlike', 'post');
+        return parent::interact('unlike', 'page');
     }
 
     /**
@@ -355,7 +355,7 @@ class Controller_Page extends Controller_Resource {
      */
     public function action_subscribe()
     {
-        return parent::interact('subscribe', 'post');
+        return parent::interact('subscribe', 'page');
     }
 
     /**
@@ -363,7 +363,7 @@ class Controller_Page extends Controller_Resource {
      */
     public function action_unsubscribe()
     {
-        return parent::interact('unsubscribe', 'post');
+        return parent::interact('unsubscribe', 'page');
     }
 
 

@@ -58,7 +58,7 @@ class Model_Post extends Document {
             // save
             $this->save();
             $this->uri = '/post.php?id=' . (string) $this->_id;
-            if($this->message)
+            if ($this->message)
             {
                 $this->excerpt = $this->get_excerpt_link();
             }
@@ -173,18 +173,7 @@ class Model_Post extends Document {
     {
         if ($action === parent::SAVE_INSERT || $action === parent::SAVE_UPSERT)
         {
-            $pages = [];
-
-            if (isset($this->page))
-                $pages[] = $this->page;
-
-            if (isset($this->to))
-                $pages[] = $this->to;
-
-            if (isset($this->page_parent))
-                $pages[] = $this->page_parent;
-
-            return $this->process_counts(['pages'   => $pages, 'privacy' => $this->privacy], $this->type, $this->user);
+            return $this->process_counts($this->as_array());
         }
     }
 
@@ -282,11 +271,11 @@ class Model_Post extends Document {
         if ($this->current_user)
         {
             $arr['actions'] = static::get_action_routes($arr);
-            if($arr['is_owner'])
+            if ($arr['is_owner'])
             {
                 $arr['actions'] = static::get_owner_action_routes($arr);
             }
-            elseif($arr['is_page_owner'])
+            elseif ($arr['is_page_owner'])
             {
                 $arr['actions'] = static::get_page_owner_action_routes($arr);
             }
@@ -297,6 +286,11 @@ class Model_Post extends Document {
         if ($cu)
         {
             $arr['interactions'] = parent::factory('interaction', NULL, $cu_id)->interacting($arr['_id'], 'post');
+        }
+
+        if($arr['type'] === 'album')
+        {
+            $arr['connections']['attachments'] = Router::post('attachments', $arr['_id']);
         }
 
         // we should trigger the comment model's formatting so each comment in
@@ -315,16 +309,8 @@ class Model_Post extends Document {
      */
     public function before_delete()
     {
-        static::$after_delete_processing = [
-            '_id'         => $this->_id,
-            'user'        => $this->user,
-            'type'        => $this->type,
-            'counts'      => $this->counts,
-            'page'        => $this->page,
-            'page_parent' => $this->page_parent,
-            'to'          => $this->to,
-            'privacy'     => $this->privacy,
-        ];
+        $this->load();
+        static::$after_delete_processing = $this->as_array();
     }
 
     /**
@@ -334,60 +320,67 @@ class Model_Post extends Document {
      */
     public function after_delete()
     {
-        $f       = static::$after_delete_processing;
-        $id      = $f['_id'];
-        $user    = $f['user'];
-        $type    = $f['type'];
-        $counts  = $f['counts'];
-        $privacy = $f['privacy'];
-
-        unset($f['_id'], $f['user'], $f['type'], $f['counts'], $f['privacy']);
-        $pages = [];
-
-        foreach ($f as $key => $array)
-        {
-            if (!empty($array))
-                $pages[] = $array;
-        }
-
-        $this->process_counts(['pages'   => $pages, 'privacy' => $privacy], $type, $user, -1);
+        $f = static::$after_delete_processing;
+        $this->process_counts($f, -1);
 
         // remove all embedded documents
-        if (isset($counts))
+        if (isset($f['counts']))
         {
-            if ($counts['subscribers'] > 0 || $counts['likers'] > 0)
+            if ($f['counts']['subscribers'] > 0 || $f['counts']['likers'] > 0)
             {
-                parent::factory('interaction')->collection()
-                        ->remove_safe([
-                            'object_id'   => parent::check_id($id),
+                Collection::factory('interaction')
+                        ->remove([
+                            'object_id'   => parent::check_id($f['_id']),
                             'object_type' => 'post',
                                 ], ['multiple' => true]);
             }
 
-            if ($counts['comments'] > 0)
+            if ($f['counts']['comments'] > 0)
             {
-                parent::factory('comment')->collection()
-                        ->remove_safe([
-                            'post._id' => $id
+                Collection::factory('comment')
+                        ->remove([
+                            'post._id' => $f['_id']
                                 ], ['multiple' => true]);
             }
         }
+
+        if($f['type'] === 'attachment' && $f['subtype'] === 'avatar')
+        {
+            $u = Document::factory('user', $f['user']['_id']);
+            $u->set('avatar', null);
+            $u->save();
+        }
+
+        return $this;
     }
 
     /**
      * This updates all respective counts of a post's user and a post's pages
      * depending the type of post and the increment.
      *
-     * @param array $pages all possible pages [page, page_parent, to]
-     * @param string $type this post type
-     * @param array $user this post's creator
+     * @param array $params the post
      * @param int $inc increase or decrease
      * @return \Model_Post
      */
-    public function process_counts(array $params, $type, $user, $inc = 1)
+    public function process_counts(array $params, $inc = 1)
     {
-        $pages   = $params['pages'];
-        $privacy = $params['privacy'];
+        $pages   = [];
+        if (isset($params['page']))
+            $pages[] = $params['page'];
+
+        if (isset($params['to']))
+            $pages[] = $params['to'];
+
+        if (isset($params['page_parent']))
+            $pages[] = $params['page_parent'];
+
+        $privacy   = Arr::get($params, 'privacy');
+        $type      = Arr::get($params, 'type');
+        $user      = Arr::get($params, 'user');
+        $subtype   = Arr::get($params, 'subtype');
+        $mediainfo = Arr::get($params, 'mediainfo');
+
+        $pages = array_filter($pages);
         // not empty seem redundant, just in case there are no pages.
         // future posts maybe?
         if (!empty($pages))
@@ -397,6 +390,18 @@ class Model_Post extends Document {
                 // we do different page updates based on the post type
                 switch ($type)
                 {
+                    case 'wallpost' :
+                    case 'checkin' :
+                    case 'event' :
+                    case 'post' :
+                        $type = $type === 'wallpost' ? 'posts' : Inflector::plural($type);
+                        // for other kinds of posts, we don't update the
+                        // user whose page was written on.
+                        parent::factory('page', $page['_id'])
+                                ->inc('counts.' . $type, $inc)
+                                ->save();
+                        break;
+
                     case 'testimonial' :
                         // get the page type
                         $page_type = $page['type'] === 'user' ? 'user' : 'page';
@@ -406,48 +411,30 @@ class Model_Post extends Document {
                                 ->save();
                         break;
 
-                    case 'listing' :
-                    case 'wallpost' :
-                    case 'checkin' :
-                    case 'attachment' :
-                    case 'event' :
-                    case 'post' :
-                        $type = $type === 'wallpost' ? 'posts' : Inflector::plural($type);
-                        // for other kinds of posts, we don't update the
-                        // user whose page was written on.
-                        if ($page['type'] !== 'user' && $page['type'] !== 'album')
-                        {
-                            parent::factory('page', $page['_id'])
-                                    ->inc('counts.' . $type, $inc)
-                                    ->save();
-                            break;
-                        }
-                        if ($page['type'] === 'album')
-                        {
-                            parent::factory('post', $page['_id'])
-                                    ->inc('counts.' . $type, $inc)
-                                    ->save();
-                            break;
-                        }
-                        if ($page['type'] === 'library' && $this->type === 'attachment')
-                        {
-                            if (empty($this->mediainfo))
-                                break;
+                    case 'attachment':
+                        $page_type = Arr::get($page, 'type');
 
-                            if (strpos($this->mediainfo['mime'], 'image') !== false)
+                        if ($page_type === 'library')
+                        {
+                            if (strpos($mediainfo['mime'], 'image') !== false)
                             {
-                                $count_type = 'pictures';
+                                $type = 'picture';
+                            }
+                            elseif ($subtype === 'avatar')
+                            {
+                                $type = 'picture';
                             }
                             else
                             {
-                                $count_type = 'documents';
+                                $type = 'document';
                             }
-
-                            parent::factory('page', $page['_id'])
-                                    ->inc('counts.' . $count_type, $inc)
-                                    ->save();
-                            break;
                         }
+
+                        parent::factory('page', $page['_id'])
+                                ->inc('counts.' . Inflector::plural($type), $inc)
+                                ->save();
+
+                        break;
                     case 'conversation' :
                         // conversations, we update both. Because we need
                         // the number of total conversations in each user's
@@ -654,11 +641,11 @@ class Model_Post extends Document {
         {
             // wallpost, testimonial, conversation, listing, checkin, event, album
             case "checkin": return static::l($uri, 'checked in') . " to $page_link.";
-            case "testimonial": return "wrote a ".static::l($uri, 'testimonial')." about $page_link.";
-            case "listing": return "created a ".static::l($uri, 'listing')." in $page_link.";
-            case "event": return "created an ".static::l($uri, 'event')." in $page_link.";
+            case "testimonial": return "wrote a " . static::l($uri, 'testimonial') . " about $page_link.";
+            case "listing": return "created a " . static::l($uri, 'listing') . " in $page_link.";
+            case "event": return "created an " . static::l($uri, 'event') . " in $page_link.";
             // for avatar uploads, state so, if not default to new media
-            case "attachment": return Arr::get($post, 'subtype') === 'avatar' ? "uploaded a new ".static::l($uri, 'profile picture')."." : "uploaded ".static::l($uri, 'new media')." " . ($own_wall ? '.' : "in $page_link.");
+            case "attachment": return Arr::get($post, 'subtype') === 'avatar' ? "uploaded a new " . static::l($uri, 'profile picture') . "." : "uploaded " . static::l($uri, 'new media') . " " . ($own_wall ? '.' : "in $page_link.");
             case ("post" || 'wallpost'):
                 $link = Arr::get($post, 'link');
                 if ($link)
@@ -666,16 +653,16 @@ class Model_Post extends Document {
                     switch ($link['type'])
                     {
                         case 'rich':
-                            return "shared a ".static::l($uri, 'document')."" . ($own_wall ? $ohw : " on $page_link's profile page.");
+                            return "shared a " . static::l($uri, 'document') . "" . ($own_wall ? $ohw : " on $page_link's profile page.");
                         case 'video':
-                            return "shared a ".static::l($uri, 'video')."" . ($own_wall ? $ohw : " on $page_link's profile page.");
+                            return "shared a " . static::l($uri, 'video') . "" . ($own_wall ? $ohw : " on $page_link's profile page.");
                         case 'photo':
-                            return "shared a ".static::l($uri, 'photo')."" . ($own_wall ? $ohw : " on $page_link's profile page.");
+                            return "shared a " . static::l($uri, 'photo') . "" . ($own_wall ? $ohw : " on $page_link's profile page.");
                         case 'link':
-                            return "shared a ".static::l($uri, 'link')."" . ($own_wall ? $ohw : " on $page_link's profile page.");
+                            return "shared a " . static::l($uri, 'link') . "" . ($own_wall ? $ohw : " on $page_link's profile page.");
                     }
                 }
-                return "wrote a ".static::l($uri, 'post'). ($own_wall ? $ohw : " on $page_link's profile page.");
+                return "wrote a " . static::l($uri, 'post') . ($own_wall ? $ohw : " on $page_link's profile page.");
             default: return "shared in $page_link.";
         }
     }
@@ -768,17 +755,17 @@ class Model_Post extends Document {
     protected function get_excerpt_link()
     {
         $link = '';
-        if($this->message)
+        if ($this->message)
         {
-            if(strlen($this->message) !== strlen($this->excerpt))
+            if (strlen($this->message) !== strlen($this->excerpt))
             {
-                if(strlen($this->message) >= 10000)
+                if (strlen($this->message) >= 10000)
                 {
-                    $link = '&nbsp;&hellip;'.HTML::anchor($this->uri, '<small class="muted"><br><br>Continue Reading</small>');
+                    $link = '&nbsp;&hellip;' . HTML::anchor($this->uri, '<small class="muted"><br><br>Continue Reading</small>');
                 }
                 else
                 {
-                    $link = '&nbsp;&hellip;'.HTML::anchor($this->uri, '<small class="muted"><br><br>Continue Reading</small>', ['class' => 'post_read_more']);
+                    $link = '&nbsp;&hellip;' . HTML::anchor($this->uri, '<small class="muted"><br><br>Continue Reading</small>', ['class' => 'post_read_more']);
                 }
             }
         }

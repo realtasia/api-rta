@@ -117,8 +117,23 @@ class Model_Post_Collection extends Collection {
 
             $return[] = $ret;
         }
-
+        $this->reset();
         return array_filter($return);
+    }
+
+    /**
+     * Utility method to retrieve albums
+     *
+     * @uses self::search()
+     * @param array $args
+     * @param string||MongoID $user_id
+     * @return type
+     */
+    public function albums($args = array(), $user_id = NULL)
+    {
+        $defaults = ['type' => 'album'];
+
+        return $this->search(Arr::merge($defaults, $args), $user_id);
     }
 
     /**
