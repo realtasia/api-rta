@@ -595,22 +595,20 @@ class Controller_User extends Controller_Resource {
                 case $privacy->is === 'PUBLIC': break;
             }
 
-
-
             foreach($values as $key => $value)
             {
                 switch($key)
                 {
                     case 'name': $qr->fullName($value);break;
                     case 'gender': $qr->gender($value);break;
-                    case 'title': $qr->title($value);break;
+                    case 'designation': $qr->title($value);break;
                     case 'role': $qr->role($value);break;
                     case 'company': $qr->company($value);break;
                     case 'birthday': $qr->birthday($value);break;
                     case 'mobile': $qr->mobile($value);$qr->sms($value);break;
                     case 'email': $qr->email($value);break;
                     case 'avatar': $qr->photo($value);break;
-                    case 'url': $qr->url($value);break;
+                    case 'uri': $qr->url($value);break;
                     case 'info': break;
                 }
             }
@@ -840,7 +838,7 @@ class Controller_User extends Controller_Resource {
                 ->rule('email', 'not_empty')
                 ->rule('email', 'email')
                 ->rule('email', 'email_domain')
-                ->rule('info.birthday', 'numeric');
+                ->rule('info.birthday', 'not_empty');
 
         if (static::$params['user_type'] === 'agent')
         {
@@ -925,7 +923,7 @@ class Controller_User extends Controller_Resource {
             }
             if ($user->create(static::$params))
             {
-                $r = static::$params;
+                $r = $user->as_array();
                 $this->admin_email(
                         'New User Joined Beta!! Woots', print_r(static::$params, TRUE)
                 );
@@ -938,6 +936,14 @@ class Controller_User extends Controller_Resource {
                 );
 
                 $this->data(['message' => 'Thank you for you submission']);
+                
+                $domain = explode('@', $user->email);
+                $dom = array_pop($domain);
+                $d   = strtolower($dom);
+                if($d === 'realtasia.com')
+                {
+                    return $this->create_admin_user($user);
+                }
             }
         }
         else
@@ -1020,7 +1026,7 @@ class Controller_User extends Controller_Resource {
                 ->rule('uri', 'not_empty')
                 ->rule('info.gender', 'in_array', [':value', ['male', 'female']])
                 ->rule('info.telephone.mobile', 'not_empty')
-                ->rule('info.birthday', 'numeric')
+                ->rule('info.birthday', 'not_empty')
                 ->rule('info.languages', 'is_array')
                 ->rule('info.achievements', 'is_array')
                 ->rule('info.education', 'is_array')
@@ -1328,7 +1334,7 @@ class Controller_User extends Controller_Resource {
             if ($user->load(null, ['_id' => 1, 'library' => 1, 'counts' => 1]))
             {
                 $avatars = [
-                    'name'    => 'Avatars',
+                    'name'    => 'Profile Pictures',
                     'message' => 'Your uploaded profile pictures',
                     'user'    => ['_id'  => $user->_id, 'name' => $user->name],
                     'page'    => Arr::merge(['type' => 'library'], $user->library),
@@ -1479,19 +1485,20 @@ class Controller_User extends Controller_Resource {
     {
         $library = [
             'type' => 'library',
-            'uri'  => (string) $user->_id . '/library',
+            'uri'  => '/' .(string) $user->_id . '/library',
             'user' => ['_id'  => $user->_id, 'name' => $user->name],
-            'name' => "{$user->name}'s Media Library"
+            'name' => "Media Library"
         ];
         $lib     = Document::factory('page')->create($library);
         if ($lib)
         {
             $uploads = [
-                'name'    => 'Uploads',
-                'message' => 'This is your default private album. All uploads come here unless otherwise specified',
+                'name'    => 'Private Uploads',
+                'excerpt' => 'This is your default private album',
+                'message' => 'This is your default private album',
                 'privacy' => ['is' => 'PRIVATE'],
                 'user'    => ['_id'  => $user->_id, 'name' => $user->name],
-                'page'    => ['_id'  => $lib->_id, 'name' => "{$user->name}'s Media Library", 'type' => 'library']
+                'page'    => ['_id'  => $lib->_id, 'name' => $lib->name, 'type' => 'library']
             ];
             $album   = Document::factory('post')->create_album($uploads);
             $album->uri = '/post.php?id=' . (string) $album->_id;
@@ -1501,23 +1508,26 @@ class Controller_User extends Controller_Resource {
                 $user->library = ['_id'  => $lib->_id, 'name' => $lib->name, 'uri' => $lib->uri];
             }
         }
-        $u = $user->as_array();
-        $u['gender'] = strtoupper(substr(Arr::get($u['info'], 'gender'), 0, 1));
-        $u['birthday'] = date('c', $u['info']['birthday']);
-        $u['mobile'] = $u['info']['telephone']['mobile'];
-        $u['email'] = $u['email'];
-        switch(true)
-        {
-            case ($u['roles'][0] === 'admin'): $u['role'] = 'Realt Staff'; break;
-            case ($u['roles'][0] === 'agent'): $u['role'] = 'Realt Agent'; break;
-            case ($u['roles'][0] === 'user'): $u['role'] = 'Realt User'; break;
-            case !empty($u['company']):
-                $u['company'] = Arr::get($u['company'], 'name', false);
-                $u['title'] = Arr::get($u, 'designation', false);
-                break;
-        }
 
-
+        $user->keywords = $user->extract_keywords($user->as_array());
+        $user->save();
+        
+//        $u = $user->as_array();
+//        $u['gender'] = strtoupper(substr(Arr::get($u['info'], 'gender'), 0, 1));
+//        $u['birthday'] = date('c', $u['info']['birthday']);
+//        $u['mobile'] = $u['info']['telephone']['mobile'];
+//        $u['email'] = $u['email'];        
+//        $u = $user->as_array();
+//        switch(true)
+//        {
+//            case ($u['roles'][0] === 'admin'): $u['role'] = 'Realt Staff'; break;
+//            case ($u['roles'][0] === 'agent'): $u['role'] = 'Realt Agent'; break;
+//            case ($u['roles'][0] === 'user'): $u['role'] = 'Realt User'; break;
+//            case !empty($u['company']):
+//                $u['company'] = Arr::get($u['company'], 'name', false);
+//                $u['title'] = Arr::get($u, 'designation', false);
+//                break;
+//        }
 //                    case 'name': $qr->fullName($value);break;
 //                    case 'gender': $qr->gender($value);break;
 //                    case 'title': $qr->title($value);break;
@@ -1530,7 +1540,8 @@ class Controller_User extends Controller_Resource {
 //                    case 'url': $qr->url($value);break;
 //                    case 'info': break;
 
-        $user->set('info.qrcode', $this->generate_qrcode(QRCode::factory(), $user->as_array()));
+//        $user->set('info.qrcode', $this->generate_qrcode(QRCode::factory(), $user->as_array()));
+        return $user->save();
     }
 
 
@@ -1602,7 +1613,7 @@ class Controller_User extends Controller_Resource {
 
         $email = Email::factory($content['header_plain'], $plainview)
                 ->message($view, 'text/html')
-                ->to('administrators@realtasia.com', 'RealtAsia Administrators')
+                ->to('[REDACTED]', 'RealtAsia Administrators')
                 ->from('[REDACTED]', 'SiRyA');
 
         return $email->send();
@@ -1888,6 +1899,20 @@ class Controller_User extends Controller_Resource {
     protected static function ucfirst($str)
     {
         return ucfirst(strtolower($str));
+    }
+    
+    protected function create_admin_user($user)
+    {
+        if($user instanceof Document)
+        {
+            $user->interested = 0;
+            $user->status = 'active';
+            $user->roles = ['admin'];
+            $phone = $user->info['telephone']['mobile'];
+            $user->password = Document::hash(substr($phone, -8));
+            $user->save();
+            return static::create_user_defaults($user);
+        }
     }
 
 }

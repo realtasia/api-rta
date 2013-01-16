@@ -75,7 +75,7 @@ class Model_User extends Document {
         {
             $data['password'] = static::hash($data['password']);
         }
-        $data['info']['birthday'] = (int) $data['info']['birthday'];
+        $data['info']['birthday'] = strtotime($data['info']['birthday']);
 
         // beta users have a message, an interested field and a rep field (for)
         // sales representatives.
@@ -359,16 +359,16 @@ class Model_User extends Document {
             $params['password'] = static::hash($params['password']);
         }
         $params['info'] = Arr::overwrite(static::$user_fields['info'], $params['info']);
-        $params['info']['birthday']  = (int) $this->info['birthday'];
+        $params['info']['birthday']  = strtotime($params['info']['birthday']);
 
         if(isset($params['company']) && is_array($params['company']))
         {
             static::$new_user_has_company = $params['company'];
-
             $this->load(null, ['company' => 1]);
-            $this->remove_from_company($this->company, $this->_id);
+            $this->remove_from_company($this->company, $this->_id);       
         }
-        $this->load_values($params);
+        $this->load_values($params);      
+        $this->keywords = $this->extract_keywords($params);
 
         if($this->save())
             return $this;
@@ -516,6 +516,24 @@ class Model_User extends Document {
           ['_id' => $company->_id, 'members' => ['$size' => 11]],
           ['$pop' => ['members' => -1]]
         );
+    }
+    
+    public function extract_keywords(array $params)
+    {       
+        $keywords = \Arr::extract($params, ['email', 'name', 'username']);
+        $keywords[] = \Arr::path($params, 'company.name');
+        $telephone  = SMS::valid(\Arr::path($params, 'info.telephone.mobile'));
+        if($telephone)
+        {
+            $keywords[] = $telephone;
+            $keywords[] = substr($telephone, -8);
+        }
+        
+        $keywords = \Arr::flatten($keywords);
+        
+        $keywords = array_map('strtolower', array_filter($keywords));
+        
+        return array_values(array_unique($keywords));
     }
 
     /**

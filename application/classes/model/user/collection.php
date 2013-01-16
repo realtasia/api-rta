@@ -27,11 +27,11 @@ class Model_User_Collection extends Collection {
     public function search($args = array(), $user_id = NULL)
     {
 //        $this->collection()->ensureIndex([
-//            'status' => 1, 'name' => 1, 'roles' => 1, 'settings.privacy.is' => 1, 'active' => -1
-//        ], ['name' => 'user_search_fields', 'safe' => true]);
+//            'keywords' => 1
+//                ], ['name' => 'user_keywords', 'safe' => true]);        
 //        $this->collection()->ensureIndex([
-//            'username' => 1, 'email' => 1, 'info.telephone.mobile' => 1
-//        ], ['name' => 'user_id_fields', 'safe' => true]);
+//            'status' => 1, 'roles' => 1, 'settings.privacy.is' => 1, 'active' => -1
+//        ], ['name' => 'user_search_fields', 'safe' => true]);
 //        $this->collection()->ensureIndex([
 //            'logins.user_id' => 1
 //        ], ['sparse' => true, 'safe' => true]);
@@ -46,9 +46,6 @@ class Model_User_Collection extends Collection {
 //        ], ['sparse' => true, 'safe' => true]);
 //        $this->collection()->ensureIndex([
 //            'rep.token' => 1
-//        ], ['sparse' => true, 'safe' => true]);
-//        $this->collection()->ensureIndex([
-//            'company.name' => 1
 //        ], ['sparse' => true, 'safe' => true]);
         $logged_in_user = $user_search_fields_hint = false;
 //
@@ -76,7 +73,7 @@ class Model_User_Collection extends Collection {
          * the query.
          */
         $user_id_fields_hint = [
-            'status' => 1, 'name' => 1, 'roles' => 1, 'settings.privacy.is' => 1, 'active' => -1
+            'status' => 1, 'roles' => 1, 'settings.privacy.is' => 1, 'active' => -1
         ];
 
         if($user_id)
@@ -88,7 +85,7 @@ class Model_User_Collection extends Collection {
 
         if($company)
         {
-            $query['company.name'] = new MongoRegex('/^'. strtoupper($company) .'/');
+            $query['keywords'] = new MongoRegex('/^'. strtolower($company) .'/');
         }
 
         if($company_id)
@@ -110,22 +107,17 @@ class Model_User_Collection extends Collection {
             // this time it's a regex search. Since it is a "start with", ie ^,
             // indexes should work... Hopefully.
             $telephone = SMS::valid($s);
-            $keyword = new MongoRegex("/^$s/");
-            $query['$or'] = [
-                    ['username' => $keyword],
-                    ['email' => $keyword],
-                    ['company.name' => new MongoRegex('/^'. strtoupper($s) .'/')],
-                    ['name' => new MongoRegex("/^".ucfirst($s)."/")],
-                ];
+            $keyword = new MongoRegex("/^".strtolower($s)."/");
+            $query['keywords'] = $keyword;
             if($telephone)
             {
-                $query['$or'][] = ['info.telephone.mobile' => $telephone];
+                $query['keywords'] = $telephone;
             }
             //print_r($query);
             // we change the hint now as these are more relevant. Can we use
             // all the fields?
             $user_search_fields_hint = [
-                'username' => 1, 'email' => 1, 'info.telephone.mobile' => 1
+                'keywords' => 1
             ];
 
 //            if (!empty($ids))

@@ -23,11 +23,8 @@ class Model_Page_Collection extends Collection {
 //            'parent._id' => 1
 //                ], ['name'   => 'parent_id', 'sparse' => true, 'safe'   => true]);
 //        $this->collection()->ensureIndex([
-//            'slug' => 1, 'name' => 1
-//                ], ['name' => 'page_name', 'safe' => true]);
-//        $this->collection()->ensureIndex([
-//            'parent.name' => 1
-//                ], ['name'   => 'parent_name', 'sparse' => true, 'safe'   => true]);
+//            'keywords' => 1
+//                ], ['name' => 'page_keyword', 'safe' => true]);
 //        $this->collection()->ensureIndex([
 //            'type'    => 1, 'subtype' => 1
 //                ], ['name' => 'page_types', 'safe' => true]);
@@ -74,13 +71,7 @@ class Model_Page_Collection extends Collection {
         // this is the search term typed.
         if ($s)
         {
-            $normalcase   = new MongoRegex("/^" . ucwords(strtolower($s)) . "/");
-            $titledcase   = new MongoRegex("/^" . URL::title($s) . "/");
-            $query['$or'] = [
-                ['name' => $normalcase],
-                ['parent.name' => $normalcase],
-                ['slug' => $titledcase],
-            ];
+            $query['keywords'] = new MongoRegex("/^" . strtolower($s) . "/");
         }
 
         // this is different from include_ids as we are looking in the

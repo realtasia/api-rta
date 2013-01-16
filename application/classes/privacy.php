@@ -42,7 +42,7 @@ class Privacy {
      */
     public function __construct($load, $model = null)
     {
-        if ((is_string($load) || $load instanceof MongoID) && $model)
+        if (is_string($load) || ($load instanceof MongoID && $model))
         {
             $this->document = Document::factory(Inflector::singular($model), $load);
         }
@@ -135,9 +135,7 @@ class Privacy {
     public static function valid($value, $field = null, $validation = null)
     {
         if (in_array($value, ['PUBLIC', 'SUBSCRIBERS', 'PRIVATE', 'CUSTOM']))
-        {
             return true;
-        }
 
         if ($validation instanceof Validation)
         {

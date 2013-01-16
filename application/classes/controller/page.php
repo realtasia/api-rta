@@ -69,7 +69,7 @@ class Controller_Page extends Controller_Resource {
         return $this->error('invalid_request');
     }
 
-    /*     * ************************************************************************
+    /**************************************************************************
      * Public Connections
      * *********************************************************************** */
 
@@ -328,7 +328,94 @@ class Controller_Page extends Controller_Resource {
 
         return $this->error('invalid_request');
     }
+    
+    public function action_locationkeyword()
+    {
+        $s = $this->request->query('s');        
+        if(!$s)
+            return $this->error('invalid_request'); 
+        
+        $q = [
+            'keywords' => new MongoRegex("/^$s/"),
+            'type' => 'location',
+            'status' => 'active',
+            'privacy.is' => 'PUBLIC',
+        ];
+        
+        // in case we are in an estate, limiting will be best
+        if(Arr::get(static::$params, 'object_id'))
+        {
+            $q['parent._id'] = new MongoID(static::$params['object_id']);
+        }
 
+        $s = strtolower($s);
+        $results = [];
+
+        $cursor = Collection::factory('page')
+                ->find($q)
+                ->fields(['keywords'])
+                ->limit(50);
+        while($cursor->hasNext())
+        {
+            $k = $cursor->getNext()->keywords;
+            
+            foreach($k as $value)
+            {
+                if(strpos($value, $s) !== false)
+                {
+                    $results [] = ucwords($value);
+                }
+            }            
+        }        
+        
+        $data = array_values(array_unique($results));
+        if(count($data) > 15)
+        {
+            $data = array_slice($data, 0, 15);
+        }
+        
+        return $this->data($data);
+    }
+
+    public function action_companykeyword()
+    {
+        $s = $this->request->query('s');        
+        if(!$s)
+            return $this->error('invalid_request'); 
+        
+        $s = strtolower($s);
+        $results = [];        
+        
+        $cursor = Collection::factory('page')
+                ->find([
+                    'keywords' => new MongoRegex("/^$s/"), 
+                    'type' => 'company', 
+                    'status' => 'active',
+                    'privacy.is' => 'PUBLIC',
+                ])
+                ->fields(['keywords'])
+                ->limit(50);
+        while($cursor->hasNext())
+        {
+            $k = $cursor->getNext()->keywords;
+            
+            foreach($k as $value)
+            {
+                if(strpos($value, $s) !== false)
+                {
+                    $results [] = ucwords($value);
+                }
+            }            
+        }        
+
+        $data = array_values(array_unique($results));
+        if(count($data) > 15)
+        {
+            $data = array_slice($data, 0, 15);
+        }
+        
+        return $this->data($data);
+    }    
 
     /*     * ************************************************************************
      * Public Actions
@@ -370,11 +457,9 @@ class Controller_Page extends Controller_Resource {
     public function action_search()
     {
         if(parent::logged_in())
-            $pages = Collection::factory('page')
-                                    ->search(static::$params, static::$user_id);
+            $pages = Collection::factory('page')->search(static::$params, static::$user_id);
         else
-            $pages = Collection::factory('page')
-                                    ->search(static::$params);
+            $pages = Collection::factory('page')->search(static::$params);
 
         return $this->data($pages);
     }
@@ -390,7 +475,7 @@ class Controller_Page extends Controller_Resource {
         return Document::factory('page', $id)->load(['_id' => $id], ['_id' => 1]) ? true : $v->error($field, 'Not a Valid Page', $u);
     }
 
-    /*     * ************************************************************************
+    /** ************************************************************************
      * TestPad methods
      * *********************************************************************** */
 
