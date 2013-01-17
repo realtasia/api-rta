@@ -51,7 +51,7 @@ class Model_User_Collection extends Collection {
 //
         $defaults = [
            'limit' => 11, 'skip' => 0, 'roles' => [], 'sort' => null,
-           's' => null, 'include_ids' => [], 'status' => ['$ne' => 'terminated'],
+           's' => null, 'include_ids' => [], 'status' => 'active',
            'privacy' => NULL, 'company' => NULL, 'company_id' => NULL
         ];
 
@@ -106,23 +106,12 @@ class Model_User_Collection extends Collection {
         {
             // this time it's a regex search. Since it is a "start with", ie ^,
             // indexes should work... Hopefully.
-            $telephone = SMS::valid($s);
             $keyword = new MongoRegex("/^".strtolower($s)."/");
             $query['keywords'] = $keyword;
-            if($telephone)
-            {
-                $query['keywords'] = $telephone;
-            }
+            
             //print_r($query);
-            // we change the hint now as these are more relevant. Can we use
-            // all the fields?
-            $user_search_fields_hint = [
-                'keywords' => 1
-            ];
-
-//            if (!empty($ids))
-//                $query['$or'][] = ['$and' => [['_id'] => ['$in' => Arr::map('Document::check_id', $ids)]]];
-
+            // we change the hint now as these are more relevant.
+            $user_search_fields_hint = ['keywords' => 1];
         }
 
         // iterate through the $ids and make sure they're all MongoID objects

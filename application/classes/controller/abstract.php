@@ -224,7 +224,7 @@ class Controller_Abstract extends Controller {
             $data = static::$params['callback'] . '(' . $data . ')';
         //Debug::log('Made it to body');
         $this->response->body($data);
-        //return parent::after();
+        return parent::after();
     }
 
     /**

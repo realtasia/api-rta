@@ -23,5 +23,5 @@ class Controller extends Kohana_Controller {
         $this->response->headers('Content-Type', 'application/javascript');
         return $this->response->body(json_encode(['status' => 'success', 'data' => $data], JSON_PRETTY_PRINT));
     }
-
+   
 }

@@ -1107,6 +1107,18 @@ class Controller_User extends Controller_Resource {
 
         }
 
+        $com = Arr::get(static::$params, 'company', []);       
+        
+        if(!empty($com))
+        {
+            if(isset($com['_id']))
+            {
+                $com['_id'] = Document::check_id($com['_id']);
+            }
+            
+            static::$params['company'] = $com;
+        }
+        
         $edu = Arr::path(static::$params, 'info.education', []);
         foreach($edu as $k => $v)
         {

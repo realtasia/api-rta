@@ -24,14 +24,14 @@ class Controller_Corrections extends Controller {
             $row = $cursor->getNext();
             $keywords = [];            
             
-//            if($row->type === 'location' && $row->subtype !== 'Estate')
-//            {
-//                $s = Collection::factory('singpost');
-//                $q = ['child.name' => $row->name];
-//                $streets = $s->distinct('street', $q);
-//                $s->reset();                
-//                $keywords = array_merge($keywords, $streets);
-//            }
+            if($row->type === 'location' && $row->subtype !== 'Estate')
+            {
+                $s = Collection::factory('singpost');
+                $q = ['child.name' => $row->name];
+                $streets = $s->distinct('street', $q);
+                $s->reset();                
+                $keywords = array_merge($keywords, $streets);
+            }
             
             $keywords[] = $row->name;
             
