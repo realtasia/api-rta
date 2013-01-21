@@ -164,7 +164,19 @@ abstract class Controller_Resource extends Controller_Abstract{
     protected static function logged_in_is_id($id)
     {
         // casting as string in case a MongoID was given
-        return static::$user_id && (string) static::$user_id === (string) $id;
+        return static::$user_id ? (string) static::$user_id === (string) $id : false;
     }
+    
+    /**
+     * 
+     * @param string|MongoID $id
+     * @param string $objtype
+     */
+    protected static function creator_interactions($id, $objtype)
+    {
+        $i = Document::factory('interaction', null, static::$user_id);
+        $i->subscribe($id, $objtype);
+    }    
+    
 }
 // End Welcome

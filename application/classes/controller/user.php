@@ -308,7 +308,7 @@ class Controller_User extends Controller_Resource {
     {
         $id = $this->request->param('id');
 
-        static::$params['type'] = ['$nin' => ['conversation', 'album']];
+        static::$params['type'] = ['$nin' => ['conversation', 'attachment']];
 
         $posts = Mongo_Collection::factory('post');
 
@@ -1336,25 +1336,30 @@ class Controller_User extends Controller_Resource {
         $picture   = Arr::get(static::$params, 'picture');
 
         $album = Document::factory('post');
-        $query = ['user._id' => new MongoID($uid), 'name' => 'Avatars', 'type' => 'album'];
+        $query = ['user._id' => new MongoID($uid), 'name' => 'Profile Pictures', 'type' => 'album'];
         $user = Document::factory('user', $uid);
+        $user->load(null, ['name' => 1, 'library' => 1]);
 
         // either retrieve the avatar album or create one
         if(!$album->load($query))
         {
 
-            if ($user->load(null, ['_id' => 1, 'library' => 1, 'counts' => 1]))
+            if ($user)
             {
                 $avatars = [
                     'name'    => 'Profile Pictures',
+                    'excerpt' => 'Your uploaded profile pictures',
                     'message' => 'Your uploaded profile pictures',
                     'user'    => ['_id'  => $user->_id, 'name' => $user->name],
-                    'page'    => Arr::merge(['type' => 'library'], $user->library),
+                    'page'    => $user->library,
                     'type'    => 'album',
                 ];
                 $album = $album->create_album($avatars);
                 $album->uri = '/post.php?id=' . (string) $album->_id;
-                $album->save();
+                if($album->save())
+                {
+                    static::creator_interactions($album->_id, 'post');
+                }
             }
         }
 
@@ -1370,7 +1375,7 @@ class Controller_User extends Controller_Resource {
             'picture'     => $picture,
             'user'        => ['_id'  => $user->_id, 'name' => $user->name],
             'page'        => ['_id'  => $album->_id, 'name' => $album->name, 'type' => 'album', 'uri' => $album->uri],
-            'page_parent' => Arr::merge(['type' => 'library'], $user->library)
+            'page_parent' => $user->library
         ];
 
 
@@ -1385,8 +1390,10 @@ class Controller_User extends Controller_Resource {
             $attachment->save();
             $album->set('picture', $picture);
             $album->save();
-            $user->avatar = $picture;
+            $user->set('avatar', $picture);
             $user->save();
+            // auto subscribe
+            static::creator_interactions($attachment->_id, 'post');
             return $this->data(['success' => 1]);
         }
 
@@ -1517,6 +1524,7 @@ class Controller_User extends Controller_Resource {
             $album->save();
             if ($album)
             {
+                static::creator_interactions($album->_id, 'post');
                 $user->library = ['_id'  => $lib->_id, 'name' => $lib->name, 'uri' => $lib->uri];
             }
         }

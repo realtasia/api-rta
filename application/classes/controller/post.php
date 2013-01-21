@@ -1,6 +1,4 @@
-<?php
-
-defined('SYSPATH') or die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');
 
 /**
  * Description of user
@@ -18,9 +16,9 @@ class Controller_Post extends Controller_Resource {
     ];
     private static $valid_post_types = [
         'create_testimonial', 'create_listing', 'create_post', 'create_conversation',
-        'update_privacy', 'update_testimonial', 'update_listing', 'update_post',
-        'create_album', 'create_comment', 'create_message',
-        'delete_comment', 'create_wallpost'
+        'update_privacy', 'update_testimonial', 'update_listing', 'update_post', 
+        'create_album', 'update_album', 'create_comment', 'create_message',
+        'delete_comment', 'create_wallpost', 'create_attachment'
     ];
 
     public function before()
@@ -168,8 +166,7 @@ class Controller_Post extends Controller_Resource {
 
         if ($this->is_GET() && (static::logged_in_is_id($post->user['_id']) || parent::has_role('admin')))
         {
-            return $this->data(
-                            $post->stringify($post->as_array()['privacy'])
+            return $this->data($post->stringify($post->as_array()['privacy'])
             );
         }
         else
@@ -644,6 +641,117 @@ class Controller_Post extends Controller_Resource {
 
         return $this->error('server_error');
     }
+    
+    /**
+     * extracts an album from the given params or creates a new album.
+     * then creates an attachment post
+     * 
+     * @return JSON data
+     */
+    protected function create_attachment()
+    {
+        $data     = \Arr::get(static::$params, 'data');
+        $user     = (object) $this->get_user();
+        $album_id = \Arr::get(static::$params, 'album_id');
+        
+        if($album_id)
+        {
+            $a = Document::factory('post', $album_id);
+            $a->current_user = $user;
+            $a->load();
+            $page = ['_id' => $a->_id, 'name' => $a->name, 'type' => $a->type, 'uri' => $a->uri];
+        }        
+        elseif(Arr::get(static::$params, 'create_album'))
+        {
+            $a = $this->create_album(true);
+            if(!$a)
+            {
+                return $this->error('invalid_request');
+            }
+            
+            $page = ['_id' => $a->_id, 'name' => $a->name, 'type' => $a->type, 'uri' => $a->uri];
+        }
+        
+        // can be json encoded.
+        if(!is_array($data))
+        {
+            $data = @json_decode($data, true);
+        }
+        
+        if(empty($data))
+            return $this->error ('invalid_request');
+        
+        $data['name']   = trim(Security::xss_clean($data['name']));       
+        $data['page'] = $page;
+        $data['user'] = ['_id'  => Document::check_id($user->_id),'name' => $user->name];
+        $lib = $user->library;
+        $lib['_id'] = Document::check_id($lib['_id']);
+
+        $data['page_parent'] = $lib;
+        
+        $args = \Arr::merge([
+            'name'        => '',
+            'excerpt'     => '',
+            'message'     => '',
+            'picture'     => '',
+            'page'        => [],
+            'user'        => [],
+            'page_parent' => [],
+            'mediainfo'   => [],
+            'subtype'     => '',
+            'type'        => 'attachment',
+        ], $data);
+        
+        $attachment     = Document::factory('post');
+        $attachment->current_user = $user;
+        if($attachment->create_attachment($args))
+        {
+            $a->set('picture', $attachment->picture);
+            $a->save();
+            static::creator_interactions($attachment->_id, 'post');
+            return $this->data($attachment->stringify($attachment->as_array()));
+        }
+        
+        return $this->error ('invalid_request');
+    }
+
+    /**
+     * 
+     * @param boolean $model whether to return the model data instead. Helpful when creating an attachment.
+     * @return mixed false if creation failed, a model or JSON data
+     */
+    protected function create_album($model = false)
+    {
+        $params = static::format(Arr::get(static::$params, 'create_album'));
+        if(!is_array($params))
+        {
+            $params = @json_decode($params, TRUE);
+        }
+        $params['name'] = trim(Security::xss_clean($params['name']));
+        $album = Document::factory('post');
+        $user  = (object) $this->get_user();
+        $album->current_user = $user;
+        $lib   = $user->library;
+        $lib['_id'] = Document::check_id($lib['_id']);
+
+        $args = \Arr::merge([
+                    'name' => '',
+                    'excerpt' => '',
+                    'message' => '',
+                    'user' => ['_id' => $user->_id, 'name' => $user->name],
+                    'page' => $lib,
+                    'type' => 'album',
+        ], $params);
+
+        if ($album->create_album($args))
+        {
+            static::creator_interactions($album->_id, 'post');
+            return $model ? $album : $this->data($album->stringify($album->as_array()));
+        }
+
+        return $model ? false : $this->error('invalid_request');
+    }
+   
 
     /*     * ***************************************************"*********************
      * Protected Actions - UPDATES
@@ -695,6 +803,46 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
+     * updates an album and all it's attachments.
+     * 
+     * @return JSON data
+     */
+    protected function update_album()
+    {
+        $id = $this->request->param('id');
+        $params = static::format(static::$params);
+        $params['name'] = trim(Security::xss_clean($params['name']));
+        $user  = (object) $this->get_user();      
+        $lib   = $user->library;
+        $lib['_id'] = Document::check_id($lib['_id']);        
+     
+        $args = \Arr::overwrite([
+                    'name' => '',
+                    'excerpt' => '',
+                    'message' => '',
+                    'user' => ['_id' => $user->_id, 'name' => $user->name],
+                    'privacy' => [],
+                    'page' => $lib,
+                    'type' => 'album',
+        ], $params);
+        
+        $a = Document::factory('post', $id);
+        $a->current_user = $user;          
+        $a->load_values($args);
+        if($a->save())
+        {
+            // update all the attachments
+            Collection::factory('post')->update(['page._id' => $a->_id], [
+                '$set' => ['page.name' => $a->name]
+            ]);
+            
+            return $this->data($a->stringify($a->as_array()));
+        }
+        
+        return $this->error('invalid_request');
+    }    
+    
+    /**
      * Update a post's privacuy settings.
      *
      * @return boolean
@@ -704,7 +852,7 @@ class Controller_Post extends Controller_Resource {
         $privacy = Arr::path(static::$params, 'privacy.is');
         if (!in_array($privacy, ['PUBLIC', 'PRIVATE']))
         {
-            $this->errors = ['privacy' => "We do not recognise this value"];
+            $this->errors = ['message' => "We do not recognise this value"];
             return $this->fail();
         }
 
@@ -725,6 +873,8 @@ class Controller_Post extends Controller_Resource {
     protected static function delete_attachment($post)
     {
         $picture = Arr::get($post, 'picture');
+        $uid = (string) Arr::get($post['user'], '_id');  
+        $objects = [];
         // not sure if basename() can do relative
         if (substr($picture, 0, 1) !== '/')
         {
@@ -732,9 +882,19 @@ class Controller_Post extends Controller_Resource {
         }
 
         $file = basename($picture);
+        $sizes = [110, 90, 40, 16, 150];     
+        $objects[] = ['Key' => $uid . '/' . $file];
+        
+        foreach($sizes as $size)
+        {
+            $objects[] = ['Key' => "$uid/$size/$file"];
+        }
 
-        $s3 = AWS::s3();
-        return $s3->delete_all_object_versions('static2.realtasia.com.sg', "/$file/i");
+        
+        return AmazonSDK::s3()->deleteObjects([
+            'Bucket' => 'static2.realtasia.com.sg',
+            'Objects' => $objects,
+        ]);
     }
 
     /**
@@ -801,12 +961,6 @@ class Controller_Post extends Controller_Resource {
 
 
         return Arr::merge($return, $array);
-    }
-
-    protected static function creator_interactions($id, $objtype)
-    {
-        $i = Document::factory('interaction', null, static::$user_id);
-        $i->subscribe($id, $objtype);
     }
 
     /**
@@ -924,54 +1078,57 @@ class Controller_Post extends Controller_Resource {
 
     protected static function format($params, $len = 76, $max = 200)
     {
-        $text     = trim(Security::xss_clean($params['message']));
-        $original = $chunks   = explode("\n", $text);
-        $link     = Arr::get($params['link'], $type);
-
-        foreach ($chunks as $key => $t)
+        $text     = trim(Security::xss_clean(Arr::get($params, 'message')));
+        if($text)
         {
-            if (mb_strlen($t) >= 1)
+            $original = $chunks   = explode("\n", $text);
+            $link     = Arr::get($params['link'], $type);
+
+            foreach ($chunks as $key => $t)
             {
-                $chunks[$key] = trim(Text::wrap($t, $len));
+                if (mb_strlen($t) >= 1)
+                {
+                    $chunks[$key] = trim(Text::wrap($t, $len));
+                }
             }
-        }
 
-        // after all the wrapping, more line breaks occurs. join & split again
-        // for accuracy
-        $chunks = explode("\n", implode("\n", $chunks));
+            // after all the wrapping, more line breaks occurs. join & split again
+            // for accuracy
+            $chunks = explode("\n", implode("\n", $chunks));
 
-        // if this is a link-type post, the excerpt is shorter
-        if ($link)
-        {
-            $excerpt = implode("\n", array_slice($chunks, 0, 5));
-        }
-        else
-        {
-            // special post types have shorter excerpts
-            switch (Arr::get($params, 'type'))
+            // if this is a link-type post, the excerpt is shorter
+            if ($link)
             {
-                case 'attachment':
-                case 'listing':
-                case 'album':
-                    $excerpt = implode("\n", array_slice($chunks, 0, 5));
-                    break;
-                default:
-                    $excerpt = implode("\n", array_slice($chunks, 0, 10));
-                    break;
+                $excerpt = implode("\n", array_slice($chunks, 0, 5));
             }
+            else
+            {
+                // special post types have shorter excerpts
+                switch (Arr::get($params, 'type'))
+                {
+                    case 'attachment':
+                    case 'listing':
+                    case 'album':
+                        $excerpt = implode("\n", array_slice($chunks, 0, 5));
+                        break;
+                    default:
+                        $excerpt = implode("\n", array_slice($chunks, 0, 10));
+                        break;
+                }
+            }
+
+            // we default to the original text
+            $message = implode("\n", $original);
+
+            // unless the original post was too long
+            if (count($chunks) >= $max)
+            {
+                $message = implode("\n", array_slice($chunks, 0, $max));
+            }
+
+            $params['message'] = nl2br(static::extract_links(trim($message)));
+            $params['excerpt'] = nl2br(static::extract_links(trim($excerpt)));            
         }
-
-        // we default to the original text
-        $message = implode("\n", $original);
-
-        // unless the original post was too long
-        if (count($chunks) >= $max)
-        {
-            $message = implode("\n", array_slice($chunks, 0, $max));
-        }
-
-        $params['message'] = nl2br(static::extract_links(trim($message)));
-        $params['excerpt'] = nl2br(static::extract_links(trim($excerpt)));
 
         return $params;
     }

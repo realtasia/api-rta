@@ -25,7 +25,7 @@ class Model_Post_Collection extends Collection {
            'status' => null, 'skip' => 0, 'limit' => 11, 'sort' => 'active',
            's' => '', 'include_ids' => [], 'page_id' => null, 'parent_id' => null,
            'user_id' => null, 'type' => null, 'listing' => [], 'to_id' => null,
-            'privacy' => NULL, 'feed' => false, 'company_id' => null,
+           'privacy' => NULL, 'company_id' => null,
         ];
 
         // set some empty arrays
@@ -52,13 +52,15 @@ class Model_Post_Collection extends Collection {
         if ($s)
         {
             // this time it's a regex search.
-            $query['message'] = new MongoRegex("/$s/i");
+            $query['keywords'] = new MongoRegex("/^".  strtolower($s)."/i");
         }
 
         if ($user_id && $page_id)
         {
-            $query['$or'][] = ['user._id' => Document::check_id($user_id)];
-            $query['$or'][] = ['page._id' => Document::check_id($page_id)];
+            $query['$or'] = [
+                ['user._id' => Document::check_id($user_id)],
+                ['page._id' => Document::check_id($page_id)]
+            ];
         }
         elseif($user_id)
         {

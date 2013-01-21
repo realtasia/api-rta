@@ -135,15 +135,15 @@ class Model_User_Collection extends Collection {
                 ->skip($skip);
                 //->explain();
                 //
-        // Give the MongoCursor a hint. Set earlier.
-        if($user_search_fields_hint)
-        {
-            $results->hint($user_search_fields_hint);
-        }
-        else
-        {
-            $results->hint($user_id_fields_hint);
-        }
+//        // Give the MongoCursor a hint. Set earlier.
+//        if($user_search_fields_hint)
+//        {
+//            $results->hint($user_search_fields_hint);
+//        }
+//        else
+//        {
+//            $results->hint($user_id_fields_hint);
+//        }
         //die(Debug::Vars($query));
         while($results->hasNext())
         {

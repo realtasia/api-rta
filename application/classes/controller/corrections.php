@@ -76,6 +76,28 @@ class Controller_Corrections extends Controller {
         
         echo Debug::vars($return);
     }
+    
+    public function action_cleanup()
+    {
+        //http://static2.realtasia.com.sg/50f81f30d0729dc509000016/40/9a0d765af4214f907dee6d1f9b333729.jpg
+        $user = Document::factory('user', '50f81f30d0729dc509000016');
+        $user->load();
+        $lib  = Document::factory('page', $user->library['_id']);
+        $del = Collection::factory('post')->remove_safe([
+            'user._id' => null,
+//            'type' => 'attachment',
+//            '$or' => [
+//                //['name' => ['$nin' => ['Profile Pictures', 'Private Uploads']]],
+//                ['page.name' => '']
+//            ]
+        ], ['multiple' => true]);
+        print_r($del);
+        $lib->set('counts.albums.public', 1);
+        $lib->save();
+        $user->set('avatar', null);
+        $user->set('counts.attachments', 1);
+        $user->save();
+    }
 }
 
 ?>

@@ -1,6 +1,4 @@
-<?php
-
-defined('SYSPATH') or die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');
 
 /**
  * Description of user
@@ -115,12 +113,16 @@ class Model_Post extends Document {
     public function create_album(array $params)
     {
         $defaults = [
-            'name'    => '',
-            'message' => '',
-            'privacy' => ['is' => 'PUBLIC'],
-            'user'    => [],
-            'page'    => [],
-            'type'    => 'album',
+            'name'      => '',
+            'mediainfo' => [],
+            'picture'   => '',
+            'privacy'   => ['is' => 'PUBLIC'],
+            'user'      => [],
+            'message'   => '',
+            'excerpt'   => '',
+            'page'      => [],
+            'subtype'   => null,          
+            'type'      => 'album',
         ];
 
         return $this->create(Arr::merge($defaults, $params));
@@ -136,12 +138,17 @@ class Model_Post extends Document {
     public function create_attachment(array $params)
     {
         $defaults = [
-            'mediainfo' => [],
-            'picture'   => '',
-            'privacy'   => ['is' => 'PUBLIC'],
-            'user'      => [],
-            'page'      => [],
-            'type'      => 'attachment',
+            'name'        => '',
+            'mediainfo'   => [],
+            'picture'     => '',
+            'privacy'     => ['is' => 'PUBLIC'],
+            'user'        => [],
+            'message'     => '',
+            'excerpt'     => '',
+            'page'        => [],
+            'page_parent' => [],
+            'subtype'     => null,
+            'type'        => 'attachment',
         ];
 
         return $this->create(Arr::merge($defaults, $params));
@@ -245,12 +252,15 @@ class Model_Post extends Document {
      */
     public function after_load()
     {
-        $id = parent::check_id($this->_id);
+        if($this->_id)
+        {
+            $id = parent::check_id($this->_id);
 
-        $this->created = $id->getTimestamp();
-        // if there is no current user, no further formatting required.
+            $this->created = $id->getTimestamp();
+            // if there is no current user, no further formatting required.
 
-        return $this;
+            return $this;            
+        }
     }
 
     /**
@@ -291,6 +301,16 @@ class Model_Post extends Document {
         if($arr['type'] === 'album')
         {
             $arr['connections']['attachments'] = Router::post('attachments', $arr['_id']);
+            $subdocs = Collection::factory('post')
+                    ->find(['type' => 'attachment', 'page._id' => Document::check_id($arr['_id'])])
+                    ->fields(['picture', 'excerpt', 'type', 'subtype', 'mediainfo', 'user', 'page', 'uri'])
+                    ->limit(6);
+            while($subdocs->hasNext())
+            {
+                $doc = $subdocs->getNext();
+                $doc->current_user = $this->current_user;
+                $arr['attachments'][] = $doc->stringify($doc->as_array());
+            }
         }
 
         // we should trigger the comment model's formatting so each comment in
@@ -338,17 +358,19 @@ class Model_Post extends Document {
             if ($f['counts']['comments'] > 0)
             {
                 Collection::factory('comment')
-                        ->remove([
-                            'post._id' => $f['_id']
-                                ], ['multiple' => true]);
+                        ->remove(['post._id' => parent::check_id($f['_id'])], ['multiple' => true]);
             }
         }
 
         if($f['type'] === 'attachment' && $f['subtype'] === 'avatar')
         {
-            $u = Document::factory('user', $f['user']['_id']);
-            $u->set('avatar', null);
-            $u->save();
+            $u = parent::factory('user', $f['user']['_id']);
+            $u->load([], ['avatar' => 1]);
+            if($f['picture'] === $u->avatar)
+            {
+                $u->set('avatar', null);
+                $u->save();                
+            }
         }
 
         return $this;
@@ -428,11 +450,16 @@ class Model_Post extends Document {
                             {
                                 $type = 'document';
                             }
+                            parent::factory('page', $page['_id'])
+                                    ->inc('counts.' . Inflector::plural($type), $inc)
+                                    ->save();      
                         }
-
-                        parent::factory('page', $page['_id'])
-                                ->inc('counts.' . Inflector::plural($type), $inc)
-                                ->save();
+                        else
+                        {
+                            parent::factory('post', $page['_id'])
+                                    ->inc('counts.' . Inflector::plural($type), $inc)
+                                    ->save();
+                        }
 
                         break;
                     case 'conversation' :
@@ -644,8 +671,12 @@ class Model_Post extends Document {
             case "testimonial": return "wrote a " . static::l($uri, 'testimonial') . " about $page_link.";
             case "listing": return "created a " . static::l($uri, 'listing') . " in $page_link.";
             case "event": return "created an " . static::l($uri, 'event') . " in $page_link.";
-            // for avatar uploads, state so, if not default to new media
-            case "attachment": return Arr::get($post, 'subtype') === 'avatar' ? "uploaded a new " . static::l($uri, 'profile picture') . "." : "uploaded " . static::l($uri, 'new media') . " " . ($own_wall ? '.' : "in $page_link.");
+            // because we don't show attachments...
+            case "album": 
+                if($post['counts']['attachments'] >= 1)
+                    return "uploaded new media to " . static::l($uri, $post['name']) . ".";
+                else
+                    return "created a new album " . static::l($uri, $post['name']) . ".";
             case ("post" || 'wallpost'):
                 $link = Arr::get($post, 'link');
                 if ($link)

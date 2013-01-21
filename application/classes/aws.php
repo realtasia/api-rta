@@ -1,4 +1,6 @@
-<?php defined('SYSPATH') or die('No direct script access.');
+<?php
+
+defined('SYSPATH') or die('No direct script access.');
 
 /**
  * Amazon Web Services Utility Helper.
@@ -8,15 +10,19 @@
  * @subpackage Helper
  * @copyright 2011 Realtasia Pte Ltd
  */
-require_once MODPATH . 'kaws/vendor/aws-sdk-for-php/sdk.class.php';
+require 'AWSSDKforPHP/aws.phar';
 
-class AWS
-{
+use Aws\S3\S3Client;
+use Aws\Common\Enum\Region;
+class AWS {
 
     public static function s3()
     {
-        defined('AWS_KEY') or self::_initialise();
-        return new AmazonS3(array('key' => '[REDACTED]', 'secret' => '[REDACTED]'));
+        return S3Client::factory([
+            'key'    => '[REDACTED]', 
+            'secret' => '[REDACTED]',
+            'region' => Region::US_EAST_1
+        ]);
     }
 
     public static function sns()
