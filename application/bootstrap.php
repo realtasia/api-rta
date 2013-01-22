@@ -101,13 +101,13 @@ Kohana::modules([
     'rt_core'    => MODPATH . 'rt_core', // Core RT classes
     'queue'      => MODPATH . 'queue', // Core RT classes
     'interact'   => MODPATH . 'interact', // Interaction Models
-    'auth'       => MODPATH . 'auth', // Basic authentication
+    //'auth'       => MODPATH . 'auth', // Basic authentication
     'cache'      => MODPATH . 'cache', // Caching with multiple backends
     'mongodb'    => MODPATH . 'mongodb', // Database access
     //'mongo-auth' => MODPATH . 'mongo-auth', // Not using
     'email'      => MODPATH . 'email', // Emailer
     'sms'        => MODPATH . 'sms', // SMSer
-    'devtools'   => MODPATH . 'devtools', // Devtools (route checker etc...)
+    //'devtools'   => MODPATH . 'devtools', // Devtools (route checker etc...)
         // 'codebench'  => MODPATH.'codebench',  // Benchmarking tool
     'database'   => MODPATH.'database',   // Database access
     'image'      => MODPATH.'image',      // Image manipulation
