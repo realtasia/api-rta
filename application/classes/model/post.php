@@ -55,7 +55,7 @@ class Model_Post extends Document {
         {
             // save
             $this->save();
-            $this->uri = '/post.php?id=' . (string) $this->_id;
+            $this->uri = '/post?id=' . (string) $this->_id;
             if ($this->message)
             {
                 $this->excerpt = $this->get_excerpt_link();
@@ -304,7 +304,8 @@ class Model_Post extends Document {
             $subdocs = Collection::factory('post')
                     ->find(['type' => 'attachment', 'page._id' => Document::check_id($arr['_id'])])
                     ->fields(['picture', 'excerpt', 'type', 'subtype', 'mediainfo', 'user', 'page', 'uri'])
-                    ->limit(6);
+                    ->limit(6)
+                    ->sort_desc('_id');
             while($subdocs->hasNext())
             {
                 $doc = $subdocs->getNext();
