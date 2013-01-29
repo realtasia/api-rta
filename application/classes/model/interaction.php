@@ -218,7 +218,7 @@ class Model_Interaction extends Document {
         $this->collection()->ensureIndex(['object_id' => 1]);
         $this->collection()->ensureIndex(['user._id' => 1]);
 
-        if (!$this->current_user->loaded())
+        if ( is_object($this->current_user) && !$this->current_user->loaded())
             return false;
 
         $user = (object) $this->get_default_user_fields();

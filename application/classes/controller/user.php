@@ -1500,15 +1500,21 @@ class Controller_User extends Controller_Resource {
      * Protected STATIC Utility Methods
      * *********************************************************************** */
 
-    protected static function create_user_defaults($user)
+    protected static function create_user_defaults(Document $user)
     {
+        if(!static::$user_id)
+        {
+            static::$user_id = $user->_id;
+        }
         $library = [
             'type' => 'library',
             'uri'  => '/' .(string) $user->_id . '/library',
             'user' => ['_id'  => $user->_id, 'name' => $user->name],
             'name' => "Media Library"
         ];
-        $lib     = Document::factory('page')->create($library);
+        $lib     = Document::factory('page');
+        $lib->current_user = $user;
+        $lib->create($library);
         if ($lib)
         {
             $uploads = [
@@ -1519,7 +1525,9 @@ class Controller_User extends Controller_Resource {
                 'user'    => ['_id'  => $user->_id, 'name' => $user->name],
                 'page'    => ['_id'  => $lib->_id, 'name' => $lib->name, 'type' => 'library']
             ];
-            $album   = Document::factory('post')->create_album($uploads);
+            $album   = Document::factory('post');
+            $album->current_user = $user;
+            $album->create_album($uploads);
             $album->uri = '/post.php?id=' . (string) $album->_id;
             $album->save();
             if ($album)

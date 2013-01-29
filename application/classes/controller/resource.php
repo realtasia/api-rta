@@ -174,8 +174,12 @@ abstract class Controller_Resource extends Controller_Abstract{
      */
     protected static function creator_interactions($id, $objtype)
     {
-        $i = Document::factory('interaction', null, static::$user_id);
-        $i->subscribe($id, $objtype);
+        if(static::$user_id)
+        {
+            $i = Document::factory('interaction', null, static::$user_id);
+            return $i->subscribe($id, $objtype);
+        }
+        return false;
     }    
     
 }
