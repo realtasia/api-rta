@@ -14,9 +14,13 @@ class Controller_Corrections extends Controller {
         
     public function action_pages()
     {
-        $cursor = Collection::factory('page')->find(['type' => 'location'], [
-            'type' => 1, 'subtype' => 1, 'parent' => 1, 'property_type' => 1
-        ])->limit(1000)->skip(1000);
+        $cursor = Collection::factory('page')
+                ->find(['type' => 'location'], array_fill_keys([
+                    'type','subtype','parent','property_type'
+                  ],1))
+                ->limit(1000)
+                ->skip(2000);
+        
         $return = [];
         
         while ($cursor->hasNext())

@@ -109,46 +109,47 @@ require APPPATH . 'bootstrap' . EXT;
 //            ->send_headers()
 //            ->body();
 
-if(!ob_start("ob_gzhandler")) ob_start();
+//if(!ob_start("ob_gzhandler")) ob_start();
     
-echo Request::factory()
-        ->execute()
-        ->send_headers()
-        ->body();
-//try
-//{
-//    //ob_start('ob_gzhandler');
-//    echo Request::factory()
-//            ->execute()
-//            ->send_headers()
-//            ->body();
-//}
-//catch (Exception $e)
-//{
-//    $error = sprintf('%s [ %s ]: %s ~ %s [ %d ]', get_class($e), $e->getCode(), strip_tags($e->getMessage()), Debug::path($e->getFile()), $e->getLine());
-//    Debug::error($error);
-//
-//    if(!$callback = Arr::get($_GET, 'callback'))
-//    {
-//        $callback = Arr::get($_POST, 'callback');
-//    }
-//    $data = json_encode([
-//        'status' => 'error',
-//        'data' => [
-//            'title' => get_class($e),
-//            'code' => $e->getCode(),
-//            'message' => strip_tags($e->getMessage()),
-//            'path' => Debug::path($e->getFile()), $e->getLine(),
-//        ]
-//    ], JSON_PRETTY_PRINT);
-//
-//
-//    if($callback)
-//        $data = $callback . '(' . $data . ')';
-//    //print_r($error);
-//
-//    echo Response::factory([
-//        'status' => 200
-//    ])->headers('Content-Type', 'application/javascript')
-//      ->body($data);
-//}
+//echo Request::factory()
+//        ->execute()
+//        ->send_headers()
+//        ->body();
+try
+{
+    if(!ob_start("ob_gzhandler")) ob_start();
+    echo Request::factory()
+            ->execute()
+            ->send_headers()
+            ->body();
+}
+catch (Exception $e)
+{
+    $error = sprintf('%s [ %s ]: %s ~ %s [ %d ]', get_class($e), $e->getCode(), strip_tags($e->getMessage()), Debug::path($e->getFile()), $e->getLine());
+    Debug::error($error);
+    
+    if(!$callback = Arr::get($_GET, 'callback'))
+    {
+        $callback = Arr::get($_POST, 'callback');
+    }
+    $data = json_encode([
+        'status' => 'error',
+        'data' => [
+            'title' => get_class($e),
+            'code' => $e->getCode(),
+            'message' => strip_tags($e->getMessage()),
+            'path' => Debug::path($e->getFile()), $e->getLine(),
+        ]
+    ], JSON_PRETTY_PRINT);
+
+
+    if($callback)
+        $data = $callback . '(' . $data . ')';
+    //print_r($error);
+
+    echo Response::factory([
+        'status' => 200
+    ])->headers('Content-Type', 'application/javascript')
+      ->body($data);
+    return exec("php /home/jason/www/rta.casa.net/index.php --uri=stats/check");
+}
