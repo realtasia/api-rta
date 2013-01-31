@@ -20,6 +20,8 @@ class Controller_Post extends Controller_Resource {
         'create_album', 'update_album', 'create_comment', 'create_message',
         'delete_comment', 'create_wallpost', 'create_attachment'
     ];
+    
+    protected static $bucket = 'static2.realtasia.com.sg';
 
     public function before()
     {
@@ -114,22 +116,36 @@ class Controller_Post extends Controller_Resource {
         $post = Document::factory('post', $this->request->param('id'));
 
         // We check the post user
-        if ($post->load(null, array_fill_keys(['user', 'counts', 'page', 'page_parent', 'to', 'type', 'picture'], 1)))
+        if ($post->load(null, array_fill_keys(['user', 'counts', 'page', 'page_parent', 'to', 'type', 'picture', 'link'], 1)))
         {
             $post_user  = (string) $post->user['_id'];
             $page       = (string) $post->page['_id'];
             $is_owner   = static::logged_in_is_id($post_user);
             $page_is_cu = static::logged_in_is_id($page);
+            
             if ($post->type === 'attachment')
             {
                 $attachment = $post->as_array();
             }
-
+            
+            if ($post->type === 'album')
+            {
+                $album = $post->as_array();
+            }
+            
             if ($is_owner || $page_is_cu || parent::has_role('admin'))
             {
                 if ($post->delete())
                 {
-                    $this->delete_attachment($attachment);
+                    if($attachment)
+                    {
+                        $this->delete_attachment($attachment);
+                    }
+                    if($album)
+                    {
+                        $this->delete_attachments($album);
+                    }     
+                    
                     return $this->data(['success' => 1]);
                 }
             }
@@ -145,7 +161,14 @@ class Controller_Post extends Controller_Resource {
                 {
                     if ($post->delete())
                     {
-                        $this->delete_attachment($attachment);
+                        if($attachment)
+                        {
+                            $this->delete_attachment($attachment);
+                        }
+                        if($album)
+                        {
+                            $this->delete_attachments($album);
+                        }  
                         return $this->data(['success' => 1]);
                     }
                 }
@@ -738,7 +761,7 @@ class Controller_Post extends Controller_Resource {
                     'name' => '',
                     'excerpt' => '',
                     'message' => '',
-                    'user' => ['_id' => $user->_id, 'name' => $user->name],
+                    'user' => ['_id' => Document::check_id($user->_id), 'name' => $user->name],
                     'page' => $lib,
                     'type' => 'album',
         ], $params);
@@ -820,7 +843,7 @@ class Controller_Post extends Controller_Resource {
                     'name' => '',
                     'excerpt' => '',
                     'message' => '',
-                    'user' => ['_id' => $user->_id, 'name' => $user->name],
+                    'user' => ['_id' => Document::check_id($user->_id), 'name' => $user->name],
                     'privacy' => [],
                     'page' => $lib,
                     'type' => 'album',
@@ -870,33 +893,66 @@ class Controller_Post extends Controller_Resource {
      * Protected STATIC Utility Methods
      * *********************************************************************** */
 
-    protected static function delete_attachment($post)
+    protected static function delete_attachment($post, $array = false)
     {
         $picture = Arr::get($post, 'picture');
+        $source  = Arr::path($post, 'link.source');
         $uid = (string) Arr::get($post['user'], '_id');  
         $objects = [];
         // not sure if basename() can do relative
-        if (substr($picture, 0, 1) !== '/')
+        if ($picture)
         {
-            $picture = '/' . $picture;
+            $file = basename($picture);
+            $sizes = [110, 90, 40, 16, 150];     
+            foreach($sizes as $size)
+            {
+                $objects[] = ['Key' => "$uid/$size/$file"];
+            }            
+        } 
+        elseif($source)
+        {
+            $file = basename($source);
         }
 
-        $file = basename($picture);
-        $sizes = [110, 90, 40, 16, 150];     
-        $objects[] = ['Key' => $uid . '/' . $file];
-        
-        foreach($sizes as $size)
-        {
-            $objects[] = ['Key' => "$uid/$size/$file"];
-        }
-
-        
-        return AmazonSDK::s3()->deleteObjects([
-            'Bucket' => 'static2.realtasia.com.sg',
-            'Objects' => $objects,
+   
+        $objects[] = $file ? ['Key' => $uid . '/' . $file] : [];
+                
+        return $array ? array_filter($objects) : AmazonSDK::s3()->deleteObjects([
+            'Bucket' => static::$bucket,
+            'Objects' => array_filter($objects),
         ]);
     }
 
+    protected static function delete_attachments($album)
+    {
+        $objects = $final = [];
+        $attaches = Collection::factory('post')
+                    ->find(['page._id' => Document::check_id($album['_id'])])
+                    ->fields(['user', 'link', 'picture']);
+        
+        while($attaches->hasNext())
+        {
+            $objects[] = static::delete_attachment($attaches->getNext()->as_array(), true);
+        }
+        
+        if(!empty($objects))
+        {
+            $objs = \Arr::flatten_recursive($objects);
+
+            foreach($objs as $v)
+            {
+                $final[] = ["Key" => $v];
+            }
+
+            return AmazonSDK::s3()->deleteObjects([
+                'Bucket' => static::$bucket,
+                'Objects' => array_filter($final),
+            ]);            
+        }
+        
+        return true;
+    }
+    
     /**
      * Small validation for property types
      *
@@ -1076,6 +1132,13 @@ class Controller_Post extends Controller_Resource {
         return $html;
     }
 
+    /**
+     * 
+     * @param array $params the POSTed vals array
+     * @param type $len
+     * @param type $max
+     * @return type
+     */
     protected static function format($params, $len = 76, $max = 200)
     {
         $text     = trim(Security::xss_clean(Arr::get($params, 'message')));

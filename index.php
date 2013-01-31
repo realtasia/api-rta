@@ -128,10 +128,8 @@ catch (Exception $e)
     $error = sprintf('%s [ %s ]: %s ~ %s [ %d ]', get_class($e), $e->getCode(), strip_tags($e->getMessage()), Debug::path($e->getFile()), $e->getLine());
     Debug::error($error);
     
-    if(!$callback = Arr::get($_GET, 'callback'))
-    {
-        $callback = Arr::get($_POST, 'callback');
-    }
+    $callback = Arr::get($_REQUEST, 'callback');
+    
     $data = json_encode([
         'status' => 'error',
         'data' => [
@@ -142,14 +140,13 @@ catch (Exception $e)
         ]
     ], JSON_PRETTY_PRINT);
 
-
-    if($callback)
-        $data = $callback . '(' . $data . ')';
-    //print_r($error);
+    $data = $callback ? "($data)" : $data;
 
     echo Response::factory([
         'status' => 200
     ])->headers('Content-Type', 'application/javascript')
+      ->send_headers()
       ->body($data);
+
     return exec("php /home/jason/www/rta.casa.net/index.php --uri=stats/check");
 }

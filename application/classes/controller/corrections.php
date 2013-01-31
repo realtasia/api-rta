@@ -88,12 +88,12 @@ class Controller_Corrections extends Controller {
         $user->load();
         $lib  = Document::factory('page', $user->library['_id']);
         $del = Collection::factory('post')->remove_safe([
-            'user._id' => null,
+//            'user._id' => null,
 //            'type' => 'attachment',
-//            '$or' => [
-//                //['name' => ['$nin' => ['Profile Pictures', 'Private Uploads']]],
-//                ['page.name' => '']
-//            ]
+            '$or' => [
+                ['name' => ['$nin' => ['Profile Pictures', 'Private Uploads']]],
+                ['page.name' => '']
+            ]
         ], ['multiple' => true]);
         print_r($del);
         $lib->set('counts.albums.public', 1);

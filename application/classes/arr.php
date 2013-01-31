@@ -63,5 +63,26 @@ class Arr extends Kohana_Arr {
 
         return $return;
     }
+    
+    /**
+     * returns a single dimension numeric array of values from an multidim array
+     * 
+     * @param array $arr
+     * @return array
+     */
+    public static function flatten_recursive(array $arr)
+    {
+        if($arr) {
+            $flat = [];
+            foreach(new RecursiveIteratorIterator(new RecursiveArrayIterator($arr), RecursiveIteratorIterator::SELF_FIRST) as $key=>$value) {
+                if(!is_array($value)) {
+                    $flat[] = $value;
+                }
+            }
+
+            return $flat;
+        }
+        return [];
+    }
 
 }
