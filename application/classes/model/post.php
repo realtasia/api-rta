@@ -303,7 +303,7 @@ class Model_Post extends Document {
             $arr['connections']['attachments'] = Router::post('attachments', $arr['_id']);
             $subdocs = Collection::factory('post')
                     ->find(['type' => 'attachment', 'page._id' => Document::check_id($arr['_id'])])
-                    ->fields(['picture', 'excerpt', 'type', 'subtype', 'mediainfo', 'user', 'page', 'uri'])
+                    ->fields(['picture', 'excerpt', 'type', 'subtype', 'mediainfo', 'user', 'page', 'uri', 'counts'])
                     ->limit(6)
                     ->sort_desc('_id');
             while($subdocs->hasNext())

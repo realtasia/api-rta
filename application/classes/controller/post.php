@@ -676,25 +676,24 @@ class Controller_Post extends Controller_Resource {
         $data     = \Arr::get(static::$params, 'data');
         $user     = (object) $this->get_user();
         $album_id = \Arr::get(static::$params, 'album_id');
+        $debug = ['album_id' => $album_id];
         
         if($album_id)
         {
             $a = Document::factory('post', $album_id);
             $a->current_user = $user;
             $a->load();
-            $page = ['_id' => $a->_id, 'name' => $a->name, 'type' => $a->type, 'uri' => $a->uri];
+            $debug['loaded'] = $a->as_array();
         }        
         elseif(Arr::get(static::$params, 'create_album'))
         {
+            $debug['creating'] = 'yes';
             $a = $this->create_album(true);
             if(!$a)
             {
                 return $this->error('invalid_request');
-            }
-            
-            $page = ['_id' => $a->_id, 'name' => $a->name, 'type' => $a->type, 'uri' => $a->uri];
+            }                        
         }
-        
         // can be json encoded.
         if(!is_array($data))
         {
@@ -704,9 +703,9 @@ class Controller_Post extends Controller_Resource {
         if(empty($data))
             return $this->error ('invalid_request');
         
-        $data['name']   = trim(Security::xss_clean($data['name']));       
-        $data['page'] = $page;
-        $data['user'] = ['_id'  => Document::check_id($user->_id),'name' => $user->name];
+        $data['name'] = trim(Security::xss_clean($data['name']));       
+        $data['page'] = ['_id' => Document::check_id($a->_id), 'name' => $a->name, 'type' => $a->type, 'uri' => $a->uri];
+        $data['user'] = ['_id' => Document::check_id($user->_id),'name' => $user->name];
         $lib = $user->library;
         $lib['_id'] = Document::check_id($lib['_id']);
 
@@ -724,7 +723,10 @@ class Controller_Post extends Controller_Resource {
             'subtype'     => '',
             'type'        => 'attachment',
         ], $data);
-        
+        $debug['attachment'] = $args;
+        $fh = fopen('debug.html', 'a');
+        fwrite($fh, "<pre>" . print_r($debug, true) . "</pre>");
+        fclose($fh);
         $attachment     = Document::factory('post');
         $attachment->current_user = $user;
         if($attachment->create_attachment($args))
@@ -757,7 +759,7 @@ class Controller_Post extends Controller_Resource {
         $lib   = $user->library;
         $lib['_id'] = Document::check_id($lib['_id']);
 
-        $args = \Arr::merge([
+        $args = \Arr::overwrite([
                     'name' => '',
                     'excerpt' => '',
                     'message' => '',
