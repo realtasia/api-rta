@@ -837,15 +837,20 @@ class Controller_Post extends Controller_Resource {
         $params['name'] = trim(Security::xss_clean($params['name']));
         $user  = (object) $this->get_user();      
         $lib   = $user->library;
-        $lib['_id'] = Document::check_id($lib['_id']);        
-     
+        $lib['_id'] = Document::check_id($lib['_id']);  
+        $params['user'] = ['_id' => Document::check_id($user->_id), 'name' => $user->name];
+        $params['page'] = $lib;        
+        if(!Privacy::valid(\Arr::path($params, 'privacy.is')))
+        {
+           $params['privacy']['is'] = 'PUBLIC';
+        }     
         $args = \Arr::overwrite([
                     'name' => '',
                     'excerpt' => '',
                     'message' => '',
-                    'user' => ['_id' => Document::check_id($user->_id), 'name' => $user->name],
+                    'user' => [],
                     'privacy' => [],
-                    'page' => $lib,
+                    'page' => [],
                     'type' => 'album',
         ], $params);
         
@@ -864,6 +869,57 @@ class Controller_Post extends Controller_Resource {
         
         return $this->error('invalid_request');
     }    
+    
+    /**
+     * updates an album and all it's attachments.
+     * 
+     * @return JSON data
+     */
+    protected function update_attachment()
+    {
+        $id = $this->request->param('id');
+        $params = static::format(static::$params);
+        $params['name'] = trim(Security::xss_clean($params['name']));
+        $user  = (object) $this->get_user();      
+        $page  = Arr::get($_REQUEST, 'album_id');
+        $album = Document::factory('post', $page);
+        $album->load(null, ['type' => 1, 'name' => 1, 'uri' => 1]);
+        $lib   = $user->library;
+        $lib['_id'] = Document::check_id($lib['_id']); 
+        $params['page'] = $album->as_array();
+        $params['user'] = ['_id' => Document::check_id($user->_id), 'name' => $user->name];
+        $params['page_parent'] = $lib;
+        if(!Privacy::valid(\Arr::path($params, 'privacy.is')))
+        {
+           $params['privacy']['is'] = 'PUBLIC';
+        }
+     
+        $args = \Arr::overwrite([
+                    'name' => '',
+                    'excerpt' => '',
+                    'message' => '',
+                    'user' => [],
+                    'privacy' => [],
+                    'page' => [],
+                    'page_parent' => [],
+                    'type' => 'attachment',
+        ], $params);
+        
+        $a = Document::factory('post', $id);
+        $a->current_user = $user;          
+        $a->load_values($args);
+        if($a->save())
+        {
+            // update all the attachments
+            Collection::factory('post')->update(['page._id' => $a->_id], [
+                '$set' => ['page.name' => $a->name]
+            ]);
+            
+            return $this->data($a->stringify($a->as_array()));
+        }
+        
+        return $this->error('invalid_request');
+    }        
     
     /**
      * Update a post's privacuy settings.
@@ -932,7 +988,9 @@ class Controller_Post extends Controller_Resource {
         
         while($attaches->hasNext())
         {
-            $objects[] = static::delete_attachment($attaches->getNext()->as_array(), true);
+            $child = $attaches->getNext();                                    
+            $objects[] = static::delete_attachment($child->as_array(), true);
+            $child->delete();
         }
         
         if(!empty($objects))
