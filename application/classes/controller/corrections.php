@@ -14,14 +14,7 @@ class Controller_Corrections extends Controller {
         
     public function action_pages()
     {
-        $cursor = Collection::factory('page')
-                ->find(['type' => 'location'], array_fill_keys([
-                    'type','subtype','parent','property_type'
-                  ],1))
-                ->limit(1000)
-                ->skip(2000);
-        
-        $return = [];
+        $cursor = Collection::factory('page')->find();
         
         while ($cursor->hasNext())
         {
@@ -53,11 +46,9 @@ class Controller_Corrections extends Controller {
             $keywords = array_filter(array_map('strtolower', \Arr::flatten($keywords)));
             $row->set('keywords', $keywords);
             $row->save();
-            $return [] = $keywords;           
-        } 
-        
-            echo Debug::vars($return);        
-            
+            fwrite(STDOUT, "Adding the following to {$row->name}: \n");          
+            fwrite(STDOUT, implode(', ', $keywords) . "\n");          
+        }                 
     }
     
     public function action_estates()
@@ -84,16 +75,16 @@ class Controller_Corrections extends Controller {
     public function action_cleanup()
     {
         //http://static2.realtasia.com.sg/50f81f30d0729dc509000016/40/9a0d765af4214f907dee6d1f9b333729.jpg
-        $user = Document::factory('user', '50f81f30d0729dc509000016');
+        $user = Document::factory('user', '5106694e6c01992d14000011');
         $user->load();
         $lib  = Document::factory('page', $user->library['_id']);
-        $del = Collection::factory('post')->remove_safe([
+        $del = Collection::factory('page')->remove_safe([
 //            'user._id' => null,
-//            'type' => 'attachment',
-            '$or' => [
-                ['name' => ['$nin' => ['Profile Pictures', 'Private Uploads']]],
-                ['page.name' => '']
-            ]
+            'type' => null,
+//            '$or' => [
+//                ['name' => ['$nin' => ['Profile Pictures', 'Private Uploads']]],
+//                ['page.name' => '']
+//            ]
         ], ['multiple' => true]);
         print_r($del);
         $lib->set('counts.albums.public', 1);

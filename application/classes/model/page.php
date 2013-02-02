@@ -78,7 +78,7 @@ class Model_Page extends Document {
         }
 
         // sort - for some sanity in debugging.. :-)
-        ksort($data);
+        ksort($this->get_keywords($data));
         //return $data;
         // load the document
         $this->load_values($data);
@@ -134,6 +134,7 @@ class Model_Page extends Document {
     public function before_save($action)
     {
         $this->modified = time();
+        //$this->keywords = $this->get_keywords();
 
         if ($action === parent::SAVE_UPDATE)
         {
@@ -353,5 +354,30 @@ class Model_Page extends Document {
             ]
         ];
     }
+    
+    protected function get_keywords()
+    {
+        $keywords = [];
+        foreach($this->_object as $k=>$v)
+        {
+            switch($k)
+            {
+                case 'parent':
+                case 'page':
+                    if(is_array($v))
+                    {
+                        $keywords[] = Arr::get($v, 'name');
+                    }
+                    break;
+                case 'name':
+                    if($type !== 'library')
+                    {
+                        $keywords[] = $v;
+                    }
+                    break;
+            }
+        }
+        return array_filter($keywords);
+    }    
 
 }

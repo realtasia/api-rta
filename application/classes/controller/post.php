@@ -17,7 +17,7 @@ class Controller_Post extends Controller_Resource {
     private static $valid_post_types = [
         'create_testimonial', 'create_listing', 'create_post', 'create_conversation',
         'update_privacy', 'update_testimonial', 'update_listing', 'update_post', 
-        'create_album', 'update_album', 'create_comment', 'create_message',
+        'create_album', 'update_album', 'update_attachment', 'create_comment', 'create_message',
         'delete_comment', 'create_wallpost', 'create_attachment'
     ];
     
@@ -881,7 +881,10 @@ class Controller_Post extends Controller_Resource {
     {
         $id = $this->request->param('id');
         $params = static::format(static::$params);
-        $params['name'] = trim(Security::xss_clean($params['name']));
+        if(!empty($params['name']))
+        {
+            $params['name'] = trim(Security::xss_clean($params['name']));
+        }        
         $user  = (object) $this->get_user();      
         $page  = Arr::get($_REQUEST, 'album_id');
         $album = Document::factory('post', $page);
@@ -896,27 +899,22 @@ class Controller_Post extends Controller_Resource {
            $params['privacy']['is'] = 'PUBLIC';
         }
      
-        $args = \Arr::overwrite([
-                    'name' => '',
-                    'excerpt' => '',
-                    'message' => '',
+        $args = \Arr::merge([
+                    'excerpt' => null,
+                    'message' => null,
                     'user' => [],
                     'privacy' => [],
                     'page' => [],
                     'page_parent' => [],
                     'type' => 'attachment',
         ], $params);
-        
+        //die(json_encode($args));
         $a = Document::factory('post', $id);
         $a->current_user = $user;          
         $a->load_values($args);
         if($a->save())
         {
-            // update all the attachments
-            Collection::factory('post')->update(['page._id' => $a->_id], [
-                '$set' => ['page.name' => $a->name]
-            ]);
-            
+            $a->load();
             return $this->data($a->stringify($a->as_array()));
         }
         

@@ -47,7 +47,7 @@ class Model_Post extends Document {
         {
             $this->atomic($params['_id']);
         }
-
+        
         // load the document
         $this->load_values($data);
 
@@ -387,23 +387,13 @@ class Model_Post extends Document {
      */
     public function process_counts(array $params, $inc = 1)
     {
-        $pages   = [];
-        if (isset($params['page']))
-            $pages[] = $params['page'];
+        $pages     = array_filter(\Arr::extract($params, ['page','to','page_parent']));
+        $privacy   = \Arr::get($params, 'privacy');
+        $type      = \Arr::get($params, 'type');
+        $user      = \Arr::get($params, 'user');
+        $subtype   = \Arr::get($params, 'subtype');
+        $mediainfo = \Arr::get($params, 'mediainfo');
 
-        if (isset($params['to']))
-            $pages[] = $params['to'];
-
-        if (isset($params['page_parent']))
-            $pages[] = $params['page_parent'];
-
-        $privacy   = Arr::get($params, 'privacy');
-        $type      = Arr::get($params, 'type');
-        $user      = Arr::get($params, 'user');
-        $subtype   = Arr::get($params, 'subtype');
-        $mediainfo = Arr::get($params, 'mediainfo');
-
-        $pages = array_filter($pages);
         // not empty seem redundant, just in case there are no pages.
         // future posts maybe?
         if (!empty($pages))
@@ -803,6 +793,5 @@ class Model_Post extends Document {
         }
 
         return $this->excerpt . $link;
-    }
-
+    }   
 }
