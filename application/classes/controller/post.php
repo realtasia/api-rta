@@ -952,7 +952,7 @@ class Controller_Post extends Controller_Resource {
     protected static function delete_attachment($post, $array = false)
     {
         $picture = Arr::get($post, 'picture');
-        $source  = Arr::path($post, 'link.source');
+        $source  = Arr::path($post, 'link.src');
         $uid = (string) Arr::get($post['user'], '_id');  
         $objects = [];
         // not sure if basename() can do relative
@@ -1162,7 +1162,7 @@ class Controller_Post extends Controller_Resource {
                 else
                 {
                     // Prepend http:// if no scheme is specified
-                    $completeUrl = "/external.php?uri=";
+                    $completeUrl = "/external?uri=";
                     $completeUrl .= $scheme ? $url : "http://$url";
                     $linkText    = "$domain$port$path";
                 }

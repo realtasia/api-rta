@@ -303,7 +303,7 @@ class Model_Post extends Document {
             $arr['connections']['attachments'] = Router::post('attachments', $arr['_id']);
             $subdocs = Collection::factory('post')
                     ->find(['type' => 'attachment', 'page._id' => Document::check_id($arr['_id'])])
-                    ->fields(['picture', 'excerpt', 'type', 'subtype', 'mediainfo', 'user', 'page', 'uri', 'counts'])
+                    ->fields(['picture', 'excerpt', 'type', 'subtype', 'mediainfo', 'user', 'page', 'uri', 'counts', 'link'])
                     ->limit(6)
                     ->sort_desc('_id');
             while($subdocs->hasNext())
@@ -718,7 +718,6 @@ class Model_Post extends Document {
             'picture'      => null, // if this post has an image, this will be the url
             'mediainfo'    => [], // if this post has an image, this will be the url
             'link'         => [], // 'name', 'description', 'source' the original link if there is one.
-            'video'        => [], // 'name', 'description', 'source', 'properties' if this post has a video
             'type'         => 'post', // wallpost, testimonial, conversation, listing, checkin, event, album
             'subtype'      => '', // wallpost, testimonial, conversation, listing, checkin, event, album
             'status'       => 'active', // pending, active, expired,
