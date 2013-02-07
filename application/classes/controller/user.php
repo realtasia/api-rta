@@ -936,7 +936,7 @@ class Controller_User extends Controller_Resource {
                 );
 
                 $this->data(['message' => 'Thank you for you submission']);
-                
+
                 $domain = explode('@', $user->email);
                 $dom = array_pop($domain);
                 $d   = strtolower($dom);
@@ -1107,18 +1107,18 @@ class Controller_User extends Controller_Resource {
 
         }
 
-        $com = Arr::get(static::$params, 'company', []);       
-        
+        $com = Arr::get(static::$params, 'company', []);
+
         if(!empty($com))
         {
             if(isset($com['_id']))
             {
                 $com['_id'] = Document::check_id($com['_id']);
             }
-            
+
             static::$params['company'] = $com;
         }
-        
+
         $edu = Arr::path(static::$params, 'info.education', []);
         foreach($edu as $k => $v)
         {
@@ -1539,12 +1539,12 @@ class Controller_User extends Controller_Resource {
 
         $user->keywords = $user->extract_keywords($user->as_array());
         $user->save();
-        
+
 //        $u = $user->as_array();
 //        $u['gender'] = strtoupper(substr(Arr::get($u['info'], 'gender'), 0, 1));
 //        $u['birthday'] = date('c', $u['info']['birthday']);
 //        $u['mobile'] = $u['info']['telephone']['mobile'];
-//        $u['email'] = $u['email'];        
+//        $u['email'] = $u['email'];
 //        $u = $user->as_array();
 //        switch(true)
 //        {
@@ -1928,7 +1928,7 @@ class Controller_User extends Controller_Resource {
     {
         return ucfirst(strtolower($str));
     }
-    
+
     protected function create_admin_user($user)
     {
         if($user instanceof Document)

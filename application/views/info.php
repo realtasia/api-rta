@@ -1,4 +1,4 @@
-<? include('header.php') ?>   
+<? include('header.php') ?>
 <section id="container">
     <? include('leftbar.php') ?>
     <div id="contentArea" class="centerContent">
@@ -8,14 +8,14 @@
 
 
             <p>
-                <?= nl2br('Aishwarya Rai the Miss World stunning beauty queen is considered to be one of the beautiful actresses in the movie industry. She has done movies in languages like Hindi, Tamil, English and Bengali. 
+                <?= nl2br('Aishwarya Rai the Miss World stunning beauty queen is considered to be one of the beautiful actresses in the movie industry. She has done movies in languages like Hindi, Tamil, English and Bengali.
                             In the year 1994, she won the Miss World title and brought fame to her mother land.') ?>
             </p>
         </section>
         <section class="infoContent">
             <div class="wrapperHeader">
                 <img src="/img/png/glyphicons_352_nameplate.png" />
-                <p>Personal & Contact Details</p>     
+                <p>Personal & Contact Details</p>
             </div>
             <div class="leftPadding">
                 <ul class="infoLists">
@@ -28,7 +28,7 @@
                                 <input class="span2" id="inputFax" size="16" type="text" placeholder="89259845">
                                 <span class="help-inline">Error</span>
                             </div>
-                        </div>                        
+                        </div>
 <!--                        <p>
                             <label class="infoYear">&nbsp;Mobile&nbsp;</label>
                             <span class="infoDetail">+65 89259845</span>
@@ -59,8 +59,8 @@
                                 <input class="span2" id="inputFax" size="16" type="text" placeholder="aishwarya.rai@bollywoodstars.com">
                                 <span class="help-inline">Success!</span>
                             </div>
-                        </div>                        
-                    </li>                
+                        </div>
+                    </li>
                     <li>
                         <a class="infoControls"><i class="formIcons i-edit"></i></a>
 <!--                        <p><span class="infoYear">&nbsp;Birthday&nbsp;</span><span class="infoDetail">12th August 1978</span></p>-->
@@ -71,8 +71,8 @@
                                 <span class="add-on"><i class="icon-th"></i></span>
                                 <span class="help-inline">Normal</span>
                             </div>
-                        </div>                         
-                    </li>                
+                        </div>
+                    </li>
                 </ul>
             </div>
         </section>
@@ -89,8 +89,8 @@
                                 <input class="span2 yearPrepend" type="text" placeholder="2009">
                                 <input class="span2 inputWithSelect" type="text" placeholder="MsC Real Estate Related Shit (NUS)">
                                 <span class="help-inline">Normal</span>
-                            </div>                                                                                        
-                        </div>                        
+                            </div>
+                        </div>
                     </li>
                     <li><p><span class="infoYear">&nbsp;2009&nbsp;</span><span class="infoDetail">BsC Property Management (NUS)</span></p></li>
                     <li><p><span class="infoYear">&nbsp;2008&nbsp;</span><span class="infoDetail">Certificate in CEHA</span></p></li>
@@ -134,7 +134,7 @@
                     <li><p><a href="http://www.propertyguru.com">My Listings on PropertyGuru</a></p></li>
                 </ul>
             </div>
-        </section>                  
+        </section>
     </div>
     <? include('rightbar.php') ?>
 </section>

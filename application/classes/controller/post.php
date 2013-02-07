@@ -16,11 +16,11 @@ class Controller_Post extends Controller_Resource {
     ];
     private static $valid_post_types = [
         'create_testimonial', 'create_listing', 'create_post', 'create_conversation',
-        'update_privacy', 'update_testimonial', 'update_listing', 'update_post', 
+        'update_privacy', 'update_testimonial', 'update_listing', 'update_post',
         'create_album', 'update_album', 'update_attachment', 'create_comment', 'create_message',
         'delete_comment', 'create_wallpost', 'create_attachment'
     ];
-    
+
     protected static $bucket = 'static2.realtasia.com.sg';
 
     public function before()
@@ -122,17 +122,17 @@ class Controller_Post extends Controller_Resource {
             $page       = (string) $post->page['_id'];
             $is_owner   = static::logged_in_is_id($post_user);
             $page_is_cu = static::logged_in_is_id($page);
-            
+
             if ($post->type === 'attachment')
             {
                 $attachment = $post->as_array();
             }
-            
+
             if ($post->type === 'album')
             {
                 $album = $post->as_array();
             }
-            
+
             if ($is_owner || $page_is_cu || parent::has_role('admin'))
             {
                 if ($post->delete())
@@ -144,8 +144,8 @@ class Controller_Post extends Controller_Resource {
                     if($album)
                     {
                         $this->delete_attachments($album);
-                    }     
-                    
+                    }
+
                     return $this->data(['success' => 1]);
                 }
             }
@@ -168,7 +168,7 @@ class Controller_Post extends Controller_Resource {
                         if($album)
                         {
                             $this->delete_attachments($album);
-                        }  
+                        }
                         return $this->data(['success' => 1]);
                     }
                 }
@@ -664,11 +664,11 @@ class Controller_Post extends Controller_Resource {
 
         return $this->error('server_error');
     }
-    
+
     /**
      * extracts an album from the given params or creates a new album.
      * then creates an attachment post
-     * 
+     *
      * @return JSON data
      */
     protected function create_attachment()
@@ -677,14 +677,14 @@ class Controller_Post extends Controller_Resource {
         $user     = (object) $this->get_user();
         $album_id = \Arr::get(static::$params, 'album_id');
         $debug = ['album_id' => $album_id];
-        
+
         if($album_id)
         {
             $a = Document::factory('post', $album_id);
             $a->current_user = $user;
             $a->load();
             $debug['loaded'] = $a->as_array();
-        }        
+        }
         elseif(Arr::get(static::$params, 'create_album'))
         {
             $debug['creating'] = 'yes';
@@ -692,25 +692,25 @@ class Controller_Post extends Controller_Resource {
             if(!$a)
             {
                 return $this->error('invalid_request');
-            }                        
+            }
         }
         // can be json encoded.
         if(!is_array($data))
         {
             $data = @json_decode($data, true);
         }
-        
+
         if(empty($data))
             return $this->error ('invalid_request');
-        
-        $data['name'] = trim(Security::xss_clean($data['name']));       
+
+        $data['name'] = trim(Security::xss_clean($data['name']));
         $data['page'] = ['_id' => Document::check_id($a->_id), 'name' => $a->name, 'type' => $a->type, 'uri' => $a->uri];
         $data['user'] = ['_id' => Document::check_id($user->_id),'name' => $user->name];
         $lib = $user->library;
         $lib['_id'] = Document::check_id($lib['_id']);
 
         $data['page_parent'] = $lib;
-        
+
         $args = \Arr::merge([
             'name'        => '',
             'excerpt'     => '',
@@ -736,12 +736,12 @@ class Controller_Post extends Controller_Resource {
             static::creator_interactions($attachment->_id, 'post');
             return $this->data($attachment->stringify($attachment->as_array()));
         }
-        
+
         return $this->error ('invalid_request');
     }
 
     /**
-     * 
+     *
      * @param boolean $model whether to return the model data instead. Helpful when creating an attachment.
      * @return mixed false if creation failed, a model or JSON data
      */
@@ -776,7 +776,7 @@ class Controller_Post extends Controller_Resource {
 
         return $model ? false : $this->error('invalid_request');
     }
-   
+
 
     /*     * ***************************************************"*********************
      * Protected Actions - UPDATES
@@ -829,7 +829,7 @@ class Controller_Post extends Controller_Resource {
 
     /**
      * updates an album and all it's attachments.
-     * 
+     *
      * @return JSON data
      */
     protected function update_album()
@@ -837,15 +837,15 @@ class Controller_Post extends Controller_Resource {
         $id = $this->request->param('id');
         $params = static::format(static::$params);
         $params['name'] = trim(Security::xss_clean($params['name']));
-        $user  = (object) $this->get_user();      
+        $user  = (object) $this->get_user();
         $lib   = $user->library;
-        $lib['_id'] = Document::check_id($lib['_id']);  
+        $lib['_id'] = Document::check_id($lib['_id']);
         $params['user'] = ['_id' => Document::check_id($user->_id), 'name' => $user->name];
-        $params['page'] = $lib;        
+        $params['page'] = $lib;
         if(!Privacy::valid(\Arr::path($params, 'privacy.is')))
         {
            $params['privacy']['is'] = 'PUBLIC';
-        }     
+        }
         $args = \Arr::overwrite([
                     'name' => '',
                     'excerpt' => '',
@@ -855,9 +855,9 @@ class Controller_Post extends Controller_Resource {
                     'page' => [],
                     'type' => 'album',
         ], $params);
-        
+
         $a = Document::factory('post', $id);
-        $a->current_user = $user;          
+        $a->current_user = $user;
         $a->load_values($args);
         if($a->save())
         {
@@ -865,16 +865,16 @@ class Controller_Post extends Controller_Resource {
             Collection::factory('post')->update(['page._id' => $a->_id], [
                 '$set' => ['page.name' => $a->name]
             ]);
-            
+
             return $this->data($a->stringify($a->as_array()));
         }
-        
+
         return $this->error('invalid_request');
-    }    
-    
+    }
+
     /**
      * updates an album and all it's attachments.
-     * 
+     *
      * @return JSON data
      */
     protected function update_attachment()
@@ -884,13 +884,13 @@ class Controller_Post extends Controller_Resource {
         if(!empty($params['name']))
         {
             $params['name'] = trim(Security::xss_clean($params['name']));
-        }        
-        $user  = (object) $this->get_user();      
+        }
+        $user  = (object) $this->get_user();
         $page  = Arr::get($_REQUEST, 'album_id');
         $album = Document::factory('post', $page);
         $album->load(null, ['type' => 1, 'name' => 1, 'uri' => 1]);
         $lib   = $user->library;
-        $lib['_id'] = Document::check_id($lib['_id']); 
+        $lib['_id'] = Document::check_id($lib['_id']);
         $params['page'] = $album->as_array();
         $params['user'] = ['_id' => Document::check_id($user->_id), 'name' => $user->name];
         $params['page_parent'] = $lib;
@@ -898,7 +898,7 @@ class Controller_Post extends Controller_Resource {
         {
            $params['privacy']['is'] = 'PUBLIC';
         }
-     
+
         $args = \Arr::merge([
                     'excerpt' => null,
                     'message' => null,
@@ -910,17 +910,17 @@ class Controller_Post extends Controller_Resource {
         ], $params);
         //die(json_encode($args));
         $a = Document::factory('post', $id);
-        $a->current_user = $user;          
+        $a->current_user = $user;
         $a->load_values($args);
         if($a->save())
         {
             $a->load();
             return $this->data($a->stringify($a->as_array()));
         }
-        
+
         return $this->error('invalid_request');
-    }        
-    
+    }
+
     /**
      * Update a post's privacuy settings.
      *
@@ -953,26 +953,26 @@ class Controller_Post extends Controller_Resource {
     {
         $picture = Arr::get($post, 'picture');
         $source  = Arr::path($post, 'link.src');
-        $uid = (string) Arr::get($post['user'], '_id');  
+        $uid = (string) Arr::get($post['user'], '_id');
         $objects = [];
         // not sure if basename() can do relative
         if ($picture)
         {
             $file = basename($picture);
-            $sizes = [110, 90, 40, 16, 150];     
+            $sizes = [110, 90, 40, 16, 150];
             foreach($sizes as $size)
             {
                 $objects[] = ['Key' => "$uid/$size/$file"];
-            }            
-        } 
+            }
+        }
         elseif($source)
         {
             $file = basename($source);
         }
 
-   
+
         $objects[] = $file ? ['Key' => $uid . '/' . $file] : [];
-                
+
         return $array ? array_filter($objects) : AmazonSDK::s3()->deleteObjects([
             'Bucket' => static::$bucket,
             'Objects' => array_filter($objects),
@@ -985,14 +985,14 @@ class Controller_Post extends Controller_Resource {
         $attaches = Collection::factory('post')
                     ->find(['page._id' => Document::check_id($album['_id'])])
                     ->fields(['user', 'link', 'picture']);
-        
+
         while($attaches->hasNext())
         {
-            $child = $attaches->getNext();                                    
+            $child = $attaches->getNext();
             $objects[] = static::delete_attachment($child->as_array(), true);
             $child->delete();
         }
-        
+
         if(!empty($objects))
         {
             $objs = \Arr::flatten_recursive($objects);
@@ -1005,12 +1005,12 @@ class Controller_Post extends Controller_Resource {
             return AmazonSDK::s3()->deleteObjects([
                 'Bucket' => static::$bucket,
                 'Objects' => array_filter($final),
-            ]);            
+            ]);
         }
-        
+
         return true;
     }
-    
+
     /**
      * Small validation for property types
      *
@@ -1191,7 +1191,7 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
-     * 
+     *
      * @param array $params the POSTed vals array
      * @param type $len
      * @param type $max
@@ -1248,7 +1248,7 @@ class Controller_Post extends Controller_Resource {
             }
 
             $params['message'] = nl2br(static::extract_links(trim($message)));
-            $params['excerpt'] = nl2br(static::extract_links(trim($excerpt)));            
+            $params['excerpt'] = nl2br(static::extract_links(trim($excerpt)));
         }
 
         return $params;

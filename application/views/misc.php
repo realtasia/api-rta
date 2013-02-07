@@ -6,11 +6,11 @@
                 <section class="RTAWindowContainer">
                     <section class="RTAWindowContent noSidebar">
                         <div class="contentArea introBox">
-                            <p>                                
+                            <p>
                                 Haven't received your welcome email? Interested in joining the Beta program?
                                 <a href="#" onclick="javascript:jQuery('#sidebar-beta-link').click();return false;">Join the Beta Program</a>
                                 and we'll invite you on the next beta cycle. <br><br> If you've already sent your interest via 'Join Beta Program', please be patient as
-                                we are still testing the system with a 100 randomly selected users at a time. We extend this to another 100 each week.                                
+                                we are still testing the system with a 100 randomly selected users at a time. We extend this to another 100 each week.
                             </p><hr>
                             <form class="form-horizontal">
                                 <div class="control-group">
@@ -27,15 +27,15 @@
                                         </button>
                                     </div>
                                 </div>
-                            </form>                                
+                            </form>
 
                         </div>
                     </section>
                 </section>
                 <footer class="footerBar"></footer>
             </section>
-        </div>    
-    </div>    
+        </div>
+    </div>
     <div class="row-fluid" style="margin-top:20px">
         <div class="span4">
             <section class="RTAWindow">
@@ -59,7 +59,7 @@
                                         </button>
                                     </div>
                                 </div>
-                            </form>                                
+                            </form>
 
                         </div>
                     </section>
@@ -112,8 +112,8 @@
                                             <span class="fb-auth-button" id="fb-auth">login with realtasia</span>
                                         </button>
                                     </div>
-                                </div>                                
-                            </form>                                
+                                </div>
+                            </form>
 
                         </div>
                     </section>
@@ -148,7 +148,7 @@
                                     <div class="controls">
                                         <textarea placeholder="Message"></textarea>
                                     </div>
-                                </div>                                
+                                </div>
                                 <div class="control-group">
                                     <div class="controls">
                                         <label class="checkbox">
@@ -160,19 +160,19 @@
                                     <div class="controls">
                                         <button class="btn btn-small">
                                             <span class="fb-auth-button" id="fb-auth">Submit</span>
-                                        </button> 
+                                        </button>
                                     </div>
                                 </div>
-                            </form>                                
+                            </form>
 
                         </div>
                     </section>
                 </section>
                 <footer class="footerBar"></footer>
             </section>
-        </div>          
+        </div>
     </div>
-    <hr class="bolderLine"/>    
+    <hr class="bolderLine"/>
     <div class="row-fluid" style="margin-top:20px">
         <div class="span12">
             <section class="RTAWindow slimWidth" id="listingCreationWizard">
@@ -194,16 +194,16 @@
                         </li>
                         <li class="hasHoverState">
                             <a class="windowMenuItem" href="#" data-bind="css:{disabled: currentStep() <= 0}, click:resetSteps"><i class="Round26 reset"></i>Reset</a>
-                        </li>                        
+                        </li>
                         <li class="hasHoverState">
                             <a class="windowMenuItem" href="#" data-bind="css:{disabled: !currentStep() > 0}, click:save"><i class="Round26 draft"></i>Save</a>
                         </li>
                         <li class="hasHoverState">
                             <a class="windowMenuItem" href="#" data-bind="css:{disabled: !isStepComplete(5)}, click:publish"><i class="Round26 publish"></i>Publish</a>
-                        </li> 
+                        </li>
                         <li class="hasHoverState">
                             <a class="windowMenuItem" href="#" data-bind="click:cancel"><i class="Round26 cancel"></i>Cancel</a>
-                        </li>                           
+                        </li>
                     </ul>
                 </nav>
                 <section class="RTAWindowContainer">
@@ -335,7 +335,7 @@
                         <h6>Media Library <small><span class="number"></span></small></h6>
                         <div class="RTprogressbar">
                             <div></div>
-                        </div>                        
+                        </div>
                     </div>
                 </header>
                 <!--</i>-->
@@ -358,7 +358,7 @@
                         </li>
                         <li class="hasHoverState hasActiveState rightMenuItem isNavigation">
                             <a class="windowMenuItem" href="#" data-bind="click:function(){return true}"><i class="action20 upload"></i>Upload</a>
-                        </li>                        
+                        </li>
                     </ul>
                 </nav>
                 <section class="RTAWindowContainer">
@@ -377,14 +377,14 @@
                     </section>
                     <section class="RTAWindowContent">
                         <ul class="thumbnails">
-                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 35%"></div></div><span class="thumbCaption">Uploading</span></a></li>                         
-                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 45%"></div></div><span class="thumbCaption">Uploading</span></a></li>                         
-                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 25%"></div></div><span class="thumbCaption">Uploading</span></a></li>                         
-                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 65%"></div></div><span class="thumbCaption">Uploading</span></a></li>                         
-                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 85%"></div></div><span class="thumbCaption">Uploading</span></a></li>                         
-                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 100%"></div></div><span class="thumbCaption">Upload Complete</span></a></li>                         
-                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 100%"></div></div><span class="thumbCaption">Upload Complete</span></a></li>                         
-                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 100%"></div></div><span class="thumbCaption">Upload Complete</span></a></li>                         
+                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 35%"></div></div><span class="thumbCaption">Uploading</span></a></li>
+                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 45%"></div></div><span class="thumbCaption">Uploading</span></a></li>
+                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 25%"></div></div><span class="thumbCaption">Uploading</span></a></li>
+                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 65%"></div></div><span class="thumbCaption">Uploading</span></a></li>
+                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 85%"></div></div><span class="thumbCaption">Uploading</span></a></li>
+                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 100%"></div></div><span class="thumbCaption">Upload Complete</span></a></li>
+                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 100%"></div></div><span class="thumbCaption">Upload Complete</span></a></li>
+                            <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt="" /><div class="RTprogressbar"><div style="width: 100%"></div></div><span class="thumbCaption">Upload Complete</span></a></li>
                             <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt=""></a><span class="thumbCaption">Thumbnail caption...</span></li>
                             <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt=""></a><span class="thumbCaption">Thumbnail caption...</span></li>
                             <li><a class="thumbnail" href=""><img src="/images/165x110.gif" alt=""></a><span class="thumbCaption">Thumbnail caption...</span></li>

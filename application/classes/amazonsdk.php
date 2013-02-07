@@ -9,21 +9,21 @@
  * @copyright 2011 Realtasia Pte Ltd
  */
 require 'AWSSDKforPHP/aws.phar';
-use Aws\S3\S3Client;  
+use Aws\S3\S3Client;
 
 class AmazonSDK
 {
-    
+
     public static function s3()
     {
         return S3Client::factory([
-            'key'      => '[REDACTED]', 
+            'key'      => '[REDACTED]',
             'secret'   => '[REDACTED]',
             //'base_url' => 's3.amazonaws.com',
             'region'   => 'ap-southeast-1'
         ]);
     }
-    
+
     public static function sns()
     {
         defined('AWS_KEY') or self::_initialise();

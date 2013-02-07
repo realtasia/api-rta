@@ -365,9 +365,9 @@ class Model_User extends Document {
         {
             static::$new_user_has_company = $params['company'];
             $this->load(null, ['company' => 1]);
-            $this->remove_from_company($this->company, $this->_id);       
+            $this->remove_from_company($this->company, $this->_id);
         }
-        $this->load_values($params);      
+        $this->load_values($params);
         $this->keywords = $this->extract_keywords($params);
 
         if($this->save())
@@ -517,9 +517,9 @@ class Model_User extends Document {
           ['$pop' => ['members' => -1]]
         );
     }
-    
+
     public function extract_keywords(array $params)
-    {       
+    {
         $keywords = \Arr::extract($params, ['email', 'name', 'username']);
         $keywords[] = \Arr::path($params, 'company.name');
         $telephone  = SMS::valid(\Arr::path($params, 'info.telephone.mobile'));
@@ -528,11 +528,11 @@ class Model_User extends Document {
             $keywords[] = $telephone;
             $keywords[] = substr($telephone, -8);
         }
-        
+
         $keywords = \Arr::flatten($keywords);
-        
+
         $keywords = array_map('strtolower', array_filter($keywords));
-        
+
         return array_values(array_unique($keywords));
     }
 

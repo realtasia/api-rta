@@ -1,7 +1,7 @@
 <?php
 
 class Controller_Stats extends Controller{
-    
+
     public function action_check()
     {
         //print_r("<pre>");
@@ -20,7 +20,7 @@ class Controller_Stats extends Controller{
 //        }
         exit;
     }
-    
+
     public function action_index()
     {
         return exec("php /home/jason/www/rta.casa.net/index.php --uri=stats/check");

@@ -47,7 +47,7 @@ class Model_Post extends Document {
         {
             $this->atomic($params['_id']);
         }
-        
+
         // load the document
         $this->load_values($data);
 
@@ -121,7 +121,7 @@ class Model_Post extends Document {
             'message'   => '',
             'excerpt'   => '',
             'page'      => [],
-            'subtype'   => null,          
+            'subtype'   => null,
             'type'      => 'album',
         ];
 
@@ -259,7 +259,7 @@ class Model_Post extends Document {
             $this->created = $id->getTimestamp();
             // if there is no current user, no further formatting required.
 
-            return $this;            
+            return $this;
         }
     }
 
@@ -370,7 +370,7 @@ class Model_Post extends Document {
             if($f['picture'] === $u->avatar)
             {
                 $u->set('avatar', null);
-                $u->save();                
+                $u->save();
             }
         }
 
@@ -443,7 +443,7 @@ class Model_Post extends Document {
                             }
                             parent::factory('page', $page['_id'])
                                     ->inc('counts.' . Inflector::plural($type), $inc)
-                                    ->save();      
+                                    ->save();
                         }
                         else
                         {
@@ -663,7 +663,7 @@ class Model_Post extends Document {
             case "listing": return "created a " . static::l($uri, 'listing') . " in $page_link.";
             case "event": return "created an " . static::l($uri, 'event') . " in $page_link.";
             // because we don't show attachments...
-            case "album": 
+            case "album":
                 if($post['counts']['attachments'] >= 1)
                     return "uploaded new media to " . static::l($uri, $post['name']) . ".";
                 else
@@ -792,5 +792,5 @@ class Model_Post extends Document {
         }
 
         return $this->excerpt . $link;
-    }   
+    }
 }

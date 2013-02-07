@@ -1,6 +1,4 @@
-<?php
-
-defined('SYSPATH') or die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');
 
 /**
  * Amazon Web Services Utility Helper.
@@ -19,7 +17,7 @@ class AWS {
     public static function s3()
     {
         return S3Client::factory([
-            'key'    => '[REDACTED]', 
+            'key'    => '[REDACTED]',
             'secret' => '[REDACTED]',
             'region' => Region::US_EAST_1
         ]);

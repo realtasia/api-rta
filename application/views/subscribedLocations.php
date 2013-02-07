@@ -7,10 +7,10 @@
             <div class="pageInfo">
                 <span class="pageType">Associate Director</span> at <span class="parentDesc">
                     <a href="#">DTZ Debenham Tie Leung</a>
-                </span>  
+                </span>
                 <div class="pageActions">
                     <a class="pageActionsButton btn btn-mini hasActiveState hasHoverState"><i class="action16 subscribe"></i>Subscribe</a>
-                    <a class="pageActionsButton btn btn-mini hasActiveState hasHoverState"><i class="action16 likeSmall"></i>Like</a>                     
+                    <a class="pageActionsButton btn btn-mini hasActiveState hasHoverState"><i class="action16 likeSmall"></i>Like</a>
                     <a class="moreLink">View More<i class="Action16 infoCircleBG"></i></a>
                 </div>
             </div>
@@ -39,8 +39,8 @@
                     <ul class="dropdown-menu">
                         <li><a href="#" id="sortNewest">Newest</a></li>
                         <li><a href="#" id="sortPopular">Popular</a></li>
-                    </ul>                    
-                </div>                    
+                    </ul>
+                </div>
             </section> <!--  sort button & result count -->
             <div class="outerBox relative">
                 <article class="contentArea location widgetContentBG relative">
@@ -53,8 +53,8 @@
                             <ul class="locationDetails">
                                 <li><label>Estate</label><span>Jurong</span></li>
                                 <li><label>Locality</label><span>Lakeside</span></li>
-                                <li><label>Type</label><span>Landed Housing</span></li>                                    
-                            </ul>                                   
+                                <li><label>Type</label><span>Landed Housing</span></li>
+                            </ul>
                         </div> <!-- locations content -->
                     </div> <!-- main location content -->
                     <div class="postActions">
@@ -81,8 +81,8 @@
                             <ul class="locationDetails">
                                 <li><label>Estate</label><span>Jurong</span></li>
                                 <li><label>Locality</label><span>Jurong East</span></li>
-                                <li><label>Type</label><span>Apartments</span></li>                                    
-                            </ul>                                   
+                                <li><label>Type</label><span>Apartments</span></li>
+                            </ul>
                         </div> <!-- locations content -->
                     </div> <!-- main location content -->
                     <div class="postActions">
@@ -97,7 +97,7 @@
                         </ul>
                     </div> <!-- postActions -->
                 </article>
-            </div> <!-- member -->              
+            </div> <!-- member -->
             <div class="outerBox relative">
                 <article class="contentArea location widgetContentBG relative">
                     <div class="mainlocationContent">
@@ -109,8 +109,8 @@
                             <ul class="locationDetails">
                                 <li><label>Estate</label><span>Jurong</span></li>
                                 <li><label>Locality</label><span>Teban Gardens, Pandan Gardens</span></li>
-                                <li><label>Type</label><span>Apartment</span></li>                                    
-                            </ul>                                
+                                <li><label>Type</label><span>Apartment</span></li>
+                            </ul>
                         </div> <!-- locations content -->
                     </div> <!-- main location content -->
                     <div class="postActions">

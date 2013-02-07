@@ -1,6 +1,4 @@
-<?php
-
-defined('SYSPATH') or die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');
 
 /**
  * Description of arr
@@ -63,10 +61,10 @@ class Arr extends Kohana_Arr {
 
         return $return;
     }
-    
+
     /**
      * returns a single dimension numeric array of values from an multidim array
-     * 
+     *
      * @param array $arr
      * @return array
      */

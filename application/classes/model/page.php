@@ -354,7 +354,7 @@ class Model_Page extends Document {
             ]
         ];
     }
-    
+
     protected function get_keywords()
     {
         $keywords = [];
@@ -378,6 +378,6 @@ class Model_Page extends Document {
             }
         }
         return array_filter($keywords);
-    }    
+    }
 
 }

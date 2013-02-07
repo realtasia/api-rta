@@ -11,46 +11,46 @@
  * @author jason
  */
 class Controller_Corrections extends Controller {
-        
+
     public function action_pages()
     {
         $cursor = Collection::factory('page')->find();
-        
+
         while ($cursor->hasNext())
         {
             $row = $cursor->getNext();
-            $keywords = [];            
-            
+            $keywords = [];
+
             if($row->type === 'location' && $row->subtype !== 'Estate')
             {
                 $s = Collection::factory('singpost');
                 $q = ['child.name' => $row->name];
                 $streets = $s->distinct('street', $q);
-                $s->reset();                
+                $s->reset();
                 $keywords = array_merge($keywords, $streets);
             }
-            
+
             $keywords[] = $row->name;
-            
+
             $parent_name = Arr::get($row->parent, 'name');
             if(isset($row->property_type))
             {
                 $keywords[] = $row->property_type;
             }
-            
+
             if($parent_name)
             {
                 $keywords[] = $parent_name;
             }
-            
+
             $keywords = array_filter(array_map('strtolower', \Arr::flatten($keywords)));
             $row->set('keywords', $keywords);
             $row->save();
-            fwrite(STDOUT, "Adding the following to {$row->name}: \n");          
-            fwrite(STDOUT, implode(', ', $keywords) . "\n");          
-        }                 
+            fwrite(STDOUT, "Adding the following to {$row->name}: \n");
+            fwrite(STDOUT, implode(', ', $keywords) . "\n");
+        }
     }
-    
+
     public function action_estates()
     {
         Collection::factory('page')->remove(['_id' => new MongoID('50ed26deb90fb8c817000049')]);
@@ -63,15 +63,15 @@ class Controller_Corrections extends Controller {
             $children = Collection::factory('page')->find([
                 'type' => 'location', 'parent._id' => $estate->_id
             ])->fields(['name', 'parent.name']);
-            
+
             $return[(string)$estate->_id]['name'] = $estate->name;
             $return[(string)$estate->_id]['count'] = $children->count();
             $return[(string)$estate->_id]['children'] = $children->as_array(false);
         }
-        
+
         echo Debug::vars($return);
     }
-    
+
     public function action_cleanup()
     {
         //http://static2.realtasia.com.sg/50f81f30d0729dc509000016/40/9a0d765af4214f907dee6d1f9b333729.jpg

@@ -33,8 +33,8 @@
                         <ul class="dropdown-menu">
                             <li><a href="#" id="sortNewest">Newest</a></li>
                             <li><a href="#" id="sortPopular">Popular</a></li>
-                        </ul>                    
-                    </div>                    
+                        </ul>
+                    </div>
                 </section> <!--  sort button & result count -->
                 <div class="widgetOuterBox relative">
                     <article class="contentArea location widgetContentBG relative">
@@ -45,9 +45,9 @@
                             <div class="locationRight relative">
                                 <h3><a href="#">Jason Nathan <a><small>Realt Staff</small></a></a></h3>
                                 <ul class="locationDetails">
-                                    <li><label>Rep</label><span>Not enough Information</span></li>                                    
+                                    <li><label>Rep</label><span>Not enough Information</span></li>
                                     <li><label>Listings</label><span>0</span></li>
-                                </ul>                                   
+                                </ul>
                             </div> <!-- listings content -->
                         </div> <!-- main listing content -->
                         <div class="postActions">
@@ -72,36 +72,9 @@
                             <div class="locationRight relative">
                                 <h3><a href="#">Jason Nathan <a><small>Realt Staff</small></a></a></h3>
                                 <ul class="locationDetails">
-                                    <li><label>Rep</label><span>Not enough Information</span></li>                                    
+                                    <li><label>Rep</label><span>Not enough Information</span></li>
                                     <li><label>Listings</label><span>0</span></li>
-                                </ul>                                   
-                            </div> <!-- listings content -->
-                        </div> <!-- main listing content -->
-                        <div class="postActions">
-                            <ul class="postActionButtons">
-                                <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 share"></i></a></li>
-                                <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 subscribe"></i></a></li>
-                                <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 like"></i></a></li>
-                            </ul>
-                            <ul class="postActionInfo">
-                                <li class="hasHoverState"><a href="#"><i class="info16 people"></i>215</a></li>
-                                <li class="hasHoverState"><a href="#"><i class="action16 likeSmall"></i>167</a></li>
-                            </ul>
-                        </div> <!-- postActions -->
-                    </article>
-                </div> <!-- member -->              
-                <div class="widgetOuterBox relative">
-                    <article class="contentArea location widgetContentBG relative">
-                        <div class="mainListingContent">
-                            <div class="locationLeft relative">
-                                <i class="hovercards avatar"></i>
-                            </div> <!-- listings thumbnail -->
-                            <div class="locationRight relative">
-                                <h3><a href="#">Jason Nathan <a><small>Realt Staff</small></a></a></h3>
-                                <ul class="locationDetails">
-                                    <li><label>Rep</label><span>Not enough Information</span></li>                                    
-                                    <li><label>Listings</label><span>0</span></li>
-                                </ul>                                   
+                                </ul>
                             </div> <!-- listings content -->
                         </div> <!-- main listing content -->
                         <div class="postActions">
@@ -126,9 +99,36 @@
                             <div class="locationRight relative">
                                 <h3><a href="#">Jason Nathan <a><small>Realt Staff</small></a></a></h3>
                                 <ul class="locationDetails">
-                                    <li><label>Rep</label><span>Not enough Information</span></li>                                    
+                                    <li><label>Rep</label><span>Not enough Information</span></li>
                                     <li><label>Listings</label><span>0</span></li>
-                                </ul>                                   
+                                </ul>
+                            </div> <!-- listings content -->
+                        </div> <!-- main listing content -->
+                        <div class="postActions">
+                            <ul class="postActionButtons">
+                                <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 share"></i></a></li>
+                                <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 subscribe"></i></a></li>
+                                <li class="hasActiveState hasHoverState"><a href="#"><i class="action20 like"></i></a></li>
+                            </ul>
+                            <ul class="postActionInfo">
+                                <li class="hasHoverState"><a href="#"><i class="info16 people"></i>215</a></li>
+                                <li class="hasHoverState"><a href="#"><i class="action16 likeSmall"></i>167</a></li>
+                            </ul>
+                        </div> <!-- postActions -->
+                    </article>
+                </div> <!-- member -->
+                <div class="widgetOuterBox relative">
+                    <article class="contentArea location widgetContentBG relative">
+                        <div class="mainListingContent">
+                            <div class="locationLeft relative">
+                                <i class="hovercards avatar"></i>
+                            </div> <!-- listings thumbnail -->
+                            <div class="locationRight relative">
+                                <h3><a href="#">Jason Nathan <a><small>Realt Staff</small></a></a></h3>
+                                <ul class="locationDetails">
+                                    <li><label>Rep</label><span>Not enough Information</span></li>
+                                    <li><label>Listings</label><span>0</span></li>
+                                </ul>
                             </div> <!-- listings content -->
                         </div> <!-- main listing content -->
                         <div class="postActions">

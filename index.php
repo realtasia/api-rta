@@ -110,7 +110,7 @@ require APPPATH . 'bootstrap' . EXT;
 //            ->body();
 
 //if(!ob_start("ob_gzhandler")) ob_start();
-    
+
 //echo Request::factory()
 //        ->execute()
 //        ->send_headers()
@@ -127,9 +127,9 @@ catch (Exception $e)
 {
     $error = sprintf('%s [ %s ]: %s ~ %s [ %d ]', get_class($e), $e->getCode(), strip_tags($e->getMessage()), Debug::path($e->getFile()), $e->getLine());
     Debug::error($error);
-    
+
     $callback = Arr::get($_REQUEST, 'callback');
-    
+
     $data = json_encode([
         'status' => 'error',
         'data' => [

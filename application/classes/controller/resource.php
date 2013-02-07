@@ -166,9 +166,9 @@ abstract class Controller_Resource extends Controller_Abstract{
         // casting as string in case a MongoID was given
         return static::$user_id ? (string) static::$user_id === (string) $id : false;
     }
-    
+
     /**
-     * 
+     *
      * @param string|MongoID $id
      * @param string $objtype
      */
@@ -180,7 +180,7 @@ abstract class Controller_Resource extends Controller_Abstract{
             return $i->subscribe($id, $objtype);
         }
         return false;
-    }    
-    
+    }
+
 }
 // End Welcome

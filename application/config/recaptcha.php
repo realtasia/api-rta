@@ -2,7 +2,7 @@
     /**
     * @author jason
     */
- 
+
 return array(
   'publickey' => '',
   'privatekey' => ''

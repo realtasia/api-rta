@@ -28,7 +28,7 @@ class Model_User_Collection extends Collection {
     {
 //        $this->collection()->ensureIndex([
 //            'keywords' => 1
-//                ], ['name' => 'user_keywords', 'safe' => true]);        
+//                ], ['name' => 'user_keywords', 'safe' => true]);
 //        $this->collection()->ensureIndex([
 //            'status' => 1, 'roles' => 1, 'settings.privacy.is' => 1, 'active' => -1
 //        ], ['name' => 'user_search_fields', 'safe' => true]);
@@ -108,7 +108,7 @@ class Model_User_Collection extends Collection {
             // indexes should work... Hopefully.
             $keyword = new MongoRegex("/^".strtolower($s)."/");
             $query['keywords'] = $keyword;
-            
+
             //print_r($query);
             // we change the hint now as these are more relevant.
             $user_search_fields_hint = ['keywords' => 1];

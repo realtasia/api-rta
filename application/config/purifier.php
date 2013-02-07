@@ -61,7 +61,7 @@ return array(
       ),
       /**
        * Document doctype
-       * Options : 
+       * Options :
        * "HTML 4.01 Transitional"
        * "HTML 4.01 Strict"
        * "XHTML 1.0 Transitional"

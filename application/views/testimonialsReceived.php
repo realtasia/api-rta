@@ -7,11 +7,11 @@
             <div class="pageInfo">
                 <span class="pageType">Associate Director</span> at <span class="parentDesc">
                     <a href="#">DTZ Debenham Tie Leung</a>
-                </span>  
+                </span>
                 <div class="pageActions">
-                    <a class="pageActionsButton btn btn-mini hasActiveState hasHoverState"><i class="action16 okCircleBG"></i>Edit</a>  
+                    <a class="pageActionsButton btn btn-mini hasActiveState hasHoverState"><i class="action16 okCircleBG"></i>Edit</a>
                     <a class="pageActionsButton btn btn-mini hasActiveState hasHoverState"><i class="action16 subscribe"></i>Subscribe</a>
-                    <a class="pageActionsButton btn btn-mini hasActiveState hasHoverState"><i class="action16 likeSmall"></i>Like</a>                                                          
+                    <a class="pageActionsButton btn btn-mini hasActiveState hasHoverState"><i class="action16 likeSmall"></i>Like</a>
                     <a class="moreLink">View More<i class="Action16 infoCircleBG"></i></a>
                 </div>
             </div>
@@ -23,7 +23,7 @@
                     <li class="hasActiveState hasHoverState"><a href="#"><i class="action16 postTestimonial"></i></a></li>
                     <li class="statusRight" style="display:none"><button class="close" type="button">&times;</button></li>
                 </ul>
-                <div id="statusFormTA">                    
+                <div id="statusFormTA">
                     <textarea id="statusFormTextarea" class="rounded" placeholder="What's New"></textarea>
                 </div>
                 <div class="statusBoxExpand" style="display:none">
@@ -34,35 +34,35 @@
                     <button class="btn btn-info relative">Share</button>
                 </div>
             </section>
-        </div> <!--  status form -->        
+        </div> <!--  status form -->
         <section id="theLoop">
-            <section id="feedActionDiv">                
+            <section id="feedActionDiv">
                 <div id="filterButtonDiv" class="dropdown hasHoverState hasActiveState">
                     <a data-toggle="dropdown" class="dropdown-toggle" id="filterButton" href="#">Show:&nbsp;<span class="dropDownSelected">All</span>&nbsp;<span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="#" id="filterAll">All</a></li>
                         <li><a href="#" id="filterPopular">Published</a></li>
                         <li><a href="#" id="filterDraft">Draft</a></li>
-                    </ul>                    
-                </div>                
+                    </ul>
+                </div>
                 <div id="sortButtonDiv" class="dropdown hasHoverState hasActiveState">
                     <a data-toggle="dropdown" class="btn btn-small dropdown-toggle" id="sortButton" href="#">Sort:&nbsp;<span class="sortSelected">Popular</span>&nbsp;<span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="#" id="sortNewest">Newest</a></li>
                         <li><a href="#" id="sortPopular">Popular</a></li>
-                    </ul>                    
+                    </ul>
                 </div>
             </section> <!--  sort button & result count -->
             <article class="postFeed editMode Approved infoBorderColor">
                 <div class="dropdown postSettings infoBorderColor infoBGColor">
                     <div class="containerLeft">
                         <label class="label label-info">Approved</label>
-                    </div> 
+                    </div>
                     <div class="containerRight">
-                        <div class="btn-group">                            
+                        <div class="btn-group">
                             <a class="btn btn-mini"><i class="action20 xCircleBG"></i></a>
                             <a class="btn btn-mini"><i class="action20 unapprove"></i></a>
-                        </div>                        
+                        </div>
                     </div>
                 </div> <!-- post settings -->
                 <div class="feedProfileThumbs thumbnails">
@@ -99,10 +99,10 @@
                         <label class="label label-warning">Pending Approval</label>
                     </div>
                     <div class="containerRight">
-                        <div class="btn-group">                            
+                        <div class="btn-group">
                             <a class="btn btn-mini"><i class="action20 xCircleBG"></i></a>
                             <a class="btn btn-mini"><i class="action20 approve"></i></a>
-                        </div> 
+                        </div>
                     </div>
                 </div> <!-- post settings -->
                 <div class="feedProfileThumbs thumbnails">
@@ -139,9 +139,9 @@
                         <label class="label label-inverse">Trashed</label>
                     </div>
                     <div class="containerRight">
-                        <div class="btn-group">                            
+                        <div class="btn-group">
                             <a class="btn"><i class="action20 okCircleBG"></i></a>
-                        </div> 
+                        </div>
                     </div>
                 </div> <!-- post settings -->
                 <div class="feedProfileThumbs thumbnails">

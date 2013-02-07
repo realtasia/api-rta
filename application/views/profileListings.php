@@ -7,10 +7,10 @@
             <div class="pageInfo">
                 <span class="pageType">Associate Director</span> at <span class="parentDesc">
                     <a href="#">DTZ Debenham Tie Leung</a>
-                </span>  
+                </span>
                 <div class="pageActions">
                     <a class="pageActionsButton btn btn-mini hasActiveState hasHoverState"><i class="action16 subscribe"></i>Subscribe</a>
-                    <a class="pageActionsButton btn btn-mini hasActiveState hasHoverState"><i class="action16 likeSmall"></i>Like</a>                     
+                    <a class="pageActionsButton btn btn-mini hasActiveState hasHoverState"><i class="action16 likeSmall"></i>Like</a>
                     <a class="moreLink">View More<i class="Action16 infoCircleBG"></i></a>
                 </div>
             </div>

@@ -144,7 +144,7 @@
                                 <div class="containerRight">
                                     <div class="formButtons">
                                         <a class="btn hasHoverState" id="cancelSearch"><i class="action20 xCircleBG"></i></a>
-                                        <a class="btn hasHoverState" id="doSearch"><i class="action20 search"></i></a>                                        
+                                        <a class="btn hasHoverState" id="doSearch"><i class="action20 search"></i></a>
                                     </div> <!-- SEARCH FORM BUTTONS -->
                                 </div>
                             </div>
@@ -159,8 +159,8 @@
                         <ul class="dropdown-menu">
                             <li><a href="#" id="sortNewest">Newest</a></li>
                             <li><a href="#" id="sortPopular">Popular</a></li>
-                        </ul>                    
-                    </div>                    
+                        </ul>
+                    </div>
                 </section> <!--  sort button & result count -->
                 <div class="widgetOuterBox relative">
                     <article class="contentArea widgetContentBG listing relative">
@@ -337,7 +337,7 @@
             </div>
         </div>
     </div>
-<? //include('rightbar.php') ?>    
+<? //include('rightbar.php') ?>
 </section>
 <footer id="footer"></footer>
 </body>
