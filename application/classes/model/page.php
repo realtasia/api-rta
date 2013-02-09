@@ -78,7 +78,8 @@ class Model_Page extends Document {
         }
 
         // sort - for some sanity in debugging.. :-)
-        ksort($this->get_keywords($data));
+        $d = $this->get_keywords($data);
+        ksort($d);
         //return $data;
         // load the document
         $this->load_values($data);
