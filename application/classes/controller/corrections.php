@@ -49,8 +49,46 @@ class Controller_Corrections extends Controller {
             fwrite(STDOUT, "Adding the following to {$row->name}: \n");
             fwrite(STDOUT, implode(', ', $keywords) . "\n");
         }
-    }
+    }   
 
+    public function action_postIndex()
+    {
+        $r = Collection::factory('singpost')->collection()->find([
+            'keywords' => new MongoRegex("/^0/"),
+        ]); 
+        
+        fwrite(STDOUT, print_r(iterator_to_array($r), true) . "\n\n\n");
+    }
+    
+    public function action_postal()
+    {
+        $cursor = Collection::factory('singpost')->find();
+        $keywords = [];
+
+        while ($cursor->hasNext())
+        {
+            $row = $cursor->getNext();
+            $a = $row->as_array();
+            
+            $keywords[] = \Arr::get($a, 'building');
+            $keywords[] = \Arr::get($a, 'estate');
+            $keywords[] = \Arr::get($a, 'locality');
+            $keywords[] = \Arr::get($a, 'number', '') . ' ' . \Arr::get($a, 'street', '');
+            $keywords[] = \Arr::get($a, 'postal');
+            $keywords[] = \Arr::get($a, 'other_name');
+            $keywords[] = \Arr::path($a, 'child.name');
+
+            $keywords = array_filter(array_map('trim', \Arr::flatten($keywords)));
+            $keywords = array_values(array_unique(array_map('strtolower', $keywords), SORT_STRING));
+
+            $row->set('keywords', $keywords);
+            $row->save();
+            fwrite(STDOUT, "Adding the following to {$row->_id}: \n");
+            fwrite(STDOUT, print_r($keywords, true) . "\n\n\n");
+            $keywords = [];
+        }
+    }    
+    
     public function action_estates()
     {
         Collection::factory('page')->remove(['_id' => new MongoID('50ed26deb90fb8c817000049')]);
@@ -94,5 +132,3 @@ class Controller_Corrections extends Controller {
         $user->save();
     }
 }
-
-?>

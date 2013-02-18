@@ -573,10 +573,8 @@ class Controller_Post extends Controller_Resource {
             // this is a little different. we merge params with defaults to force defaults
             if ($post = static::$model->create(Arr::merge(static::$params, $defaults)))
             {
-                Job::add($post->_id, 'post', static::$user_id)
-                        ->wallpost($post->page['_id']);
-
-                static::creator_interactions($post->_id, 'post');
+                static::_do_interactions($post);
+                Job::add($post->_id, 'post', static::$user_id)->wallpost($post->page['_id']);                
                 $post                          = $post->stringify($post->as_array());
                 $post['counts']['subscribers'] = 1;
                 return $this->data($post);
@@ -1252,6 +1250,16 @@ class Controller_Post extends Controller_Resource {
         }
 
         return $params;
+    }
+    
+    protected static function _do_interactions($post)
+    {        
+        if( (string) $post->user['_id'] !== (string) $post->page['_id'])
+        {
+            $i = Document::factory('interaction', null, $post->page['_id']);
+            $i->subscribe($post->_id, 'post');      
+        }
+        return static::creator_interactions($post->_id, 'post');
     }
 
 }

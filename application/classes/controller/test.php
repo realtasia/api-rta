@@ -2,7 +2,6 @@
 
 ini_set("max_execution_time", 0);
 ini_set('memory_limit', '2000M');
-
 class Controller_Test extends Controller {
     use Trait_Oauth2_Utils;
     public $template = 'template';
@@ -662,25 +661,65 @@ EOD;
 
     public function action_job()
     {
-        $job = Model::factory('job')->collection->find();
-        while ($job->hasNext())
-        {
-            print_r('<style type="text/css">' .
-                    file_get_contents(Kohana::find_file('views', 'profiler/style', 'css'))
-                    . '</style>'
-            );
-            $j   = $job->getNext();
-            $pro = new Job_Processor_Immediate($j);
-            echo '<pre>';
-            if ($j['is_single'])
-                echo Debug::vars($pro->add('single')->emails);
-            else
-                echo Debug::vars($pro->add()->emails);
-            echo '</pre>';
-        }
-        echo View::factory('profiler/stats');
+        require_once MODPATH . 'kohana-aws/vendor/aws-sdk-for-php/sdk.class.php';
+        ///echo Debug::vars(get_class_methods(AmazonSDK));
+//        while(1){
+            $i = 0;
+            while($i <= 1)
+            {
+//                $pid = pcntl_fork();
+//                if(!$pid)
+//                {
+                    $Job  = Document::factory('job');
+                    $j    = $Job->get_next();
+                    $pro = new Job_Processor_Immediate($j);
+                    if ($j['is_single'])
+                        $e = $pro->add('single');
+                    else
+                        $e = $pro->add();
+                    $token = Profiler::start('email', 'Send Email');
+                    $res = $queue->send();
+                    Profiler::stop($token);
+                    echo Debug::Vars($res);
+                    echo View::factory('profiler/stats');
+//                }
 
-        die();
+            }
+//        }
+//        $job = Document::factory('job')->get_next();
+//        while ($job->hasNext())
+//        {
+//            $j   = $job->getNext();
+//            $arr = $j->as_array();
+//            //die(Debug::vars($j));
+//            $pro = new Job_Processor_Immediate($arr);
+//            //die;
+//            //die(Debug::vars($pro));
+//            //echo '<pre>';
+//            if ($arr['is_single'])
+//                $e = $pro->add('single');
+//            else
+//                $e = $pro->add();
+//
+//            $queue = new CFBatchRequest(100);
+//
+//            foreach($e->emails as $email)
+//            {
+//                $queue->add($email);
+//            }
+//
+//            //$res = $queue->send();
+//
+//            $token = Profiler::start('email', 'Send Email');
+//            $res = $queue->send();
+//            Profiler::stop($token);
+//            echo Debug::Vars($res);
+//            echo View::factory('profiler/stats');
+//            $j->delete();
+//        }
+//        echo "<pre>";
+//        die((string)$e[0]);
+        //$this->response->body((string)$e[0]);
     }
 
     public function action_password()
@@ -688,5 +727,4 @@ EOD;
         //echo static::hash('121481') . '<br>';
         echo static::hash('90250056') . '<br>';
     }
-
 }

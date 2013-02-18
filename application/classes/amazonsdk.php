@@ -24,6 +24,14 @@ class AmazonSDK
         ]);
     }
 
+    public static function SES()
+    {
+        define('AWS_KEY', '[REDACTED]');
+        define('AWS_SECRET_KEY', '[REDACTED]');
+        require_once MODPATH . 'kohana-aws/vendor/aws-sdk-for-php/sdk.class.php';
+        return new AmazonSES();
+    }
+
     public static function sns()
     {
         defined('AWS_KEY') or self::_initialise();

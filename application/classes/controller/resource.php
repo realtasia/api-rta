@@ -144,7 +144,7 @@ abstract class Controller_Resource extends Controller_Abstract{
                 // Job added only for positive interactions.
                 if(strpos($interaction, 'un') !== 0)
                 {
-                    Job::add($id, $object_type, static::$user_id);
+                    Job::add($id, $object_type, static::$user_id)->{$interaction}();
                 }
                 return $this->data(['success' => 1]);
             }
