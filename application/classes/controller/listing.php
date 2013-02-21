@@ -16,7 +16,7 @@ class Controller_Listing extends Controller{
                     'estate' => ['$ne' => null],
                     'keywords' => new MongoRegex("/^".strtolower($s)."/")
                     ])
-                ->fields(['keywords', 'estate', 'child'])
+                ->fields(['keywords', 'estate', 'child', 'number', 'postal', 'street'])
                 ->limit(50);
 
         while($cursor->hasNext())
@@ -33,7 +33,8 @@ class Controller_Listing extends Controller{
                         'label' => $trimmed,
                         'value' => $trimmed,
                         'child' => empty($row->child) ? null : $row->stringify((array)$row->child),
-                        'estate'=> $row->estate
+                        'estate'=> $row->estate,
+                        'address' => $row->number . " " . ucwords(strtolower($row->street))
                     ];
                 }
             }
