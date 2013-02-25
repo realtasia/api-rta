@@ -4,8 +4,8 @@
  * Updated Amazon Web Services Utility Helper.
  *
  * @author Jason Nathan
- * @category RealtAsia API
- * @package Helpers
+ * @category RealtAsia
+ * @package RT_Helpers
  * @subpackage AmazonSDK
  * @version 1.1
  * @copyright 2013 Realtasia Pte Ltd

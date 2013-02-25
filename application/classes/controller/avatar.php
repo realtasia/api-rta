@@ -5,8 +5,8 @@
  * redirect the request to serve the static file instead of having PHP handle the file.
  *
  * @author Jason Nathan
- * @category RealtAsia API
- * @package Controller
+ * @category RealtAsia
+ * @package RT_Controller
  * @subpackage Avatar
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd

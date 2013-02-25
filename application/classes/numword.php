@@ -4,8 +4,8 @@
  * Description of Numword
  *
  * @author Manda Krishna Srikanth (krishnasrikanth.com)
- * @category RealtAsia API
- * @package Helpers
+ * @category RealtAsia
+ * @package RT_Helpers
  * @subpackage Numword
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd

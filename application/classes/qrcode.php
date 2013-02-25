@@ -4,8 +4,8 @@
  * Description of QRCode
  *
  * @author Pierre-Henry Soria <ph7software@gmail.com>
- * @category RealtAsia API
- * @package Helpers
+ * @category RealtAsia
+ * @package RT_Helpers
  * @subpackage QRCode
  * @version 1.1
  * @desc Compatible to vCard 4.0 or higher.

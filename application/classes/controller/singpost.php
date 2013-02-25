@@ -4,8 +4,8 @@ ini_set('memory_limit', '2000M');
 /**
  *
  * @author Jason Nathan
- * @category RealtAsia API
- * @package Controller
+ * @category RealtAsia
+ * @package RT_Controller
  * @subpackage Singpost
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd

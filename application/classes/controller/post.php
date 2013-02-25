@@ -5,8 +5,8 @@
  * attachments, status updates, wallposts etc. also creates comments for a given post.
  *
  * @author Jason Nathan
- * @category RealtAsia API
- * @package Controller
+ * @category RealtAsia
+ * @package RT_Controller
  * @subpackage Post
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
@@ -49,13 +49,9 @@ class Controller_Post extends Controller_Resource {
      * *********************************************************************** */
 
     /**
-     * Fetch a private GET action or fail if there is one and no method for it
-     * || Or fetch a post by id. Check if there is a logged in user. Fetch requested post and check relation to 
-     * logged_in user
-    * Usage: Issue a GET to
-     * <code>
-     * "/post/index/{id}" || "/post/index/{action}"
-     * </code>
+     * Fetch a private GET action or fail if there is one and no method for it || Or fetch a post by id. Check if 
+     * there is a logged in user. Fetch requested post and check relation to  logged_in user. <code>
+     * GET "/post/index/{id}" || "/post/index/{action}"</code>
      * 
      * @return string JSON encoded array
      */
@@ -88,11 +84,8 @@ class Controller_Post extends Controller_Resource {
 
     /**
      * All private update methods go through this method. Authenticates whether a user is allowed to perform
-     * and action before delegating to the respective handlers.
-    * Usage: Issue a POST to
-     * <code>
-     *  "/post/update/{action}"
-     * </code>
+     * and action before delegating to the respective handlers. <code> 
+     * POST "/post/update/{action}"</code>
      * 
      * @return string JSON encoded array
      */
@@ -122,11 +115,8 @@ class Controller_Post extends Controller_Resource {
      *  - Checks if post owner is current user.
      *  - Checks if page itself is the current user.
      *  - Checks if page owner is current user
-     *  If any thing checks out, we delete the post
-    * Usage: Issue a POST to
-     * <code>
-     *  "/post/delete/{id}"
-     * </code>
+     *  If any thing checks out, we delete the post  <code> 
+     * POST "/post/delete/{id}"</code>
      * 
      * @return string JSON encoded array
      */
@@ -198,11 +188,8 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
-     * Set or get the privacy of a post
-    * Usage: Issue a POST [Setter] or GET [Getter]
-     * <code>
-     *  "/post/privacy/{id}"
-     * </code>
+     * Set or get the privacy of a post.<code>
+     * POST [Setter] || GET [Getter]  "/post/privacy/{id}"</code>
      * @see update_privacy
      * @return string JSON encoded array
      */
@@ -260,10 +247,8 @@ class Controller_Post extends Controller_Resource {
      * *********************************************************************** */
 
     /**
-     * Retrieves users who like this post. Usage: Issue a GET to
-     * <code>
-     * "/post/likers/{id}"
-     * </code>
+     * Retrieves users who like this post. <code> 
+     * GET "/post/likers/{id}"</code>
      * with the following params
      * <code>
      * $defaults = [
@@ -293,10 +278,8 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
-     * Retrieves users who are subscribed to this post. Usage: Issue a GET to
-     * <code>
-     * "/post/subscribers/{id}"
-     * </code>
+     * Retrieves users who are subscribed to this post. <code> 
+     * GET "/post/subscribers/{id}"</code>
      * with the following params
      * <code>
      * $defaults = [
@@ -326,10 +309,8 @@ class Controller_Post extends Controller_Resource {
     }
     
     /**
-     * Retrieves attachments (subposts) of a given post (normally albums or listings). Usage: Issue a GET to
-     * <code>
-     * "/post/attachments/{id}"
-     * </code>
+     * Retrieves attachments (subposts) of a given post (normally albums or listings). <code>
+     * GET "/post/attachments/{id}"</code>
      * with the following params
      * <code>
      * $defaults = [
@@ -337,12 +318,6 @@ class Controller_Post extends Controller_Resource {
      *      'page_id' => null, 'parent_id' => null,  'user_id' => null, 'type' => null, 'listing' => [], 'to_id' => null,
      *      'privacy' => NULL, 'company_id' => null
      * ];
-     * </code>
-     * Returns a JSON string
-     * <code>
-     * {
-     *      ['_id': 'user_id', 'name':'username'] , [...]
-     * }
      * </code>
      * 
      * @return string JSON encoded array
@@ -361,10 +336,8 @@ class Controller_Post extends Controller_Resource {
      * *********************************************************************** */
 
     /**
-     * Performs a like on the given post. Usage: Issue a POST to
-     * <code>
-     * "/post/like/{id}"
-     * </code>
+     * Performs a like on the given post. <code> 
+     * POST "/post/like/{id}"</code>
      * 
      * @return string JSON encoded array
      */
@@ -374,10 +347,8 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
-     * Performs an unlike on the given post. Usage: Issue a POST to
-     * <code>
-     * "/post/unlike/{id}"
-     * </code>
+     * Performs an unlike on the given post. <code> 
+     * POST "/post/unlike/{id}"</code>
      * 
      * @return string JSON encoded array
      */
@@ -387,10 +358,8 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
-     * Performs a subscribe on the given post. Usage: Issue a POST to
-     * <code>
-     * "/post/subscribe/{id}"
-     * </code>
+     * Performs a subscribe on the given post. <code> 
+     * POST "/post/subscribe/{id}"</code>
      * 
      * @return string JSON encoded array
      */
@@ -400,10 +369,8 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
-     * Performs an unsubscribe on the given post. Usage: Issue a POST to
-     * <code>
-     * "/post/unsubscribe/{id}"
-     * </code>
+     * Performs an unsubscribe on the given post. <code> 
+     * POST "/post/unsubscribe/{id}"</code>
      * 
      * @return string JSON encoded array
      */
@@ -509,20 +476,17 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
-     * Testimonials are very similar to regular posts accept that this method
-     * sets the type to testimonial and ensures that the default status is pending
-     * unless this is an update. Upon successful creation,
+     * Testimonials are very similar to regular posts accept that this method sets the type to testimonial and 
+     * ensures that the default status is pending  unless this is an update. Upon successful creation,
      *   - increase the receipient count for testimonials received.
-     *   - increase the writer's count for testimonials written.Usage: Issue a post to
-     * <code>
-     * "/post/update/create_testimonial"
-     * </code>
+     *   - increase the writer's count for testimonials written.<code> 
+     * POST "/post/update/create_testimonial"</code>
      * with the following params
      * <code>
      * $defaults = [
      *      'user'         => [], // '_id', 'name' of the user who created this           
-     *      'page'         => [], // '_id', 'name', 'type' the page it was written on (location, user profile, album etc...)
-     *      'page_parent'  => [], // '_id', 'name', 'type' the page's parent (estate or library)
+     *      'page'         => [], // '_id', 'name', 'type', 'uri' the page it was written on (location, user, album etc...)
+     *      'page_parent'  => [], // '_id', 'name', 'type', 'uri' the page's parent (estate or library)
      *      'company'      => [], // '_id', 'name', 'type' the user's company if available
      *      'message'      => '', // the content
      *      'picture'      => null, // if this post has an image, this will be the url
@@ -652,18 +616,15 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
-     * Creates a wallpost. Uses the user controller to validate a page if
-     * present. A page parent is optional, but a page is needed so we know
-     * where this post was created - in this case it is a user. Usage: Issue a post to
-     * <code>
-     * "/post/update/create_wallpost"
-     * </code>
+     * Creates a wallpost. Uses the user controller to validate a page if present. A page parent is optional, 
+     * but a page is needed so we know where this post was created - in this case it is a user. <code>
+     * POST to "/post/update/create_wallpost"</code>
      * with the following params
      * <code>
      * $defaults = [
      *      'user'         => [], // '_id', 'name' of the user who created this           
-     *      'page'         => [], // '_id', 'name', 'type' the page it was written on (location, user profile, album etc...)
-     *      'page_parent'  => [], // '_id', 'name', 'type' the page's parent (estate or library)
+     *      'page'         => [], // '_id', 'name', 'type', 'uri' the page it was written on (location, user, album etc...)
+     *      'page_parent'  => [], // '_id', 'name', 'type', 'uri' the page's parent (estate or library)
      *      'company'      => [], // '_id', 'name', 'type' the user's company if available
      *      'message'      => '', // the content
      *      'picture'      => null, // if this post has an image, this will be the url
@@ -722,18 +683,15 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
-     * Creates a regular post. Uses the page controller to validate a page if
-     * present. A page parent is optional, but a page is needed so we know
-     * where this post was created. Usage: Issue a post to
-     * <code>
-     * "/post/update/create_post"
-     * </code>
+     * Creates a regular post. Uses the page controller to validate a page if present. A page parent is optional, 
+     * but a page is needed so we know where this post was created.  <code>
+     * POST to "/post/update/create_post"</code>
      * with the following params
      * <code>
      * $defaults = [
      *      'user'         => [], // '_id', 'name' of the user who created this           
-     *      'page'         => [], // '_id', 'name', 'type' the page it was written on (location, user profile, album etc...)
-     *      'page_parent'  => [], // '_id', 'name', 'type' the page's parent (estate or library)
+     *      'page'         => [], // '_id', 'name', 'type', 'uri' the page it was written on (location, user, album etc...)
+     *      'page_parent'  => [], // '_id', 'name', 'type', 'uri' the page's parent (estate or library)
      *      'company'      => [], // '_id', 'name', 'type' the user's company if available
      *      'message'      => '', // the content
      *      'picture'      => null, // if this post has an image, this will be the url
@@ -816,10 +774,8 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
-     * Creates an attachment. Usage: Issue a post to
-     * <code>
-     * "/post/update/create_attachment"
-     * </code>
+     * Creates an attachment. <code> 
+     * POST "/post/update/create_attachment"</code>
      * with the following params
      * <code>
      * $defaults = [
@@ -899,10 +855,8 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
-     * Creates an album. Usage: Issue a post to
-     * <code>
-     * "/post/update/create_album"
-     * </code>
+     * Creates an album. <code> 
+     * POST "/post/update/create_album"</code>
      * with the following params
      * <code>
      * $defaults = [
@@ -952,7 +906,8 @@ class Controller_Post extends Controller_Resource {
 
     /**
      * Update a listing. Checks if there is an id and calls the create_listing
-     * method.
+     * method. <code> 
+     * POST "/post/update/update_listing/{id}"</code>
      * @see self::create_listing
      * @return string JSON encoded array
      */
@@ -969,7 +924,8 @@ class Controller_Post extends Controller_Resource {
 
     /**
      * Update a testimonial. Checks if there is an id and calls the create_testimonial
-     * method.
+     * method. <code> 
+     * POST "/post/update/update_testimonial/{id}"</code>
      * @see self::create_testimonial
      * @return string JSON encoded array
      */
@@ -986,7 +942,8 @@ class Controller_Post extends Controller_Resource {
 
     /**
      * Update a post. Checks if there is an id and calls the create_post
-     * method.
+     * method. <code> 
+     * POST "/post/update/update_post/{id}"</code>
      * @see self::create_post
      * @return string JSON encoded array
      */
@@ -1002,7 +959,8 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
-     * updates an album and all it's attachments.
+     * Updates an album and all it's attachments. <code> 
+     * POST "/post/update/update_album/{id}"</code>
      * @see self::create_album
      * @return string JSON encoded array
      */
@@ -1047,7 +1005,8 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
-     * updates an attachment.
+     * updates an attachment.<code> 
+     * POST "/post/update/update_attachment/{id}"</code>
      * @see self::create_attachment
      * @return string JSON encoded array
      */

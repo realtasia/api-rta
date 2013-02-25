@@ -16,8 +16,8 @@
  *      4. Needs to provide valid error messages
  *
  * @author Jason Nathan
- * @category RealtAsia API
- * @package Controller
+ * @category RealtAsia
+ * @package RT_Controller
  * @subpackage Auth
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd

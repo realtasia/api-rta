@@ -6,8 +6,8 @@ ini_set('memory_limit', '2000M');
  *  Testing Controller for some tests
  *
  * @author Jason Nathan
- * @category RealtAsia API
- * @package Controller
+ * @category RealtAsia
+ * @package RT_Controller
  * @subpackage Test
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd

@@ -3,8 +3,8 @@
  * Description of corrections
  *
  * @author Jason Nathan
- * @category RealtAsia API
- * @package Controller
+ * @category RealtAsia
+ * @package RT_Controller
  * @subpackage Corrections
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd

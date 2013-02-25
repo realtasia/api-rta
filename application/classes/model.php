@@ -4,8 +4,8 @@
  * Description of arr
  *
  * @author Jason Nathan
- * @category RealtAsia API
- * @package Model
+ * @category RealtAsia
+ * @package RT_Model
  * @version 0.8
  * @copyright 2012 Realtasia Pte Ltd
  */

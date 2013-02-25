@@ -4,8 +4,8 @@
  * The comment controller handles all comment related functionality.
  *
  * @author Jason Nathan
- * @category RealtAsia API
- * @package Controller
+ * @category RealtAsia
+ * @package RT_Controller
  * @subpackage Comment
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
