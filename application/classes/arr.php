@@ -4,8 +4,9 @@
  * Description of arr
  *
  * @author Jason Nathan
- * @package RealtAsia API
- * @subpackage /Helpers/Arr
+ * @category RealtAsia API
+ * @package Helpers
+ * @subpackage Arr
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */

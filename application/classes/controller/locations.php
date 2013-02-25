@@ -1,15 +1,14 @@
-<?php
-
-defined('SYSPATH') or die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');
 ini_set("max_execution_time", 0);
 ini_set('memory_limit', '2000M');
 
 /**
- * Description of user
+ * Description of locations
  *
  * @author Jason Nathan
- * @package RealtAsia API
- * @subpackage /Controller/User
+ * @category RealtAsia API
+ * @package Controller
+ * @subpackage Locations
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */

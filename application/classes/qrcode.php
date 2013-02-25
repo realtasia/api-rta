@@ -1,15 +1,16 @@
-<?php
-
-defined('SYSPATH') or die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');
 
 /**
- * @title            QR Code
- * @desc             Compatible to vCard 4.0 or higher.
+ * Description of QRCode
  *
- * @author           Pierre-Henry Soria <ph7software@gmail.com>
- * @copyright        (c) 2012, Pierre-Henry Soria. All Rights Reserved.
+ * @author Pierre-Henry Soria <ph7software@gmail.com>
+ * @category RealtAsia API
+ * @package Helpers
+ * @subpackage QRCode
+ * @version 1.1
+ * @desc Compatible to vCard 4.0 or higher.
+ * @copyright (c) 2012, Pierre-Henry Soria. All Rights Reserved.
  * @license          GNU General Public License.
- * @version          1.1
  */
 class QRCode {
 

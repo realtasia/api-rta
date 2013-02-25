@@ -1,9 +1,16 @@
-<?php
+<?php defined('SYSPATH') or die('No direct script access.');
 
-//-----------------------------------------------------------
-//     NumbWordter - Number to Word converter class in PHP
-//   Written by Manda Krishna Srikanth (krishnasrikanth.com)
-//-----------------------------------------------------------
+/**
+ * Description of Numword
+ *
+ * @author Manda Krishna Srikanth (krishnasrikanth.com)
+ * @category RealtAsia API
+ * @package Helpers
+ * @subpackage Numword
+ * @version 1.0
+ * @copyright 2012 Realtasia Pte Ltd
+ */
+
 class numword {
 
     private $discrete = array('0'  => 'zero', '1'  => 'one', '2'  => 'two', '3'  => "three", '4'  => "four", '5'  => "five", '6'  => 'six', '7'  => 'seven',
@@ -101,5 +108,3 @@ class numword {
     }
 
 }
-
-?>

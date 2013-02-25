@@ -1,11 +1,13 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
 /**
- * Description of user
+ * Post is one of RTA's core controllers. It handles all posting functionality for post types. Albums, 
+ * attachments, status updates, wallposts etc. also creates comments for a given post.
  *
  * @author Jason Nathan
- * @package RealtAsia API
- * @subpackage /Controller/User
+ * @category RealtAsia API
+ * @package Controller
+ * @subpackage Post
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */
@@ -23,6 +25,12 @@ class Controller_Post extends Controller_Resource {
 
     protected static $bucket = 'static2.realtasia.com.sg';
 
+    /**
+     * Sets the static $model property to Document::post. Inits document params for logged in user
+     * after log in checks.
+     * 
+     * @return void
+     */
     public function before()
     {
         parent::before();
@@ -42,14 +50,14 @@ class Controller_Post extends Controller_Resource {
 
     /**
      * Fetch a private GET action or fail if there is one and no method for it
-     * Or fetch a post by id.
-     * Check if there is a logged in user
-     * Fetch requested post and check relation to logged_in user
-     *
-     * GET post
-     * Usage: Issue a GET to /post/index/{id}
-     *
-     * @return json data
+     * || Or fetch a post by id. Check if there is a logged in user. Fetch requested post and check relation to 
+     * logged_in user
+    * Usage: Issue a GET to
+     * <code>
+     * "/post/index/{id}" || "/post/index/{action}"
+     * </code>
+     * 
+     * @return string JSON encoded array
      */
     public function action_index()
     {
@@ -79,7 +87,14 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
-     * Changes to post settings or content and post creation will use this update.
+     * All private update methods go through this method. Authenticates whether a user is allowed to perform
+     * and action before delegating to the respective handlers.
+    * Usage: Issue a POST to
+     * <code>
+     *  "/post/update/{action}"
+     * </code>
+     * 
+     * @return string JSON encoded array
      */
     public function action_update()
     {
@@ -98,7 +113,7 @@ class Controller_Post extends Controller_Resource {
         return $this->error('invalid_request');
     }
 
-    /*     * ************************************************************************
+    /* ************************************************************************
      * Private Actions
      * *********************************************************************** */
 
@@ -107,9 +122,13 @@ class Controller_Post extends Controller_Resource {
      *  - Checks if post owner is current user.
      *  - Checks if page itself is the current user.
      *  - Checks if page owner is current user
-     *  - Checks if admin user.
-     *
      *  If any thing checks out, we delete the post
+    * Usage: Issue a POST to
+     * <code>
+     *  "/post/delete/{id}"
+     * </code>
+     * 
+     * @return string JSON encoded array
      */
     public function action_delete()
     {
@@ -180,6 +199,12 @@ class Controller_Post extends Controller_Resource {
 
     /**
      * Set or get the privacy of a post
+    * Usage: Issue a POST [Setter] or GET [Getter]
+     * <code>
+     *  "/post/privacy/{id}"
+     * </code>
+     * @see update_privacy
+     * @return string JSON encoded array
      */
     public function action_privacy()
     {
@@ -189,19 +214,14 @@ class Controller_Post extends Controller_Resource {
 
         if ($this->is_GET() && (static::logged_in_is_id($post->user['_id']) || parent::has_role('admin')))
         {
-            return $this->data($post->stringify($post->as_array()['privacy'])
-            );
+            return $this->data($post->stringify($post->as_array()['privacy']));
         }
-        else
+        elseif (static::logged_in_is_id($post->user['_id']) || parent::has_role('admin'))
         {
-            if (static::logged_in_is_id($post->user['_id']) || parent::has_role('admin'))
+            // this is a setter
+            if ($this->is_POST())
             {
-                // update user by his/her specific field
-                if ($this->is_POST())
-                {
-                    $this->update_privacy();
-                }
-                return true;
+                return $this->update_privacy();
             }
         }
         return $this->error('access_denied');
@@ -210,7 +230,7 @@ class Controller_Post extends Controller_Resource {
     /**
      * Creates a comment for a given post
      *
-     * @return json data
+     * @return string JSON encoded array
      */
     public function action_comment()
     {
@@ -240,7 +260,25 @@ class Controller_Post extends Controller_Resource {
      * *********************************************************************** */
 
     /**
-     * Retrieves an array of [user_ids and user names] of people who like this post
+     * Retrieves users who like this post. Usage: Issue a GET to
+     * <code>
+     * "/post/likers/{id}"
+     * </code>
+     * with the following params
+     * <code>
+     * $defaults = [
+     *      'limit' => 11, 'skip' => 0, 'object_id' => NULL,  'object_type' => NULL, 'interaction' => 'like', 
+     *      'user_id' => NULL
+     * ];
+     * </code>
+     * Returns a JSON string
+     * <code>
+     * {
+     *      ['_id': 'user_id', 'name':'username'] , [...]
+     * }
+     * </code>
+     * 
+     * @return string JSON encoded array
      */
     public function action_likers()
     {
@@ -255,7 +293,25 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
-     * Retrieves an array of [user_ids and user names] of people who are subscribed to this post
+     * Retrieves users who are subscribed to this post. Usage: Issue a GET to
+     * <code>
+     * "/post/subscribers/{id}"
+     * </code>
+     * with the following params
+     * <code>
+     * $defaults = [
+     *      'limit' => 11, 'skip' => 0, 'object_id' => NULL,  'object_type' => NULL, 'interaction' => 'subscribe', 
+     *      'user_id' => NULL
+     * ];
+     * </code>
+     * Returns a JSON string
+     * <code>
+     * {
+     *      ['_id': 'user_id', 'name':'username'] , [...]
+     * }
+     * </code>
+     * 
+     * @return string JSON encoded array
      */
     public function action_subscribers()
     {
@@ -268,44 +324,29 @@ class Controller_Post extends Controller_Resource {
 
         return $this->data($data);
     }
-
-    /*     * ************************************************************************
-     * Public Actions
-     * *********************************************************************** */
-
+    
     /**
-     * Performs a like on the given post
-     */
-    public function action_like()
-    {
-        return parent::interact('like', 'post');
-    }
-
-    /**
-     * Performs an unlike on the given post
-     */
-    public function action_unlike()
-    {
-        return parent::interact('unlike', 'post');
-    }
-
-    /**
-     * Performs a subscribe on the given post
-     */
-    public function action_subscribe()
-    {
-        return parent::interact('subscribe', 'post');
-    }
-
-    /**
-     * Performs an unsubscribe on the given post
-     */
-    public function action_unsubscribe()
-    {
-        return parent::interact('unsubscribe', 'post');
-    }
-
-
+     * Retrieves attachments (subposts) of a given post (normally albums or listings). Usage: Issue a GET to
+     * <code>
+     * "/post/attachments/{id}"
+     * </code>
+     * with the following params
+     * <code>
+     * $defaults = [
+     *      'status' => null, 'skip' => 0, 'limit' => 11, 'sort' => 'active',  's' => '', 'include_ids' => [],
+     *      'page_id' => null, 'parent_id' => null,  'user_id' => null, 'type' => null, 'listing' => [], 'to_id' => null,
+     *      'privacy' => NULL, 'company_id' => null
+     * ];
+     * </code>
+     * Returns a JSON string
+     * <code>
+     * {
+     *      ['_id': 'user_id', 'name':'username'] , [...]
+     * }
+     * </code>
+     * 
+     * @return string JSON encoded array
+     */    
     public function action_attachments()
     {
         $id = $this->request->param('id');
@@ -313,6 +354,62 @@ class Controller_Post extends Controller_Resource {
         $q = Arr::merge(static::$params, ['type' => 'attachment', 'page_id' => $id]);
 
         return $this->data(Collection::factory('post')->search($q, static::$user_id));
+    }    
+
+    /**************************************************************************
+     * Public Actions
+     * *********************************************************************** */
+
+    /**
+     * Performs a like on the given post. Usage: Issue a POST to
+     * <code>
+     * "/post/like/{id}"
+     * </code>
+     * 
+     * @return string JSON encoded array
+     */
+    public function action_like()
+    {
+        return parent::interact('like', 'post');
+    }
+
+    /**
+     * Performs an unlike on the given post. Usage: Issue a POST to
+     * <code>
+     * "/post/unlike/{id}"
+     * </code>
+     * 
+     * @return string JSON encoded array
+     */
+    public function action_unlike()
+    {
+        return parent::interact('unlike', 'post');
+    }
+
+    /**
+     * Performs a subscribe on the given post. Usage: Issue a POST to
+     * <code>
+     * "/post/subscribe/{id}"
+     * </code>
+     * 
+     * @return string JSON encoded array
+     */
+    public function action_subscribe()
+    {
+        return parent::interact('subscribe', 'post');
+    }
+
+    /**
+     * Performs an unsubscribe on the given post. Usage: Issue a POST to
+     * <code>
+     * "/post/unsubscribe/{id}"
+     * </code>
+     * 
+     * @return string JSON encoded array
+     */
+    public function action_unsubscribe()
+    {
+        return parent::interact('unsubscribe', 'post');
     }
 
     /*     * ************************************************************************
@@ -328,8 +425,8 @@ class Controller_Post extends Controller_Resource {
      * Required GET params [unit, not_empty, listing_type, page_id]
      *
      * @todo Only logged in user is checked. What about admins & client credentials?
-     *
-     * @return json data
+     * 
+     * @return string JSON encoded array
      */
     protected function find_unique()
     {
@@ -373,7 +470,8 @@ class Controller_Post extends Controller_Resource {
      * has to contain a user and maybe a list of to[ids]. It can also be one
      * to[_id]. Either way, this post object has very little information and
      * normally depends on it's containing messages (comments) for content.
-     *
+     * 
+     * @return string JSON encoded array
      */
     protected function create_conversation()
     {
@@ -413,13 +511,31 @@ class Controller_Post extends Controller_Resource {
     /**
      * Testimonials are very similar to regular posts accept that this method
      * sets the type to testimonial and ensures that the default status is pending
-     * unless this is an update.
-     *
-     * Upon successful creation,
+     * unless this is an update. Upon successful creation,
      *   - increase the receipient count for testimonials received.
-     *   - increase the writer's count for testimonials written.
-     *
-     * @return json array
+     *   - increase the writer's count for testimonials written.Usage: Issue a post to
+     * <code>
+     * "/post/update/create_testimonial"
+     * </code>
+     * with the following params
+     * <code>
+     * $defaults = [
+     *      'user'         => [], // '_id', 'name' of the user who created this           
+     *      'page'         => [], // '_id', 'name', 'type' the page it was written on (location, user profile, album etc...)
+     *      'page_parent'  => [], // '_id', 'name', 'type' the page's parent (estate or library)
+     *      'company'      => [], // '_id', 'name', 'type' the user's company if available
+     *      'message'      => '', // the content
+     *      'picture'      => null, // if this post has an image, this will be the url
+     *      'mediainfo'    => [], // if this post has an image, this will be the url
+     *      'link'         => [], // 'name', 'description', 'source' the original link if there is one. 
+     *      'type'         => 'testimonial',
+     *      'subtype'      => 'post',
+     *      'status'       => 'pending', // note that this defaults to pending.   
+     *      'privacy'      => ['is' => 'PUBLIC'],   
+     * ];
+     * </code>
+     * @uses Controller_Page
+     * @return string JSON encoded array
      */
     protected function create_testimonial($update = FALSE)
     {
@@ -478,8 +594,8 @@ class Controller_Post extends Controller_Resource {
 
     /**
      * Listing has a lot more validation rules.
-     *
-     * @return json array
+     * 
+     * @return string JSON encoded array
      */
     protected function create_listing($update = FALSE)
     {
@@ -538,11 +654,29 @@ class Controller_Post extends Controller_Resource {
     /**
      * Creates a wallpost. Uses the user controller to validate a page if
      * present. A page parent is optional, but a page is needed so we know
-     * where this post was created - in this case it is a user.
-     *
+     * where this post was created - in this case it is a user. Usage: Issue a post to
+     * <code>
+     * "/post/update/create_wallpost"
+     * </code>
+     * with the following params
+     * <code>
+     * $defaults = [
+     *      'user'         => [], // '_id', 'name' of the user who created this           
+     *      'page'         => [], // '_id', 'name', 'type' the page it was written on (location, user profile, album etc...)
+     *      'page_parent'  => [], // '_id', 'name', 'type' the page's parent (estate or library)
+     *      'company'      => [], // '_id', 'name', 'type' the user's company if available
+     *      'message'      => '', // the content
+     *      'picture'      => null, // if this post has an image, this will be the url
+     *      'mediainfo'    => [], // if this post has an image, this will be the url
+     *      'link'         => [], // 'name', 'description', 'source' the original link if there is one. 
+     *      'type'         => 'wallpost',
+     *      'subtype'      => 'post',
+     *      'status'       => 'active', // pending, active, expired,    
+     *      'privacy'      => ['is' => 'PUBLIC'],   
+     * ];
+     * </code>
      * @uses Controller_Page
-     *
-     * @return json array
+     * @return string JSON encoded array
      */
     protected function create_wallpost()
     {
@@ -590,11 +724,29 @@ class Controller_Post extends Controller_Resource {
     /**
      * Creates a regular post. Uses the page controller to validate a page if
      * present. A page parent is optional, but a page is needed so we know
-     * where this post was created.
-     *
+     * where this post was created. Usage: Issue a post to
+     * <code>
+     * "/post/update/create_post"
+     * </code>
+     * with the following params
+     * <code>
+     * $defaults = [
+     *      'user'         => [], // '_id', 'name' of the user who created this           
+     *      'page'         => [], // '_id', 'name', 'type' the page it was written on (location, user profile, album etc...)
+     *      'page_parent'  => [], // '_id', 'name', 'type' the page's parent (estate or library)
+     *      'company'      => [], // '_id', 'name', 'type' the user's company if available
+     *      'message'      => '', // the content
+     *      'picture'      => null, // if this post has an image, this will be the url
+     *      'mediainfo'    => [], // if this post has an image, this will be the url
+     *      'link'         => [], // 'name', 'description', 'source' the original link if there is one. 
+     *      'type'         => 'post',
+     *      'subtype'      => 'post',
+     *      'status'       => 'active', // pending, active, expired,    
+     *      'privacy'      => ['is' => 'PUBLIC'],   
+     * ];
+     * </code>
      * @uses Controller_Page
-     *
-     * @return json array
+     * @return string JSON encoded array
      */
     protected function create_post()
     {
@@ -640,8 +792,8 @@ class Controller_Post extends Controller_Resource {
 
     /**
      * Creates a message for a given conversation
-     *
-     * @return json data
+     * 
+     * @return string JSON encoded array
      */
     protected function create_message()
     {
@@ -664,10 +816,18 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
-     * extracts an album from the given params or creates a new album.
-     * then creates an attachment post
-     *
-     * @return JSON data
+     * Creates an attachment. Usage: Issue a post to
+     * <code>
+     * "/post/update/create_attachment"
+     * </code>
+     * with the following params
+     * <code>
+     * $defaults = [
+     *      'name'  => '', 'mediainfo' => [], 'picture' => '', 'privacy' => ['is' => 'PUBLIC'],  'user' => [],
+     *      'message' => '', 'excerpt' => '', 'page' => [], 'subtype'   => null, 'type'  => 'attachment',
+     * ];
+     * </code>
+     * @return string JSON encoded array
      */
     protected function create_attachment()
     {
@@ -739,9 +899,19 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
-     *
+     * Creates an album. Usage: Issue a post to
+     * <code>
+     * "/post/update/create_album"
+     * </code>
+     * with the following params
+     * <code>
+     * $defaults = [
+     *      'name'  => '', 'mediainfo' => [], 'picture' => '', 'privacy' => ['is' => 'PUBLIC'],  'user' => [],
+     *      'message' => '', 'excerpt' => '', 'page' => [], 'subtype'   => null, 'type'  => 'album',
+     * ];
+     * </code>
      * @param boolean $model whether to return the model data instead. Helpful when creating an attachment.
-     * @return mixed false if creation failed, a model or JSON data
+     * @return mixed false if creation failed, a model or JSON encoded array
      */
     protected function create_album($model = false)
     {
@@ -782,7 +952,9 @@ class Controller_Post extends Controller_Resource {
 
     /**
      * Update a listing. Checks if there is an id and calls the create_listing
-     * method
+     * method.
+     * @see self::create_listing
+     * @return string JSON encoded array
      */
     protected function update_listing()
     {
@@ -797,7 +969,9 @@ class Controller_Post extends Controller_Resource {
 
     /**
      * Update a testimonial. Checks if there is an id and calls the create_testimonial
-     * method
+     * method.
+     * @see self::create_testimonial
+     * @return string JSON encoded array
      */
     protected function update_testimonial()
     {
@@ -812,7 +986,9 @@ class Controller_Post extends Controller_Resource {
 
     /**
      * Update a post. Checks if there is an id and calls the create_post
-     * method
+     * method.
+     * @see self::create_post
+     * @return string JSON encoded array
      */
     protected function update_post()
     {
@@ -827,8 +1003,8 @@ class Controller_Post extends Controller_Resource {
 
     /**
      * updates an album and all it's attachments.
-     *
-     * @return JSON data
+     * @see self::create_album
+     * @return string JSON encoded array
      */
     protected function update_album()
     {
@@ -871,9 +1047,9 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
-     * updates an album and all it's attachments.
-     *
-     * @return JSON data
+     * updates an attachment.
+     * @see self::create_attachment
+     * @return string JSON encoded array
      */
     protected function update_attachment()
     {
@@ -920,9 +1096,9 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
-     * Update a post's privacuy settings.
-     *
-     * @return boolean
+     * Update a post's privacy settings.
+     * 
+     * @return string JSON encoded array
      */
     protected function update_privacy()
     {
@@ -941,72 +1117,6 @@ class Controller_Post extends Controller_Resource {
         }
 
         return $this->error('invalid_request');
-    }
-
-    /*     * ************************************************************************
-     * Protected STATIC Utility Methods
-     * *********************************************************************** */
-
-    protected static function delete_attachment($post, $array = false)
-    {
-        $picture = Arr::get($post, 'picture');
-        $source  = Arr::path($post, 'link.src');
-        $uid = (string) Arr::get($post['user'], '_id');
-        $objects = [];
-        // not sure if basename() can do relative
-        if ($picture)
-        {
-            $file = basename($picture);
-            $sizes = [110, 90, 40, 16, 150];
-            foreach($sizes as $size)
-            {
-                $objects[] = ['Key' => "$uid/$size/$file"];
-            }
-        }
-        elseif($source)
-        {
-            $file = basename($source);
-        }
-
-
-        $objects[] = $file ? ['Key' => $uid . '/' . $file] : [];
-
-        return $array ? array_filter($objects) : AmazonSDK::s3()->deleteObjects([
-            'Bucket' => static::$bucket,
-            'Objects' => array_filter($objects),
-        ]);
-    }
-
-    protected static function delete_attachments($album)
-    {
-        $objects = $final = [];
-        $attaches = Collection::factory('post')
-                    ->find(['page._id' => Document::check_id($album['_id'])])
-                    ->fields(['user', 'link', 'picture']);
-
-        while($attaches->hasNext())
-        {
-            $child = $attaches->getNext();
-            $objects[] = static::delete_attachment($child->as_array(), true);
-            $child->delete();
-        }
-
-        if(!empty($objects))
-        {
-            $objs = \Arr::flatten_recursive($objects);
-
-            foreach($objs as $v)
-            {
-                $final[] = ["Key" => $v];
-            }
-
-            return AmazonSDK::s3()->deleteObjects([
-                'Bucket' => static::$bucket,
-                'Objects' => array_filter($final),
-            ]);
-        }
-
-        return true;
     }
 
     /**
@@ -1047,6 +1157,84 @@ class Controller_Post extends Controller_Resource {
                     return in_array($type, $types) ? TRUE : $validation->error($field, 'prop_type.landed_not_valid');
             }
         }
+    }    
+    
+    /*     * ************************************************************************
+     * Protected STATIC Utility Methods
+     * *********************************************************************** */
+    /**
+     * Constructs a request object to delete S3 resources
+     * 
+     * @param array $post
+     * @param boolean $array
+     * @return mixed An array if flag is set or issues a request to s3 directly.
+     */
+    protected static function delete_attachment(array $post, $array = false)
+    {
+        $picture = Arr::get($post, 'picture');
+        $source  = Arr::path($post, 'link.src');
+        $uid = (string) Arr::get($post['user'], '_id');
+        $objects = [];
+        // not sure if basename() can do relative
+        if ($picture)
+        {
+            $file = basename($picture);
+            $sizes = [110, 90, 40, 16, 150];
+            foreach($sizes as $size)
+            {
+                $objects[] = ['Key' => "$uid/$size/$file"];
+            }
+        }
+        elseif($source)
+        {
+            $file = basename($source);
+        }
+
+
+        $objects[] = $file ? ['Key' => $uid . '/' . $file] : [];
+
+        return $array ? array_filter($objects) : AmazonSDK::s3()->deleteObjects([
+            'Bucket' => static::$bucket,
+            'Objects' => array_filter($objects),
+        ]);
+    }
+
+    /**
+     * This is similar to the above except it issues a batch request to S3 for multiple attachments.
+     * 
+     * @param array $album
+     * @return boolean
+     */
+    protected static function delete_attachments(array $album)
+    {
+        $objects = $final = [];
+        $attaches = Collection::factory('post')
+                    ->find(['page._id' => Document::check_id($album['_id'])])
+                    ->fields(['user', 'link', 'picture']);
+
+        while($attaches->hasNext())
+        {
+            $child = $attaches->getNext();
+            $objects[] = static::delete_attachment($child->as_array(), true);
+            $child->delete();
+        }
+
+        if(!empty($objects))
+        {
+            $objs = \Arr::flatten_recursive($objects);
+
+            foreach($objs as $v)
+            {
+                $final[] = ["Key" => $v];
+            }
+
+            return AmazonSDK::s3()->deleteObjects([
+                'Bucket' => static::$bucket,
+                'Objects' => array_filter($final),
+            ]);
+        }
+
+        return true;
     }
 
     /**
@@ -1057,7 +1245,7 @@ class Controller_Post extends Controller_Resource {
      * @see http://forum.kohanaframework.org/discussion/1338/validation-and-sub-arrays/p1
      *
      * @param array $array
-     * @return type
+     * @return array
      */
     protected static function extract_listing_values(array $array)
     {
@@ -1078,14 +1266,15 @@ class Controller_Post extends Controller_Resource {
     /**
      *  UrlLinker - facilitates turning plain text URLs into HTML links.
      *
-     *  Author: Søren Løvborg
+     *  @author: Søren Løvborg
      *
      *  To the extent possible under law, Søren Løvborg has waived all copyright
      *  and related or neighboring rights to UrlLinker.
      *  http://creativecommons.org/publicdomain/zero/1.0/
-     */
-    /*
+
      *  Regular expression bits used by htmlEscapeAndLinkUrls() to match URLs.
+     * @param string $text
+     * @return string a html string with linked urls
      */
     protected static function extract_links($text)
     {
@@ -1189,13 +1378,14 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
-     *
-     * @param array $params the POSTed vals array
-     * @param type $len
-     * @param type $max
-     * @return type
+     * Cleans out text fields and auto-links urls
+     * 
+     * @param array $params the post params received for this request
+     * @param int $len
+     * @param int $max
+     * @return array
      */
-    protected static function format($params, $len = 76, $max = 200)
+    protected static function format(array $params, $len = 76, $max = 200)
     {
         $text     = trim(Security::xss_clean(Arr::get($params, 'message')));
         if($text)
@@ -1252,7 +1442,16 @@ class Controller_Post extends Controller_Resource {
         return $params;
     }
     
-    protected static function _do_interactions($post)
+    /**
+     * Performs default subscription for a user. Page owners and Poster needs to be subscribed to the post
+     * upon creation.
+     * 
+     * @param Document $post
+     * @uses Controller_Resource::creator_interactions()
+     * 
+     * @return boolean
+     */
+    protected static function _do_interactions(Document $post)
     {        
         if( (string) $post->user['_id'] !== (string) $post->page['_id'])
         {
@@ -1261,5 +1460,4 @@ class Controller_Post extends Controller_Resource {
         }
         return static::creator_interactions($post->_id, 'post');
     }
-
 }

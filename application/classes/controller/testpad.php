@@ -3,13 +3,16 @@ ini_set("max_execution_time", 0);
 ini_set('memory_limit', '2000M');
 
 /**
- * Description of testpad
+ *  Testing Controller for some tests
  *
  * @author Jason Nathan
- * @package RealtAsia API
- * @subpackage
+ * @category RealtAsia API
+ * @package Controller
+ * @subpackage Testpad
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
+ * @uses Oauth2_Resource
+ *
  */
 class Controller_Testpad extends Controller {
 

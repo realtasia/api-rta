@@ -1,11 +1,12 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
 /**
- * Description of comment
+ * The comment controller handles all comment related functionality.
  *
  * @author Jason Nathan
- * @package RealtAsia API
- * @subpackage /Controller/User
+ * @category RealtAsia API
+ * @package Controller
+ * @subpackage Comment
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */
@@ -21,8 +22,12 @@ class Controller_Comment extends Controller_Resource {
      *  - Checks if post owner is current user.
      *  - Checks if page owner is current user.
      *  - Checks if admin user.
-     *
-     *  If any thing checks out, we delete the comment
+     *  If any thing checks out, we delete the comment. Usage: Issue a POST to
+     * <code>
+     * "/comment/delete/{comment_id}"
+     * </code>
+     * 
+     * @return string JSON encoded array
      */
     public function action_delete()
     {
@@ -71,13 +76,52 @@ class Controller_Comment extends Controller_Resource {
         return $this->error('access_denied');
     }
 
-
-    /**************************************************************************
-     * Public Connections
-     * ************************************************************************/
+    /**
+     * Performs a like on the given comment. Usage: Issue a POST to
+     * <code>
+     * "/comment/like/{comment_id}"
+     * </code>
+     * 
+     * @return string JSON encoded array
+     */
+    public function action_like()
+    {
+        return parent::interact('like', 'comment');
+    }
+    
+    /**
+     * Performs an unlike on the given comment. Usage: Issue a POST to
+     * <code>
+     * "/comment/unlike/{comment_id}"
+     * </code>
+     * 
+     * @return string JSON encoded array
+     */
+    public function action_unlike()
+    {
+        return parent::interact('unlike', 'comment');
+    }
 
     /**
-     * Retrieves an array of [user_ids and user names] of people who like this post
+     * Retrieves users who like this comment. Usage: Issue a GET to
+     * <code>
+     * "/comment/likers/{comment_id}"
+     * </code>
+     * with the following params
+     * <code>
+     * $defaults = [
+     *      'limit' => 11, 'skip' => 0, 'object_id' => NULL,  'object_type' => NULL, 'interaction' => 'like', 
+     *      'user_id' => NULL
+     * ];
+     * </code>
+     * Returns a JSON string
+     * <code>
+     * {
+     *      ['_id': 'user_id', 'name':'username'] , [...]
+     * }
+     * </code>
+     * 
+     * @return string JSON encoded array
      */
     public function action_likers()
     {
@@ -89,28 +133,24 @@ class Controller_Comment extends Controller_Resource {
                 ->likers(static::$params);
 
         return $this->data($data);
-    }
-
-    /**************************************************************************
-     * Public Actions
-     ************************************************************************ */
-
+    }    
+    
     /**
-     * Performs a like on the given post
+     * This is the method that retrieves comments for a given post. Issue a GET to
+     * <code>
+     * "/comment/get/{post_id}"
+     * </code>
+     * with the following params
+     * <code>
+     * $defaults = [
+     *      'limit' => 2, 'skip' => 0, 'type' => 'comment', 'sort' => -1,  'post_id' => $this->request->param('id'), 
+     *      'status' => 'active'
+     *  ];
+     * </code>
+     * 
+     * @params array $_GET see above.
+     * @return string JSON encoded array
      */
-    public function action_like()
-    {
-        return parent::interact('like', 'comment');
-    }
-
-    /**
-     * Performs an unlike on the given post
-     */
-    public function action_unlike()
-    {
-        return parent::interact('unlike', 'comment');
-    }
-
     public function action_get()
     {
         $defaults = [
@@ -126,7 +166,5 @@ class Controller_Comment extends Controller_Resource {
 
         return $this->data($c);
 
-    }
-
-
+    }    
 }

@@ -1,12 +1,13 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
 /**
- * Model. Does not extend Kohana Model. All models extends this
+ * Description of arr
  *
  * @author Jason Nathan
- * @package realtasia-beta-0.8
- * @subpackage Model
- * @copyright 2011 Realtasia Pte Ltd
+ * @category RealtAsia API
+ * @package Model
+ * @version 0.8
+ * @copyright 2012 Realtasia Pte Ltd
  */
 class Model
 {

@@ -1,9 +1,17 @@
-<?php
-
-defined('SYSPATH') or die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');
 ini_set("max_execution_time", 0);
 ini_set('memory_limit', '2000M');
-
+/**
+ *
+ * @author Jason Nathan
+ * @category RealtAsia API
+ * @package Controller
+ * @subpackage Singpost
+ * @version 1.0
+ * @copyright 2012 Realtasia Pte Ltd
+ * @uses Oauth2_Resource
+ *
+ */
 class Controller_Singpost extends Controller {
 
     public function action_index()

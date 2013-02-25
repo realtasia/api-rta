@@ -3,8 +3,9 @@
  * Description of clean
  *
  * @author Jason Nathan
- * @package RealtAsia API
- * @subpackage
+ * @category RealtAsia API
+ * @package Controller
+ * @subpackage Clean
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */

@@ -3,16 +3,26 @@
  * Description of controller
  *
  * @author Jason Nathan
- * @package RealtAsia API
- * @subpackage
+ * @category RealtAsia API
+ * @package Controller
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
+ * @uses Oauth2_Resource
+ *
  */
 class Controller extends Kohana_Controller {
 
     /**
-     * Returns a formatted response containing current session and data
-     *
+     * Returns a formatted response containing current session and data in the following format
+     * <code> 
+     * return json_encode([
+     *      'status' => 'success',
+     *      'data' => $data
+     * ]);
+     *</code>
+     * 
+     * HTTP status code defaults to 200
+     * 
      * @uses Oauth2_Resource->success
      * @param array|object $data
      * @return boolean

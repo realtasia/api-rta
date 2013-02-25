@@ -1,5 +1,14 @@
-<?php
-
+<?php defined('SYSPATH') or die('No direct script access.');
+/**
+ * Description of corrections
+ *
+ * @author Jason Nathan
+ * @category RealtAsia API
+ * @package Controller
+ * @subpackage Listing
+ * @version 1.0
+ * @copyright 2012 Realtasia Pte Ltd
+ */
 class Controller_Listing extends Controller{
 
     public function action_keyword()

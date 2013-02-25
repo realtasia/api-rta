@@ -1,7 +1,19 @@
-<?php
-
+<?php defined('SYSPATH') or die('No direct script access.');
 ini_set("max_execution_time", 0);
 ini_set('memory_limit', '2000M');
+
+/**
+ *  Testing Controller for some tests
+ *
+ * @author Jason Nathan
+ * @category RealtAsia API
+ * @package Controller
+ * @subpackage Test
+ * @version 1.0
+ * @copyright 2012 Realtasia Pte Ltd
+ * @uses Oauth2_Resource
+ *
+ */
 class Controller_Test extends Controller {
     use Trait_Oauth2_Utils;
     public $template = 'template';

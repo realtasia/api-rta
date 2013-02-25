@@ -14,6 +14,13 @@
  *          b. the token expiry (ttl)
  *          c. a user_id to make api requests with
  *      4. Needs to provide valid error messages
+ *
+ * @author Jason Nathan
+ * @category RealtAsia API
+ * @package Controller
+ * @subpackage Auth
+ * @version 1.0
+ * @copyright 2012 Realtasia Pte Ltd
  */
 class Controller_Auth extends Controller_Abstract {
     public static $auth;

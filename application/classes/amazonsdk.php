@@ -1,12 +1,14 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
 /**
- * Amazon Web Services Utility Helper.
+ * Updated Amazon Web Services Utility Helper.
  *
  * @author Jason Nathan
- * @package realtasia-beta-0.8
- * @subpackage Helper
- * @copyright 2011 Realtasia Pte Ltd
+ * @category RealtAsia API
+ * @package Helpers
+ * @subpackage AmazonSDK
+ * @version 1.1
+ * @copyright 2013 Realtasia Pte Ltd
  */
 require 'AWSSDKforPHP/aws.phar';
 use Aws\S3\S3Client;

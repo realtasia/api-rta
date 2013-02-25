@@ -1,14 +1,14 @@
-<?php
-
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+<?php defined('SYSPATH') or die('No direct script access.');
 
 /**
- * Description of debug
+ * Description of Debug
  *
- * @author jason
+ * @author Jason Nathan
+ * @category RealtAsia API
+ * @package Helpers
+ * @subpackage Debug
+ * @version 1.0
+ * @copyright 2012 Realtasia Pte Ltd
  */
 class Debug extends Kohana_Debug
 {

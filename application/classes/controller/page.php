@@ -9,6 +9,12 @@ ini_set('memory_limit', '2000M');
  *  3. Get error utility from trait.
  *  4. Get success utility from trait.
  *
+ * @author Jason Nathan
+ * @category RealtAsia API
+ * @package Controller
+ * @subpackage Page
+ * @version 1.0
+ * @copyright 2012 Realtasia Pte Ltd
  * @uses Oauth2_Resource
  *
  */

@@ -1,14 +1,13 @@
 <?php defined('SYSPATH') or die('No direct script access.');
-
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
  * Description of corrections
  *
- * @author jason
+ * @author Jason Nathan
+ * @category RealtAsia API
+ * @package Controller
+ * @subpackage Corrections
+ * @version 1.0
+ * @copyright 2012 Realtasia Pte Ltd
  */
 class Controller_Corrections extends Controller {
 

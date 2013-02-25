@@ -6,6 +6,12 @@
  *  3. Get error utility from trait.
  *  4. Get success utility from trait.
  *
+ * @author Jason Nathan
+ * @category RealtAsia API
+ * @package Controller
+ * @subpackage Resource
+ * @version 1.0
+ * @copyright 2012 Realtasia Pte Ltd
  * @uses Oauth2_Resource
  *
  */
@@ -171,6 +177,7 @@ abstract class Controller_Resource extends Controller_Abstract{
      *
      * @param string|MongoID $id
      * @param string $objtype
+     * @return boolean
      */
     protected static function creator_interactions($id, $objtype)
     {

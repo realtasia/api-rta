@@ -1,16 +1,24 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
 /**
- * Description of abstract
+ * A simple controller that returns the location of an avatar for a given user. It sets nginx headers so it can
+ * redirect the request to serve the static file instead of having PHP handle the file.
  *
  * @author Jason Nathan
- * @package RealtAsia API
- * @subpackage /Controller/Abstract
+ * @category RealtAsia API
+ * @package Controller
+ * @subpackage Avatar
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */
 class Controller_Avatar extends Controller {
 
+    /**
+     * A simple method that retrieves a user by id, checks for an existing avatar or redirects to the default
+     * after checking user gender.
+     * 
+     * @return Response $response
+     */
     public function action_index()
     {
         $url = '/s3/';

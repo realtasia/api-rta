@@ -1,23 +1,23 @@
-<?php
-
+<?php defined('SYSPATH') or die('No direct script access.');
+/**
+ *  A simple log notifier
+ *
+ * @author Jason Nathan
+ * @category RealtAsia API
+ * @package Controller
+ * @subpackage Stats
+ * @version 1.0
+ * @copyright 2012 Realtasia Pte Ltd
+ * @uses Oauth2_Resource
+ *
+ */
 class Controller_Stats extends Controller{
 
     public function action_check()
     {
-        //print_r("<pre>");
         $logs = Model::factory('log')->collection->findOne();
         $t = new DateTime($logs['time']);
-        //print_r($logs);
         echo exec("DISPLAY=:0 notify-send " . escapeshellarg($t->format("g:i:s a")) . " " . escapeshellarg($logs['body']. PHP_EOL));
-        //print_r(get_class_methods($logs));
-//                ->find();
-//        while($logs->hasNext())
-//        {
-//            $l = $logs->getNext();
-//            $d = new DateTime($l['time']);
-//            return exec("notify-send " . escapeshellarg($d->format("g:i:s a")) . " " . escapeshellarg($l['body']. PHP_EOL));
-//            //echo $d->format("g:i:sa") . " : " . $l['body'] . "\n";
-//        }
         exit;
     }
 

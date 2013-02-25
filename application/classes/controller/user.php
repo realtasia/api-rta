@@ -4,10 +4,13 @@
  * Description of user
  *
  * @author Jason Nathan
- * @package RealtAsia API
- * @subpackage /Controller/User
+ * @category RealtAsia API
+ * @package Controller
+ * @subpackage User
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
+ * @uses Oauth2_Resource
+ *
  */
 class Controller_User extends Controller_Resource {
 

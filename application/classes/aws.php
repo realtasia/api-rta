@@ -4,14 +4,16 @@
  * Amazon Web Services Utility Helper.
  *
  * @author Jason Nathan
- * @package realtasia-beta-0.8
- * @subpackage Helper
- * @copyright 2011 Realtasia Pte Ltd
+ * @category RealtAsia API
+ * @package Helpers
+ * @subpackage AWS
+ * @version 1.0
+ * @copyright 2012 Realtasia Pte Ltd
  */
 require 'AWSSDKforPHP/aws.phar';
 
-use Aws\S3\S3Client;
-use Aws\Common\Enum\Region;
+ use Aws\S3\S3Client;
+ use Aws\Common\Enum\Region;
 class AWS {
 
     public static function s3()

@@ -1,36 +1,49 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
- * Description of abstract
+ * This controller provides acstract methods for returning responses. Success, error etc. It also provides 
+ * functionality for other utilities
  *
  * @author Jason Nathan
- * @package RealtAsia API
- * @subpackage /Controller/Abstract
+ * @category RealtAsia API
+ * @package Controller
+ * @subpackage Abstract
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */
 class Controller_Abstract extends Controller {
 
-    public static $params = array();
     /**
-     * @var array REST types
+     * @var array The global $params property that contains parsed params.
+     */
+    public static $params = [];
+    
+    /**
+     * @var array REST request types
      */
     protected $_action_map = [
         HTTP_Request::GET    => 'index',
         HTTP_Request::POST   => 'update',
     ];
 
-    // the model each respective child controller uses
+    /**
+     * @var Document the model each respective child controller uses 
+     */
     protected static $model;
 
-
-    // the global validation errors array. returns it's errors if available.
+    /**
+     * @var mixed the global validation errors array. returns it's errors if available. 
+     */
     public $errors = null;
+    
     /**
      * @var string requested action
      */
     protected static $_action_requested = '';
 
-    // the current session set upon authentication
+    /**
+     *
+     * @var array the current session set upon authentication
+     */
     public static $current_session = null;
 
     /**
@@ -66,7 +79,7 @@ class Controller_Abstract extends Controller {
     }
 
     /**
-     * Returns a formatted response containing current session and data
+     * Returns a formatted response containing current session and data.
      *
      * @uses Oauth2_Resource->success
      * @param array|object $data
@@ -219,7 +232,7 @@ class Controller_Abstract extends Controller {
         }
 
         $this->response->headers('Content-Type', 'application/javascript');
-        $data = json_encode($this->return, JSON_PRETTY_PRINT);
+        $data = json_encode($this->return);
         if(isset(static::$params['callback']))
             $data = static::$params['callback'] . '(' . $data . ')';
         //Debug::log('Made it to body');
