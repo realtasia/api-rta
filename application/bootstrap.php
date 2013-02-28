@@ -98,7 +98,7 @@ Kohana::$config->attach(new Config_File);
  */
 Kohana::modules([
     'event'      => MODPATH . 'event', // Kohana 3 event class
-    'rt_core'    => MODPATH . 'rt_core', // Core RT classes
+    'RT'    => MODPATH . 'RT', // Core RT classes
     'queue'      => MODPATH . 'queue', // Core RT classes
     'interact'   => MODPATH . 'interact', // Interaction Models
     //'auth'       => MODPATH . 'auth', // Basic authentication
@@ -135,6 +135,13 @@ Route::set('user', 'user(/<action>(/<id>))', ['id' => '[^/,;?]++'])
 Route::set('post', 'post(/<action>(/<id>))')
         ->defaults([
             'controller' => 'post',
+            'action'     => 'index',
+            'id'         => null
+        ]);
+
+Route::set('listing', 'listing(/<action>(/<id>))')
+        ->defaults([
+            'controller' => 'listing',
             'action'     => 'index',
             'id'         => null
         ]);

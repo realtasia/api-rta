@@ -83,4 +83,30 @@ class Arr extends Kohana_Arr {
         }
         return [];
     }
+    
+    /**
+     * Sorts an associative array with an array of keys
+     * 
+     * @param array $array
+     * @param array $keys
+     * @return array
+     */
+    public static function order(array $array, array $keys)
+    {
+        if(!\Arr::is_assoc($array))
+            return $array;
+        
+        $ordered = [];
+        
+        foreach($keys as $key)
+        {
+            if(array_key_exists($key, $array))
+            {
+                $ordered[$key] = $array[$key];
+                unset($array[$key]);
+            }
+        }
+        
+        return $ordered + $array;
+    }
 }

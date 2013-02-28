@@ -11,7 +11,7 @@
  */
 class Controller_Clean extends Controller {
 
-    public function action_delete_user()
+    public function action_deleteuser()
     {
         $user = Document::factory('user', $this->request->param('id'));
 

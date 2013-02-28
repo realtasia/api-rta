@@ -1358,7 +1358,7 @@ class Controller_User extends Controller_Resource {
                     'type'    => 'album',
                 ];
                 $album = $album->create_album($avatars);
-                $album->uri = '/post.php?id=' . (string) $album->_id;
+                $album->uri = '/post?id=' . (string) $album->_id;
                 if($album->save())
                 {
                     static::creator_interactions($album->_id, 'post');
@@ -1389,7 +1389,7 @@ class Controller_User extends Controller_Resource {
         // updated automatically on save()
         if($attachment)
         {
-            $attachment->uri = '/post.php?id=' . (string) $attachment->_id;
+            $attachment->uri = '/post?id=' . (string) $attachment->_id;
             $attachment->save();
             $album->set('picture', $picture);
             $album->save();
@@ -1531,7 +1531,7 @@ class Controller_User extends Controller_Resource {
             $album   = Document::factory('post');
             $album->current_user = $user;
             $album->create_album($uploads);
-            $album->uri = '/post.php?id=' . (string) $album->_id;
+            $album->uri = '/post?id=' . (string) $album->_id;
             $album->save();
             if ($album)
             {

@@ -1,5 +1,4 @@
 <?php defined('SYSPATH') or die('No direct script access.');
-
 /**
  * Updated Amazon Web Services Utility Helper.
  *
@@ -50,5 +49,3 @@ class AmazonSDK
     }
 
 }
-
-?>

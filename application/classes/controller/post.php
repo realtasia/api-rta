@@ -77,7 +77,10 @@ class Controller_Post extends Controller_Resource {
         $id = $this->request->param('id');
 
         if ($id)
+        {
+            static::$model->is_single = true;
             return $this->data(static::$model->get($id));
+        }            
 
         return $this->error('invalid_request');
     }
@@ -570,40 +573,71 @@ class Controller_Post extends Controller_Resource {
 
         static::$params['user']['_id'] = $id ? $id : static::$user_id;
 
-        $params               = static::extract_listing_values(static::$params);
-        $params['privacy.is'] = Arr::path($params, 'privacy.is');
-
-        $validation = Validation::factory($params)
-                ->rule('privacy.is', 'Privacy::valid', [
-                    ':value', ':field', ':validation'
-                ])
-                ->rule('listing.type', 'not_empty')
-                ->rule('listing.type', 'in_array', [':value', ['rent', 'sale']])
-                ->rule('listing.price', 'not_empty')
-                ->rule('listing.price', 'numeric')
-                ->rule('listing.rooms', 'not_empty')
-                ->rule('listing.rooms', 'numeric')
-                ->rule('listing.built_size', 'not_empty')
-                ->rule('listing.built_size', 'numeric')
-                ->rule('listing.built_size', 'not_empty')
-                ->rule('listing.property_type', 'not_empty')
-                ->rule('listing.property_type', 'Controller_Post::valid_property_type', [':value', ':field', ':validation'])
-                ->rule('listing.land_size', 'numeric')
-                ->rule('listing.unit', 'not_empty')
-                ->rule('status', 'not_empty')
+        $validation = Validation::factory(static::$params)
+                ->rule('type', 'not_empty')
+                ->rule('type', 'in_array', [':value', ['Rent', 'Sale']])
+                ->rule('price', 'not_empty')
+                ->rule('price', 'numeric')
+                ->rule('rooms', 'not_empty')
+                ->rule('rooms', 'numeric')
+                ->rule('built_size', 'not_empty')
+                ->rule('built_size', 'numeric')
+                ->rule('property_type', 'not_empty')
+                //->rule('property_type', 'Controller_Post::valid_property_type', [':value', ':field', ':validation'])
+                ->rule('land_size', 'numeric')
+                //->rule('status', 'not_empty')
+                ->rule('address', 'not_empty')
                 ->rule('page', 'not_empty')
-                ->rule('page', 'Controller_Page::valid_page', [':value', ':field', ':validation'])
-                ->rule('page_parent', 'Controller_Page::valid_parent', [':value', ':field', ':validation']);
-
-        $defaults = [
-            'type'   => 'listing', 'status' => 'active'
-        ];
+                ->rule('page', 'Controller_Page::valid', [':value', ':field', ':validation'])
+                ->rule('page_parent', 'Controller_Page::valid', [':value', ':field', ':validation']);
+              
         if ($validation->check())
         {
-            if ($post = static::$model->create(Arr::merge($defaults, static::$params)))
+            static::$params = static::format(static::$params);
+            $listing = \Arr::extract(static::$params, [
+                'type', 'price', 'rooms', 'built_size', 'land_size', 'cov', 'valuation', 'leaseSpace', 'cobroke', 'unit', 'property_type', 'baths'
+            ]);
+            $page = \Arr::get(static::$params, 'page');
+            $unitIsAddress = \Arr::get(static::$params, 'unitIsAddress');
+            if('Private Landed' === $page['subtype'] && $unitIsAddress)
+            {
+                $listing['unit'] = array_shift(explode(' ', static::$params['address']));
+            } 
+            else 
+            {
+                $listing['unit'] = $listing['unit']['floor'] . '-' . $listing['unit']['stack'];
+            }
+
+            $params = \Arr::merge([
+                'type'   => 'listing', 'status' => 'active', 'privacy' => ['is' => 'PUBLIC']
+            ], \Arr::extract(static::$params, [
+               'message', 'address', 'page', 'page_parent', 'excerpt', 'showAddress', 'picture'
+            ]), [  
+                'listing'     => $listing,
+                'addedMedia' => \Arr::map("Document::check_id", \Arr::get(static::$params, 'addedMedia', [])),
+            ]);
+            
+            $params['counts']['attachments'] = count($params['addedMedia']);
+            
+            if($params['status'] === 'active')
+            {
+                $params['expiry'] = time();
+            }
+  
+            $u = (array) $this->get_user();
+            $params['user']= [
+                '_id' => Document::check_id($u['_id']),
+                'name' => $u['name']
+            ];
+            $params['company'] = $u['company'];            
+            $post = static::$model;
+            $post->current_user = $u;
+            $post->create($params);
+            
+            if ($post)
             {
                 static::creator_interactions($post->_id, 'post');
-                $post                          = $post->stringify($post->as_array());
+                $post = $post->stringify($post->as_array());
                 $post['counts']['subscribers'] = 1;
                 return $this->data($post);
             }
@@ -869,7 +903,12 @@ class Controller_Post extends Controller_Resource {
      */
     protected function create_album($model = false)
     {
-        $params = static::format(Arr::get(static::$params, 'create_album'));
+        $p = Arr::get(static::$params, 'create_album', []);
+        if(!is_array($p))
+        {
+            $p = json_decode($p, true);
+        }
+        $params = static::format($p);
         if(!is_array($params))
         {
             $params = @json_decode($params, TRUE);
@@ -1418,5 +1457,42 @@ class Controller_Post extends Controller_Resource {
             $i->subscribe($post->_id, 'post');      
         }
         return static::creator_interactions($post->_id, 'post');
+    }
+    
+    /**
+     * Updates all attachments of a listing and sets a new field, listing_id.
+     * 
+     * @param array $attachments
+     * @param MongoID $post_id
+     * @return int
+     */
+    protected static function _attachments_for_listings(array $attachments)
+    {
+        $ids = [];
+        $picture = null;
+        if(!empty($attachments))
+        {
+            foreach($attachments as $a)
+            {
+                $ids[] = Document::check_id($a['_id']);
+                if(!empty($a['picture']))
+                $picture = $a['picture'];
+            }
+        }
+        
+        if($picture)
+        {
+            $post->set('picture', $attachment->picture);
+            $post->save();            
+        }
+        
+        $query = [
+            '_id' => ['$in' => $ids]
+        ];
+
+        return  Collection::factory('post')->update($query, [
+                '$set' => ['listing_id' => $post->_id]
+        ], ['multiple' => true]);
+        
     }
 }
