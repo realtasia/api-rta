@@ -136,6 +136,16 @@ class Controller_Comment extends Controller_Resource {
     }    
     
     /**
+     * Retrieves the full message content from a given comment id
+     */
+    public function action_fullContent()
+    {
+        $m = Document::factory('comment');
+        $m->load($this->request->param('id'), ['message' => !0]);
+        $this->data($m->message);
+    }    
+    
+    /**
      * This is the method that retrieves comments for a given post. Issue a GET to
      * <code>
      * "/comment/get/{post_id}"

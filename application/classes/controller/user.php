@@ -230,6 +230,7 @@ class Controller_User extends Controller_Resource {
                 ->collection()
                 ->subscriptions(static::$params);
 
+        //return $this->data(static::$params);
         return $this->data($data);
     }
 
@@ -323,6 +324,14 @@ class Controller_User extends Controller_Resource {
          */
 
         $status = Arr::get(static::$params, 'status', 'active');
+        
+        $int = Collection::factory('interaction')->find([
+            'interaction' => 'subscribe', 'object_type' => ['$in' => ['user', 'page']],
+            'user._id' => Document::check_id($id)
+        ])
+                ->fields(['object_id' => 1])
+                ->limit(200);
+        
 
         switch ($status)
         {
