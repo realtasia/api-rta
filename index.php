@@ -115,38 +115,49 @@ require APPPATH . 'bootstrap' . EXT;
 //        ->execute()
 //        ->send_headers()
 //        ->body();
-try
+
+if (PHP_SAPI == 'cli') { // Try and load minion
+    class_exists('Minion_Task') OR die('Please enable the Minion module for CLI support.');
+    set_exception_handler(array('Minion_Exception', 'handler'));
+
+    Minion_Task::factory(Minion_CLI::options())->execute();
+} 
+else 
 {
-    if(!ob_start("ob_gzhandler")) ob_start();
-    echo Request::factory()
-            ->execute()
-            ->send_headers()
-            ->body();
+    try
+    {
+        if(!ob_start("ob_gzhandler")) ob_start();
+        echo Request::factory()
+                ->execute()
+                ->send_headers()
+                ->body();
+    }
+    catch (Exception $e)
+    {
+        $error = sprintf('%s [ %s ]: %s ~ %s [ %d ]', get_class($e), $e->getCode(), strip_tags($e->getMessage()), Debug::path($e->getFile()), $e->getLine());
+        Debug::error($error);
+
+        $callback = Arr::get($_REQUEST, 'callback');
+
+        $data = json_encode([
+            'status' => 'error',
+            'data' => [
+                'title' => get_class($e),
+                'code' => $e->getCode(),
+                'message' => strip_tags($e->getMessage()),
+                'path' => Debug::path($e->getFile()), $e->getLine(),
+            ]
+        ], JSON_PRETTY_PRINT);
+
+        $data = $callback ? "($data)" : $data;
+
+        echo Response::factory([
+            'status' => 200
+        ])->headers('Content-Type', 'application/javascript')
+          ->send_headers()
+          ->body($data);
+
+        return exec("php /home/jason/www/rta.casa.net/index.php --uri=stats/check");
+    }
 }
-catch (Exception $e)
-{
-    $error = sprintf('%s [ %s ]: %s ~ %s [ %d ]', get_class($e), $e->getCode(), strip_tags($e->getMessage()), Debug::path($e->getFile()), $e->getLine());
-    Debug::error($error);
 
-    $callback = Arr::get($_REQUEST, 'callback');
-
-    $data = json_encode([
-        'status' => 'error',
-        'data' => [
-            'title' => get_class($e),
-            'code' => $e->getCode(),
-            'message' => strip_tags($e->getMessage()),
-            'path' => Debug::path($e->getFile()), $e->getLine(),
-        ]
-    ], JSON_PRETTY_PRINT);
-
-    $data = $callback ? "($data)" : $data;
-
-    echo Response::factory([
-        'status' => 200
-    ])->headers('Content-Type', 'application/javascript')
-      ->send_headers()
-      ->body($data);
-
-    return exec("php /home/jason/www/rta.casa.net/index.php --uri=stats/check");
-}

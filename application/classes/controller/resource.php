@@ -151,6 +151,11 @@ abstract class Controller_Resource extends Controller_Abstract{
                 if(strpos($interaction, 'un') !== 0)
                 {
                     Job::add($id, $object_type, static::$user_id)->{$interaction}();
+                    if($object_type === 'post')
+                    {
+                        Ticker::factory($id)->update(['user_id' => static::$user_id], 1);
+                        Ticker::add($id, 'update');   
+                    }
                 }
                 return $this->data(['success' => 1]);
             }

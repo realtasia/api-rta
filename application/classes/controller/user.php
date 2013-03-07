@@ -311,60 +311,22 @@ class Controller_User extends Controller_Resource {
     public function action_feed()
     {
         $id = $this->request->param('id');
+        $tiker = Collection::factory('ticker');
+        $return = [];
 
-        static::$params['type'] = ['$nin' => ['conversation', 'attachment']];
-
-        $posts = Mongo_Collection::factory('post');
-
-        /*
-         * 1. if user is logged in and ids are the same (or admin)
-         *      - all statuses allowed.
-         * 2. if not
-         *      - only active statuses allowed.
-         */
-
-        $status = Arr::get(static::$params, 'status', 'active');
-        
-        $int = Collection::factory('interaction')->find([
-            'interaction' => 'subscribe', 'object_type' => ['$in' => ['user', 'page']],
-            'user._id' => Document::check_id($id)
-        ])
-                ->fields(['object_id' => 1])
-                ->limit(200);
-        
-
-        switch ($status)
+        if (parent::is_client() || parent::logged_in())
         {
-            case 'pending':
-            case 'archived':
-            case 'draft':
-            case 'trashed':
-                // logged in user does not see other statuses if posts don't
-                // belong to him
-                if (static::logged_in_is_id($id))
-                {
-                    $p = Arr::merge(static::$params, ['user_id' => static::$user_id]);
-                    return $this->data($posts->search($p, static::$user_id));
-                }
-
-                // admin sees everything
-                if (parent::has_role('admin'))
-                    return $this->data($posts->search(static::$params, static::$user_id));
-
-                // clients only see active (public) posts
-                return $this->error('access_denied');
-
-            // this is a regular (public) lookup
-            default :
-                // need a client or user token.
-                if (parent::is_client() || parent::logged_in())
-                {
-                    // only publically viewable posts
-                    static::$params['privacy'] = static::logged_in_is_id($id) ? null : 'PUBLIC';
-                    // we include posts written on his page
-                    return $this->data($posts->search(static::$params, static::$user_id));
-                }
+            // only publically viewable posts
+            static::$params['privacy'] = static::logged_in_is_id($id) ? null : 'PUBLIC';
+            // we include posts written on his page
+            $ids = $tiker->search(static::$params, static::$user_id);
+            if(!empty($ids))
+            {
+                $return = Collection::factory('post')->search(['include_ids' => $ids], static::$user_id);
+            }
+            return $this->data($return);
         }
+
 
         return $this->error('invalid_request');
     }
@@ -1370,6 +1332,8 @@ class Controller_User extends Controller_Resource {
                 $album->uri = '/post?id=' . (string) $album->_id;
                 if($album->save())
                 {
+                    Ticker::factory($album)->create(static::$user_id, 2);
+                    Ticker::add($album->_id, 'new');
                     static::creator_interactions($album->_id, 'post');
                 }
             }
@@ -1544,6 +1508,8 @@ class Controller_User extends Controller_Resource {
             $album->save();
             if ($album)
             {
+                // create a new ticker for this user's
+                Ticker::factory($album)->create($user->_id, 2);
                 static::creator_interactions($album->_id, 'post');
                 $user->library = ['_id'  => $lib->_id, 'name' => $lib->name, 'uri' => $lib->uri];
             }

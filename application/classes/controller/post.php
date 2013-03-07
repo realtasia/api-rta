@@ -1,9 +1,7 @@
-<?php
-
-defined('SYSPATH') or die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');
 
 /**
- * Post is one of RTA's core controllers. It handles all posting functionality for post types. Albums, 
+ * Post is one of RTA's core controllers. It handles all posting functionality for post types. Albums,
  * attachments, status updates, wallposts etc. also creates comments for a given post.
  *
  * @author Jason Nathan
@@ -15,7 +13,7 @@ defined('SYSPATH') or die('No direct script access.');
  */
 class Controller_Post extends Controller_Resource {
 
-    private static $valid_get_types = [
+    private static $valid_get_types  = [
         'find_unique'
     ];
     private static $valid_post_types = [
@@ -24,19 +22,23 @@ class Controller_Post extends Controller_Resource {
         'create_album', 'update_album', 'update_attachment', 'create_comment', 'create_message',
         'delete_comment', 'create_wallpost', 'create_attachment'
     ];
-    protected static $bucket = 'static2.realtasia.com.sg';
+    protected static $bucket          = 'static2.realtasia.com.sg';
 
     /**
      * Sets the static $model property to Document::post. Inits document params for logged in user
      * after log in checks.
-     * 
+     *
      * @return void
      */
-    public function before() {
+    public function before()
+    {
         parent::before();
-        if (parent::logged_in()) {
+        if (parent::logged_in())
+        {
             static::$model = Document::factory('post', null, static::$user_id);
-        } else {
+        }
+        else
+        {
             static::$model = Document::factory('post');
         }
     }
@@ -46,18 +48,20 @@ class Controller_Post extends Controller_Resource {
      * *********************************************************************** */
 
     /**
-     * Fetch a private GET action or fail if there is one and no method for it || Or fetch a post by id. Check if 
+     * Fetch a private GET action or fail if there is one and no method for it || Or fetch a post by id. Check if
      * there is a logged in user. Fetch requested post and check relation to  logged_in user. <code>
      * GET "/post/index/{id}" || "/post/index/{action}"</code>
-     * 
+     *
      * @return string JSON encoded array
      */
-    public function action_index() {
+    public function action_index()
+    {
         // we retrieve the request_type from params
         $type = Arr::get(static::$params, 'request_type', false);
 
         // if we have a type
-        if ($type) {
+        if ($type)
+        {
             // we check if it is valid and the method exists
             if (in_array($type, static::$valid_get_types) && method_exists($this, $type))
             // run it
@@ -71,7 +75,8 @@ class Controller_Post extends Controller_Resource {
         // try id
         $id = $this->request->param('id');
 
-        if ($id) {
+        if ($id)
+        {
             static::$model->is_single = true;
             return $this->data(static::$model->get($id));
         }
@@ -81,12 +86,13 @@ class Controller_Post extends Controller_Resource {
 
     /**
      * All private update methods go through this method. Authenticates whether a user is allowed to perform
-     * and action before delegating to the respective handlers. <code> 
+     * and action before delegating to the respective handlers. <code>
      * POST "/post/update/{action}"</code>
-     * 
+     *
      * @return string JSON encoded array
      */
-    public function action_update() {
+    public function action_update()
+    {
         // get the type of request
         $type = Arr::get(static::$params, 'request_type');
 
@@ -111,35 +117,43 @@ class Controller_Post extends Controller_Resource {
      *  - Checks if post owner is current user.
      *  - Checks if page itself is the current user.
      *  - Checks if page owner is current user
-     *  If any thing checks out, we delete the post  <code> 
+     *  If any thing checks out, we delete the post  <code>
      * POST "/post/delete/{id}"</code>
-     * 
+     *
      * @return string JSON encoded array
      */
-    public function action_delete() {
+    public function action_delete()
+    {
         $post = Document::factory('post', $this->request->param('id'));
 
         // We check the post user
-        if ($post->load(null, array_fill_keys(['user', 'counts', 'page', 'page_parent', 'to', 'type', 'picture', 'link'], 1))) {
-            $post_user = (string) $post->user['_id'];
-            $page = (string) $post->page['_id'];
-            $is_owner = static::logged_in_is_id($post_user);
+        if ($post->load(null, array_fill_keys(['user', 'counts', 'page', 'page_parent', 'to', 'type', 'picture', 'link'], 1)))
+        {
+            $post_user  = (string) $post->user['_id'];
+            $page       = (string) $post->page['_id'];
+            $is_owner   = static::logged_in_is_id($post_user);
             $page_is_cu = static::logged_in_is_id($page);
 
-            if ($post->type === 'attachment') {
+            if ($post->type === 'attachment')
+            {
                 $attachment = $post->as_array();
             }
 
-            if ($post->type === 'album') {
+            if ($post->type === 'album')
+            {
                 $album = $post->as_array();
             }
 
-            if ($is_owner || $page_is_cu || parent::has_role('admin')) {
-                if ($post->delete()) {
-                    if ($attachment) {
+            if ($is_owner || $page_is_cu || parent::has_role('admin'))
+            {
+                if ($post->delete())
+                {
+                    if ($attachment)
+                    {
                         $this->delete_attachment($attachment);
                     }
-                    if ($album) {
+                    if ($album)
+                    {
                         $this->delete_attachments($album);
                     }
 
@@ -151,14 +165,19 @@ class Controller_Post extends Controller_Resource {
             $page->load(null, ['user' => 1]);
 
             // now we check if the owner of the page is the current user
-            if ($page->loaded()) {
+            if ($page->loaded())
+            {
                 $page_user = (string) $page->user['_id'];
-                if (static::$user_id === $page_user) {
-                    if ($post->delete()) {
-                        if ($attachment) {
+                if (static::$user_id === $page_user)
+                {
+                    if ($post->delete())
+                    {
+                        if ($attachment)
+                        {
                             $this->delete_attachment($attachment);
                         }
-                        if ($album) {
+                        if ($album)
+                        {
                             $this->delete_attachments($album);
                         }
                         return $this->data(['success' => 1]);
@@ -171,21 +190,64 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
+     * This hides a post from a user's ticker stream. The post is not actually
+     * deleted. We can add on to the UI later to show hidden posts.<code>
+     * POST "/post/hide/{id}"</code>
+     * @return string JSON encoded array
+     */
+    public function action_hide()
+    {
+        $ticker = Collection::factory('ticker');
+        $ticker->update([
+            'document_id' => Document::check_id($this->request->param('id')),
+            'user_id'     => Document::check_id(static::$user_id)
+        ], [
+            '$set' => ['visibility' => 'hidden']
+        ]);
+
+        return $this->data(['success' => 1]);
+    }
+
+    /**
+     * This unhides a previously hidden post. This option in only available if the
+     * user did not refresh the page after hiding an item.<code>
+     * POST "/post/unhide/{id}"</code>
+     * @return string JSON encoded array
+     */
+    public function action_unhide()
+    {
+        $ticker = Collection::factory('ticker');
+        $ticker->update([
+            'document_id' => Document::check_id($this->request->param('id')),
+            'user_id'     => Document::check_id(static::$user_id)
+        ], [
+            '$set' => ['visibility' => 'visible']
+        ]);
+
+        return $this->data(['success' => 1]);
+    }
+
+    /**
      * Set or get the privacy of a post.<code>
      * POST [Setter] || GET [Getter]  "/post/privacy/{id}"</code>
      * @see update_privacy
      * @return string JSON encoded array
      */
-    public function action_privacy() {
-        $id = $this->request->param('id');
+    public function action_privacy()
+    {
+        $id   = $this->request->param('id');
         $post = Document::factory('post', $id);
-        $post->load([], ['user' => 1, 'privacy' => 1]);
+        $post->load([], ['user'    => 1, 'privacy' => 1]);
 
-        if ($this->is_GET() && (static::logged_in_is_id($post->user['_id']) || parent::has_role('admin'))) {
+        if ($this->is_GET() && (static::logged_in_is_id($post->user['_id']) || parent::has_role('admin')))
+        {
             return $this->data($post->stringify($post->as_array()['privacy']));
-        } elseif (static::logged_in_is_id($post->user['_id']) || parent::has_role('admin')) {
+        }
+        elseif (static::logged_in_is_id($post->user['_id']) || parent::has_role('admin'))
+        {
             // this is a setter
-            if ($this->is_POST()) {
+            if ($this->is_POST())
+            {
                 return $this->update_privacy();
             }
         }
@@ -197,19 +259,24 @@ class Controller_Post extends Controller_Resource {
      *
      * @return string JSON encoded array
      */
-    public function action_comment() {
-        $params = static::format(static::$params, 66, 100);
-        $params['type'] = 'comment';
+    public function action_comment()
+    {
+        $params           = static::format(static::$params, 66, 100);
+        $params['type']   = 'comment';
         $params['status'] = static::$params['status'];
-        $params['user'] = static::$params['user'];
-        $params['post'] = static::$params['post'];
+        $params['user']   = static::$params['user'];
+        $params['post']   = static::$params['post'];
 
-        $c = Document::factory('comment', null, static::$user_id)
-                ->create($params);
-        if ($c) {
-            Job::add($params['post']['_id'], 'post', static::$user_id)
-                    ->comment($c->_id);
-            $ret = $c->as_array();
+        $c = Document::factory('comment', null, static::$user_id)->create($params);
+        if ($c)
+        {
+            $pid = Document::check_id($params['post']['_id']);
+            Job::add($pid, 'post', static::$user_id)->comment($c->_id);
+            Ticker::factory($pid)->update([
+                'user_id' => Document::check_id(static::$user_id)
+            ], 2);
+            Ticker::add($pid, 'update');
+            $ret            = $c->as_array();
             $ret['created'] = $ret['_id']->getTimestamp();
 
             return $this->data($c->stringify($ret));
@@ -223,12 +290,12 @@ class Controller_Post extends Controller_Resource {
      * *********************************************************************** */
 
     /**
-     * Retrieves users who like this post. <code> 
+     * Retrieves users who like this post. <code>
      * GET "/post/likers/{id}"</code>
      * with the following params
      * <code>
      * $defaults = [
-     *      'limit' => 11, 'skip' => 0, 'object_id' => NULL,  'object_type' => NULL, 'interaction' => 'like', 
+     *      'limit' => 11, 'skip' => 0, 'object_id' => NULL,  'object_type' => NULL, 'interaction' => 'like',
      *      'user_id' => NULL
      * ];
      * </code>
@@ -238,10 +305,11 @@ class Controller_Post extends Controller_Resource {
      *      ['_id': 'user_id', 'name':'username'] , [...]
      * }
      * </code>
-     * 
+     *
      * @return string JSON encoded array
      */
-    public function action_likers() {
+    public function action_likers()
+    {
         static::$params['object_id'] = $this->request->param('id');
         static::$params['object_type'] = 'comment';
 
@@ -253,12 +321,12 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
-     * Retrieves users who are subscribed to this post. <code> 
+     * Retrieves users who are subscribed to this post. <code>
      * GET "/post/subscribers/{id}"</code>
      * with the following params
      * <code>
      * $defaults = [
-     *      'limit' => 11, 'skip' => 0, 'object_id' => NULL,  'object_type' => NULL, 'interaction' => 'subscribe', 
+     *      'limit' => 11, 'skip' => 0, 'object_id' => NULL,  'object_type' => NULL, 'interaction' => 'subscribe',
      *      'user_id' => NULL
      * ];
      * </code>
@@ -268,10 +336,11 @@ class Controller_Post extends Controller_Resource {
      *      ['_id': 'user_id', 'name':'username'] , [...]
      * }
      * </code>
-     * 
+     *
      * @return string JSON encoded array
      */
-    public function action_subscribers() {
+    public function action_subscribers()
+    {
         static::$params['object_id'] = $this->request->param('id');
         static::$params['object_type'] = 'post';
 
@@ -293,13 +362,14 @@ class Controller_Post extends Controller_Resource {
      *      'privacy' => NULL, 'company_id' => null
      * ];
      * </code>
-     * 
+     *
      * @return string JSON encoded array
      */
-    public function action_attachments() {
+    public function action_attachments()
+    {
         $id = $this->request->param('id');
 
-        $q = Arr::merge(static::$params, ['type' => 'attachment', 'page_id' => $id]);
+        $q = Arr::merge(static::$params, ['type'    => 'attachment', 'page_id' => $id]);
 
         return $this->data(Collection::factory('post')->search($q, static::$user_id));
     }
@@ -307,7 +377,8 @@ class Controller_Post extends Controller_Resource {
     /**
      * Retrieves an array of posts belonging to a user.
      */
-    public function action_listings() {
+    public function action_listings()
+    {
         $id = $this->request->param('id');
 
         static::$params['type'] = 'listing';
@@ -323,14 +394,16 @@ class Controller_Post extends Controller_Resource {
 
         $status = Arr::get(static::$params, 'status', 'active');
 
-        switch ($status) {
+        switch ($status)
+        {
             case 'pending':
             case 'archived':
             case 'draft':
             case 'trashed':
                 // logged in user does not see other statuses if posts don't
                 // belong to him
-                if (static::logged_in_is_id($id)) {
+                if (static::logged_in_is_id($id))
+                {
                     $p = Arr::merge(static::$params, ['user_id' => static::$user_id]);
                     return $this->data($posts->search($p, static::$user_id));
                 }
@@ -345,7 +418,8 @@ class Controller_Post extends Controller_Resource {
             // this is a regular (public) lookup
             default :
                 // need a client or user token.
-                if (parent::is_client() || parent::logged_in()) {
+                if (parent::is_client() || parent::logged_in())
+                {
                     // only publically viewable posts
                     static::$params['privacy'] = static::logged_in_is_id($id) ? null : 'PUBLIC';
                     // we include posts written on his page
@@ -359,7 +433,8 @@ class Controller_Post extends Controller_Resource {
     /**
      * Retrieves the full message content from a given post id
      */
-    public function action_fullContent() {
+    public function action_fullContent()
+    {
         static::$model->load($this->request->param('id'), ['message' => !0]);
         $this->data(static::$model->message);
     }
@@ -369,42 +444,46 @@ class Controller_Post extends Controller_Resource {
      * *********************************************************************** */
 
     /**
-     * Performs a like on the given post. <code> 
+     * Performs a like on the given post. <code>
      * POST "/post/like/{id}"</code>
-     * 
+     *
      * @return string JSON encoded array
      */
-    public function action_like() {
+    public function action_like()
+    {
         return parent::interact('like', 'post');
     }
 
     /**
-     * Performs an unlike on the given post. <code> 
+     * Performs an unlike on the given post. <code>
      * POST "/post/unlike/{id}"</code>
-     * 
+     *
      * @return string JSON encoded array
      */
-    public function action_unlike() {
+    public function action_unlike()
+    {
         return parent::interact('unlike', 'post');
     }
 
     /**
-     * Performs a subscribe on the given post. <code> 
+     * Performs a subscribe on the given post. <code>
      * POST "/post/subscribe/{id}"</code>
-     * 
+     *
      * @return string JSON encoded array
      */
-    public function action_subscribe() {
+    public function action_subscribe()
+    {
         return parent::interact('subscribe', 'post');
     }
 
     /**
-     * Performs an unsubscribe on the given post. <code> 
+     * Performs an unsubscribe on the given post. <code>
      * POST "/post/unsubscribe/{id}"</code>
-     * 
+     *
      * @return string JSON encoded array
      */
-    public function action_unsubscribe() {
+    public function action_unsubscribe()
+    {
         return parent::interact('unsubscribe', 'post');
     }
 
@@ -421,25 +500,31 @@ class Controller_Post extends Controller_Resource {
      * Required GET params [unit, not_empty, listing_type, page_id]
      *
      * @todo Only logged in user is checked. What about admins & client credentials?
-     * 
+     *
      * @return string JSON encoded array
      */
-    protected function find_unique() {
+    protected function find_unique()
+    {
         $validation = Validation::factory(static::$params)
                 ->rule('unit', 'not_empty')
                 ->rule('listing_type', 'not_empty')
                 ->rule('page_id', 'not_empty');
 
-        if ($validation->check()) {
-            if ($user_id = Arr::get(static::$params, 'user_id')) {
+        if ($validation->check())
+        {
+            if ($user_id = Arr::get(static::$params, 'user_id'))
+            {
                 static::$params['user_id'] = $user_id;
-            } else {
+            }
+            else
+            {
                 static::$params['user_id'] = static::$user_id;
             }
-            if ($id = static::$model->find_unique(static::$params)) {
+            if ($id = static::$model->find_unique(static::$params))
+            {
                 $this->errors = [
                     'message' => Kohana::message('post/listings', 'listing_exists'),
-                    'id' => $id
+                    'id'      => $id
                 ];
                 return $this->fail();
             }
@@ -460,10 +545,11 @@ class Controller_Post extends Controller_Resource {
      * has to contain a user and maybe a list of to[ids]. It can also be one
      * to[_id]. Either way, this post object has very little information and
      * normally depends on it's containing messages (comments) for content.
-     * 
+     *
      * @return string JSON encoded array
      */
-    protected function create_conversation() {
+    protected function create_conversation()
+    {
         $id = $this->request->param('id');
 
         if (!$id && !parent::logged_in())
@@ -477,11 +563,13 @@ class Controller_Post extends Controller_Resource {
                 ->rule('message', 'not_empty');
 
         $defaults = [
-            'type' => 'conversation', 'status' => 'active'
+            'type'   => 'conversation', 'status' => 'active'
         ];
-        if ($validation->check()) {
+        if ($validation->check())
+        {
             static::$params['message'] = nl2br(HTML::chars(static::$params['message']));
-            if ($comment = static::$model->create_conversation(Arr::merge($defaults, static::$params))) {
+            if ($comment = static::$model->create_conversation(Arr::merge($defaults, static::$params)))
+            {
                 Job::add($comment->post['_id'], 'post', static::$user_id)
                         ->private_message($comment->_id);
 
@@ -496,32 +584,33 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
-     * Testimonials are very similar to regular posts accept that this method sets the type to testimonial and 
+     * Testimonials are very similar to regular posts accept that this method sets the type to testimonial and
      * ensures that the default status is pending  unless this is an update. Upon successful creation,
      *   - increase the receipient count for testimonials received.
-     *   - increase the writer's count for testimonials written.<code> 
+     *   - increase the writer's count for testimonials written.<code>
      * POST "/post/update/create_testimonial"</code>
      * with the following params
      * <code>
      * $defaults = [
-     *      'user'         => [], // '_id', 'name' of the user who created this           
+     *      'user'         => [], // '_id', 'name' of the user who created this
      *      'page'         => [], // '_id', 'name', 'type', 'uri' the page it was written on (location, user, album etc...)
      *      'page_parent'  => [], // '_id', 'name', 'type', 'uri' the page's parent (estate or library)
      *      'company'      => [], // '_id', 'name', 'type' the user's company if available
      *      'message'      => '', // the content
      *      'picture'      => null, // if this post has an image, this will be the url
      *      'mediainfo'    => [], // if this post has an image, this will be the url
-     *      'link'         => [], // 'name', 'description', 'source' the original link if there is one. 
+     *      'link'         => [], // 'name', 'description', 'source' the original link if there is one.
      *      'type'         => 'testimonial',
      *      'subtype'      => 'post',
-     *      'status'       => 'pending', // note that this defaults to pending.   
-     *      'privacy'      => ['is' => 'PUBLIC'],   
+     *      'status'       => 'pending', // note that this defaults to pending.
+     *      'privacy'      => ['is' => 'PUBLIC'],
      * ];
      * </code>
      * @uses Controller_Page
      * @return string JSON encoded array
      */
-    protected function create_testimonial($update = FALSE) {
+    protected function create_testimonial($update = FALSE)
+    {
         $id = $this->request->param('id');
 
         if (!$id && !parent::logged_in())
@@ -538,26 +627,38 @@ class Controller_Post extends Controller_Resource {
                 ->rule('page_parent', 'Controller_Page::valid', [':value', ':field', ':validation']);
 
         $defaults = [
-            'type' => 'testimonial', 'status' => 'pending'
+            'type'   => 'testimonial', 'status' => 'pending'
         ];
-        if ($validation->check()) {
+        if ($validation->check())
+        {
             static::$params = static::format(static::$params);
 
             $params = Arr::merge(static::$params, $defaults);
 
-            if ($update && isset(static::$params['status'])) {
+            if ($update && isset(static::$params['status']))
+            {
                 $params['status'] = static::$params['status'];
             }
 
             // this is a little different. we merge params with defaults to force defaults
-            if ($post = static::$model->create($params)) {
-                if ($update && $params['status'] === 'active') {
-                    Job::add($post->_id, 'post')
-                            ->approve_testimonial($post->user['_id']);
-                } else {
-                    Job::add($post->_id, 'post', static::$user_id)
-                            ->testimonial($post->page['_id']);
+            if ($post = static::$model->create($params))
+            {
+                $t = Ticker::factory($post);
+                if ($update && $params['status'] === 'active')
+                {
+                    Job::add($post->_id, 'post')->approve_testimonial($post->user['_id']);
+                    $t->update(['user_id' => Document::check_id(static::$user_id)], 1);
+                    $t->update(['user_id' => $post->page['_id']], 1);
+                    Ticker::add($post->_id, 'new');
                 }
+                else
+                {
+                    Job::add($post->_id, 'post', static::$user_id)->testimonial($post->page['_id']);
+                    $t->create($post->user['_id'], 2);
+                    $t->create($post->page['_id'], 1);
+                    Ticker::add($post->_id, 'new');
+                }
+
                 $post = $post->stringify($post->as_array());
                 return $this->data($post);
             }
@@ -571,10 +672,11 @@ class Controller_Post extends Controller_Resource {
 
     /**
      * Listing has a lot more validation rules.
-     * 
+     *
      * @return string JSON encoded array
      */
-    protected function create_listing($update = FALSE) {
+    protected function create_listing($update = FALSE)
+    {
         $id = $this->request->param('id');
 
         if (!$id && !parent::logged_in())
@@ -598,54 +700,72 @@ class Controller_Post extends Controller_Resource {
                 ->rule('page', 'Controller_Page::valid', [':value', ':field', ':validation'])
                 ->rule('page_parent', 'Controller_Page::valid', [':value', ':field', ':validation']);
 
-        if ($validation->check()) {
+        if ($validation->check())
+        {
             static::$params = static::format(static::$params);
-            $listing = \Arr::extract(static::$params, [
+            $listing       = \Arr::extract(static::$params, [
                         'type', 'price', 'rooms', 'built_size', 'land_size', 'cov', 'valuation', 'leaseSpace', 'cobroke', 'unit', 'property_type', 'baths'
                     ]);
-            $page = \Arr::get(static::$params, 'page');
+            $page          = \Arr::get(static::$params, 'page');
             $unitIsAddress = \Arr::get(static::$params, 'unitIsAddress');
-            if ('Private Landed' === $page['subtype'] && $unitIsAddress) {
+            if ('Private Landed' === $page['subtype'] && $unitIsAddress)
+            {
                 $listing['unit'] = array_shift(explode(' ', static::$params['address']));
-            } else {
+            }
+            else
+            {
                 $listing['unit'] = $listing['unit']['floor'] . '-' . $listing['unit']['stack'];
             }
 
             $params = \Arr::merge([
-                        'type' => 'listing', 'status' => 'active', 'privacy' => ['is' => 'PUBLIC']
+                        'type'    => 'listing', 'status'  => 'active', 'privacy' => ['is' => 'PUBLIC']
                             ], \Arr::extract(static::$params, [
                                 'message', 'address', 'page', 'page_parent', 'excerpt', 'showAddress', 'picture'
                             ]), [
-                        'listing' => $listing,
+                        'listing'    => $listing,
                         'addedMedia' => \Arr::map("Document::check_id", \Arr::get(static::$params, 'addedMedia', [])),
                     ]);
 
             $params['counts']['attachments'] = count($params['addedMedia']);
 
-            if ($params['status'] === 'active') {
+            if ($params['status'] === 'active')
+            {
                 $params['expiry'] = time();
             }
 
-            $u = (array) $this->get_user();
-            $params['user'] = [
-                '_id' => Document::check_id($u['_id']),
+            $u                  = (array) $this->get_user();
+            $params['user']     = [
+                '_id'  => Document::check_id($u['_id']),
                 'name' => $u['name']
             ];
-            $params['company'] = $u['company'];
+            $params['company']  = $u['company'];
             $params['keywords'] = static::listing_keywords($params);
-            if ($update) {
+            if ($update)
+            {
                 $post = Document::factory('post', $update);
             }
             else
                 $post = static::$model;
 
             $post->current_user = $u;
-            
+
             $post->create($params);
 
-            if ($post) {
+            if ($post)
+            {
+                $t = Ticker::factory($post);
+                if ($update)
+                {
+                    $t->update(['user_id' => Document::check_id(static::$user_id)], 1);
+                    Ticker::add($post->_id, 'update');
+                }
+                else
+                {
+                    $t->create(static::$user_id, 2);
+                    Ticker::add($post->_id, 'new');
+                }
                 static::creator_interactions($post->_id, 'post');
-                $post = $post->stringify($post->as_array());
+                $post                          = $post->stringify($post->as_array());
                 $post['counts']['subscribers'] = 1;
                 return $this->data($post);
             }
@@ -658,30 +778,31 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
-     * Creates a wallpost. Uses the user controller to validate a page if present. A page parent is optional, 
+     * Creates a wallpost. Uses the user controller to validate a page if present. A page parent is optional,
      * but a page is needed so we know where this post was created - in this case it is a user. <code>
      * POST to "/post/update/create_wallpost"</code>
      * with the following params
      * <code>
      * $defaults = [
-     *      'user'         => [], // '_id', 'name' of the user who created this           
+     *      'user'         => [], // '_id', 'name' of the user who created this
      *      'page'         => [], // '_id', 'name', 'type', 'uri' the page it was written on (location, user, album etc...)
      *      'page_parent'  => [], // '_id', 'name', 'type', 'uri' the page's parent (estate or library)
      *      'company'      => [], // '_id', 'name', 'type' the user's company if available
      *      'message'      => '', // the content
      *      'picture'      => null, // if this post has an image, this will be the url
      *      'mediainfo'    => [], // if this post has an image, this will be the url
-     *      'link'         => [], // 'name', 'description', 'source' the original link if there is one. 
+     *      'link'         => [], // 'name', 'description', 'source' the original link if there is one.
      *      'type'         => 'wallpost',
      *      'subtype'      => 'post',
-     *      'status'       => 'active', // pending, active, expired,    
-     *      'privacy'      => ['is' => 'PUBLIC'],   
+     *      'status'       => 'active', // pending, active, expired,
+     *      'privacy'      => ['is' => 'PUBLIC'],
      * ];
      * </code>
      * @uses Controller_Page
      * @return string JSON encoded array
      */
-    protected function create_wallpost() {
+    protected function create_wallpost()
+    {
         $id = $this->request->param('id');
 
         if (!$id && !parent::logged_in())
@@ -701,15 +822,28 @@ class Controller_Post extends Controller_Resource {
                 ->rule('page_parent', 'Controller_Page::valid', [':value', ':field', ':validation']);
 
         $defaults = [
-            'type' => 'wallpost', 'status' => 'active'
+            'type'   => 'wallpost', 'status' => 'active'
         ];
-        if ($validation->check()) {
+        if ($validation->check())
+        {
             static::$params = static::format(static::$params);
             // this is a little different. we merge params with defaults to force defaults
-            if ($post = static::$model->create(Arr::merge(static::$params, $defaults))) {
+            if ($post = static::$model->create(Arr::merge(static::$params, $defaults)))
+            {
+                $t = Ticker::factory($post);
+                $t->create(static::$user_id, 2);
+                if ($post->page['type'] === 'user' && (string) $post->page['_id'] !== static::$user_id)
+                {
+                    $t->create($post->page['_id'], 2);
+                }
+                if(static::$params['privacy.is'] === 'PUBLIC')
+                {
+                    Ticker::add($post->_id, 'new');
+                }
+
                 static::_do_interactions($post);
                 Job::add($post->_id, 'post', static::$user_id)->wallpost($post->page['_id']);
-                $post = $post->stringify($post->as_array());
+                $post                          = $post->stringify($post->as_array());
                 $post['counts']['subscribers'] = 1;
                 return $this->data($post);
             }
@@ -722,30 +856,31 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
-     * Creates a regular post. Uses the page controller to validate a page if present. A page parent is optional, 
+     * Creates a regular post. Uses the page controller to validate a page if present. A page parent is optional,
      * but a page is needed so we know where this post was created.  <code>
      * POST to "/post/update/create_post"</code>
      * with the following params
      * <code>
      * $defaults = [
-     *      'user'         => [], // '_id', 'name' of the user who created this           
+     *      'user'         => [], // '_id', 'name' of the user who created this
      *      'page'         => [], // '_id', 'name', 'type', 'uri' the page it was written on (location, user, album etc...)
      *      'page_parent'  => [], // '_id', 'name', 'type', 'uri' the page's parent (estate or library)
      *      'company'      => [], // '_id', 'name', 'type' the user's company if available
      *      'message'      => '', // the content
      *      'picture'      => null, // if this post has an image, this will be the url
      *      'mediainfo'    => [], // if this post has an image, this will be the url
-     *      'link'         => [], // 'name', 'description', 'source' the original link if there is one. 
+     *      'link'         => [], // 'name', 'description', 'source' the original link if there is one.
      *      'type'         => 'post',
      *      'subtype'      => 'post',
-     *      'status'       => 'active', // pending, active, expired,    
-     *      'privacy'      => ['is' => 'PUBLIC'],   
+     *      'status'       => 'active', // pending, active, expired,
+     *      'privacy'      => ['is' => 'PUBLIC'],
      * ];
      * </code>
      * @uses Controller_Page
      * @return string JSON encoded array
      */
-    protected function create_post() {
+    protected function create_post()
+    {
         $id = $this->request->param('id');
 
         if (!$id && !parent::logged_in())
@@ -765,14 +900,26 @@ class Controller_Post extends Controller_Resource {
                 ->rule('page_parent', 'Controller_Page::valid', [':value', ':field', ':validation']);
 
         $defaults = [
-            'type' => 'wallpost', 'status' => 'active'
+            'type'   => 'post', 'status' => 'active'
         ];
-        if ($validation->check()) {
+        if ($validation->check())
+        {
             static::$params = static::format(static::$params);
 
-            if ($post = static::$model->create(Arr::merge($defaults, static::$params))) {
+            if ($post = static::$model->create(Arr::merge($defaults, static::$params)))
+            {
+                $t = Ticker::factory($post);
+                $t->create(static::$user_id, 2);
+                if ($post->page['type'] === 'user' && (string) $post->page['_id'] !== static::$user_id)
+                {
+                    $t->create($post->page['_id'], 1);
+                }
+                if(static::$params['privacy.is'] === 'PUBLIC')
+                {
+                    Ticker::add($post->_id, 'new');
+                }
                 static::creator_interactions($post->_id, 'post');
-                $post = $post->stringify($post->as_array());
+                $post                          = $post->stringify($post->as_array());
                 $post['counts']['subscribers'] = 1;
                 return $this->data($post);
             }
@@ -786,18 +933,20 @@ class Controller_Post extends Controller_Resource {
 
     /**
      * Creates a message for a given conversation
-     * 
+     *
      * @return string JSON encoded array
      */
-    protected function create_message() {
-        $params['post']['_id'] = $this->request->param('id');
+    protected function create_message()
+    {
+        $params['post']['_id']  = $this->request->param('id');
         $params['post']['type'] = static::$params['post_type'];
 
         $params['message'] = nl2br(HTML::chars(static::$params['message']));
 
         $c = Document::factory('comment', null, static::$user_id)
                 ->create_message($params);
-        if ($c) {
+        if ($c)
+        {
             Job::add($params['post']['_id'], 'post', static::$user_id)
                     ->private_message($c['_id']);
 
@@ -808,7 +957,7 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
-     * Creates an attachment. <code> 
+     * Creates an attachment. <code>
      * POST "/post/update/create_attachment"</code>
      * with the following params
      * <code>
@@ -819,26 +968,32 @@ class Controller_Post extends Controller_Resource {
      * </code>
      * @return string JSON encoded array
      */
-    protected function create_attachment() {
-        $data = \Arr::get(static::$params, 'data');
-        $user = (object) $this->get_user();
+    protected function create_attachment()
+    {
+        $data     = \Arr::get(static::$params, 'data');
+        $user     = (object) $this->get_user();
         $album_id = \Arr::get(static::$params, 'album_id');
-        $debug = ['album_id' => $album_id];
+        $debug    = ['album_id' => $album_id];
 
-        if ($album_id) {
-            $a = Document::factory('post', $album_id);
+        if ($album_id)
+        {
+            $a               = Document::factory('post', $album_id);
             $a->current_user = $user;
             $a->load();
             $debug['loaded'] = $a->as_array();
-        } elseif (Arr::get(static::$params, 'create_album')) {
+        }
+        elseif (Arr::get(static::$params, 'create_album'))
+        {
             $debug['creating'] = 'yes';
-            $a = $this->create_album(true);
-            if (!$a) {
+            $a                 = $this->create_album(true);
+            if (!$a)
+            {
                 return $this->error('invalid_request');
             }
         }
         // can be json encoded.
-        if (!is_array($data)) {
+        if (!is_array($data))
+        {
             $data = @json_decode($data, true);
         }
 
@@ -846,32 +1001,33 @@ class Controller_Post extends Controller_Resource {
             return $this->error('invalid_request');
 
         $data['name'] = trim(Security::xss_clean($data['name']));
-        $data['page'] = ['_id' => Document::check_id($a->_id), 'name' => $a->name, 'type' => $a->type, 'uri' => $a->uri];
-        $data['user'] = ['_id' => Document::check_id($user->_id), 'name' => $user->name];
-        $lib = $user->library;
-        $lib['_id'] = Document::check_id($lib['_id']);
+        $data['page'] = ['_id'  => Document::check_id($a->_id), 'name' => $a->name, 'type' => $a->type, 'uri'  => $a->uri];
+        $data['user'] = ['_id'  => Document::check_id($user->_id), 'name' => $user->name];
+        $lib          = $user->library;
+        $lib['_id']   = Document::check_id($lib['_id']);
 
         $data['page_parent'] = $lib;
 
-        $args = \Arr::merge([
-                    'name' => '',
-                    'excerpt' => '',
-                    'message' => '',
-                    'picture' => '',
-                    'page' => [],
-                    'user' => [],
+        $args                     = \Arr::merge([
+                    'name'        => '',
+                    'excerpt'     => '',
+                    'message'     => '',
+                    'picture'     => '',
+                    'page'        => [],
+                    'user'        => [],
                     'page_parent' => [],
-                    'mediainfo' => [],
-                    'subtype' => '',
-                    'type' => 'attachment',
+                    'mediainfo'   => [],
+                    'subtype'     => '',
+                    'type'        => 'attachment',
                         ], $data);
-        $debug['attachment'] = $args;
-        $fh = fopen('debug.html', 'a');
+        $debug['attachment']      = $args;
+        $fh                       = fopen('debug.html', 'a');
         fwrite($fh, "<pre>" . print_r($debug, true) . "</pre>");
         fclose($fh);
-        $attachment = Document::factory('post');
+        $attachment               = Document::factory('post');
         $attachment->current_user = $user;
-        if ($attachment->create_attachment($args)) {
+        if ($attachment->create_attachment($args))
+        {
             $a->set('picture', $attachment->picture);
             $a->save();
             static::creator_interactions($attachment->_id, 'post');
@@ -882,7 +1038,7 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
-     * Creates an album. <code> 
+     * Creates an album. <code>
      * POST "/post/update/create_album"</code>
      * with the following params
      * <code>
@@ -894,32 +1050,38 @@ class Controller_Post extends Controller_Resource {
      * @param boolean $model whether to return the model data instead. Helpful when creating an attachment.
      * @return mixed false if creation failed, a model or JSON encoded array
      */
-    protected function create_album($model = false) {
+    protected function create_album($model = false)
+    {
         $p = Arr::get(static::$params, 'create_album', []);
-        if (!is_array($p)) {
-            $p = json_decode($p, true);
+        if (!is_array($p))
+        {
+            $p      = json_decode($p, true);
         }
         $params = static::format($p);
-        if (!is_array($params)) {
+        if (!is_array($params))
+        {
             $params = @json_decode($params, TRUE);
         }
-        $params['name'] = trim(Security::xss_clean($params['name']));
-        $album = Document::factory('post');
-        $user = (object) $this->get_user();
+        $params['name']      = trim(Security::xss_clean($params['name']));
+        $album               = Document::factory('post');
+        $user                = (object) $this->get_user();
         $album->current_user = $user;
-        $lib = $user->library;
-        $lib['_id'] = Document::check_id($lib['_id']);
+        $lib                 = $user->library;
+        $lib['_id']          = Document::check_id($lib['_id']);
 
         $args = \Arr::overwrite([
-                    'name' => '',
+                    'name'    => '',
                     'excerpt' => '',
                     'message' => '',
-                    'user' => ['_id' => Document::check_id($user->_id), 'name' => $user->name],
-                    'page' => $lib,
-                    'type' => 'album',
-                        ], $params);
+                    'user'    => ['_id'  => Document::check_id($user->_id), 'name' => $user->name],
+                    'page'    => $lib,
+                    'type'    => 'album',
+        ], $params);
 
-        if ($album->create_album($args)) {
+        if ($album->create_album($args))
+        {
+            Ticker::factory($album)->create(static::$user_id, 2);
+            Ticker::add($album->_id, 'new');
             static::creator_interactions($album->_id, 'post');
             return $model ? $album : $this->data($album->stringify($album->as_array()));
         }
@@ -933,12 +1095,13 @@ class Controller_Post extends Controller_Resource {
 
     /**
      * Update a listing. Checks if there is an id and calls the create_listing
-     * method. <code> 
+     * method. <code>
      * POST "/post/update/update_listing/{id}"</code>
      * @see self::create_listing
      * @return string JSON encoded array
      */
-    protected function update_listing() {
+    protected function update_listing()
+    {
         $post_id = Arr::get(static::$params, '_id');
 
         if (!$post_id)
@@ -950,12 +1113,13 @@ class Controller_Post extends Controller_Resource {
 
     /**
      * Update a testimonial. Checks if there is an id and calls the create_testimonial
-     * method. <code> 
+     * method. <code>
      * POST "/post/update/update_testimonial/{id}"</code>
      * @see self::create_testimonial
      * @return string JSON encoded array
      */
-    protected function update_testimonial() {
+    protected function update_testimonial()
+    {
         $post_id = Arr::get(static::$params, '_id');
 
         if (!$post_id)
@@ -966,54 +1130,42 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
-     * Update a post. Checks if there is an id and calls the create_post
-     * method. <code> 
-     * POST "/post/update/update_post/{id}"</code>
-     * @see self::create_post
-     * @return string JSON encoded array
-     */
-    protected function update_post() {
-        $post_id = Arr::get(static::$params, '_id');
-
-        if (!$post_id)
-            return $this->error('invalid_request');
-
-        // the create post method in the model checks to see if this is an update.
-        return $this->create_post(TRUE);
-    }
-
-    /**
-     * Updates an album and all it's attachments. <code> 
+     * Updates an album and all it's attachments. <code>
      * POST "/post/update/update_album/{id}"</code>
      * @see self::create_album
      * @return string JSON encoded array
      */
-    protected function update_album() {
-        $id = $this->request->param('id');
-        $params = static::format(static::$params);
+    protected function update_album()
+    {
+        $id             = $this->request->param('id');
+        $params         = static::format(static::$params);
         $params['name'] = trim(Security::xss_clean($params['name']));
-        $user = (object) $this->get_user();
-        $lib = $user->library;
-        $lib['_id'] = Document::check_id($lib['_id']);
-        $params['user'] = ['_id' => Document::check_id($user->_id), 'name' => $user->name];
+        $user           = (object) $this->get_user();
+        $lib            = $user->library;
+        $lib['_id']     = Document::check_id($lib['_id']);
+        $params['user'] = ['_id'  => Document::check_id($user->_id), 'name' => $user->name];
         $params['page'] = $lib;
-        if (!Privacy::valid(\Arr::path($params, 'privacy.is'))) {
+        if (!Privacy::valid(\Arr::path($params, 'privacy.is')))
+        {
             $params['privacy']['is'] = 'PUBLIC';
         }
-        $args = \Arr::overwrite([
-                    'name' => '',
+        $args                    = \Arr::overwrite([
+                    'name'    => '',
                     'excerpt' => '',
                     'message' => '',
-                    'user' => [],
+                    'user'    => [],
                     'privacy' => [],
-                    'page' => [],
-                    'type' => 'album',
+                    'page'    => [],
+                    'type'    => 'album',
                         ], $params);
 
-        $a = Document::factory('post', $id);
+        $a               = Document::factory('post', $id);
         $a->current_user = $user;
         $a->load_values($args);
-        if ($a->save()) {
+        if ($a->save())
+        {
+            Ticker::factory($a)->update(['user_id' => Document::check_id(static::$user_id)], 1);
+            Ticker::add($a->_id, 'update');
             // update all the attachments
             Collection::factory('post')->update(['page._id' => $a->_id], [
                 '$set' => ['page.name' => $a->name]
@@ -1026,44 +1178,48 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
-     * updates an attachment.<code> 
+     * updates an attachment.<code>
      * POST "/post/update/update_attachment/{id}"</code>
      * @see self::create_attachment
      * @return string JSON encoded array
      */
-    protected function update_attachment() {
-        $id = $this->request->param('id');
+    protected function update_attachment()
+    {
+        $id     = $this->request->param('id');
         $params = static::format(static::$params);
-        if (!empty($params['name'])) {
-            $params['name'] = trim(Security::xss_clean($params['name']));
+        if (!empty($params['name']))
+        {
+            $params['name']        = trim(Security::xss_clean($params['name']));
         }
-        $user = (object) $this->get_user();
-        $page = Arr::get($_REQUEST, 'album_id');
-        $album = Document::factory('post', $page);
-        $album->load(null, ['type' => 1, 'name' => 1, 'uri' => 1]);
-        $lib = $user->library;
-        $lib['_id'] = Document::check_id($lib['_id']);
-        $params['page'] = $album->as_array();
-        $params['user'] = ['_id' => Document::check_id($user->_id), 'name' => $user->name];
+        $user                  = (object) $this->get_user();
+        $page                  = Arr::get($_REQUEST, 'album_id');
+        $album                 = Document::factory('post', $page);
+        $album->load(null, ['type' => 1, 'name' => 1, 'uri'  => 1]);
+        $lib                   = $user->library;
+        $lib['_id']            = Document::check_id($lib['_id']);
+        $params['page']        = $album->as_array();
+        $params['user']        = ['_id'  => Document::check_id($user->_id), 'name' => $user->name];
         $params['page_parent'] = $lib;
-        if (!Privacy::valid(\Arr::path($params, 'privacy.is'))) {
+        if (!Privacy::valid(\Arr::path($params, 'privacy.is')))
+        {
             $params['privacy']['is'] = 'PUBLIC';
         }
 
-        $args = \Arr::merge([
-                    'excerpt' => null,
-                    'message' => null,
-                    'user' => [],
-                    'privacy' => [],
-                    'page' => [],
+        $args            = \Arr::merge([
+                    'excerpt'     => null,
+                    'message'     => null,
+                    'user'        => [],
+                    'privacy'     => [],
+                    'page'        => [],
                     'page_parent' => [],
-                    'type' => 'attachment',
+                    'type'        => 'attachment',
                         ], $params);
         //die(json_encode($args));
-        $a = Document::factory('post', $id);
+        $a               = Document::factory('post', $id);
         $a->current_user = $user;
         $a->load_values($args);
-        if ($a->save()) {
+        if ($a->save())
+        {
             $a->load();
             return $this->data($a->stringify($a->as_array()));
         }
@@ -1073,19 +1229,22 @@ class Controller_Post extends Controller_Resource {
 
     /**
      * Update a post's privacy settings.
-     * 
+     *
      * @return string JSON encoded array
      */
-    protected function update_privacy() {
+    protected function update_privacy()
+    {
         $privacy = Arr::path(static::$params, 'privacy.is');
-        if (!in_array($privacy, ['PUBLIC', 'PRIVATE'])) {
+        if (!in_array($privacy, ['PUBLIC', 'PRIVATE']))
+        {
             $this->errors = ['message' => "We do not recognise this value"];
             return $this->fail();
         }
 
         $d = Document::factory('post', $this->request->param('id'));
         $d->set('privacy.is', $privacy);
-        if ($d->save()) {
+        if ($d->save())
+        {
             return $this->data(['success' => 1]);
         }
 
@@ -1098,14 +1257,18 @@ class Controller_Post extends Controller_Resource {
      * @param string $value
      * @return boolean
      */
-    public static function valid_property_type($value, $field, $validation) {
-        if (!is_array($value)) {
+    public static function valid_property_type($value, $field, $validation)
+    {
+        if (!is_array($value))
+        {
             $validation->error($field, 'prop_type.not_array');
             return false;
         }
 
-        foreach ($value as $location => $type) {
-            switch ($location) {
+        foreach ($value as $location => $type)
+        {
+            switch ($location)
+            {
                 case 'HDB':
                     $types = [
                         '2I', '2S (Standard)', '3A', '3A Modified', '3NG', '3I',
@@ -1134,24 +1297,29 @@ class Controller_Post extends Controller_Resource {
 
     /**
      * Constructs a request object to delete S3 resources
-     * 
+     *
      * @param array $post
      * @param boolean $array
      * @return mixed An array if flag is set or issues a request to s3 directly.
      */
-    protected static function delete_attachment(array $post, $array = false) {
+    protected static function delete_attachment(array $post, $array = false)
+    {
         $picture = Arr::get($post, 'picture');
-        $source = Arr::path($post, 'link.src');
-        $uid = (string) Arr::get($post['user'], '_id');
+        $source  = Arr::path($post, 'link.src');
+        $uid     = (string) Arr::get($post['user'], '_id');
         $objects = [];
         // not sure if basename() can do relative
-        if ($picture) {
-            $file = basename($picture);
+        if ($picture)
+        {
+            $file  = basename($picture);
             $sizes = [110, 90, 40, 16, 150];
-            foreach ($sizes as $size) {
+            foreach ($sizes as $size)
+            {
                 $objects[] = ['Key' => "$uid/$size/$file"];
             }
-        } elseif ($source) {
+        }
+        elseif ($source)
+        {
             $file = basename($source);
         }
 
@@ -1159,38 +1327,42 @@ class Controller_Post extends Controller_Resource {
         $objects[] = $file ? ['Key' => $uid . '/' . $file] : [];
 
         return $array ? array_filter($objects) : AmazonSDK::s3()->deleteObjects([
-                    'Bucket' => static::$bucket,
+                    'Bucket'  => static::$bucket,
                     'Objects' => array_filter($objects),
                 ]);
     }
 
     /**
      * This is similar to the above except it issues a batch request to S3 for multiple attachments.
-     * 
+     *
      * @param array $album
      * @return boolean
      */
-    protected static function delete_attachments(array $album) {
-        $objects = $final = [];
+    protected static function delete_attachments(array $album)
+    {
+        $objects  = $final    = [];
         $attaches = Collection::factory('post')
                 ->find(['page._id' => Document::check_id($album['_id'])])
                 ->fields(['user', 'link', 'picture']);
 
-        while ($attaches->hasNext()) {
-            $child = $attaches->getNext();
+        while ($attaches->hasNext())
+        {
+            $child     = $attaches->getNext();
             $objects[] = static::delete_attachment($child->as_array(), true);
             $child->delete();
         }
 
-        if (!empty($objects)) {
+        if (!empty($objects))
+        {
             $objs = \Arr::flatten_recursive($objects);
 
-            foreach ($objs as $v) {
+            foreach ($objs as $v)
+            {
                 $final[] = ["Key" => $v];
             }
 
             return AmazonSDK::s3()->deleteObjects([
-                        'Bucket' => static::$bucket,
+                        'Bucket'  => static::$bucket,
                         'Objects' => array_filter($final),
                     ]);
         }
@@ -1208,16 +1380,17 @@ class Controller_Post extends Controller_Resource {
      * @param array $array
      * @return array
      */
-    protected static function extract_listing_values(array $array) {
+    protected static function extract_listing_values(array $array)
+    {
         $return = [];
 
-        $return['listing.type'] = Arr::path($array, 'listing.type');
-        $return['listing.price'] = Arr::path($array, 'listing.price');
-        $return['listing.rooms'] = Arr::path($array, 'listing.rooms');
-        $return['listing.built_size'] = Arr::path($array, 'listing.price');
+        $return['listing.type']          = Arr::path($array, 'listing.type');
+        $return['listing.price']         = Arr::path($array, 'listing.price');
+        $return['listing.rooms']         = Arr::path($array, 'listing.rooms');
+        $return['listing.built_size']    = Arr::path($array, 'listing.price');
         $return['listing.property_type'] = Arr::path($array, 'listing.property_type');
-        $return['listing.land_size'] = Arr::path($array, 'listing.land_size');
-        $return['listing.unit'] = Arr::path($array, 'listing.unit');
+        $return['listing.land_size']     = Arr::path($array, 'listing.land_size');
+        $return['listing.unit']          = Arr::path($array, 'listing.unit');
 
 
         return Arr::merge($return, $array);
@@ -1236,7 +1409,8 @@ class Controller_Post extends Controller_Resource {
      * @param string $text
      * @return string a html string with linked urls
      */
-    protected static function extract_links($text) {
+    protected static function extract_links($text)
+    {
         /**
          *  $validTlds is an associative array mapping valid TLDs to the value true.
          *  Since the set of valid TLDs is not static, this array should be updated
@@ -1250,45 +1424,48 @@ class Controller_Post extends Controller_Resource {
         /*
          *  Regular expression bits used by htmlEscapeAndLinkUrls() to match URLs.
          */
-        $rexScheme = 'https?://';
+        $rexScheme     = 'https?://';
         // $rexScheme    = "$rexScheme|ftp://"; // Uncomment this line to allow FTP addresses.
-        $rexDomain = '(?:[-a-zA-Z0-9]{1,63}\.)+[a-zA-Z][-a-zA-Z0-9]{1,62}';
-        $rexIp = '(?:[1-9][0-9]{0,2}\.|0\.){3}(?:[1-9][0-9]{0,2}|0)';
-        $rexPort = '(:[0-9]{1,5})?';
-        $rexPath = '(/[!$-/0-9:;=@_\':;!a-zA-Z\x7f-\xff]*?)?';
-        $rexQuery = '(\?[!$-/0-9:;=@_\':;!a-zA-Z\x7f-\xff]+?)?';
-        $rexFragment = '(#[!$-/0-9:;=@_\':;!a-zA-Z\x7f-\xff]+?)?';
-        $rexUsername = '[^]\\\\\x00-\x20\"(),:-<>[\x7f-\xff]{1,64}';
-        $rexPassword = $rexUsername; // allow the same characters as in the username
-        $rexUrl = "($rexScheme)?(?:($rexUsername)(:$rexPassword)?@)?($rexDomain|$rexIp)($rexPort$rexPath$rexQuery$rexFragment)";
+        $rexDomain     = '(?:[-a-zA-Z0-9]{1,63}\.)+[a-zA-Z][-a-zA-Z0-9]{1,62}';
+        $rexIp         = '(?:[1-9][0-9]{0,2}\.|0\.){3}(?:[1-9][0-9]{0,2}|0)';
+        $rexPort       = '(:[0-9]{1,5})?';
+        $rexPath       = '(/[!$-/0-9:;=@_\':;!a-zA-Z\x7f-\xff]*?)?';
+        $rexQuery      = '(\?[!$-/0-9:;=@_\':;!a-zA-Z\x7f-\xff]+?)?';
+        $rexFragment   = '(#[!$-/0-9:;=@_\':;!a-zA-Z\x7f-\xff]+?)?';
+        $rexUsername   = '[^]\\\\\x00-\x20\"(),:-<>[\x7f-\xff]{1,64}';
+        $rexPassword   = $rexUsername; // allow the same characters as in the username
+        $rexUrl        = "($rexScheme)?(?:($rexUsername)(:$rexPassword)?@)?($rexDomain|$rexIp)($rexPort$rexPath$rexQuery$rexFragment)";
         $rexTrailPunct = "[)'?.!,;:]"; // valid URL characters which are not part of the URL if they appear at the very end
-        $rexNonUrl = "[^-_$+.!*'(),;/?:@=&a-zA-Z0-9]"; // characters that should never appear in a URL
-        $rexUrlLinker = "{\\b$rexUrl(?=$rexTrailPunct*($rexNonUrl|$))}";
+        $rexNonUrl     = "[^-_$+.!*'(),;/?:@=&a-zA-Z0-9]"; // characters that should never appear in a URL
+        $rexUrlLinker  = "{\\b$rexUrl(?=$rexTrailPunct*($rexNonUrl|$))}";
 
 
         $html = '';
 
         $position = 0;
-        while (preg_match($rexUrlLinker, $text, $match, PREG_OFFSET_CAPTURE, $position)) {
+        while (preg_match($rexUrlLinker, $text, $match, PREG_OFFSET_CAPTURE, $position))
+        {
             list($url, $urlPosition) = $match[0];
 
             // Add the text leading up to the URL.
             $html .= htmlspecialchars(substr($text, $position, $urlPosition - $position));
 
-            $scheme = $match[1][0];
-            $username = $match[2][0];
-            $password = $match[3][0];
-            $domain = $match[4][0];
+            $scheme      = $match[1][0];
+            $username    = $match[2][0];
+            $password    = $match[3][0];
+            $domain      = $match[4][0];
             $afterDomain = $match[5][0]; // everything following the domain
-            $port = $match[6][0];
-            $path = $match[7][0];
+            $port        = $match[6][0];
+            $path        = $match[7][0];
 
             // Check that the TLD is valid or that $domain is an IP address.
             $tld = strtolower(strrchr($domain, '.'));
-            if (preg_match('{^\.[0-9]{1,3}$}', $tld) || isset($validTlds[$tld])) {
+            if (preg_match('{^\.[0-9]{1,3}$}', $tld) || isset($validTlds[$tld]))
+            {
                 // Do not permit implicit scheme if a password is specified, as
                 // this causes too many errors (e.g. "my email:foo@example.org").
-                if (!$scheme && $password) {
+                if (!$scheme && $password)
+                {
                     $html .= htmlspecialchars($username);
 
                     // Continue text parsing at the ':' following the "username".
@@ -1296,25 +1473,30 @@ class Controller_Post extends Controller_Resource {
                     continue;
                 }
 
-                if (!$scheme && $username && !$password && !$afterDomain) {
+                if (!$scheme && $username && !$password && !$afterDomain)
+                {
                     // Looks like an email address.
                     $completeUrl = "mailto:$url";
-                    $linkText = $url;
-                } else {
+                    $linkText    = $url;
+                }
+                else
+                {
                     // Prepend http:// if no scheme is specified
                     $completeUrl = "/external?uri=";
                     $completeUrl .= $scheme ? $url : "http://$url";
-                    $linkText = "$domain$port$path";
+                    $linkText    = "$domain$port$path";
                 }
 
-                $linkHtml = html::anchor($completeUrl, htmlspecialchars($linkText), ['title' => 'Visit link in new tab', 'target' => '_blank']);
+                $linkHtml = html::anchor($completeUrl, htmlspecialchars($linkText), ['title'  => 'Visit link in new tab', 'target' => '_blank']);
 
                 // Cheap e-mail obfuscation to trick the dumbest mail harvesters.
                 $linkHtml = str_replace('@', '&#64;', $linkHtml);
 
                 // Add the hyperlink.
                 $html .= $linkHtml;
-            } else {
+            }
+            else
+            {
                 // Not a valid URL.
                 $html .= htmlspecialchars($url);
             }
@@ -1330,20 +1512,24 @@ class Controller_Post extends Controller_Resource {
 
     /**
      * Cleans out text fields and auto-links urls
-     * 
+     *
      * @param array $params the post params received for this request
      * @param int $len
      * @param int $max
      * @return array
      */
-    protected static function format(array $params, $len = 65, $max = 200) {
+    protected static function format(array $params, $len = 65, $max = 200)
+    {
         $text = trim(Security::xss_clean(Arr::get($params, 'message')));
-        if ($text) {
-            $original = $chunks = explode("\n", $text);
-            $link = Arr::get($params['link'], $type);
+        if ($text)
+        {
+            $original = $chunks   = explode("\n", $text);
+            $link     = Arr::get($params['link'], $type);
 
-            foreach ($chunks as $key => $t) {
-                if (mb_strlen($t) >= 1) {
+            foreach ($chunks as $key => $t)
+            {
+                if (mb_strlen($t) >= 1)
+                {
                     $chunks[$key] = trim(Text::wrap($t, $len));
                 }
             }
@@ -1353,11 +1539,15 @@ class Controller_Post extends Controller_Resource {
             $chunks = explode("\n", implode("\n", $chunks));
 
             // if this is a link-type post, the excerpt is shorter
-            if ($link) {
+            if ($link)
+            {
                 $excerpt = implode("\n", array_slice($chunks, 0, 5));
-            } else {
+            }
+            else
+            {
                 // special post types have shorter excerpts
-                switch (Arr::get($params, 'type')) {
+                switch (Arr::get($params, 'type'))
+                {
                     case 'attachment':
                     case 'listing':
                     case 'album':
@@ -1373,7 +1563,8 @@ class Controller_Post extends Controller_Resource {
             $message = implode("\n", $original);
 
             // unless the original post was too long
-            if (count($chunks) >= $max) {
+            if (count($chunks) >= $max)
+            {
                 $message = implode("\n", array_slice($chunks, 0, $max));
             }
 
@@ -1387,14 +1578,16 @@ class Controller_Post extends Controller_Resource {
     /**
      * Performs default subscription for a user. Page owners and Poster needs to be subscribed to the post
      * upon creation.
-     * 
+     *
      * @param Document $post
      * @uses Controller_Resource::creator_interactions()
-     * 
+     *
      * @return boolean
      */
-    protected static function _do_interactions(Document $post) {
-        if ((string) $post->user['_id'] !== (string) $post->page['_id']) {
+    protected static function _do_interactions(Document $post)
+    {
+        if ((string) $post->user['_id'] !== (string) $post->page['_id'])
+        {
             $i = Document::factory('interaction', null, $post->page['_id']);
             $i->subscribe($post->_id, 'post');
         }
@@ -1403,23 +1596,27 @@ class Controller_Post extends Controller_Resource {
 
     /**
      * Updates all attachments of a listing and sets a new field, listing_id.
-     * 
+     *
      * @param array $attachments
      * @param MongoID $post_id
      * @return int
      */
-    protected static function _attachments_for_listings(array $attachments) {
-        $ids = [];
+    protected static function _attachments_for_listings(array $attachments)
+    {
+        $ids     = [];
         $picture = null;
-        if (!empty($attachments)) {
-            foreach ($attachments as $a) {
-                $ids[] = Document::check_id($a['_id']);
+        if (!empty($attachments))
+        {
+            foreach ($attachments as $a)
+            {
+                $ids[]   = Document::check_id($a['_id']);
                 if (!empty($a['picture']))
                     $picture = $a['picture'];
             }
         }
 
-        if ($picture) {
+        if ($picture)
+        {
             $post->set('picture', $attachment->picture);
             $post->save();
         }
@@ -1433,18 +1630,21 @@ class Controller_Post extends Controller_Resource {
                         ], ['multiple' => true]);
     }
 
-    protected static function listing_keywords($params) {
-        if (\Arr::get($params, 'showAddress') === false) {
+    protected static function listing_keywords($params)
+    {
+        if (\Arr::get($params, 'showAddress') === false)
+        {
             $a = @explode(' ', \Arr::get($params, 'address'));
-            if (!empty($a)) {
+            if (!empty($a))
+            {
                 unset($a[0]);
                 $params['address'] = implode(' ', $a);
             }
         }
 
         $params['subtype'] = \Arr::path($params, 'page.subtype');
-        $params['name'] = \Arr::path($params, 'page.name');
-        $params['parent'] = \Arr::path($params, 'page_parent.name');
+        $params['name']    = \Arr::path($params, 'page.name');
+        $params['parent']  = \Arr::path($params, 'page_parent.name');
 
         return \Arr::map('strtolower', \Arr::extract($params, [
                             'address', 'subtype', 'name', 'parent'

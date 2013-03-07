@@ -17,23 +17,37 @@ class Controller_Clean extends Controller {
 
         if($user->load())
         {
-            $company = Document::factory('page');
-            if($company->load($user->company['_id'], ['counts' => 1, 'members' => 1]))
+            if(isset($user->company['_id']))
             {
-                foreach($company->counts as $k => $v)
+                $company = Document::factory('page', $user->company['_id']);
+                if($company->load(null, ['counts' => 1, 'members' => 1]))
                 {
-                    $company->set("counts.$k", 0);
+                    foreach($company->counts as $k => $v)
+                    {
+                        $company->set("counts.$k", 0);
+                    }
+                    $company->members = [];
+                    $company->save();
                 }
-                $company->members = [];
-                $company->save();
             }
 
+//5135a47f6c0199a24100000a   document_id
             Collection::factory('page')
                     ->remove_safe(['user._id' => $user->_id]);
             Collection::factory('post')
                     ->remove_safe(['user._id' => $user->_id], ['multiple' => true]);
             Collection::factory('comment')
                     ->remove_safe(['user._id' => $user->_id], ['multiple' => true]);
+            Collection::factory('job')
+                    ->remove_safe(['document_id' => $user->_id], ['multiple' => true]);
+            Collection::factory('ticker')
+                    ->remove_safe(['$or' => [
+                        ['user_id' => $user->_id], 'owner_id' => $user->_id
+                    ]], ['multiple' => true]);
+            Collection::factory('interaction')
+                    ->remove_safe(['$or' => [
+                        ['user._id' => $user->_id], 'object_id' => $user->_id
+                    ]], ['multiple' => true]);
         }
 
         $user->delete();

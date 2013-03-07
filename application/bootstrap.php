@@ -98,22 +98,18 @@ Kohana::$config->attach(new Config_File);
  */
 Kohana::modules([
     'event'      => MODPATH . 'event', // Kohana 3 event class
-    'RT'    => MODPATH . 'RT', // Core RT classes
+    'RT'         => MODPATH . 'RT', // Core RT classes
     'queue'      => MODPATH . 'queue', // Core RT classes
     'interact'   => MODPATH . 'interact', // Interaction Models
-    //'auth'       => MODPATH . 'auth', // Basic authentication
     'cache'      => MODPATH . 'cache', // Caching with multiple backends
     'mongodb'    => MODPATH . 'mongodb', // Database access
-    //'mongo-auth' => MODPATH . 'mongo-auth', // Not using
     'email'      => MODPATH . 'email', // Emailer
     'sms'        => MODPATH . 'sms', // SMSer
-    //'devtools'   => MODPATH . 'devtools', // Devtools (route checker etc...)
-        // 'codebench'  => MODPATH.'codebench',  // Benchmarking tool
-    'database'   => MODPATH.'database',   // Database access
-    'image'      => MODPATH.'image',      // Image manipulation
-    'purifier'   => MODPATH.'purifier',        // Object Relationship Mapping
-        // 'unittest'   => MODPATH.'unittest',   // Unit testing
-        // 'userguide'  => MODPATH.'userguide',  // User guide and API documentation
+    'database'   => MODPATH . 'database',   // Database access
+    'image'      => MODPATH . 'image',      // Image manipulation
+    'purifier'   => MODPATH . 'purifier',        // Object Relationship Mapping
+    'minion'     => MODPATH . 'minion',        // Object Relationship Mapping
+    'ticker'     => MODPATH . 'ticker'        // Object Relationship Mapping
 ]);
 
 Kohana::$log->attach(new Log_Mongo(), [], Log::DEBUG);
