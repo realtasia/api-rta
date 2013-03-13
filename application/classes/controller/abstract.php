@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
- * This controller provides acstract methods for returning responses. Success, error etc. It also provides 
+ * This controller provides acstract methods for returning responses. Success, error etc. It also provides
  * functionality for other utilities
  *
  * @author Jason Nathan
@@ -16,7 +16,7 @@ class Controller_Abstract extends Controller {
      * @var array The global $params property that contains parsed params.
      */
     public static $params = [];
-    
+
     /**
      * @var array REST request types
      */
@@ -26,15 +26,15 @@ class Controller_Abstract extends Controller {
     ];
 
     /**
-     * @var Document the model each respective child controller uses 
+     * @var Document the model each respective child controller uses
      */
     protected static $model;
 
     /**
-     * @var mixed the global validation errors array. returns it's errors if available. 
+     * @var mixed the global validation errors array. returns it's errors if available.
      */
     public $errors = null;
-    
+
     /**
      * @var string requested action
      */
@@ -209,15 +209,7 @@ class Controller_Abstract extends Controller {
         if($p)
         {
             switch ($p) {
-                case 'http://test.jjpc.net':
-                case 'http://test.casa.net':
-                case 'http://beta.jjpc.net':
-                case 'http://beta.casa.net':
-                case 'http://beta.realtasia.com':
-                case 'http://beta.realtasia.com.sg':
-                case 'http://realtasia.com.sg':
-                case 'http://www.realtasia.com.sg':
-                case 'http://www.realtasia.com':
+                case RT::APP_SERVER:
                     $this->response->headers([
                         'Access-Control-Allow-Origin' => $p,
                         'Access-Control-Allow-Methods' => 'GET, POST, OPTIONS',
@@ -226,7 +218,6 @@ class Controller_Abstract extends Controller {
                         'Access-Control-Allow-Headers' => 'Content-Type, Origin, Accept',
                         'p3p' => 'CP=IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT',
                     ]);
-                    //Debug::log('Made it to CORS');
                     break;
             }
         }

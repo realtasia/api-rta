@@ -16,13 +16,12 @@ class Controller_Avatar extends Controller {
     /**
      * A simple method that retrieves a user by id, checks for an existing avatar or redirects to the default
      * after checking user gender.
-     * 
+     *
      * @return Response $response
      */
     public function action_index()
     {
         $url = '/s3/';
-        $bucket = 'static2.realtasia.com.sg/avatars/';
 
         $this->response->send_headers();
         $id   = trim($this->request->param('id'));
@@ -38,7 +37,7 @@ class Controller_Avatar extends Controller {
         }
 
         return $this->response->headers([
-            'X-Accel-Redirect' => $url . $bucket . ucfirst(substr($u['info']['gender'], 0, 1)) . $size . '.png'
+            'X-Accel-Redirect' => $url . RT::BUCKET . ucfirst(substr($u['info']['gender'], 0, 1)) . $size . '.png'
         ]);
 
     }

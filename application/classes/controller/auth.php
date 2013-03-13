@@ -171,3 +171,4 @@ class Controller_Auth extends Controller_Abstract {
     }
 
 }
+?>

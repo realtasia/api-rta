@@ -474,10 +474,12 @@ jQuery(document).ready(function($){
         direction.tooltip += 'Middle';
         direction.target += 'Middle';
         return $(this)
-        .qtip(rtaSlider.tooltip(tipContent.html(), direction, cssClass, csswidth)).click(function(event) {
+        .qtip(rtaSlider.tooltip(tipContent.html(), direction, cssClass, csswidth))
+        .click(function(event) {
             event.preventDefault();
             clearTimeout($(this).qtip('api').timers.show);
-        }).mouseleave(function(event) {
+        })
+        .mouseleave(function(event) {
             clearTimeout($(this).qtip('api').timers.show);
         });
     });

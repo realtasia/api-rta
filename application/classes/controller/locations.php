@@ -623,3 +623,4 @@ class Controller_Locations extends Controller_Resource {
     }
 
 }
+?>

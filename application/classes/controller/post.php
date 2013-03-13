@@ -22,7 +22,6 @@ class Controller_Post extends Controller_Resource {
         'create_album', 'update_album', 'update_attachment', 'create_comment', 'create_message',
         'delete_comment', 'create_wallpost', 'create_attachment'
     ];
-    protected static $bucket          = 'static2.realtasia.com.sg';
 
     /**
      * Sets the static $model property to Document::post. Inits document params for logged in user
@@ -201,7 +200,7 @@ class Controller_Post extends Controller_Resource {
         $ticker->update([
             'document_id' => Document::check_id($this->request->param('id')),
             'user_id'     => Document::check_id(static::$user_id)
-        ], [
+                ], [
             '$set' => ['visibility' => 'hidden']
         ]);
 
@@ -220,7 +219,7 @@ class Controller_Post extends Controller_Resource {
         $ticker->update([
             'document_id' => Document::check_id($this->request->param('id')),
             'user_id'     => Document::check_id(static::$user_id)
-        ], [
+                ], [
             '$set' => ['visibility' => 'visible']
         ]);
 
@@ -272,17 +271,40 @@ class Controller_Post extends Controller_Resource {
         {
             $pid = Document::check_id($params['post']['_id']);
             Job::add($pid, 'post', static::$user_id)->comment($c->_id);
-            Ticker::factory($pid)->update([
+            if(Ticker::factory($pid)->update_once([
                 'user_id' => Document::check_id(static::$user_id)
-            ], 2);
-            Ticker::add($pid, 'update');
-            $ret            = $c->as_array();
-            $ret['created'] = $ret['_id']->getTimestamp();
+            ], 2))
+            {
+                Ticker::add($pid, 'update');
+            }
 
-            return $this->data($c->stringify($ret));
+            return $this->data($c->stringify($c->as_array()));
         }
 
         return $this->error('server_error');
+    }
+
+    public function action_feedback()
+    {
+        if (parent::is_POST())
+        {
+            $params['message']     = nl2br(Security::xss_clean(static::$params['message']));
+            $params['type']        = 'feedback';
+            $params['user']        = static::$params['user'];
+            $params['environment'] = @json_decode(static::$params['environment'], true);
+
+            $c = Document::factory('comment', null, static::$user_id)->create_feedback($params);
+            if ($c)
+            {
+                $pid = Document::check_id($params['post']['_id']);
+                Job::add($pid, 'comment', static::$user_id)->feedback($c->_id);
+                // admin user....
+                // Job::add($pid, 'comment', static::$user_id)->feedback($c->_id);
+                return $this->data($c->stringify($c->as_array()));
+            }
+
+            return $this->error('server_error');
+        }
     }
 
     /*     * ************************************************************************
@@ -617,50 +639,72 @@ class Controller_Post extends Controller_Resource {
             return $this->error('invalid_request');
 
         static::$params['privacy.is'] = Arr::path(static::$params, 'privacy.is');
-        $validation = Validation::factory(static::$params)
-                ->rule('message', 'not_empty')
-                ->rule('privacy.is', 'Privacy::valid', [
-                    ':value', ':field', ':validation'
-                ])
-                ->rule('page', 'not_empty')
-                ->rule('page', 'Controller_User::valid', [':value', ':field', ':validation'])
-                ->rule('page_parent', 'Controller_Page::valid', [':value', ':field', ':validation']);
+        if($update)
+        {
+            $validation = Validation::factory(static::$params)
+                    ->rule('status', 'not_empty');
+        }
+        else
+        {
+            $validation = Validation::factory(static::$params)
+                    ->rule('message', 'not_empty')
+                    ->rule('privacy.is', 'Privacy::valid', [
+                        ':value', ':field', ':validation'
+                    ])
+                    ->rule('page', 'not_empty')
+                    ->rule('page', 'Controller_User::valid', [':value', ':field', ':validation'])
+                    ->rule('page_parent', 'Controller_Page::valid', [':value', ':field', ':validation']);
+        }
 
         $defaults = [
             'type'   => 'testimonial', 'status' => 'pending'
         ];
         if ($validation->check())
         {
-            static::$params = static::format(static::$params);
-
-            $params = Arr::merge(static::$params, $defaults);
-
             if ($update && isset(static::$params['status']))
             {
-                $params['status'] = static::$params['status'];
+                $post = Document::factory('post', $this->request->param('id'), static::$user_id);
+                $post->set('status', static::$params['status']);
+                if ($post->save())
+                {
+                    if ($post->status === 'active')
+                    {
+                        $t = Ticker::factory($post);
+                        Job::add($post->_id, 'post', null)->approve_testimonial($post->user['_id']);
+
+                        $t->update(['user_id' => $post->page['_id']]);
+
+                        if($t->update_once(['user_id' => Document::check_id(static::$user_id)]))
+                        {
+                            Ticker::add($post->_id, 'update');
+                        }
+                    }
+                    $post = $post->stringify($post->as_array());
+                    return $this->data($post);
+                }
+
+
+                return $this->error('server_error');
             }
-
-            // this is a little different. we merge params with defaults to force defaults
-            if ($post = static::$model->create($params))
+            else
             {
-                $t = Ticker::factory($post);
-                if ($update && $params['status'] === 'active')
-                {
-                    Job::add($post->_id, 'post')->approve_testimonial($post->user['_id']);
-                    $t->update(['user_id' => Document::check_id(static::$user_id)], 1);
-                    $t->update(['user_id' => $post->page['_id']], 1);
-                    Ticker::add($post->_id, 'new');
-                }
-                else
-                {
-                    Job::add($post->_id, 'post', static::$user_id)->testimonial($post->page['_id']);
-                    $t->create($post->user['_id'], 2);
-                    $t->create($post->page['_id'], 1);
-                    Ticker::add($post->_id, 'new');
-                }
+                static::$params = static::format(static::$params);
 
-                $post = $post->stringify($post->as_array());
-                return $this->data($post);
+                $params = Arr::merge(static::$params, $defaults);
+                if ($post = static::$model->create($params))
+                {
+                    $t = Ticker::factory($post);
+                    Job::add($post->_id, 'post', static::$user_id)->testimonial($post->page['_id']);
+                    $t->create_once(static::$user_id, 2);
+                    $t->create($post->page['_id'], 1);
+                    if (static::$params['privacy.is'] === 'PUBLIC')
+                    {
+                        Ticker::add($post->_id, 'new');
+                    }
+
+                    $post = $post->stringify($post->as_array());
+                    return $this->data($post);
+                }
             }
 
             return $this->error('server_error');
@@ -756,12 +800,14 @@ class Controller_Post extends Controller_Resource {
                 $t = Ticker::factory($post);
                 if ($update)
                 {
-                    $t->update(['user_id' => Document::check_id(static::$user_id)], 1);
-                    Ticker::add($post->_id, 'update');
+                    if($t->update_once(['user_id' => Document::check_id(static::$user_id)], 1))
+                    {
+                        Ticker::add($post->_id, 'update');
+                    }
                 }
                 else
                 {
-                    $t->create(static::$user_id, 2);
+                    $t->create_once(static::$user_id, 2);
                     Ticker::add($post->_id, 'new');
                 }
                 static::creator_interactions($post->_id, 'post');
@@ -831,12 +877,12 @@ class Controller_Post extends Controller_Resource {
             if ($post = static::$model->create(Arr::merge(static::$params, $defaults)))
             {
                 $t = Ticker::factory($post);
-                $t->create(static::$user_id, 2);
+                $t->create_once(static::$user_id, 2);
                 if ($post->page['type'] === 'user' && (string) $post->page['_id'] !== static::$user_id)
                 {
                     $t->create($post->page['_id'], 2);
                 }
-                if(static::$params['privacy.is'] === 'PUBLIC')
+                if (static::$params['privacy.is'] === 'PUBLIC')
                 {
                     Ticker::add($post->_id, 'new');
                 }
@@ -909,12 +955,12 @@ class Controller_Post extends Controller_Resource {
             if ($post = static::$model->create(Arr::merge($defaults, static::$params)))
             {
                 $t = Ticker::factory($post);
-                $t->create(static::$user_id, 2);
+                $t->create_once(static::$user_id, 2);
                 if ($post->page['type'] === 'user' && (string) $post->page['_id'] !== static::$user_id)
                 {
                     $t->create($post->page['_id'], 1);
                 }
-                if(static::$params['privacy.is'] === 'PUBLIC')
+                if (static::$params['privacy.is'] === 'PUBLIC')
                 {
                     Ticker::add($post->_id, 'new');
                 }
@@ -1076,12 +1122,16 @@ class Controller_Post extends Controller_Resource {
                     'user'    => ['_id'  => Document::check_id($user->_id), 'name' => $user->name],
                     'page'    => $lib,
                     'type'    => 'album',
-        ], $params);
+                    'privacy' => ['is' => 'PUBLIC'],
+                        ], $params);
 
         if ($album->create_album($args))
         {
-            Ticker::factory($album)->create(static::$user_id, 2);
-            Ticker::add($album->_id, 'new');
+            Ticker::factory($album)->create_once(static::$user_id, 2);
+            if (\Arr::get($album->privacy, 'is') === 'PUBLIC')
+            {
+                Ticker::add($album->_id, 'new');
+            }
             static::creator_interactions($album->_id, 'post');
             return $model ? $album : $this->data($album->stringify($album->as_array()));
         }
@@ -1120,8 +1170,8 @@ class Controller_Post extends Controller_Resource {
      */
     protected function update_testimonial()
     {
-        $post_id = Arr::get(static::$params, '_id');
-
+        $post_id = $this->request->param('id');
+        //return $this->data([$post_id]);
         if (!$post_id)
             return $this->error('invalid_request');
 
@@ -1149,23 +1199,21 @@ class Controller_Post extends Controller_Resource {
         {
             $params['privacy']['is'] = 'PUBLIC';
         }
-        $args                    = \Arr::overwrite([
-                    'name'    => '',
-                    'excerpt' => '',
-                    'message' => '',
-                    'user'    => [],
-                    'privacy' => [],
-                    'page'    => [],
-                    'type'    => 'album',
-                        ], $params);
+        $args = \Arr::overwrite([
+            'name'    => '',
+            'excerpt' => '',
+            'message' => '',
+            'user'    => [],
+            'privacy' => [],
+            'page'    => [],
+            'type'    => 'album'
+        ], $params);
 
         $a               = Document::factory('post', $id);
         $a->current_user = $user;
         $a->load_values($args);
         if ($a->save())
         {
-            Ticker::factory($a)->update(['user_id' => Document::check_id(static::$user_id)], 1);
-            Ticker::add($a->_id, 'update');
             // update all the attachments
             Collection::factory('post')->update(['page._id' => $a->_id], [
                 '$set' => ['page.name' => $a->name]
@@ -1327,7 +1375,7 @@ class Controller_Post extends Controller_Resource {
         $objects[] = $file ? ['Key' => $uid . '/' . $file] : [];
 
         return $array ? array_filter($objects) : AmazonSDK::s3()->deleteObjects([
-                    'Bucket'  => static::$bucket,
+                    'Bucket'  => RT::BUCKET,
                     'Objects' => array_filter($objects),
                 ]);
     }
@@ -1362,7 +1410,7 @@ class Controller_Post extends Controller_Resource {
             }
 
             return AmazonSDK::s3()->deleteObjects([
-                        'Bucket'  => static::$bucket,
+                        'Bucket'  => RT::BUCKET,
                         'Objects' => array_filter($final),
                     ]);
         }

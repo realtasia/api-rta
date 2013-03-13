@@ -30,7 +30,7 @@ class Controller_User extends Controller_Resource {
     ];
     private static $valid_user_actions        = [
         'create_social_login', 'password_reset', 'update_social_login', 'is_unique',
-        'update_avatar', 'update_info','send_sms', 'validate_password', 'update_settings'
+        'update_avatar', 'update_info', 'send_sms', 'validate_password', 'update_settings'
     ];
 
     /**
@@ -92,7 +92,6 @@ class Controller_User extends Controller_Resource {
                 Debug::log('Access Denied invoked because no admin user or not client');
                 return $this->error('access_denied');
             }
-
         }
 
         // no type, let's try id
@@ -161,7 +160,7 @@ class Controller_User extends Controller_Resource {
             Debug::log('Access Denied invoked because no admin user or not client');
             $valid = false;
         }
-        if(!$valid)
+        if (!$valid)
         {
             return $this->error('access_denied');
         }
@@ -310,8 +309,9 @@ class Controller_User extends Controller_Resource {
      */
     public function action_feed()
     {
-        $id = $this->request->param('id');
-        $tiker = Collection::factory('ticker');
+        $id     = $this->request->param('id');
+        $tiker  = Collection::factory('ticker');
+        $posts  = Collection::factory('post');
         $return = [];
 
         if (parent::is_client() || parent::logged_in())
@@ -320,9 +320,48 @@ class Controller_User extends Controller_Resource {
             static::$params['privacy'] = static::logged_in_is_id($id) ? null : 'PUBLIC';
             // we include posts written on his page
             $ids = $tiker->search(static::$params, static::$user_id);
-            if(!empty($ids))
+            if (!empty($ids))
             {
-                $return = Collection::factory('post')->search(['include_ids' => $ids], static::$user_id);
+                $status = Arr::get(static::$params, 'status', 'active');
+
+                switch ($status)
+                {
+                    case 'pending':
+                    case 'archived':
+                    case 'draft':
+                    case 'trashed':
+                        // logged in user does not see other statuses if posts don't
+                        // belong to him
+                        if (static::logged_in_is_id($id))
+                        {
+                            $p = Arr::merge(static::$params, ['user_id' => static::$user_id,'include_ids' => $ids]);
+                            return $this->data($posts->search($p, static::$user_id));
+                        }
+
+                        // admin sees everything
+                        if (parent::has_role('admin'))
+                            return $this->data($posts->search(static::$params, static::$user_id));
+
+                        // clients only see active (public) posts
+                        return $this->error('access_denied');
+
+                    // this is a regular (public) lookup
+                    default :
+                        // need a client or user token.
+                        if (parent::is_client() || parent::logged_in())
+                        {
+                            $q = [
+                                'include_ids' => $ids, 'status' => 'active'
+                            ];
+                            // only publically viewable posts
+                            $q['privacy'] = static::logged_in_is_id($id) ? null : 'PUBLIC';
+                            // we include posts written on his page
+                            return $this->data($posts->search($q, static::$user_id));
+                        }
+                }
+
+//                return $this->error('invalid_request');
+//                $return = Collection::factory('post')->search(['include_ids' => $ids], static::$user_id);
             }
             return $this->data($return);
         }
@@ -515,14 +554,6 @@ class Controller_User extends Controller_Resource {
 
     public function action_albums()
     {
-//        $test = Collection::factory('post')->find(['type' => ['$in' => ['album', 'library']]]);
-//        while($test->hasNext())
-//        {
-//            $p = $test->getNext();
-//            $p->set('excerpt', $p->message);
-//            $p->save();
-//        }
-//        $test->reset();
         $id = $this->request->param('id');
 
         static::$params['type'] = 'album';
@@ -545,7 +576,7 @@ class Controller_User extends Controller_Resource {
             $albums = Collection::factory('post')->search(static::$params, static::$user_id);
         }
 
-        if($albums)
+        if ($albums)
         {
             return $this->data($albums);
         }
@@ -557,38 +588,48 @@ class Controller_User extends Controller_Resource {
     {
 
         $id = $this->request->param('id');
-        $f = ['name', 'info', 'email', 'settings.privacy', 'avatar'];
-        $u = Document::factory('user', $id);
-        if($u->load(null, array_fill_keys(array_reverse($f), 1)))
+        $f  = ['name', 'info', 'email', 'settings.privacy', 'avatar'];
+        $u  = Document::factory('user', $id);
+        if ($u->load(null, array_fill_keys(array_reverse($f), 1)))
         {
             $privacy = Privacy::factory($u);
-            $values = $u->stringify($u->as_array());
+            $values  = $u->stringify($u->as_array());
 
-            switch(true)
+            switch (true)
             {
                 case $privacy->is === 'PUBLIC': break;
             }
 
-            foreach($values as $key => $value)
+            foreach ($values as $key => $value)
             {
-                switch($key)
+                switch ($key)
                 {
-                    case 'name': $qr->fullName($value);break;
-                    case 'gender': $qr->gender($value);break;
-                    case 'designation': $qr->title($value);break;
-                    case 'role': $qr->role($value);break;
-                    case 'company': $qr->company($value);break;
-                    case 'birthday': $qr->birthday($value);break;
-                    case 'mobile': $qr->mobile($value);$qr->sms($value);break;
-                    case 'email': $qr->email($value);break;
-                    case 'avatar': $qr->photo($value);break;
-                    case 'uri': $qr->url($value);break;
+                    case 'name': $qr->fullName($value);
+                        break;
+                    case 'gender': $qr->gender($value);
+                        break;
+                    case 'designation': $qr->title($value);
+                        break;
+                    case 'role': $qr->role($value);
+                        break;
+                    case 'company': $qr->company($value);
+                        break;
+                    case 'birthday': $qr->birthday($value);
+                        break;
+                    case 'mobile': $qr->mobile($value);
+                        $qr->sms($value);
+                        break;
+                    case 'email': $qr->email($value);
+                        break;
+                    case 'avatar': $qr->photo($value);
+                        break;
+                    case 'uri': $qr->url($value);
+                        break;
                     case 'info': break;
                 }
             }
         }
     }
-
 
     /*     * ************************************************************************
      * Public Actions
@@ -665,10 +706,8 @@ class Controller_User extends Controller_Resource {
     }
 
     /**
-     * Checks for unique username or email or mobile.
+     * Validates a password
      *
-     * @param string static::$params['type'] decides whether it is username or email
-     * @param string $request->param['id'] the username or email to check
      */
     protected function validate_password()
     {
@@ -676,14 +715,13 @@ class Controller_User extends Controller_Resource {
 
         if (!$password)
             return $this->error('invalid_request');
-        if(Document::factory('user')->check_password(static::$user_id, $password))
+        if (Document::factory('user')->check_password(static::$user_id, $password))
         {
             return $this->data(['success' => 1]);
         }
 
         return $this->fail('user/registration', 'password_don_match');
     }
-
 
     /**
      * 1. Returns a user's public information if not logged in.
@@ -695,13 +733,21 @@ class Controller_User extends Controller_Resource {
      */
     protected function get($id)
     {
-        //$r = ['API_LOGGED_IN' => parent::logged_in(), 'API_TOKEN_RECEIVED' => Arr::get(static::$current_session, 'access_token')];
+        $is_self = false;
         if (parent::logged_in())
-            //return $this->data(Arr::merge($r, (array) static::$model->get($id)));
-            return $this->data(static::$model->get($id));
-        else
-            //return $this->data(Arr::merge($r, (array) static::$model->get_public($id)));
-            return $this->data(static::$model->get_public($id));
+        {
+            $u = (array) $this->get_user();
+            switch (true)
+            {
+                case $id === $u['email']:
+                case $id === $u['username']:
+                case $id === (string) $u['_id']:
+                    $is_self = true;
+                    break;
+            }
+        }
+
+        return $this->data($is_self ? static::$model->get($id) : static::$model->get_public($id));
     }
 
     /**
@@ -719,9 +765,9 @@ class Controller_User extends Controller_Resource {
         $user = static::$model->collection()->findOne([
             'info.telephone.mobile' => SMS::valid($value)
                 ]);
-        if($user)
+        if ($user)
         {
-            if((int) $user['interested'] === 1)
+            if ((int) $user['interested'] === 1)
             {
                 return $this->data(Document::stringify($user));
             }
@@ -751,7 +797,7 @@ class Controller_User extends Controller_Resource {
             $row           = $c->getNext();
             $d             = $row->stringify($row->as_array());
             $data['label'] = $d["name"];
-            $data['value'] = ['_id'  => $d["_id"], 'name' => $d['name'], 'uri' => $d['uri']];
+            $data['value'] = ['_id'  => $d["_id"], 'name' => $d['name'], 'uri'  => $d['uri']];
             $r[]           = $data;
         }
         return $this->data($r);
@@ -788,7 +834,7 @@ class Controller_User extends Controller_Resource {
         return $this->data($users ? $users : []);
     }
 
-    /*************************************************************************
+    /*     * ***********************************************************************
      * Protected Actions - CREATES
      * *********************************************************************** */
 
@@ -912,9 +958,9 @@ class Controller_User extends Controller_Resource {
                 $this->data(['message' => 'Thank you for you submission']);
 
                 $domain = explode('@', $user->email);
-                $dom = array_pop($domain);
-                $d   = strtolower($dom);
-                if($d === 'realtasia.com')
+                $dom    = array_pop($domain);
+                $d      = strtolower($dom);
+                if ($d === 'realtasia.com')
                 {
                     return $this->create_admin_user($user);
                 }
@@ -984,14 +1030,14 @@ class Controller_User extends Controller_Resource {
      */
     protected function update_info()
     {
-        $params = static::extract_info_values(static::$params);
-        $possible_fields = array_fill_keys([
+        $params                     = static::extract_info_values(static::$params);
+        $possible_fields            = array_fill_keys([
             'first_name', 'last_name', 'username', 'uri', 'email', 'name', 'designation', 'license'
-        ], null);
+                ], null);
         $possible_fields['company'] = [];
-        $possible_fields['info'] = [];
+        $possible_fields['info']    = [];
         // a few checks, first the basic check.
-        $validation = Validation::factory($params)
+        $validation                 = Validation::factory($params)
                 ->rule('first_name', 'alpha')
                 ->rule('first_name', 'not_empty')
                 ->rule('last_name', 'alpha')
@@ -1021,9 +1067,9 @@ class Controller_User extends Controller_Resource {
         $password = Arr::get($params, 'password');
 
         // if we have a password, check it.
-        if($password)
+        if ($password)
         {
-            if(Arr::get($params, 'confirmPassword') !== $password)
+            if (Arr::get($params, 'confirmPassword') !== $password)
             {
                 Debug::log('password exists and do not match');
                 $this->errors = ['passwords' => 'password do not match'];
@@ -1034,9 +1080,9 @@ class Controller_User extends Controller_Resource {
         }
 
         // clean everything!
-        foreach(static::$params as $key => $value)
+        foreach (static::$params as $key => $value)
         {
-            switch($key)
+            switch ($key)
             {
                 case 'first_name':
                 case 'last_name':
@@ -1044,21 +1090,21 @@ class Controller_User extends Controller_Resource {
                 case 'designation':
                 case 'license':
                 case 'company':
-                    if(!empty($value))
+                    if (!empty($value))
                     {
-                        if(is_array($value))
+                        if (is_array($value))
                         {
-                            foreach($value as $label => $val)
+                            foreach ($value as $label => $val)
                             {
-                                if(empty($val))
+                                if (empty($val))
                                 {
                                     unset($value[$label]);
                                 }
-                                if(is_array($val))
+                                if (is_array($val))
                                 {
-                                    foreach($val as $l => $v)
+                                    foreach ($val as $l => $v)
                                     {
-                                        if(empty($v))
+                                        if (empty($v))
                                         {
                                             unset($val[$l]);
                                         }
@@ -1076,16 +1122,15 @@ class Controller_User extends Controller_Resource {
                         // set to null so as to filter
                         static::$params[$key] = is_array($value) ? (array) $value : null;
                     }
-                break;
+                    break;
             }
-
         }
 
         $com = Arr::get(static::$params, 'company', []);
 
-        if(!empty($com))
+        if (!empty($com))
         {
-            if(isset($com['_id']))
+            if (isset($com['_id']))
             {
                 $com['_id'] = Document::check_id($com['_id']);
             }
@@ -1094,17 +1139,17 @@ class Controller_User extends Controller_Resource {
         }
 
         $edu = Arr::path(static::$params, 'info.education', []);
-        foreach($edu as $k => $v)
+        foreach ($edu as $k => $v)
         {
-            if(is_array($v) && isset($v['value']))
+            if (is_array($v) && isset($v['value']))
             {
                 $v['value'] = trim($v['value']);
-                if(empty($v['value']))
+                if (empty($v['value']))
                 {
                     unset($edu[$k]);
                 }
                 $v['date'] = trim($v['date']);
-                if(empty($v['date']) || !is_numeric($v['date']))
+                if (empty($v['date']) || !is_numeric($v['date']))
                 {
                     unset($edu[$k]);
                 }
@@ -1113,17 +1158,17 @@ class Controller_User extends Controller_Resource {
         static::$params['info']['education'] = array_filter($edu);
 
         $ach = Arr::path(static::$params, 'info.achievements', []);
-        foreach($ach as $k => $v)
+        foreach ($ach as $k => $v)
         {
-            if(is_array($v) && isset($v['value']))
+            if (is_array($v) && isset($v['value']))
             {
                 $v['value'] = trim($v['value']);
-                if(empty($v['value']))
+                if (empty($v['value']))
                 {
                     unset($edu[$k]);
                 }
                 $v['date'] = trim($v['date']);
-                if(empty($v['date']) || !is_numeric($v['date']))
+                if (empty($v['date']) || !is_numeric($v['date']))
                 {
                     unset($edu[$k]);
                 }
@@ -1139,7 +1184,7 @@ class Controller_User extends Controller_Resource {
 
         $fields = Arr::overwrite($possible_fields, array_filter(static::$params));
         //die(print_r($fields, true));
-        $user = Document::factory('user', static::$user_id);
+        $user   = Document::factory('user', static::$user_id);
         $user->update_info($fields);
         if ($user)
             return $this->data($user->stringify($user->as_array()));
@@ -1306,21 +1351,21 @@ class Controller_User extends Controller_Resource {
      */
     protected function update_avatar()
     {
-        $uid       = $this->request->param('id');
-        $picture   = Arr::get(static::$params, 'picture');
+        $uid     = $this->request->param('id');
+        $picture = Arr::get(static::$params, 'picture');
 
         $album = Document::factory('post');
-        $query = ['user._id' => new MongoID($uid), 'name' => 'Profile Pictures', 'type' => 'album'];
-        $user = Document::factory('user', $uid);
-        $user->load(null, ['name' => 1, 'library' => 1]);
+        $query = ['user._id' => new MongoID($uid), 'name'     => 'Profile Pictures', 'type'     => 'album'];
+        $user  = Document::factory('user', $uid);
+        $user->load(null, ['name'    => 1, 'library' => 1]);
 
         // either retrieve the avatar album or create one
-        if(!$album->load($query))
+        if (!$album->load($query))
         {
 
             if ($user)
             {
-                $avatars = [
+                $avatars    = [
                     'name'    => 'Profile Pictures',
                     'excerpt' => 'Your uploaded profile pictures',
                     'message' => 'Your uploaded profile pictures',
@@ -1328,11 +1373,11 @@ class Controller_User extends Controller_Resource {
                     'page'    => $user->library,
                     'type'    => 'album',
                 ];
-                $album = $album->create_album($avatars);
+                $album      = $album->create_album($avatars);
                 $album->uri = '/post?id=' . (string) $album->_id;
-                if($album->save())
+                if ($album->save())
                 {
-                    Ticker::factory($album)->create(static::$user_id, 2);
+                    Ticker::factory($album)->create_once(static::$user_id, 2);
                     Ticker::add($album->_id, 'new');
                     static::creator_interactions($album->_id, 'post');
                 }
@@ -1340,7 +1385,7 @@ class Controller_User extends Controller_Resource {
         }
 
         // cannot continue without an album...
-        if(!$album)
+        if (!$album)
             return $this->fail('user/generic', 'server_error');
 
         // populate the attachment params
@@ -1350,7 +1395,7 @@ class Controller_User extends Controller_Resource {
             'subtype'     => 'avatar',
             'picture'     => $picture,
             'user'        => ['_id'  => $user->_id, 'name' => $user->name],
-            'page'        => ['_id'  => $album->_id, 'name' => $album->name, 'type' => 'album', 'uri' => $album->uri],
+            'page'        => ['_id'  => $album->_id, 'name' => $album->name, 'type' => 'album', 'uri'  => $album->uri],
             'page_parent' => $user->library
         ];
 
@@ -1360,7 +1405,7 @@ class Controller_User extends Controller_Resource {
 
         // save the new url and update the user's pic. album and library get
         // updated automatically on save()
-        if($attachment)
+        if ($attachment)
         {
             $attachment->uri = '/post?id=' . (string) $attachment->_id;
             $attachment->save();
@@ -1478,22 +1523,22 @@ class Controller_User extends Controller_Resource {
 
     protected static function create_user_defaults(Document $user)
     {
-        if(!static::$user_id)
+        if (!static::$user_id)
         {
             static::$user_id = $user->_id;
         }
-        $library = [
+        $library           = [
             'type' => 'library',
-            'uri'  => '/' .(string) $user->_id . '/library',
+            'uri'  => '/' . (string) $user->_id . '/library',
             'user' => ['_id'  => $user->_id, 'name' => $user->name],
             'name' => "Media Library"
         ];
-        $lib     = Document::factory('page');
+        $lib               = Document::factory('page');
         $lib->current_user = $user;
         $lib->create($library);
         if ($lib)
         {
-            $uploads = [
+            $uploads             = [
                 'name'    => 'Private Uploads',
                 'excerpt' => 'This is your default private album',
                 'message' => 'This is your default private album',
@@ -1501,17 +1546,17 @@ class Controller_User extends Controller_Resource {
                 'user'    => ['_id'  => $user->_id, 'name' => $user->name],
                 'page'    => ['_id'  => $lib->_id, 'name' => $lib->name, 'type' => 'library']
             ];
-            $album   = Document::factory('post');
+            $album               = Document::factory('post');
             $album->current_user = $user;
             $album->create_album($uploads);
-            $album->uri = '/post?id=' . (string) $album->_id;
+            $album->uri          = '/post?id=' . (string) $album->_id;
             $album->save();
             if ($album)
             {
                 // create a new ticker for this user's
-                Ticker::factory($album)->create($user->_id, 2);
+                Ticker::factory($album)->create_once($user->_id, 2);
                 static::creator_interactions($album->_id, 'post');
-                $user->library = ['_id'  => $lib->_id, 'name' => $lib->name, 'uri' => $lib->uri];
+                $user->library = ['_id'  => $lib->_id, 'name' => $lib->name, 'uri'  => $lib->uri];
             }
         }
 
@@ -1545,11 +1590,9 @@ class Controller_User extends Controller_Resource {
 //                    case 'avatar': $qr->photo($value);break;
 //                    case 'url': $qr->url($value);break;
 //                    case 'info': break;
-
 //        $user->set('info.qrcode', $this->generate_qrcode(QRCode::factory(), $user->as_array()));
         return $user->save();
     }
-
 
     /**
      * Sends a user an email. Normally for registrations purposes. The official
@@ -1689,7 +1732,7 @@ class Controller_User extends Controller_Resource {
         ];
 
         $admin = Document::factory('user');
-        if ($admin->load($query, ['_id'   => 1, 'session' => 1, 'name'  => 1]))
+        if ($admin->load($query, ['_id'     => 1, 'session' => 1, 'name'    => 1]))
         {
             return $this->data(Arr::merge(['success' => 1], $admin->stringify($admin->as_array())));
         }
@@ -1723,7 +1766,7 @@ class Controller_User extends Controller_Resource {
                     '_id'  => 1, 'name' => 1
                 ]))
         {
-            $admin->session = ['token' => $fourD, 'type' => $type];
+            $admin->session = ['token' => $fourD, 'type'  => $type];
             if ($admin->save())
             {
                 return $this->data(Arr::merge(['success' => 1], $admin->stringify($admin->as_array())));
@@ -1742,11 +1785,11 @@ class Controller_User extends Controller_Resource {
 
         $query = [
             '_id'  => static::$user_id,
-            '$and' => [['session' => ['$exists' => true], 'session.token' => $token]]
+            '$and' => [['session'       => ['$exists' => true], 'session.token' => $token]]
         ];
 
         $admin = Document::factory('user');
-        if ($admin->load($query, ['_id'   => 1, 'session' => 1, 'name'  => 1]))
+        if ($admin->load($query, ['_id'     => 1, 'session' => 1, 'name'    => 1]))
         {
             $admin->token = null;
             if ($admin->save())
@@ -1759,7 +1802,7 @@ class Controller_User extends Controller_Resource {
 
     protected function admin_get_users()
     {
-        $id     = new MongoID($this->request->param('id'));
+        $id = new MongoID($this->request->param('id'));
 
         $return = [
             'all'          => Collection::factory('user')->find(),
@@ -1770,18 +1813,18 @@ class Controller_User extends Controller_Resource {
             'activations'  => Collection::factory('user')->find(['status'  => 'active', 'rep._id' => $id]),
         ];
 
-        $token  = Arr::get(static::$params, 'token');
+        $token = Arr::get(static::$params, 'token');
         if ($token)
         {
             $return['token'] = Collection::factory('user')->find(['rep.token' => $token]);
         }
 
-        $s  = Arr::get(static::$params, 's');
+        $s = Arr::get(static::$params, 's');
 
         $types = array_keys($return);
-        $type = Arr::get(static::$params, 'type');
+        $type  = Arr::get(static::$params, 'type');
 
-        if (!in_array( $type, $types))
+        if (!in_array($type, $types))
         {
             $type = null;
         }
@@ -1791,31 +1834,31 @@ class Controller_User extends Controller_Resource {
 
         foreach ($types as $t)
         {
-            if($s)
+            if ($s)
             {
                 $telephone = SMS::valid($s);
-                $keyword = new MongoRegex("/^$s/");
-                $query = [
-                        ['username' => $keyword],
-                        ['email' => $keyword],
-                        ['company.name' => new MongoRegex('/^'. strtoupper($s) .'/')],
-                        ['name' => new MongoRegex("/^".ucfirst($s)."/")],
-                    ];
-                if($telephone)
+                $keyword   = new MongoRegex("/^$s/");
+                $query     = [
+                    ['username' => $keyword],
+                    ['email' => $keyword],
+                    ['company.name' => new MongoRegex('/^' . strtoupper($s) . '/')],
+                    ['name' => new MongoRegex("/^" . ucfirst($s) . "/")],
+                ];
+                if ($telephone)
                 {
                     $query[] = ['info.telephone.mobile' => $telephone];
                 }
 
                 $return[$t]->find(['$or' => $query]);
             }
-            $c  = $return[$t]->limit($limit)->skip($skip);
+            $c                   = $return[$t]->limit($limit)->skip($skip);
             unset($return[$t]);
             $return[$t]['count'] = $c->count(false);
             if ($type === $t)
             {
                 while ($c->hasNext())
                 {
-                    $row = $c->getNext();
+                    $row                = $c->getNext();
                     $return[$t]['cl'][] = $row->stringify($row->as_array());
                 }
             }
@@ -1859,37 +1902,36 @@ class Controller_User extends Controller_Resource {
     {
         $return = [];
 
-        $return['notifications.likers.own_post']        = Arr::path($array, 'notifications.likers.own_post');
+        $return['notifications.likers.own_post']         = Arr::path($array, 'notifications.likers.own_post');
         $return['notifications.likers.other_posts']      = Arr::path($array, 'notifications.likers.other_posts');
-        $return['notifications.likers.profile']         = Arr::path($array, 'notifications.likers.profile');
-        $return['notifications.subscribers.own_post']   = Arr::path($array, 'notifications.subscribers.own_post');
+        $return['notifications.likers.profile']          = Arr::path($array, 'notifications.likers.profile');
+        $return['notifications.subscribers.own_post']    = Arr::path($array, 'notifications.subscribers.own_post');
         $return['notifications.subscribers.other_posts'] = Arr::path($array, 'notifications.subscribers.other_posts');
-        $return['notifications.subscribers.profile']    = Arr::path($array, 'notifications.subscribers.profile');
-        $return['notifications.comments.own_post']      = Arr::path($array, 'notifications.comments.own_post');
+        $return['notifications.subscribers.profile']     = Arr::path($array, 'notifications.subscribers.profile');
+        $return['notifications.comments.own_post']       = Arr::path($array, 'notifications.comments.own_post');
         $return['notifications.comments.other_posts']    = Arr::path($array, 'notifications.comments.other_posts');
-        $return['notifications.mentions']               = Arr::path($array, 'notifications.mentions');
-        $return['notifications.wallpost']               = Arr::path($array, 'notifications.wallpost');
-        $return['notifications.testimonial']            = Arr::path($array, 'notifications.testimonial');
-        $return['notifications.messages']               = Arr::path($array, 'notifications.messages');
-        $return['notifications.pages']                  = Arr::path($array, 'notifications.pages');
+        $return['notifications.mentions']                = Arr::path($array, 'notifications.mentions');
+        $return['notifications.wallpost']                = Arr::path($array, 'notifications.wallpost');
+        $return['notifications.testimonial']             = Arr::path($array, 'notifications.testimonial');
+        $return['notifications.messages']                = Arr::path($array, 'notifications.messages');
+        $return['notifications.pages']                   = Arr::path($array, 'notifications.pages');
 
         return Arr::merge($return, $array);
     }
 
     protected static function extract_info_values($array)
     {
-        $return = [];
-        $return['info.gender']            = Arr::path($array, 'info.gender');
-        $return['info.telephone.mobile']  = Arr::path($array, 'info.telephone.mobile');
-        $return['info.birthday']          = Arr::path($array, 'info.birthday');
-        $return['info.languages']         = Arr::path($array, 'info.languages');
-        $return['info.achievements']      = Arr::path($array, 'info.achievements');
-        $return['likers.education']       = Arr::path($array, 'likers.education');
-        $return['likers.social']          = Arr::path($array, 'likers.social');
+        $return                          = [];
+        $return['info.gender']           = Arr::path($array, 'info.gender');
+        $return['info.telephone.mobile'] = Arr::path($array, 'info.telephone.mobile');
+        $return['info.birthday']         = Arr::path($array, 'info.birthday');
+        $return['info.languages']        = Arr::path($array, 'info.languages');
+        $return['info.achievements']     = Arr::path($array, 'info.achievements');
+        $return['likers.education']      = Arr::path($array, 'likers.education');
+        $return['likers.social']         = Arr::path($array, 'likers.social');
 
         return Arr::merge($return, $array);
     }
-
 
     protected static function extract_registration_values($array)
     {
@@ -1909,13 +1951,13 @@ class Controller_User extends Controller_Resource {
 
     protected function create_admin_user($user)
     {
-        if($user instanceof Document)
+        if ($user instanceof Document)
         {
             $user->interested = 0;
-            $user->status = 'active';
-            $user->roles = ['admin'];
-            $phone = $user->info['telephone']['mobile'];
-            $user->password = Document::hash(substr($phone, -8));
+            $user->status     = 'active';
+            $user->roles      = ['admin'];
+            $phone            = $user->info['telephone']['mobile'];
+            $user->password   = Document::hash(substr($phone, -8));
             $user->save();
             return static::create_user_defaults($user);
         }

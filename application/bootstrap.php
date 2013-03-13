@@ -97,7 +97,6 @@ Kohana::$config->attach(new Config_File);
  * Enable modules. Modules are referenced by a relative or absolute path.
  */
 Kohana::modules([
-    'event'      => MODPATH . 'event', // Kohana 3 event class
     'RT'         => MODPATH . 'RT', // Core RT classes
     'queue'      => MODPATH . 'queue', // Core RT classes
     'interact'   => MODPATH . 'interact', // Interaction Models
