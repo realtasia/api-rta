@@ -14,13 +14,14 @@
 class Controller_Post extends Controller_Resource {
 
     private static $valid_get_types  = [
-        'find_unique'
+        'find_unique', 'retrieve_post_for_conversation'
     ];
     private static $valid_post_types = [
         'create_testimonial', 'create_listing', 'create_post', 'create_conversation',
         'update_privacy', 'update_testimonial', 'update_listing', 'update_post',
-        'create_album', 'update_album', 'update_attachment', 'create_comment', 'create_message',
-        'delete_comment', 'create_wallpost', 'create_attachment'
+        'create_album', 'update_album', 'update_attachment', 'create_comment',
+        'create_message', 'delete_comment', 'create_wallpost', 'create_attachment',
+        'clear_unread'
     ];
 
     /**
@@ -284,6 +285,105 @@ class Controller_Post extends Controller_Resource {
         return $this->error('server_error');
     }
 
+    /**
+     * Creates a message for a given post
+     * -- check if existing conversation exists (by user._id or to._id)
+     *      -- create one if it doesn't exist.
+     * -- retrieve post details and construct summary
+     * -- clean and format message
+     * -- create summary
+     * -- add conversation._id to this message (needs to be an index)
+     * -- add job for new private message
+     * -- update the conversation's unread field to reflect the id of the receipient
+     *
+     * POST $params should be an array containing the following:
+     * <ul>
+     *  <li><strong>to_id</strong> : string the Document id of the post's creator</li>
+     *  <li><strong>message</strong> : string the actual message</li>
+     * </ul>
+     *
+     * @return string JSON encoded array
+     */
+    public function action_message()
+    {
+        if (!parent::logged_in())
+            return $this->error('invalid_request');
+
+        // set up all needed documents
+        $post = Document::factory('post', $this->request->param('id'));
+        $post->load(null, ['page' => 1, 'listing' => 1, 'type' => 1, 'user' => 1]);
+
+        $from = Document::factory('user', static::$user_id);
+        $to   = Document::factory('user', static::$params['to_id']);
+        $in   = [
+            '$in' => [
+                Document::check_id(static::$params['to_id']),
+                Document::check_id(static::$user_id),
+            ]
+        ];
+        // query to find conversation
+        $conv = Collection::factory('post')->find([
+            'to._id' => $in, 'user._id' => $in
+        ]);
+
+        // check if we have a conversation, if not create one
+        if(!$conv->hasNext())
+        {
+            $fields = ['name' => 1, 'uri' => 1];
+            // load both users in question
+            $from->load(null, $fields);
+            $to->load(null, $fields);
+            $conv = $this->create_conversation([
+                'to' => $to->as_array(),
+                'user' => $from->as_array(),
+            ]);
+
+            $to->inc('counts.conversations');
+            $user->inc('counts.conversations');
+        }
+
+        // make the summary
+        $summary = static::construct_message_summary($post);
+
+        $params = static::format(static::$params);
+
+        $message = [
+            'to'   => $to->as_array(),
+            'user' => $from->as_array(),
+            'post' => $post->as_array(),
+            'conversation' => [ '_id' => $conv->_id],
+            'summary' => $summary
+        ];
+
+        $c = Document::factory('comment', null, static::$user_id)
+                ->create_message($message);
+        if ($c)
+        {
+            $to->inc('counts.newMessages');
+            $to->save();
+            $user->save();
+
+            $conv->set('unread', $to->_id);
+            $conv->set('message', $c->message);
+            $conv->set('excerpt', $c->excerpt);
+            $conv->inc('counts.messages');
+            $conv->save();
+
+            Job::add($params['conversation']['_id'], 'post', static::$user_id)
+                    ->private_message($c['_id']);
+
+            return $this->data($c);
+        }
+
+        return $this->error('server_error');
+    }
+
+
+    /**
+     * Creates a feedback type post.
+     *
+     * @return string JSON encoded array
+     */
     public function action_feedback()
     {
         if (parent::is_POST())
@@ -563,46 +663,34 @@ class Controller_Post extends Controller_Resource {
      * *********************************************************************** */
 
     /**
+     * Clears a conversation's unread status
+     */
+    protected function clear_unread()
+    {
+        $conv = Document::factory('post', $this->request->param('id'));
+        $conv->set('unread', null);
+        $conv->save();
+    }
+
+    /**
      * A conversation is a special post type with no message. It
      * has to contain a user and maybe a list of to[ids]. It can also be one
      * to[_id]. Either way, this post object has very little information and
      * normally depends on it's containing messages (comments) for content.
      *
-     * @return string JSON encoded array
+     * @return \Document the instantated saved conversation
      */
-    protected function create_conversation()
+    protected function create_conversation($params)
     {
-        $id = $this->request->param('id');
-
-        if (!$id && !parent::logged_in())
+        if (!parent::logged_in())
             return $this->error('invalid_request');
 
-        static::$params['user']['_id'] = $id ? $id : static::$user_id;
-
-        $validation = Validation::factory(static::$params)
-                ->rule('to', 'not_empty')
-                ->rule('to', 'is_array')
-                ->rule('message', 'not_empty');
-
         $defaults = [
-            'type'   => 'conversation', 'status' => 'active'
+            'type'    => 'conversation', 'status'  => 'active',
+            'privacy' => ['is' => 'PRIVATE']
         ];
-        if ($validation->check())
-        {
-            static::$params['message'] = nl2br(HTML::chars(static::$params['message']));
-            if ($comment = static::$model->create_conversation(Arr::merge($defaults, static::$params)))
-            {
-                Job::add($comment->post['_id'], 'post', static::$user_id)
-                        ->private_message($comment->_id);
 
-                return $this->data($comment->stringify($comment->as_array()));
-            }
-
-            return $this->error('server_error');
-        }
-
-        $this->errors = $validation->errors('post/conversation');
-        return $this->fail();
+        return static::$model->create_conversation(Arr::merge($defaults, $params));
     }
 
     /**
@@ -978,31 +1066,6 @@ class Controller_Post extends Controller_Resource {
     }
 
     /**
-     * Creates a message for a given conversation
-     *
-     * @return string JSON encoded array
-     */
-    protected function create_message()
-    {
-        $params['post']['_id']  = $this->request->param('id');
-        $params['post']['type'] = static::$params['post_type'];
-
-        $params['message'] = nl2br(HTML::chars(static::$params['message']));
-
-        $c = Document::factory('comment', null, static::$user_id)
-                ->create_message($params);
-        if ($c)
-        {
-            Job::add($params['post']['_id'], 'post', static::$user_id)
-                    ->private_message($c['_id']);
-
-            return $this->data($c);
-        }
-
-        return $this->error('server_error');
-    }
-
-    /**
      * Creates an attachment. <code>
      * POST "/post/update/create_attachment"</code>
      * with the following params
@@ -1139,9 +1202,9 @@ class Controller_Post extends Controller_Resource {
         return $model ? false : $this->error('invalid_request');
     }
 
-    /*     * ***************************************************"*********************
+    /*****************************************************"*********************
      * Protected Actions - UPDATES
-     * *********************************************************************** */
+     ************************************************************************** */
 
     /**
      * Update a listing. Checks if there is an id and calls the create_listing
@@ -1337,6 +1400,25 @@ class Controller_Post extends Controller_Resource {
                     return in_array($type, $types) ? TRUE : $validation->error($field, 'prop_type.landed_not_valid');
             }
         }
+    }
+
+    /**
+     * Sent about the {type link} on {page link} [IF LISTING, for {sale}] when;
+     *
+     * @param Document $post
+     * @return string A sentence describing the context of this message.
+     */
+    public static function construct_message_summary(Document $post)
+    {
+        $page_link = HTML::anchor(\Arr::get($post->page, 'uri'), \Arr::get($post->page, 'name'));
+        $post_link = HTML::anchor($post->uri, $post->type);
+        $created = Date::fuzzy_span($post->_id->getTimestamp());
+        if($post->type === 'listing')
+        {
+            $addon = "for {$post->listing['type']}";
+        }
+
+        return "Sent about the $post_link $addon written on $page_link $created";
     }
 
     /*     * ************************************************************************

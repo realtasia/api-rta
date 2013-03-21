@@ -16,7 +16,7 @@ class Controller_User extends Controller_Resource {
 
     private static $valid_client_get_actions  = [
         'has_social_login', 'is_unique', 'get', 'search', 'get_by_mobile',
-        'get_company', 'get_session'
+        'get_company', 'get_session', 'get_user_updates'
     ];
     private static $valid_client_post_actions = [
         'registration', 'beta_interest', 'activate', 'send_sms', 'send_email',
@@ -30,7 +30,8 @@ class Controller_User extends Controller_Resource {
     ];
     private static $valid_user_actions        = [
         'create_social_login', 'password_reset', 'update_social_login', 'is_unique',
-        'update_avatar', 'update_info', 'send_sms', 'validate_password', 'update_settings'
+        'update_avatar', 'update_info', 'send_sms', 'validate_password',
+        'update_settings'
     ];
 
     /**
@@ -224,6 +225,7 @@ class Controller_User extends Controller_Resource {
     public function action_subscriptions()
     {
         static::$params['user_id'] = $this->request->param('id');
+        static::$params['interaction'] = 'subscribe';
 
         $data = Document::factory('interaction')
                 ->collection()
@@ -285,23 +287,69 @@ class Controller_User extends Controller_Resource {
     }
 
     /**
-     * Returns inbox of the user.
+     * Retrieves a list of conversations for a given user.
      *
-     * @return json data
+     * @return type
      */
-    public function action_inbox()
+    public function action_conversations()
     {
-        $id = $this->request->param('id');
-        static::$params['user'] = $id;
-
-        // no status checks here, statuses are in individual messages (comments)
-        if (static::logged_in_is_id($id) || parent::has_role('admin'))
+        if(!parent::logged_in())
         {
-            $posts = Mongo_Collection::factory('post');
-            return $this->data($posts->inbox(static::$params, static::$user_id));
+            return $this->error('invalid_request');
         }
 
-        return $this->error('access_denied');
+        $col = Document::factory('post', null, static::$user_id)->collection();
+
+        return $this->data($col->conversations(static::$params, static::$user_id));
+    }
+
+    /**
+     * This is the method that retrieves comments for a given post. Issue a GET to
+     * <code>
+     * "/comment/get/{conversation_id}"
+     * </code>
+     * with the following params
+     * <code>
+     * $defaults = [
+     *      'limit' => 2, 'skip' => 0, 'type' => 'message', 'sort' => -1,
+     *      'conversation._id' => $this->request->param('id'), 'status' => 'active'
+     *  ];
+     * </code>
+     *
+     * @params array $_GET see above.
+     * @return string JSON encoded array
+     */
+    public function action_messages()
+    {
+        if(!parent::logged_in())
+        {
+            return $this->error('invalid_request');
+        }
+        $id = $this->request->param('_id');
+        $return = [];
+
+        $params = [
+            'status' => 'active',
+            '$or' => [
+                ['to._id' => Document::check_id(static::$user_id)],
+                ['user._id' => Document::check_id(static::$user_id)],
+            ],
+            'conversation._id' => Document::check_id($id), 'type' => 'message'
+        ];
+
+        $messages = Collection::factory('comment', null, static::$user_id)
+                ->find($params)
+                ->limit(\Arr::get(static::$params, 'limit', 11))
+                ->skip(\Arr::get(static::$params, 'skip', 0))
+                ->sort_desc('_id');
+
+        while($messages->hasNext())
+        {
+            $row = $messages->getNext();
+            $return[] = $row->stringify($row->as_array());
+        }
+
+        return $this->data(array_filter($return));
     }
 
     /**
@@ -552,6 +600,11 @@ class Controller_User extends Controller_Resource {
         return $this->data(Document::factory('page')->get($this->request->param('id')));
     }
 
+    /**
+     * Retrieves albums
+     *
+     * @return type
+     */
     public function action_albums()
     {
         $id = $this->request->param('id');
@@ -665,6 +718,17 @@ class Controller_User extends Controller_Resource {
     public function action_unsubscribe()
     {
         return parent::interact('unsubscribe', 'user');
+    }
+
+    /**
+     * Clears the newMessages count
+     *
+     * @return type
+     */
+    public function action_resetUnread()
+    {
+        Document::factory('user', static::$user_id)->set('counts.newMessages', 0)->save();
+        return $this->data(['success' => 1]);
     }
 
     /*     * ************************************************************************
@@ -804,6 +868,24 @@ class Controller_User extends Controller_Resource {
     }
 
     /**
+     * This is used by client to poll updates for the logged in user.
+     *
+     * @return string JSON
+     */
+    protected function get_user_updates()
+    {
+        $f = array_fill_keys([
+            'subscribers', 'likers', 'settings.privacy', 'counts'
+        ], 1);
+
+        $r = static::$model;
+        $r->load($this->request->param('id'), $f);
+        $d = new Document();
+
+        return $this->data($d->stringify($r->as_array()));
+    }
+
+    /**
      * Checks if a user has an authenticated social login session and returns it.
      *
      * @param string $network the social login user has authenticated
@@ -889,6 +971,7 @@ class Controller_User extends Controller_Resource {
                 $this->admin_email(
                         'New User REGISTERED!! Double Woots! Woots!', print_r(static::$params, TRUE)
                 );
+                Job::add($doc_id, $doc_type, $user_id);
                 $this->user_email(
                         $r, 'We received your submission', Kohana::message('user/info', 'welcome_aboard')
                 );
@@ -1031,8 +1114,9 @@ class Controller_User extends Controller_Resource {
     protected function update_info()
     {
         $params                     = static::extract_info_values(static::$params);
+        static::$params['message']          = \Arr::get(static::$params, 'aboutme');
         $possible_fields            = array_fill_keys([
-            'first_name', 'last_name', 'username', 'uri', 'email', 'name', 'designation', 'license'
+            'first_name', 'last_name', 'username', 'uri', 'email', 'name', 'designation', 'license', 'message'
                 ], null);
         $possible_fields['company'] = [];
         $possible_fields['info']    = [];
@@ -1090,6 +1174,7 @@ class Controller_User extends Controller_Resource {
                 case 'designation':
                 case 'license':
                 case 'company':
+                case 'message':
                     if (!empty($value))
                     {
                         if (is_array($value))
@@ -1605,13 +1690,13 @@ class Controller_User extends Controller_Resource {
      */
     protected function user_email($recipient, $subject, $message)
     {
-        $content = array(
+        $content = [
             'header_plain'  => $subject,
             'message_plain' => $message,
             'message'       => View::factory('emails/content/standard')
                     ->set('content_header', "<h3>$subject</h3>")
                     ->set('content_message', $message)
-        );
+        ];
 
         $view = View::factory('emails/spam_mail')
                 ->set('title', $content['header_plain'])
@@ -1922,13 +2007,14 @@ class Controller_User extends Controller_Resource {
     protected static function extract_info_values($array)
     {
         $return                          = [];
+//        $return['message']           = Arr::get($array, 'aboutme');
         $return['info.gender']           = Arr::path($array, 'info.gender');
         $return['info.telephone.mobile'] = Arr::path($array, 'info.telephone.mobile');
         $return['info.birthday']         = Arr::path($array, 'info.birthday');
         $return['info.languages']        = Arr::path($array, 'info.languages');
         $return['info.achievements']     = Arr::path($array, 'info.achievements');
-        $return['likers.education']      = Arr::path($array, 'likers.education');
-        $return['likers.social']         = Arr::path($array, 'likers.social');
+        $return['info.education']      = Arr::path($array, 'info.education');
+        $return['info.social']         = Arr::path($array, 'info.social');
 
         return Arr::merge($return, $array);
     }
@@ -1962,5 +2048,4 @@ class Controller_User extends Controller_Resource {
             return static::create_user_defaults($user);
         }
     }
-
 }

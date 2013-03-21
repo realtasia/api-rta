@@ -98,6 +98,8 @@ class Controller_Auth extends Controller_Abstract {
         else
         {
             static::$current_session = $check;
+            if(isset($params['password']))
+                unset($params['password']);
             return $this->data(['success' => $params]);
         }
         //return static::is_error($check) ? $this->error($check) : $this->data($check);
@@ -171,4 +173,3 @@ class Controller_Auth extends Controller_Abstract {
     }
 
 }
-?>

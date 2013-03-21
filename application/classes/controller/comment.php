@@ -26,7 +26,7 @@ class Controller_Comment extends Controller_Resource {
      * <code>
      * "/comment/delete/{comment_id}"
      * </code>
-     * 
+     *
      * @return string JSON encoded array
      */
     public function action_delete()
@@ -81,20 +81,20 @@ class Controller_Comment extends Controller_Resource {
      * <code>
      * "/comment/like/{comment_id}"
      * </code>
-     * 
+     *
      * @return string JSON encoded array
      */
     public function action_like()
     {
         return parent::interact('like', 'comment');
     }
-    
+
     /**
      * Performs an unlike on the given comment. Usage: Issue a POST to
      * <code>
      * "/comment/unlike/{comment_id}"
      * </code>
-     * 
+     *
      * @return string JSON encoded array
      */
     public function action_unlike()
@@ -110,7 +110,7 @@ class Controller_Comment extends Controller_Resource {
      * with the following params
      * <code>
      * $defaults = [
-     *      'limit' => 11, 'skip' => 0, 'object_id' => NULL,  'object_type' => NULL, 'interaction' => 'like', 
+     *      'limit' => 11, 'skip' => 0, 'object_id' => NULL,  'object_type' => NULL, 'interaction' => 'like',
      *      'user_id' => NULL
      * ];
      * </code>
@@ -120,7 +120,7 @@ class Controller_Comment extends Controller_Resource {
      *      ['_id': 'user_id', 'name':'username'] , [...]
      * }
      * </code>
-     * 
+     *
      * @return string JSON encoded array
      */
     public function action_likers()
@@ -133,8 +133,8 @@ class Controller_Comment extends Controller_Resource {
                 ->likers(static::$params);
 
         return $this->data($data);
-    }    
-    
+    }
+
     /**
      * Retrieves the full message content from a given comment id
      */
@@ -143,8 +143,8 @@ class Controller_Comment extends Controller_Resource {
         $m = Document::factory('comment');
         $m->load($this->request->param('id'), ['message' => !0]);
         $this->data($m->message);
-    }    
-    
+    }
+
     /**
      * This is the method that retrieves comments for a given post. Issue a GET to
      * <code>
@@ -153,11 +153,11 @@ class Controller_Comment extends Controller_Resource {
      * with the following params
      * <code>
      * $defaults = [
-     *      'limit' => 2, 'skip' => 0, 'type' => 'comment', 'sort' => -1,  'post_id' => $this->request->param('id'), 
+     *      'limit' => 2, 'skip' => 0, 'type' => 'comment', 'sort' => -1,  'post_id' => $this->request->param('id'),
      *      'status' => 'active'
      *  ];
      * </code>
-     * 
+     *
      * @params array $_GET see above.
      * @return string JSON encoded array
      */
@@ -166,7 +166,7 @@ class Controller_Comment extends Controller_Resource {
         $defaults = [
            'limit' => 2, 'skip' => 0, 'type' => 'comment', 'sort' => -1,
            'post_id' => $this->request->param('id'), 'include_ids' => NULL,
-            'status' => 'active'
+           'status' => 'active'
         ];
 
         $params = Arr::merge($defaults, static::$params);
@@ -176,5 +176,5 @@ class Controller_Comment extends Controller_Resource {
 
         return $this->data($c);
 
-    }    
+    }
 }

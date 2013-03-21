@@ -191,3 +191,4 @@ Route::set('default', '(<controller>(/<action>(/<id>)))',["id" => "[a-zA-Z0-9_]+
             'action'     => 'index',
             'id'         => null
         ]);
+Cookie::$salt = '123456789';

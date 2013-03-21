@@ -116,14 +116,14 @@ require APPPATH . 'bootstrap' . EXT;
 //        ->send_headers()
 //        ->body();
 
-if (PHP_SAPI == 'cli') { // Try and load minion
-    class_exists('Minion_Task') OR die('Please enable the Minion module for CLI support.');
-    set_exception_handler(array('Minion_Exception', 'handler'));
-
-    Minion_Task::factory(Minion_CLI::options())->execute();
-} 
-else 
-{
+//if (PHP_SAPI == 'cli') { // Try and load minion
+//    class_exists('Minion_Task') OR die('Please enable the Minion module for CLI support.');
+//    set_exception_handler(array('Minion_Exception', 'handler'));
+//
+//    Minion_Task::factory(Minion_CLI::options())->execute();
+//}
+//else
+//{
     try
     {
         if(!ob_start("ob_gzhandler")) ob_start();
@@ -159,5 +159,5 @@ else
 
         return exec("php /home/jason/www/rta.casa.net/index.php --uri=stats/check");
     }
-}
+//}
 

@@ -48,17 +48,17 @@ class Controller_Corrections extends Controller {
             fwrite(STDOUT, "Adding the following to {$row->name}: \n");
             fwrite(STDOUT, implode(', ', $keywords) . "\n");
         }
-    }   
+    }
 
     public function action_postIndex()
     {
         $r = Collection::factory('singpost')->collection()->find([
             'keywords' => new MongoRegex("/^0/"),
-        ]); 
-        
+        ]);
+
         fwrite(STDOUT, print_r(iterator_to_array($r), true) . "\n\n\n");
     }
-    
+
     public function action_postal()
     {
         $cursor = Collection::factory('singpost')->find();
@@ -68,7 +68,7 @@ class Controller_Corrections extends Controller {
         {
             $row = $cursor->getNext();
             $a = $row->as_array();
-            
+
             $keywords[] = \Arr::get($a, 'building');
             $keywords[] = \Arr::get($a, 'estate');
             $keywords[] = \Arr::get($a, 'locality');
@@ -86,8 +86,8 @@ class Controller_Corrections extends Controller {
             fwrite(STDOUT, print_r($keywords, true) . "\n\n\n");
             $keywords = [];
         }
-    }    
-    
+    }
+
     public function action_estates()
     {
         Collection::factory('page')->remove(['_id' => new MongoID('50ed26deb90fb8c817000049')]);
@@ -129,5 +129,11 @@ class Controller_Corrections extends Controller {
         $user->set('avatar', null);
         $user->set('counts.attachments', 1);
         $user->save();
+    }
+
+    public function action_locationname()
+    {
+        $name = $this->request->query('id');
+        print_r($name);
     }
 }

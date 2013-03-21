@@ -22,6 +22,7 @@ class Controller_Avatar extends Controller {
     public function action_index()
     {
         $url = '/s3/';
+        $b = $url . RT::BUCKET . '/avatars/';
 
         $this->response->send_headers();
         $id   = trim($this->request->param('id'));
@@ -31,13 +32,17 @@ class Controller_Avatar extends Controller {
 
         if(\Arr::get($u, 'avatar'))
         {
+            //echo $url . str_replace($id, "$id/$size", $u['avatar']);
             return $this->response->headers([
                 'X-Accel-Redirect' => $url . str_replace($id, "$id/$size", $u['avatar'])
             ]);
+            return;
         }
 
+        //echo $b . ucfirst(substr($u['info']['gender'], 0, 1)) . $size . '.png';
+        //return;
         return $this->response->headers([
-            'X-Accel-Redirect' => $url . RT::BUCKET . ucfirst(substr($u['info']['gender'], 0, 1)) . $size . '.png'
+            'X-Accel-Redirect' => $b . ucfirst(substr($u['info']['gender'], 0, 1)) . $size . '.png'
         ]);
 
     }
