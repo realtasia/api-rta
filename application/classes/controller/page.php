@@ -80,12 +80,12 @@ class Controller_Page extends Controller_Resource {
      * *********************************************************************** */
 
     /**
-     * Retrieves an array of [user_ids and user names] of people who like this post
+     * Retrieves an array of [user_ids and user names] of people who like this page
      */
     public function action_likers()
     {
         static::$params['object_id'] = $this->request->param('id');
-        static::$params['object_type'] = 'user';
+        static::$params['object_type'] = 'page';
 
         $data = Document::factory('interaction')
                 ->collection()
@@ -100,7 +100,7 @@ class Controller_Page extends Controller_Resource {
     public function action_subscribers()
     {
         static::$params['object_id'] = $this->request->param('id');
-        static::$params['object_type'] = 'post';
+        static::$params['object_type'] = 'page';
 
         $data = Document::factory('interaction')
                 ->collection()

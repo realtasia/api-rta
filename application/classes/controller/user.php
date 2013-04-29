@@ -1,4 +1,6 @@
-<?php defined('SYSPATH') or die('No direct script access.');
+<?php
+
+defined('SYSPATH') or die('No direct script access.');
 
 /**
  * Description of user
@@ -19,7 +21,7 @@ class Controller_User extends Controller_Resource {
         'get_company', 'get_session', 'get_user_updates'
     ];
     private static $valid_client_post_actions = [
-        'registration', 'beta_interest', 'activate', 'send_sms', 'send_email',
+        'registration', 'save_details', 'activate', 'send_sms', 'send_email',
         'is_unique', 'admin_email'
     ];
     private static $valid_admin_actions       = [
@@ -43,7 +45,7 @@ class Controller_User extends Controller_Resource {
         if (parent::logged_in())
         {
             static::$model =
-                    Document::factory('user', null, static::$user_id);
+              Document::factory('user', null, static::$user_id);
         }
         else
         {
@@ -198,8 +200,8 @@ class Controller_User extends Controller_Resource {
         static::$params['object_type'] = 'user';
 
         $data = Document::factory('interaction')
-                ->collection()
-                ->likers(static::$params);
+          ->collection()
+          ->likers(static::$params);
 
         return $this->data($data);
     }
@@ -213,8 +215,8 @@ class Controller_User extends Controller_Resource {
         static::$params['object_type'] = 'user';
 
         $data = Document::factory('interaction')
-                ->collection()
-                ->subscribers(static::$params);
+          ->collection()
+          ->subscribers(static::$params);
         return $this->data($data);
     }
 
@@ -228,8 +230,8 @@ class Controller_User extends Controller_Resource {
         static::$params['interaction'] = 'subscribe';
 
         $data = Document::factory('interaction')
-                ->collection()
-                ->subscriptions(static::$params);
+          ->collection()
+          ->subscriptions(static::$params);
 
         //return $this->data(static::$params);
         return $this->data($data);
@@ -262,7 +264,7 @@ class Controller_User extends Controller_Resource {
                 // requested user and logged in user must be the same or must be admin
                 if (static::logged_in_is_id($id) || parent::has_role('admin'))
                     return $this->data(
-                                    $posts->listings(static::$params, static::$user_id)
+                        $posts->listings(static::$params, static::$user_id)
                     );
 
                 // clients only see 'active' (public) posts
@@ -275,7 +277,7 @@ class Controller_User extends Controller_Resource {
                 {
                     static::$params['privacy'] = 'PUBLIC';
                     return $this->data(
-                                    $posts->listings(static::$params, static::$user_id)
+                        $posts->listings(static::$params, static::$user_id)
                     );
                 }
 
@@ -293,7 +295,7 @@ class Controller_User extends Controller_Resource {
      */
     public function action_conversations()
     {
-        if(!parent::logged_in())
+        if (!parent::logged_in())
         {
             return $this->error('invalid_request');
         }
@@ -306,7 +308,7 @@ class Controller_User extends Controller_Resource {
     /**
      * This is the method that retrieves comments for a given post. Issue a GET to
      * <code>
-     * "/comment/get/{conversation_id}"
+     * "/user/messages/{conversation_id}"
      * </code>
      * with the following params
      * <code>
@@ -321,35 +323,35 @@ class Controller_User extends Controller_Resource {
      */
     public function action_messages()
     {
-        if(!parent::logged_in())
+        if (!parent::logged_in())
         {
             return $this->error('invalid_request');
         }
-        $id = $this->request->param('_id');
+        $id     = $this->request->param('id');
         $return = [];
 
-        $params = [
-            'status' => 'active',
-            '$or' => [
+        $params   = [
+            'status'           => 'active',
+            '$or'              => [
                 ['to._id' => Document::check_id(static::$user_id)],
                 ['user._id' => Document::check_id(static::$user_id)],
             ],
-            'conversation._id' => Document::check_id($id), 'type' => 'message'
+            'conversation._id' => Document::check_id($id), 'type'             => 'message'
         ];
-
+        //return $this->data($params);
         $messages = Collection::factory('comment', null, static::$user_id)
-                ->find($params)
-                ->limit(\Arr::get(static::$params, 'limit', 11))
-                ->skip(\Arr::get(static::$params, 'skip', 0))
-                ->sort_desc('_id');
+          ->find($params)
+          ->limit(\Arr::get(static::$params, 'limit', 11))
+          ->skip(\Arr::get(static::$params, 'skip', 0))
+          ->sort_desc('_id');
 
-        while($messages->hasNext())
+        while ($messages->hasNext())
         {
-            $row = $messages->getNext();
+            $row      = $messages->getNext();
             $return[] = $row->stringify($row->as_array());
         }
 
-        return $this->data(array_filter($return));
+        return $this->data($return);
     }
 
     /**
@@ -382,7 +384,7 @@ class Controller_User extends Controller_Resource {
                         // belong to him
                         if (static::logged_in_is_id($id))
                         {
-                            $p = Arr::merge(static::$params, ['user_id' => static::$user_id,'include_ids' => $ids]);
+                            $p = Arr::merge(static::$params, ['user_id'     => static::$user_id, 'include_ids' => $ids]);
                             return $this->data($posts->search($p, static::$user_id));
                         }
 
@@ -398,8 +400,8 @@ class Controller_User extends Controller_Resource {
                         // need a client or user token.
                         if (parent::is_client() || parent::logged_in())
                         {
-                            $q = [
-                                'include_ids' => $ids, 'status' => 'active'
+                            $q            = [
+                                'include_ids' => $ids, 'status'      => 'active'
                             ];
                             // only publically viewable posts
                             $q['privacy'] = static::logged_in_is_id($id) ? null : 'PUBLIC';
@@ -484,7 +486,7 @@ class Controller_User extends Controller_Resource {
             $user = static::$model;
             $user->load($this->request->param('id'), ['settings' => 1]);
             return $this->data(
-                            $user->stringify($user->as_array()['settings']['privacy'])
+                $user->stringify($user->as_array()['settings']['privacy'])
             );
         }
         else
@@ -513,7 +515,7 @@ class Controller_User extends Controller_Resource {
             $user = static::$model;
             $user->load($this->request->param('id'), ['settings' => 1]);
             $this->data(
-                    $user->stringify($user->as_array()['settings']['billing'])
+              $user->stringify($user->as_array()['settings']['billing'])
             );
         }
         else
@@ -541,7 +543,7 @@ class Controller_User extends Controller_Resource {
             $user = static::$model;
             $user->load($this->request->param('id'), ['settings' => 1]);
             $this->data(
-                    $user->stringify($user->as_array()['settings']['notifications'])
+              $user->stringify($user->as_array()['settings']['notifications'])
             );
         }
         else
@@ -754,7 +756,7 @@ class Controller_User extends Controller_Resource {
             if (static::$model->collection()->findOne(['info.telephone.mobile' => $value]))
             {
                 return $this->fail(
-                                'user/registration', $type . '_not_available'
+                    'user/registration', $type . '_not_available'
                 );
             }
 
@@ -763,7 +765,7 @@ class Controller_User extends Controller_Resource {
 
         if (static::$model->get($value))
             return $this->fail(
-                            'user/registration', $type . '_not_available'
+                'user/registration', $type . '_not_available'
             );
 
         return $this->data(['success' => 1]);
@@ -814,21 +816,22 @@ class Controller_User extends Controller_Resource {
         return $this->data($is_self ? static::$model->get($id) : static::$model->get_public($id));
     }
 
-    /**
-     * 1. Returns a user's public information if not logged in.
-     * 2. Returns all user information if logged in & ids are the same.
-     * 3. Retrieves a user & it's relation to logged in user.
+    /** Checks the "user" collection first, if not tries the "agent" collection
+     * 1. If user is in user coll, check for interest flag. Ok to go if 1, error if 0
+     * 2. This user has not been registered, if found in agent coll, return details
      *
+     *
+     * @todo This might be a privacy problem if abused (or complained about)
      * @param string|MongoID $id
      * @return object
      */
     protected function get_by_mobile()
     {
-        $value = $this->request->param('id');
+        $number = SMS::valid($this->request->param('id'));
 
         $user = static::$model->collection()->findOne([
-            'info.telephone.mobile' => SMS::valid($value)
-                ]);
+            'info.telephone.mobile' => $number
+        ]);
         if ($user)
         {
             if ((int) $user['interested'] === 1)
@@ -840,6 +843,16 @@ class Controller_User extends Controller_Resource {
                 return $this->fail('user/registration', 'mobile_not_available');
             }
         }
+
+        $userBeta = Document::factory('agent')->collection()->findOne([
+            'mobile' => $number
+        ]);
+
+        if ($userBeta)
+        {
+            return $this->data(static::$model->stringify($userBeta));
+        }
+
         return $this->data([]);
     }
 
@@ -853,8 +866,8 @@ class Controller_User extends Controller_Resource {
         $p = Document::factory('page')->collection();
         $p->ensureIndex(['name' => 1]);
         $c = $p->find(['name' => new MongoRegex("/^$v/")])
-                ->fields(['_id'  => 1, 'name' => 1, 'uri'  => 1])
-                ->limit(5);
+          ->fields(['_id'  => 1, 'name' => 1, 'uri'  => 1])
+          ->limit(5);
 
         while ($c->hasNext())
         {
@@ -874,14 +887,20 @@ class Controller_User extends Controller_Resource {
      */
     protected function get_user_updates()
     {
+        $id = $this->request->param('id');
+        if (static::$user_id !== $id)
+        {
+            return $this->error('access_denied');
+        }
         $f = array_fill_keys([
             'subscribers', 'likers', 'settings.privacy', 'counts'
-        ], 1);
+          ], 1);
 
         $r = static::$model;
-        $r->load($this->request->param('id'), $f);
+        $r->load($id, $f);
         $d = new Document();
 
+        //return $this->data($this->request->param('id'));
         return $this->data($d->stringify($r->as_array()));
     }
 
@@ -894,8 +913,8 @@ class Controller_User extends Controller_Resource {
     protected function has_social_login($network)
     {
         return static::$model->load([
-                    'logins.type' => $network, '_id'         => static::$user_id
-                        ], ['logins' => 1]) ? static::$model->as_array()['logins'] : $this->data([]);
+              'logins.type' => $network, '_id'         => static::$user_id
+            ], ['logins' => 1]) ? static::$model->as_array()['logins'] : $this->data([]);
         ;
     }
 
@@ -906,19 +925,20 @@ class Controller_User extends Controller_Resource {
      */
     protected function search()
     {
+
         if (parent::logged_in())
             $users = Collection::factory('user')
-                    ->search(static::$params, static::$user_id);
+              ->search(static::$params, static::$user_id);
         else
             $users = Collection::factory('user')
-                    ->search(static::$params);
+              ->search(static::$params);
         //die(Debug::vars(static::$params));
         return $this->data($users ? $users : []);
     }
 
-    /*     * ***********************************************************************
+    /* ************************************************************************
      * Protected Actions - CREATES
-     * *********************************************************************** */
+     * ************************************************************************/
 
     /**
      * New user registration. The user is not active by default and can be
@@ -929,31 +949,27 @@ class Controller_User extends Controller_Resource {
         $params     = static::extract_registration_values(static::$params);
         // validation rules for a regular user.
         $validation = Validation::factory($params)
-                ->rule('first_name', 'alpha')
-                ->rule('first_name', 'not_empty')
-                ->rule('last_name', 'alpha')
-                ->rule('last_name', 'not_empty')
-                ->rule('username', 'not_empty')
-                ->rule('info.gender', 'in_array', [':value', ['male', 'female']])
-                ->rule('info.telephone.mobile', 'not_empty')
-                ->rule('password', 'not_empty')
-                ->rule('email', 'not_empty')
-                ->rule('email', 'email')
-                ->rule('email', 'email_domain')
-                ->rule('info.birthday', 'not_empty');
-
+          ->rule('first_name', 'alpha')
+          ->rule('first_name', 'not_empty')
+          ->rule('last_name', 'alpha')
+          ->rule('last_name', 'not_empty')
+          ->rule('username', 'not_empty')
+          ->rule('info.gender', 'in_array', [':value', ['male', 'female']])
+          ->rule('info.telephone.mobile', 'not_empty')
+          ->rule('password', 'not_empty')
+          ->rule('email', 'not_empty')
+          ->rule('email', 'email');
+        //'mobile', 'first_name', 'last_name', 'username', 'email', 'password', 'confirmPassword', 'gender'
         if (static::$params['user_type'] === 'agent')
         {
             // validation rules for a agents.
             $validation->rule('company', 'is_array')
-                    ->rule('license', 'not_empty')
-                    ->rule('designation', 'not_empty');
+              ->rule('license', 'not_empty');
         }
 
         if ($validation->check())
         {
             static::$params['interested'] = 0;
-            static::$params['roles'] = [static::$params['user_type']];
             static::$params['status'] = 'pending';
             static::$params['first_name'] = static::ucfirst(static::$params['first_name']);
             static::$params['last_name'] = static::ucfirst(static::$params['last_name']);
@@ -969,16 +985,16 @@ class Controller_User extends Controller_Resource {
                 static::create_user_defaults($u);
                 $r = static::$params;
                 $this->admin_email(
-                        'New User REGISTERED!! Double Woots! Woots!', print_r(static::$params, TRUE)
+                  'New User REGISTERED!! Double Woots! Woots!', print_r(static::$params, TRUE)
                 );
                 Job::add($doc_id, $doc_type, $user_id);
                 $this->user_email(
-                        $r, 'We received your submission', Kohana::message('user/info', 'welcome_aboard')
+                  $r, 'We received your submission', Kohana::message('user/info', 'welcome_aboard')
                 );
 
-                $this->send_sms(
-                        'Welcome to Realtasia!', $params['info.telephone.mobile']
-                );
+//                $this->send_sms(
+//                  'Welcome to Realtasia!', $params['info.telephone.mobile']
+//                );
 
                 $this->data($u->stringify($u->as_array()));
             }
@@ -993,61 +1009,35 @@ class Controller_User extends Controller_Resource {
     }
 
     /**
-     * New user interested in beta. We store this info in a seperate Mongo
-     * Collection, not the user DB. But info here can aid in the registration
-     * process.
+     * This is supplementary to registration. Performed by an auto sumission
+     * client side to save the user type and possibly his corporate details.
      */
-    protected function beta_interest()
+    protected function save_details()
     {
-        $user       = Document::factory('user');
         $params     = static::extract_registration_values(static::$params);
         // validation rules for a regular user.
-        $validation = Validation::factory($params)
-                ->rule('first_name', 'alpha')
-                ->rule('first_name', 'not_empty')
-                ->rule('last_name', 'alpha')
-                ->rule('last_name', 'not_empty')
-                ->rule('username', 'not_empty')
-                ->rule('info.telephone.mobile', 'not_empty')
-                ->rule('message', 'not_empty')
-                ->rule('email', 'not_empty')
-                ->rule('email', 'email')
-                ->rule('email', 'email_domain');
+        $validation = Validation::factory($params)->rule('_id', 'not_empty');
+        if (static::$params['user_type'] === 'agent')
+        {
+            // validation rules for a agents.
+            $validation->rule('company', 'is_array')
+                       ->rule('license', 'not_empty');
+        }
 
         if ($validation->check())
         {
-            static::$params['interested'] = 1;
-            static::$params['first_name'] = static::ucfirst(static::$params['first_name']);
-            static::$params['last_name'] = static::ucfirst(static::$params['last_name']);
-            static::$params['name'] = static::$params['first_name'] . ' ' . static::$params['last_name'];
-            if ($n = Arr::get($params, 'info.telephone.mobile'))
-            {
-                static::$params['info']['telephone']['mobile'] = SMS::valid($n);
-            }
-            if ($user->create(static::$params))
-            {
-                $r = $user->as_array();
-                $this->admin_email(
-                        'New User Joined Beta!! Woots', print_r(static::$params, TRUE)
-                );
-                $this->user_email(
-                        $r, 'We received your submission', Kohana::message('user/info', 'thank_you_beta_email')
-                );
+            $u = Document::factory('user', $params['_id']);
+            $company = \Arr::get($params, 'company');
 
-                $this->send_sms(
-                        'Thank you for you submission', $params['info.telephone.mobile']
-                );
+            if($company)
+                $u->set('company', \Arr::get($params, 'company', []));
 
-                $this->data(['message' => 'Thank you for you submission']);
+            $u->set('license', \Arr::get($params, 'license'));
+            $u->set('designation', \Arr::get($params, 'designation'));
+            $u->set('roles', [\Arr::get($params, 'user_type')]);
+            $u->save();
 
-                $domain = explode('@', $user->email);
-                $dom    = array_pop($domain);
-                $d      = strtolower($dom);
-                if ($d === 'realtasia.com')
-                {
-                    return $this->create_admin_user($user);
-                }
-            }
+            return $this->data(['success' => 1]);
         }
         else
         {
@@ -1058,9 +1048,9 @@ class Controller_User extends Controller_Resource {
         return true;
     }
 
-    /*     * ***************************************************"*********************
+    /* *************************************************************************
      * Protected Actions - UPDATES
-     * *********************************************************************** */
+     * ************************************************************************/
 
     /**
      * Performs a password reset. Front-end app must authenticate user first
@@ -1114,30 +1104,29 @@ class Controller_User extends Controller_Resource {
     protected function update_info()
     {
         $params                     = static::extract_info_values(static::$params);
-        static::$params['message']          = \Arr::get(static::$params, 'aboutme');
+        static::$params['message'] = \Arr::get(static::$params, 'aboutme');
         $possible_fields            = array_fill_keys([
             'first_name', 'last_name', 'username', 'uri', 'email', 'name', 'designation', 'license', 'message'
-                ], null);
+          ], null);
         $possible_fields['company'] = [];
         $possible_fields['info']    = [];
         // a few checks, first the basic check.
         $validation                 = Validation::factory($params)
-                ->rule('first_name', 'alpha')
-                ->rule('first_name', 'not_empty')
-                ->rule('last_name', 'alpha')
-                ->rule('last_name', 'not_empty')
-                ->rule('username', 'not_empty')
-                ->rule('uri', 'not_empty')
-                ->rule('info.gender', 'in_array', [':value', ['male', 'female']])
-                ->rule('info.telephone.mobile', 'not_empty')
-                ->rule('info.birthday', 'not_empty')
-                ->rule('info.languages', 'is_array')
-                ->rule('info.achievements', 'is_array')
-                ->rule('info.education', 'is_array')
-                ->rule('info.social', 'is_array')
-                ->rule('email', 'not_empty')
-                ->rule('email', 'email')
-                ->rule('email', 'email_domain');
+          ->rule('first_name', 'alpha')
+          ->rule('first_name', 'not_empty')
+          ->rule('last_name', 'alpha')
+          ->rule('last_name', 'not_empty')
+          ->rule('username', 'not_empty')
+          ->rule('uri', 'not_empty')
+          ->rule('info.gender', 'in_array', [':value', ['male', 'female']])
+          ->rule('info.telephone.mobile', 'not_empty')
+          ->rule('info.birthday', 'not_empty')
+          ->rule('info.languages', 'is_array')
+          ->rule('info.achievements', 'is_array')
+          ->rule('info.education', 'is_array')
+          ->rule('info.social', 'is_array')
+          ->rule('email', 'not_empty')
+          ->rule('email', 'email');
 
 
         // first round
@@ -1290,49 +1279,48 @@ class Controller_User extends Controller_Resource {
         //die(print_r($params, true));
         $validation = Validation::factory($params)
 //                ->rule('notifications.email', 'email')
-//                ->rule('notifications.email', 'email_domain')
-                ->rule('notifications.likers.own_post', 'not_empty')
-                ->rule('notifications.likers.own_post', 'range', [':value', 0, 1])
-                ->rule('notifications.likers.other_posts', 'not_empty')
-                ->rule('notifications.likers.other_posts', 'range', [':value', 0, 1])
-                ->rule('notifications.likers.profile', 'range', [':value', 0, 1])
-                ->rule('notifications.likers.profile', 'not_empty')
-                ->rule('notifications.subscribers.own_post', 'range', [':value', 0, 1])
-                ->rule('notifications.subscribers.own_post', 'not_empty')
-                ->rule('notifications.subscribers.other_posts', 'range', [':value', 0, 1])
-                ->rule('notifications.subscribers.other_posts', 'not_empty')
-                ->rule('notifications.subscribers.profile', 'range', [':value', 0, 1])
-                ->rule('notifications.subscribers.profile', 'not_empty')
-                ->rule('notifications.comments.own_post', 'range', [':value', 0, 1])
-                ->rule('notifications.comments.own_post', 'not_empty')
-                ->rule('notifications.comments.other_posts', 'range', [':value', 0, 1])
-                ->rule('notifications.comments.other_posts', 'not_empty')
-                ->rule('notifications.mentions', 'range', [':value', 0, 1])
-                ->rule('notifications.mentions', 'not_empty')
-                ->rule('notifications.testimonial', 'range', [':value', 0, 1])
-                ->rule('notifications.testimonial', 'not_empty')
-                ->rule('notifications.wallpost', 'range', [':value', 0, 1])
-                ->rule('notifications.wallpost', 'not_empty')
-                ->rule('notifications.messages', 'range', [':value', 0, 1])
-                ->rule('notifications.messages', 'not_empty')
-                ->rule('notifications.pages', 'not_empty')
-                ->rule('notifications.pages', 'in_array', [':value', ['Daily', 'Weekly']])
-                ->rule('privacy.is', 'Privacy::valid', [':value', ':field', ':validation'])
-                ->rule('privacy.is', 'not_empty')
-                ->rule('privacy.personal.is', 'Privacy::valid', [':value', ':field', ':validation'])
-                ->rule('privacy.personal.is', 'not_empty')
-                ->rule('privacy.contacts.is', 'Privacy::valid', [':value', ':field', ':validation'])
-                ->rule('privacy.contacts.is', 'not_empty')
-                ->rule('privacy.subscriptions.is', 'Privacy::valid', [':value', ':field', ':validation'])
-                ->rule('privacy.subscriptions.is', 'not_empty')
-                ->rule('privacy.messages.is', 'Privacy::valid', [':value', ':field', ':validation'])
-                ->rule('privacy.messages.is', 'not_empty')
-                ->rule('privacy.mentions.is', 'Privacy::valid', [':value', ':field', ':validation'])
-                ->rule('privacy.mentions.is', 'not_empty')
-                ->rule('privacy.wallposts.others_posts.is', 'Privacy::valid', [':value', ':field', ':validation'])
-                ->rule('privacy.wallposts.others_posts.is', 'not_empty')
-                ->rule('privacy.wallposts.others_posts_visibility.is', 'Privacy::valid', [':value', ':field', ':validation'])
-                ->rule('privacy.wallposts.others_posts_visibility.is', 'not_empty');
+          ->rule('notifications.likers.own_post', 'not_empty')
+          ->rule('notifications.likers.own_post', 'range', [':value', 0, 1])
+          ->rule('notifications.likers.other_posts', 'not_empty')
+          ->rule('notifications.likers.other_posts', 'range', [':value', 0, 1])
+          ->rule('notifications.likers.profile', 'range', [':value', 0, 1])
+          ->rule('notifications.likers.profile', 'not_empty')
+          ->rule('notifications.subscribers.own_post', 'range', [':value', 0, 1])
+          ->rule('notifications.subscribers.own_post', 'not_empty')
+          ->rule('notifications.subscribers.other_posts', 'range', [':value', 0, 1])
+          ->rule('notifications.subscribers.other_posts', 'not_empty')
+          ->rule('notifications.subscribers.profile', 'range', [':value', 0, 1])
+          ->rule('notifications.subscribers.profile', 'not_empty')
+          ->rule('notifications.comments.own_post', 'range', [':value', 0, 1])
+          ->rule('notifications.comments.own_post', 'not_empty')
+          ->rule('notifications.comments.other_posts', 'range', [':value', 0, 1])
+          ->rule('notifications.comments.other_posts', 'not_empty')
+          ->rule('notifications.mentions', 'range', [':value', 0, 1])
+          ->rule('notifications.mentions', 'not_empty')
+          ->rule('notifications.testimonial', 'range', [':value', 0, 1])
+          ->rule('notifications.testimonial', 'not_empty')
+          ->rule('notifications.wallpost', 'range', [':value', 0, 1])
+          ->rule('notifications.wallpost', 'not_empty')
+          ->rule('notifications.messages', 'range', [':value', 0, 1])
+          ->rule('notifications.messages', 'not_empty')
+          ->rule('notifications.pages', 'not_empty')
+          ->rule('notifications.pages', 'in_array', [':value', ['Daily', 'Weekly']])
+          ->rule('privacy.is', 'Privacy::valid', [':value', ':field', ':validation'])
+          ->rule('privacy.is', 'not_empty')
+          ->rule('privacy.personal.is', 'Privacy::valid', [':value', ':field', ':validation'])
+          ->rule('privacy.personal.is', 'not_empty')
+          ->rule('privacy.contacts.is', 'Privacy::valid', [':value', ':field', ':validation'])
+          ->rule('privacy.contacts.is', 'not_empty')
+          ->rule('privacy.subscriptions.is', 'Privacy::valid', [':value', ':field', ':validation'])
+          ->rule('privacy.subscriptions.is', 'not_empty')
+          ->rule('privacy.messages.is', 'Privacy::valid', [':value', ':field', ':validation'])
+          ->rule('privacy.messages.is', 'not_empty')
+          ->rule('privacy.mentions.is', 'Privacy::valid', [':value', ':field', ':validation'])
+          ->rule('privacy.mentions.is', 'not_empty')
+          ->rule('privacy.wallposts.others_posts.is', 'Privacy::valid', [':value', ':field', ':validation'])
+          ->rule('privacy.wallposts.others_posts.is', 'not_empty')
+          ->rule('privacy.wallposts.others_posts_visibility.is', 'Privacy::valid', [':value', ':field', ':validation'])
+          ->rule('privacy.wallposts.others_posts_visibility.is', 'not_empty');
 
 
         if ($validation->check())
@@ -1356,42 +1344,41 @@ class Controller_User extends Controller_Resource {
     {
         $params     = static::extract_notification_values(static::$params);
         $validation = Validation::factory($params)
-                ->rule('email', 'email')
-                ->rule('email', 'email_domain')
-                ->rule('likers.own_post', 'not_empty')
-                ->rule('likers.own_post', 'range', [':value', 0, 1])
-                ->rule('likers.other_post', 'not_empty')
-                ->rule('likers.other_post', 'range', [':value', 0, 1])
-                ->rule('likers.profile', 'range', [':value', 0, 1])
-                ->rule('likers.profile', 'not_empty')
-                ->rule('subscribers.own_post', 'range', [':value', 0, 1])
-                ->rule('subscribers.own_post', 'not_empty')
-                ->rule('subscribers.other_post', 'range', [':value', 0, 1])
-                ->rule('subscribers.other_post', 'not_empty')
-                ->rule('subscribers.profile', 'range', [':value', 0, 1])
-                ->rule('subscribers.profile', 'not_empty')
-                ->rule('comments.own_post', 'range', [':value', 0, 1])
-                ->rule('comments.own_post', 'not_empty')
-                ->rule('comments.other_post', 'range', [':value', 0, 1])
-                ->rule('comments.other_post', 'not_empty')
-                ->rule('mentions', 'range', [':value', 0, 1])
-                ->rule('mentions', 'not_empty')
-                ->rule('testimonials', 'range', [':value', 0, 1])
-                ->rule('testimonials', 'not_empty')
-                ->rule('wallpost', 'range', [':value', 0, 1])
-                ->rule('wallpost', 'not_empty')
-                ->rule('messages', 'range', [':value', 0, 1])
-                ->rule('messages', 'not_empty')
-                ->rule('subscriptions', 'not_empty')
-                ->rule('subscriptions', 'in_array', [':value', ['daily', 'weekly']]);
+          ->rule('email', 'email')
+          ->rule('likers.own_post', 'not_empty')
+          ->rule('likers.own_post', 'range', [':value', 0, 1])
+          ->rule('likers.other_post', 'not_empty')
+          ->rule('likers.other_post', 'range', [':value', 0, 1])
+          ->rule('likers.profile', 'range', [':value', 0, 1])
+          ->rule('likers.profile', 'not_empty')
+          ->rule('subscribers.own_post', 'range', [':value', 0, 1])
+          ->rule('subscribers.own_post', 'not_empty')
+          ->rule('subscribers.other_post', 'range', [':value', 0, 1])
+          ->rule('subscribers.other_post', 'not_empty')
+          ->rule('subscribers.profile', 'range', [':value', 0, 1])
+          ->rule('subscribers.profile', 'not_empty')
+          ->rule('comments.own_post', 'range', [':value', 0, 1])
+          ->rule('comments.own_post', 'not_empty')
+          ->rule('comments.other_post', 'range', [':value', 0, 1])
+          ->rule('comments.other_post', 'not_empty')
+          ->rule('mentions', 'range', [':value', 0, 1])
+          ->rule('mentions', 'not_empty')
+          ->rule('testimonials', 'range', [':value', 0, 1])
+          ->rule('testimonials', 'not_empty')
+          ->rule('wallpost', 'range', [':value', 0, 1])
+          ->rule('wallpost', 'not_empty')
+          ->rule('messages', 'range', [':value', 0, 1])
+          ->rule('messages', 'not_empty')
+          ->rule('subscriptions', 'not_empty')
+          ->rule('subscriptions', 'in_array', [':value', ['daily', 'weekly']]);
 
         //var_dump($validation->check());
         //die;
         if ($validation->check())
         {
             if ($notif = static::$model->update_notifications(
-                    static::$params, $this->request->param('id')
-            ))
+              static::$params, $this->request->param('id')
+              ))
             {
                 return $this->data($notif);
             }
@@ -1410,11 +1397,11 @@ class Controller_User extends Controller_Resource {
     protected function update_billing_settings()
     {
         $validation = Validation::factory(static::$params)
-                ->rule('mode', 'not_empty')
-                ->rule('mode', 'in_array', [':value', ['cash', 'cheque', 'autopay']])
-                ->rule('frequency', 'not_empty')
-                ->rule('frequency', 'in_array', [':value', ['monthly', 'yearly']])
-                ->rule('plan_id', 'not_empty');
+          ->rule('mode', 'not_empty')
+          ->rule('mode', 'in_array', [':value', ['cash', 'cheque', 'autopay']])
+          ->rule('frequency', 'not_empty')
+          ->rule('frequency', 'in_array', [':value', ['monthly', 'yearly']])
+          ->rule('plan_id', 'not_empty');
 
         if ($validation->check())
         {
@@ -1537,7 +1524,7 @@ class Controller_User extends Controller_Resource {
                 $to     = $result['mobile'];
             }
         }
-        $sms    = SMS::factory($to, $message);
+        $sms = SMS::factory($to, $message);
         return $this->data($sms->send());
     }
 
@@ -1577,7 +1564,7 @@ class Controller_User extends Controller_Resource {
                 $to     = $result['email'];
             }
         }
-        $name   = Arr::get(static::$params, 'name');
+        $name = Arr::get(static::$params, 'name');
 
 
         $this->user_email(['email' => $to, 'name'  => $name], $subject, $message);
@@ -1694,23 +1681,23 @@ class Controller_User extends Controller_Resource {
             'header_plain'  => $subject,
             'message_plain' => $message,
             'message'       => View::factory('emails/content/standard')
-                    ->set('content_header', "<h3>$subject</h3>")
-                    ->set('content_message', $message)
+              ->set('content_header', "<h3>$subject</h3>")
+              ->set('content_message', $message)
         ];
 
         $view = View::factory('emails/spam_mail')
-                ->set('title', $content['header_plain'])
-                ->set('teaser', strip_tags($content['header_plain']))
-                ->set('content_view', $content['message']);
+          ->set('title', $content['header_plain'])
+          ->set('teaser', strip_tags($content['header_plain']))
+          ->set('content_view', $content['message']);
 
         $plainview = View::factory('emails/content/plaintext_generic')
-                ->set('content_header', $content['header_plain'])
-                ->set('content_message', $content['message_plain']);
+          ->set('content_header', $content['header_plain'])
+          ->set('content_message', $content['message_plain']);
 
         $email = Email::factory($content['header_plain'], $plainview)
-                ->message($view, 'text/html')
-                ->to($recipient['email'], $recipient['name'])
-                ->from('[REDACTED]', 'Realtasia Beta Program');
+          ->message($view, 'text/html')
+          ->to($recipient['email'], $recipient['name'])
+          ->from('[REDACTED]', 'Realtasia Beta Program');
 
         return $email->send();
     }
@@ -1732,23 +1719,23 @@ class Controller_User extends Controller_Resource {
             'header_plain'  => $subject,
             'message_plain' => $message,
             'message'       => View::factory('emails/content/standard')
-                    ->set('content_header', "<h3>$subject</h3>")
-                    ->set('content_message', "<pre>$message</pre>")
+              ->set('content_header', "<h3>$subject</h3>")
+              ->set('content_message', "<pre>$message</pre>")
         );
 
         $view = View::factory('emails/admin')
-                ->set('title', $content['header_plain'])
-                ->set('teaser', strip_tags($content['header_plain']))
-                ->set('content_view', $content['message']);
+          ->set('title', $content['header_plain'])
+          ->set('teaser', strip_tags($content['header_plain']))
+          ->set('content_view', $content['message']);
 
         $plainview = View::factory('emails/content/plaintext_generic')
-                ->set('content_header', $content['header_plain'])
-                ->set('content_message', $content['message_plain']);
+          ->set('content_header', $content['header_plain'])
+          ->set('content_message', $content['message_plain']);
 
         $email = Email::factory($content['header_plain'], $plainview)
-                ->message($view, 'text/html')
-                ->to('[REDACTED]', 'RealtAsia Administrators')
-                ->from('[REDACTED]', 'SiRyA');
+          ->message($view, 'text/html')
+          ->to('[REDACTED]', 'RealtAsia Administrators')
+          ->from('[REDACTED]', 'SiRyA');
 
         return $email->send();
     }
@@ -1846,10 +1833,10 @@ class Controller_User extends Controller_Resource {
         $fourD        = str_pad(rand(0, pow(10, 4) - 1), 4, '0', STR_PAD_LEFT);
 
         if ($admin->load([
-                    '_id'   => $id,
-                    'roles' => [ '$in' => ['admin']]], [
-                    '_id'  => 1, 'name' => 1
-                ]))
+              '_id'   => $id,
+              'roles' => [ '$in' => ['admin']]], [
+              '_id'  => 1, 'name' => 1
+          ]))
         {
             $admin->session = ['token' => $fourD, 'type'  => $type];
             if ($admin->save())
@@ -2013,8 +2000,8 @@ class Controller_User extends Controller_Resource {
         $return['info.birthday']         = Arr::path($array, 'info.birthday');
         $return['info.languages']        = Arr::path($array, 'info.languages');
         $return['info.achievements']     = Arr::path($array, 'info.achievements');
-        $return['info.education']      = Arr::path($array, 'info.education');
-        $return['info.social']         = Arr::path($array, 'info.social');
+        $return['info.education']        = Arr::path($array, 'info.education');
+        $return['info.social']           = Arr::path($array, 'info.social');
 
         return Arr::merge($return, $array);
     }
@@ -2023,6 +2010,7 @@ class Controller_User extends Controller_Resource {
     {
         $return = [];
 
+        $return['roles']                 = [Arr::get($array, 'user_type')];
         $return['info.gender']           = Arr::path($array, 'info.gender');
         $return['info.telephone.mobile'] = Arr::path($array, 'info.telephone.mobile');
         $return['info.birthday']         = Arr::path($array, 'info.birthday');
@@ -2048,4 +2036,5 @@ class Controller_User extends Controller_Resource {
             return static::create_user_defaults($user);
         }
     }
+
 }

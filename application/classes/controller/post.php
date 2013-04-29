@@ -1,7 +1,9 @@
-<?php defined('SYSPATH') or die('No direct script access.');
+<?php
+
+defined('SYSPATH') or die('No direct script access.');
 
 /**
- * Post is one of RTA's core controllers. It handles all posting functionality for post types. Albums,
+ * Post is one of RTA's core controllers. It handles all functionality for post types. Albums,
  * attachments, status updates, wallposts etc. also creates comments for a given post.
  *
  * @author Jason Nathan
@@ -201,7 +203,7 @@ class Controller_Post extends Controller_Resource {
         $ticker->update([
             'document_id' => Document::check_id($this->request->param('id')),
             'user_id'     => Document::check_id(static::$user_id)
-                ], [
+          ], [
             '$set' => ['visibility' => 'hidden']
         ]);
 
@@ -220,7 +222,7 @@ class Controller_Post extends Controller_Resource {
         $ticker->update([
             'document_id' => Document::check_id($this->request->param('id')),
             'user_id'     => Document::check_id(static::$user_id)
-                ], [
+          ], [
             '$set' => ['visibility' => 'visible']
         ]);
 
@@ -272,9 +274,9 @@ class Controller_Post extends Controller_Resource {
         {
             $pid = Document::check_id($params['post']['_id']);
             Job::add($pid, 'post', static::$user_id)->comment($c->_id);
-            if(Ticker::factory($pid)->update_once([
-                'user_id' => Document::check_id(static::$user_id)
-            ], 2))
+            if (Ticker::factory($pid)->update_once([
+                  'user_id' => Document::check_id(static::$user_id)
+                ], 2))
             {
                 Ticker::add($pid, 'update');
             }
@@ -306,78 +308,110 @@ class Controller_Post extends Controller_Resource {
      */
     public function action_message()
     {
-        if (!parent::logged_in())
-            return $this->error('invalid_request');
+        // simple checks that return errors
+        switch (true)
+        {
+            // if no logged in user
+            case!parent::logged_in():
+            // if no to id
+            case!\Arr::get(static::$params, 'to_id'):
+            // if both sender & recipient is the same person
+            case (string) static::$user_id === (string) \Arr::get(static::$params, 'to_id', ''):
+                return $this->error('invalid_request');
+        }
 
         // set up all needed documents
-        $post = Document::factory('post', $this->request->param('id'));
-        $post->load(null, ['page' => 1, 'listing' => 1, 'type' => 1, 'user' => 1]);
+        $post = Document::factory('post');
+        $summary = null;
+
+        //if there is an post id.
+        if ($this->request->param('id'))
+        {
+            $post->load($this->request->param('id'), [
+                'page'    => 1,
+                'listing' => 1,
+                'type'    => 1,
+                'user'    => 1,
+                'uri'     => 1
+            ]);
+            // make the summary
+            $summary = static::construct_message_summary($post);
+        }
 
         $from = Document::factory('user', static::$user_id);
         $to   = Document::factory('user', static::$params['to_id']);
         $in   = [
             '$in' => [
-                Document::check_id(static::$params['to_id']),
-                Document::check_id(static::$user_id),
+                Document::check_id($from->_id),
+                Document::check_id($to->_id),
             ]
         ];
         // query to find conversation
         $conv = Collection::factory('post')->find([
-            'to._id' => $in, 'user._id' => $in
+            'to._id'   => $in, 'user._id' => $in
         ]);
 
+        $fields = ['name' => 1, 'uri'  => 1, '_id' => 1];
+        // load both users in question
+        $from->load(null, $fields);
+        $to->load(null, $fields);
+
         // check if we have a conversation, if not create one
-        if(!$conv->hasNext())
+        if (!$conv->hasNext())
         {
-            $fields = ['name' => 1, 'uri' => 1];
-            // load both users in question
-            $from->load(null, $fields);
-            $to->load(null, $fields);
             $conv = $this->create_conversation([
-                'to' => $to->as_array(),
+                'to'   => $to->as_array(),
                 'user' => $from->as_array(),
             ]);
-
-            $to->inc('counts.conversations');
-            $user->inc('counts.conversations');
         }
-
-        // make the summary
-        $summary = static::construct_message_summary($post);
+        else
+        {
+            $conv = $conv->getNext();
+        }
 
         $params = static::format(static::$params);
 
+        foreach([$to, $from, $post] as $v)
+        {
+            if(isset($v['_id']))
+                $v['_id'] = Document::check_id($v['_id']);
+        }
+
         $message = [
-            'to'   => $to->as_array(),
-            'user' => $from->as_array(),
-            'post' => $post->as_array(),
-            'conversation' => [ '_id' => $conv->_id],
-            'summary' => $summary
+            'to'           => $to->as_array(),
+            'user'         => $from->as_array(),
+            'post'         => $post->as_array(),
+            'status'       => 'active',
+            'conversation' => [ '_id' => Document::check_id($conv->_id)],
+            'message'      => \Arr::get($params, 'message'),
+            'excerpt'      => \Arr::get($params, 'excerpt'),
+            'summary'      => $summary
         ];
 
         $c = Document::factory('comment', null, static::$user_id)
-                ->create_message($message);
+             ->create_message($message);
+
         if ($c)
         {
             $to->inc('counts.newMessages');
             $to->save();
-            $user->save();
+            $from->save();
 
             $conv->set('unread', $to->_id);
+            $conv->set('lastMessage', $from->as_array());
             $conv->set('message', $c->message);
             $conv->set('excerpt', $c->excerpt);
             $conv->inc('counts.messages');
             $conv->save();
 
             Job::add($params['conversation']['_id'], 'post', static::$user_id)
-                    ->private_message($c['_id']);
+              ->private_message($c->_id);
 
             return $this->data($c);
         }
 
         return $this->error('server_error');
     }
-
 
     /**
      * Creates a feedback type post.
@@ -436,8 +470,8 @@ class Controller_Post extends Controller_Resource {
         static::$params['object_type'] = 'comment';
 
         $data = Document::factory('interaction')
-                ->collection()
-                ->likers(static::$params);
+          ->collection()
+          ->likers(static::$params);
 
         return $this->data($data);
     }
@@ -467,8 +501,8 @@ class Controller_Post extends Controller_Resource {
         static::$params['object_type'] = 'post';
 
         $data = Document::factory('interaction')
-                ->collection()
-                ->subscribers(static::$params);
+          ->collection()
+          ->subscribers(static::$params);
 
         return $this->data($data);
     }
@@ -628,9 +662,9 @@ class Controller_Post extends Controller_Resource {
     protected function find_unique()
     {
         $validation = Validation::factory(static::$params)
-                ->rule('unit', 'not_empty')
-                ->rule('listing_type', 'not_empty')
-                ->rule('page_id', 'not_empty');
+          ->rule('unit', 'not_empty')
+          ->rule('listing_type', 'not_empty')
+          ->rule('page_id', 'not_empty');
 
         if ($validation->check())
         {
@@ -696,8 +730,8 @@ class Controller_Post extends Controller_Resource {
     /**
      * Testimonials are very similar to regular posts accept that this method sets the type to testimonial and
      * ensures that the default status is pending  unless this is an update. Upon successful creation,
-     *   - increase the receipient count for testimonials received.
-     *   - increase the writer's count for testimonials written.<code>
+     *   - increases the receipient count for testimonials received.
+     *   - increases the writer's count for testimonials written.<code>
      * POST "/post/update/create_testimonial"</code>
      * with the following params
      * <code>
@@ -727,21 +761,21 @@ class Controller_Post extends Controller_Resource {
             return $this->error('invalid_request');
 
         static::$params['privacy.is'] = Arr::path(static::$params, 'privacy.is');
-        if($update)
+        if ($update)
         {
             $validation = Validation::factory(static::$params)
-                    ->rule('status', 'not_empty');
+              ->rule('status', 'not_empty');
         }
         else
         {
             $validation = Validation::factory(static::$params)
-                    ->rule('message', 'not_empty')
-                    ->rule('privacy.is', 'Privacy::valid', [
-                        ':value', ':field', ':validation'
-                    ])
-                    ->rule('page', 'not_empty')
-                    ->rule('page', 'Controller_User::valid', [':value', ':field', ':validation'])
-                    ->rule('page_parent', 'Controller_Page::valid', [':value', ':field', ':validation']);
+              ->rule('message', 'not_empty')
+              ->rule('privacy.is', 'Privacy::valid', [
+                  ':value', ':field', ':validation'
+              ])
+              ->rule('page', 'not_empty')
+              ->rule('page', 'Controller_User::valid', [':value', ':field', ':validation'])
+              ->rule('page_parent', 'Controller_Page::valid', [':value', ':field', ':validation']);
         }
 
         $defaults = [
@@ -762,7 +796,7 @@ class Controller_Post extends Controller_Resource {
 
                         $t->update(['user_id' => $post->page['_id']]);
 
-                        if($t->update_once(['user_id' => Document::check_id(static::$user_id)]))
+                        if ($t->update_once(['user_id' => Document::check_id(static::$user_id)]))
                         {
                             Ticker::add($post->_id, 'update');
                         }
@@ -779,7 +813,7 @@ class Controller_Post extends Controller_Resource {
                 static::$params = static::format(static::$params);
 
                 $params = Arr::merge(static::$params, $defaults);
-                if ($post = static::$model->create($params))
+                if ($post   = static::$model->create($params))
                 {
                     $t = Ticker::factory($post);
                     Job::add($post->_id, 'post', static::$user_id)->testimonial($post->page['_id']);
@@ -817,27 +851,27 @@ class Controller_Post extends Controller_Resource {
         static::$params['user']['_id'] = $id ? $id : static::$user_id;
 
         $validation = Validation::factory(static::$params)
-                ->rule('type', 'not_empty')
-                ->rule('type', 'in_array', [':value', ['Rent', 'Sale']])
-                ->rule('price', 'not_empty')
-                ->rule('price', 'numeric')
-                ->rule('rooms', 'not_empty')
-                ->rule('rooms', 'numeric')
-                ->rule('built_size', 'not_empty')
-                ->rule('built_size', 'numeric')
-                ->rule('property_type', 'not_empty')
-                ->rule('land_size', 'numeric')
-                ->rule('address', 'not_empty')
-                ->rule('page', 'not_empty')
-                ->rule('page', 'Controller_Page::valid', [':value', ':field', ':validation'])
-                ->rule('page_parent', 'Controller_Page::valid', [':value', ':field', ':validation']);
+          ->rule('type', 'not_empty')
+          ->rule('type', 'in_array', [':value', ['Rent', 'Sale']])
+          ->rule('price', 'not_empty')
+          ->rule('price', 'numeric')
+          ->rule('rooms', 'not_empty')
+          ->rule('rooms', 'numeric')
+          ->rule('built_size', 'not_empty')
+          ->rule('built_size', 'numeric')
+          ->rule('property_type', 'not_empty')
+          ->rule('land_size', 'numeric')
+          ->rule('address', 'not_empty')
+          ->rule('page', 'not_empty')
+          ->rule('page', 'Controller_Page::valid', [':value', ':field', ':validation'])
+          ->rule('page_parent', 'Controller_Page::valid', [':value', ':field', ':validation']);
 
         if ($validation->check())
         {
             static::$params = static::format(static::$params);
             $listing       = \Arr::extract(static::$params, [
-                        'type', 'price', 'rooms', 'built_size', 'land_size', 'cov', 'valuation', 'leaseSpace', 'cobroke', 'unit', 'property_type', 'baths'
-                    ]);
+                  'type', 'price', 'rooms', 'built_size', 'land_size', 'cov', 'valuation', 'leaseSpace', 'cobroke', 'unit', 'property_type', 'baths'
+            ]);
             $page          = \Arr::get(static::$params, 'page');
             $unitIsAddress = \Arr::get(static::$params, 'unitIsAddress');
             if ('Private Landed' === $page['subtype'] && $unitIsAddress)
@@ -850,13 +884,13 @@ class Controller_Post extends Controller_Resource {
             }
 
             $params = \Arr::merge([
-                        'type'    => 'listing', 'status'  => 'active', 'privacy' => ['is' => 'PUBLIC']
-                            ], \Arr::extract(static::$params, [
-                                'message', 'address', 'page', 'page_parent', 'excerpt', 'showAddress', 'picture'
-                            ]), [
-                        'listing'    => $listing,
-                        'addedMedia' => \Arr::map("Document::check_id", \Arr::get(static::$params, 'addedMedia', [])),
-                    ]);
+                  'type'    => 'listing', 'status'  => 'active', 'privacy' => ['is' => 'PUBLIC']
+                ], \Arr::extract(static::$params, [
+                    'message', 'address', 'page', 'page_parent', 'excerpt', 'showAddress', 'picture'
+                ]), [
+                  'listing'    => $listing,
+                  'addedMedia' => \Arr::map("Document::check_id", \Arr::get(static::$params, 'addedMedia', [])),
+            ]);
 
             $params['counts']['attachments'] = count($params['addedMedia']);
 
@@ -888,7 +922,7 @@ class Controller_Post extends Controller_Resource {
                 $t = Ticker::factory($post);
                 if ($update)
                 {
-                    if($t->update_once(['user_id' => Document::check_id(static::$user_id)], 1))
+                    if ($t->update_once(['user_id' => Document::check_id(static::$user_id)], 1))
                     {
                         Ticker::add($post->_id, 'update');
                     }
@@ -947,13 +981,13 @@ class Controller_Post extends Controller_Resource {
         static::$params['page']['type'] = 'user';
 
         $validation = Validation::factory(static::$params)
-                ->rule('message', 'not_empty')
-                ->rule('privacy.is', 'Privacy::valid', [
-                    ':value', ':field', ':validation'
-                ])
-                ->rule('page', 'not_empty')
-                ->rule('page', 'Controller_User::valid', [':value', ':field', ':validation'])
-                ->rule('page_parent', 'Controller_Page::valid', [':value', ':field', ':validation']);
+          ->rule('message', 'not_empty')
+          ->rule('privacy.is', 'Privacy::valid', [
+              ':value', ':field', ':validation'
+          ])
+          ->rule('page', 'not_empty')
+          ->rule('page', 'Controller_User::valid', [':value', ':field', ':validation'])
+          ->rule('page_parent', 'Controller_Page::valid', [':value', ':field', ':validation']);
 
         $defaults = [
             'type'   => 'wallpost', 'status' => 'active'
@@ -1025,13 +1059,13 @@ class Controller_Post extends Controller_Resource {
         static::$params['privacy.is'] = Arr::path(static::$params, 'privacy.is');
 
         $validation = Validation::factory(static::$params)
-                ->rule('message', 'not_empty')
-                ->rule('privacy.is', 'Privacy::valid', [
-                    ':value', ':field', ':validation'
-                ])
-                ->rule('page', 'not_empty')
-                ->rule('page', 'Controller_Page::valid', [':value', ':field', ':validation'])
-                ->rule('page_parent', 'Controller_Page::valid', [':value', ':field', ':validation']);
+          ->rule('message', 'not_empty')
+          ->rule('privacy.is', 'Privacy::valid', [
+              ':value', ':field', ':validation'
+          ])
+          ->rule('page', 'not_empty')
+          ->rule('page', 'Controller_Page::valid', [':value', ':field', ':validation'])
+          ->rule('page_parent', 'Controller_Page::valid', [':value', ':field', ':validation']);
 
         $defaults = [
             'type'   => 'post', 'status' => 'active'
@@ -1118,17 +1152,17 @@ class Controller_Post extends Controller_Resource {
         $data['page_parent'] = $lib;
 
         $args                     = \Arr::merge([
-                    'name'        => '',
-                    'excerpt'     => '',
-                    'message'     => '',
-                    'picture'     => '',
-                    'page'        => [],
-                    'user'        => [],
-                    'page_parent' => [],
-                    'mediainfo'   => [],
-                    'subtype'     => '',
-                    'type'        => 'attachment',
-                        ], $data);
+              'name'        => '',
+              'excerpt'     => '',
+              'message'     => '',
+              'picture'     => '',
+              'page'        => [],
+              'user'        => [],
+              'page_parent' => [],
+              'mediainfo'   => [],
+              'subtype'     => '',
+              'type'        => 'attachment',
+            ], $data);
         $debug['attachment']      = $args;
         $fh                       = fopen('debug.html', 'a');
         fwrite($fh, "<pre>" . print_r($debug, true) . "</pre>");
@@ -1164,7 +1198,7 @@ class Controller_Post extends Controller_Resource {
         $p = Arr::get(static::$params, 'create_album', []);
         if (!is_array($p))
         {
-            $p      = json_decode($p, true);
+            $p = json_decode($p, true);
         }
         $params = static::format($p);
         if (!is_array($params))
@@ -1179,14 +1213,14 @@ class Controller_Post extends Controller_Resource {
         $lib['_id']          = Document::check_id($lib['_id']);
 
         $args = \Arr::overwrite([
-                    'name'    => '',
-                    'excerpt' => '',
-                    'message' => '',
-                    'user'    => ['_id'  => Document::check_id($user->_id), 'name' => $user->name],
-                    'page'    => $lib,
-                    'type'    => 'album',
-                    'privacy' => ['is' => 'PUBLIC'],
-                        ], $params);
+              'name'    => '',
+              'excerpt' => '',
+              'message' => '',
+              'user'    => ['_id'  => Document::check_id($user->_id), 'name' => $user->name],
+              'page'    => $lib,
+              'type'    => 'album',
+              'privacy' => ['is' => 'PUBLIC'],
+            ], $params);
 
         if ($album->create_album($args))
         {
@@ -1202,9 +1236,9 @@ class Controller_Post extends Controller_Resource {
         return $model ? false : $this->error('invalid_request');
     }
 
-    /*****************************************************"*********************
+    /*     * ***************************************************"*********************
      * Protected Actions - UPDATES
-     ************************************************************************** */
+     * ************************************************************************* */
 
     /**
      * Update a listing. Checks if there is an id and calls the create_listing
@@ -1263,14 +1297,14 @@ class Controller_Post extends Controller_Resource {
             $params['privacy']['is'] = 'PUBLIC';
         }
         $args = \Arr::overwrite([
-            'name'    => '',
-            'excerpt' => '',
-            'message' => '',
-            'user'    => [],
-            'privacy' => [],
-            'page'    => [],
-            'type'    => 'album'
-        ], $params);
+              'name'    => '',
+              'excerpt' => '',
+              'message' => '',
+              'user'    => [],
+              'privacy' => [],
+              'page'    => [],
+              'type'    => 'album'
+            ], $params);
 
         $a               = Document::factory('post', $id);
         $a->current_user = $user;
@@ -1300,7 +1334,7 @@ class Controller_Post extends Controller_Resource {
         $params = static::format(static::$params);
         if (!empty($params['name']))
         {
-            $params['name']        = trim(Security::xss_clean($params['name']));
+            $params['name'] = trim(Security::xss_clean($params['name']));
         }
         $user                  = (object) $this->get_user();
         $page                  = Arr::get($_REQUEST, 'album_id');
@@ -1317,14 +1351,14 @@ class Controller_Post extends Controller_Resource {
         }
 
         $args            = \Arr::merge([
-                    'excerpt'     => null,
-                    'message'     => null,
-                    'user'        => [],
-                    'privacy'     => [],
-                    'page'        => [],
-                    'page_parent' => [],
-                    'type'        => 'attachment',
-                        ], $params);
+              'excerpt'     => null,
+              'message'     => null,
+              'user'        => [],
+              'privacy'     => [],
+              'page'        => [],
+              'page_parent' => [],
+              'type'        => 'attachment',
+            ], $params);
         //die(json_encode($args));
         $a               = Document::factory('post', $id);
         $a->current_user = $user;
@@ -1412,8 +1446,8 @@ class Controller_Post extends Controller_Resource {
     {
         $page_link = HTML::anchor(\Arr::get($post->page, 'uri'), \Arr::get($post->page, 'name'));
         $post_link = HTML::anchor($post->uri, $post->type);
-        $created = Date::fuzzy_span($post->_id->getTimestamp());
-        if($post->type === 'listing')
+        $created   = Date::fuzzy_span($post->_id->getTimestamp());
+        if ($post->type === 'listing')
         {
             $addon = "for {$post->listing['type']}";
         }
@@ -1457,9 +1491,9 @@ class Controller_Post extends Controller_Resource {
         $objects[] = $file ? ['Key' => $uid . '/' . $file] : [];
 
         return $array ? array_filter($objects) : AmazonSDK::s3()->deleteObjects([
-                    'Bucket'  => RT::BUCKET,
-                    'Objects' => array_filter($objects),
-                ]);
+              'Bucket'  => RT::BUCKET,
+              'Objects' => array_filter($objects),
+        ]);
     }
 
     /**
@@ -1472,8 +1506,8 @@ class Controller_Post extends Controller_Resource {
     {
         $objects  = $final    = [];
         $attaches = Collection::factory('post')
-                ->find(['page._id' => Document::check_id($album['_id'])])
-                ->fields(['user', 'link', 'picture']);
+          ->find(['page._id' => Document::check_id($album['_id'])])
+          ->fields(['user', 'link', 'picture']);
 
         while ($attaches->hasNext())
         {
@@ -1492,9 +1526,9 @@ class Controller_Post extends Controller_Resource {
             }
 
             return AmazonSDK::s3()->deleteObjects([
-                        'Bucket'  => RT::BUCKET,
-                        'Objects' => array_filter($final),
-                    ]);
+                  'Bucket'  => RT::BUCKET,
+                  'Objects' => array_filter($final),
+            ]);
         }
 
         return true;
@@ -1756,8 +1790,8 @@ class Controller_Post extends Controller_Resource {
         ];
 
         return Collection::factory('post')->update($query, [
-                    '$set' => ['listing_id' => $post->_id]
-                        ], ['multiple' => true]);
+              '$set' => ['listing_id' => $post->_id]
+            ], ['multiple' => true]);
     }
 
     protected static function listing_keywords($params)
@@ -1777,8 +1811,8 @@ class Controller_Post extends Controller_Resource {
         $params['parent']  = \Arr::path($params, 'page_parent.name');
 
         return \Arr::map('strtolower', \Arr::extract($params, [
-                            'address', 'subtype', 'name', 'parent'
-                        ]));
+                'address', 'subtype', 'name', 'parent'
+        ]));
     }
 
 }
