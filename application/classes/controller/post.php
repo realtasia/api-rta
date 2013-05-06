@@ -1490,7 +1490,7 @@ class Controller_Post extends Controller_Resource {
 
         $objects[] = $file ? ['Key' => $uid . '/' . $file] : [];
 
-        return $array ? array_filter($objects) : AmazonSDK::s3()->deleteObjects([
+        return $array ? array_filter($objects) : ASDK::s3()->deleteObjects([
               'Bucket'  => RT::BUCKET,
               'Objects' => array_filter($objects),
         ]);
@@ -1525,7 +1525,7 @@ class Controller_Post extends Controller_Resource {
                 $final[] = ["Key" => $v];
             }
 
-            return AmazonSDK::s3()->deleteObjects([
+            return ASDK::s3()->deleteObjects([
                   'Bucket'  => RT::BUCKET,
                   'Objects' => array_filter($final),
             ]);
