@@ -73,7 +73,7 @@ abstract class Controller_Resource extends Controller_Abstract{
                 return $this->request->action('continue');
             }
         }
-        Debug::log('No token found');
+        Debug::log("No Token Found: " . implode(" \n", static::$params));
         return $this->request->action('continue');
     }
 
