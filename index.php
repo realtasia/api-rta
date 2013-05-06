@@ -157,7 +157,7 @@ require APPPATH . 'bootstrap' . EXT;
           ->send_headers()
           ->body($data);
 
-        return exec("php /home/jason/www/rta.casa.net/index.php --uri=stats/check");
+        //return exec("php /home/jason/www/rta.casa.net/index.php --uri=stats/check");
     }
 //}
 
