@@ -343,7 +343,7 @@ class Controller_User extends Controller_Resource {
           ->find($params)
           ->limit(\Arr::get(static::$params, 'limit', 11))
           ->skip(\Arr::get(static::$params, 'skip', 0))
-          ->sort_desc('_id');
+          ->sort_asc('_id');
 
         while ($messages->hasNext())
         {

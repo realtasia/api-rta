@@ -16,7 +16,31 @@ class Controller_Clean extends Controller {
 
     public function action_index()
     {
-        return $this->response->body(View::factory('admin_clean'));
+        return $this->response->body(
+          View::factory('admin_clean')
+            ->set('jobs', static::_jobs())
+          );
+    }
+
+    public function action_logs()
+    {
+        $this->auto_render = FALSE;
+        $l = Collection::factory('log')->find()->fields(['body']);
+        $data = [];
+
+        while($l->hasNext())
+        {
+            $r = $l->getNext();
+            $data[] = $r->stringify($r->as_array());
+        }
+
+        $l->rewind();
+
+        $this->response->headers('Content-type', 'application/json');
+        $this->response->body(json_encode([
+            'total' => $l->count(),
+            'data' => $data
+        ]));
     }
 
     public function action_deleteuser()
@@ -65,6 +89,21 @@ class Controller_Clean extends Controller {
 
     }
 
+    public function action_resetjobs()
+    {
+        Collection::factory('job')
+          ->update(['messages.private-message' => ['$exists' => true]],
+            ['$set' => ['status' => 1, 'in_progress' => false]],
+            ['multiple' => true]);
+
+        return $this->request->redirect('clean/index');
+    }
+
+    public function action_refreshjobs()
+    {
+        return $this->response->body(static::_jobs());
+    }
+
     /**
      * Searches a user with a given val
      *
@@ -87,6 +126,70 @@ class Controller_Clean extends Controller {
         }
 
         return Document::factory('user');
+    }
+
+    protected static function _jobs($_id = null)
+    {
+        if(is_string($_id) || $_id instanceof MongoID)
+            return Document::factory('job', $_id);
+
+        if(is_array($_id))
+            $c = Collection::factory('job')->find($_id);
+        else
+            $c = Collection::factory('job')->find(['messages.private-message' => ['$exists' => true]]);
+
+        $return = array();
+
+        while($c && $c->hasNext())
+        {
+            $return[] = static::tablify($c->getNext()->as_array());
+        }
+
+        //return count($return);
+        return implode(' ', $return);
+    }
+
+    protected static function tablify(array $arr)
+    {
+        $out = "<table class='table table-condensed' style='background-color:#f5f5f5;'>";
+        if(\Arr::get($arr, '_id'))
+            $out .= "<tr><th colspan='2' style='text-align:center;color:#555'>".\Arr::get($arr, '_id')."</th></tr>";
+
+        foreach($arr as $key => $val)
+        {
+            $out .= "<tr data-bind='click:toggleTable' class='collapse'><td style='max-width:100px;cursor:pointer;padding:0'><div class='label' style='padding:8px 5px;display:block;text-align:right'>" . $key . "</div></td>";
+            if($key === 'status')
+            {
+                switch($val)
+                {
+                    case 0: $val = '<span style="padding:5px;" class="alert-success">Success</span>';break;
+                    case 1: $val = '<span style="padding:5px;" class="alert">Pending</span>';break;
+                    case 2: $val = '<span style="padding:5px;" class="alert-error">Failed</span>';break;
+
+                }
+            }
+            if($key === 'in_progress' || $key === 'is_single')
+            {
+                if($val)
+                    $val = "Yes";
+                else
+                    $val = "No";
+            }
+            if(is_array($val))
+            {
+                $out .= "<td>" . static::tablify($val) . "</td>";
+            }
+            else
+            {
+                $out .= "<td>" . $val . "</td>";
+            }
+
+            $out .= "</tr>";
+        }
+
+        $out .= "</table>";
+
+        return $out;
     }
 
 }
