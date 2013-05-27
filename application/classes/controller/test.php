@@ -888,57 +888,6 @@ EOD;
                 array('email' => '[REDACTED]'), $update);
     }
 
-    public function action_chrishen()
-    {
-        $user =
-                array(
-                    'first_name'   => 'Chrishen',
-                    'last_name'    => 'Bijay',
-                    'display_name' => '[REDACTED]',
-                    'username'     => 'ChrishenBijay',
-                    'password'     => Auth::instance()->hash('98529487'),
-                    'email'        =>
-                    array(
-                        0 => 'chrishenbijay@realtasia.com',
-                    ),
-                    'telephone'    =>
-                    array(
-                        'mobile' => '+65 94574065',
-                        'DID'    => '+65 65190079',
-                    ),
-                    'designation'  => 'Realtasia Staff',
-                    'social'       => array(),
-                    'websites'     => array(),
-                    'roles'        =>
-                    array(
-                        0 => 'login',
-                        1 => 'admin',
-                    ),
-                    'avatar'       =>
-                    array(
-                        'cropped'   => array(),
-                        'uncropped' => NULL,
-                        150         => 'beta.realtasia.com.sg/assets/images/avatar.jpg',
-                        60          => 'beta.realtasia.com.sg/assets/images/avatar-60X60.jpg',
-                        32          => 'beta.realtasia.com.sg/assets/images/avatar-32X32.jpg',
-                    ),
-                    'uri'          => '/ChrishenBijay',
-                    'active'       => time(),
-                    'counts'       =>
-                    array(
-                        'posts'       => 0,
-                        'likes'       => 0,
-                        'listings'    => 0,
-                        'comments'    => 0,
-                        'subscribers' => 0,
-                        'attachments' => 0,
-                    )
-        );
-
-//Model::factory('user')->collection->remove(array('username' => $user['username']));
-        Model::factory('user')->collection->save($user);
-    }
-
     public function reset_pages()
     {
         $coll   = Model::factory('page')->collection;
@@ -1105,7 +1054,9 @@ EOD;
     public function action_password()
     {
         //echo static::hash('121481') . '<br>';
-        echo static::hash('90250056') . '<br>';
+        echo Document::hash('[REDACTED]') . '<br>';
+        //51a3141e6c01999b0f0000bd
+        //51a313b26c0199990f0000c9
     }
 
 }

@@ -167,9 +167,9 @@ Route::set('auth', 'auth(/<action>(/<id>))')
             'action'     => 'index',
             'id'         => null
         ]);
-Route::set('clean', 'clean(/<action>(/<id>))')
+Route::set('admin', 'admin(/<action>(/<id>))')
         ->defaults([
-            'controller' => 'clean',
+            'controller' => 'admin',
             'action'     => 'index',
             'id'         => null
         ]);

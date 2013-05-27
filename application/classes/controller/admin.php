@@ -12,26 +12,24 @@ defined('SYSPATH') or die('No direct script access.');
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */
-class Controller_Clean extends Controller {
+class Controller_Admin extends Controller {
 
     public function action_index()
     {
-        return $this->response->body(
-          View::factory('admin_clean')
-            ->set('jobs', static::_jobs())
-          );
+        return $this->response->body(View::factory('admin_clean'));
     }
 
     public function action_logs()
     {
         $this->auto_render = FALSE;
-        $l = Collection::factory('log')->find()->fields(['body']);
-        $data = [];
+        $l                 = Collection::factory('log')->find()->fields(['body', 'time']);
+        $data              = [];
 
-        while($l->hasNext())
+        while ($l->hasNext())
         {
-            $r = $l->getNext();
-            $data[] = $r->stringify($r->as_array());
+            $r       = $l->getNext();
+            $r->time = date('G:i:s j-m-y', strtotime($r->time));
+            $data[]  = $r->stringify($r->as_array());
         }
 
         $l->rewind();
@@ -39,7 +37,26 @@ class Controller_Clean extends Controller {
         $this->response->headers('Content-type', 'application/json');
         $this->response->body(json_encode([
             'total' => $l->count(),
-            'data' => $data
+            'data'  => $data
+        ]));
+    }
+
+    public function action_jobs()
+    {
+        $return = array();
+        $c      = static::_jobs();
+
+        while ($c && $c->hasNext())
+        {
+            $r       = $c->getNext();
+            $r->time = date('G:i:s j-m-y', $r->_id->getTimestamp());
+            $return[] = $r->stringify($r->as_array());
+        }
+
+        $this->response->headers('Content-type', 'application/json');
+        $this->response->body(json_encode([
+            'total' => $c->count(),
+            'data'  => $return
         ]));
     }
 
@@ -86,22 +103,43 @@ class Controller_Clean extends Controller {
 
     public function action_resetuser()
     {
-
+        $user = static::get($this->request->post('search'));
+        if ($user->loaded() || $user->load())
+        {
+            $user->set('counts.newMessages', 0);
+            $user->set('counts.conversations', 0);
+            $user->set('counts.subscribers', 0);
+            $user->set('counts.likers', 0);
+            $user->set('counts.posts', 0);
+            $user->set('likers', array());
+            $user->set('subscribers', array());
+            Collection::factory('post')->remove([
+                'user._id' => $user->_id,
+                'type'  => ['$in' => [
+                    'wallpost', 'post', 'conversation'
+                ]]
+            ]);
+            Collection::factory('comment')->remove([
+                'user._id' => $user->_id
+            ]);
+            $user->save();
+        }
     }
 
     public function action_resetjobs()
     {
-        Collection::factory('job')
-          ->update(['messages.private-message' => ['$exists' => true]],
-            ['$set' => ['status' => 1, 'in_progress' => false]],
-            ['multiple' => true]);
-
-        return $this->request->redirect('clean/index');
+        return Collection::factory('job')
+          ->update(['messages.private-message' => ['$exists' => true]], ['$set' => ['status'      => 1, 'in_progress' => false]], ['multiple' => true]);
     }
 
-    public function action_refreshjobs()
+    public function action_deletealllogs()
     {
-        return $this->response->body(static::_jobs());
+        return Collection::factory('log')->remove();
+    }
+
+    public function action_deletelog()
+    {
+        return Collection::factory('log')->remove(['_id' => Document::check_id($this->request->param('id'))]);
     }
 
     /**
@@ -130,52 +168,46 @@ class Controller_Clean extends Controller {
 
     protected static function _jobs($_id = null)
     {
-        if(is_string($_id) || $_id instanceof MongoID)
+        if (is_string($_id) || $_id instanceof MongoID)
             return Document::factory('job', $_id);
 
-        if(is_array($_id))
+        if (is_array($_id))
             $c = Collection::factory('job')->find($_id);
         else
             $c = Collection::factory('job')->find(['messages.private-message' => ['$exists' => true]]);
 
-        $return = array();
-
-        while($c && $c->hasNext())
-        {
-            $return[] = static::tablify($c->getNext()->as_array());
-        }
-
-        //return count($return);
-        return implode(' ', $return);
+        return $c ? $c : null;
     }
 
     protected static function tablify(array $arr)
     {
         $out = "<table class='table table-condensed' style='background-color:#f5f5f5;'>";
-        if(\Arr::get($arr, '_id'))
-            $out .= "<tr><th colspan='2' style='text-align:center;color:#555'>".\Arr::get($arr, '_id')."</th></tr>";
+        if (\Arr::get($arr, '_id'))
+            $out .= "<tr><th colspan='2' style='text-align:center;color:#555'>" . \Arr::get($arr, '_id') . "</th></tr>";
 
-        foreach($arr as $key => $val)
+        foreach ($arr as $key => $val)
         {
             $out .= "<tr data-bind='click:toggleTable' class='collapse'><td style='max-width:100px;cursor:pointer;padding:0'><div class='label' style='padding:8px 5px;display:block;text-align:right'>" . $key . "</div></td>";
-            if($key === 'status')
+            if ($key === 'status')
             {
-                switch($val)
+                switch ($val)
                 {
-                    case 0: $val = '<span style="padding:5px;" class="alert-success">Success</span>';break;
-                    case 1: $val = '<span style="padding:5px;" class="alert">Pending</span>';break;
-                    case 2: $val = '<span style="padding:5px;" class="alert-error">Failed</span>';break;
-
+                    case 0: $val = '<span style="padding:5px;" class="alert-success">Success</span>';
+                        break;
+                    case 1: $val = '<span style="padding:5px;" class="alert">Pending</span>';
+                        break;
+                    case 2: $val = '<span style="padding:5px;" class="alert-error">Failed</span>';
+                        break;
                 }
             }
-            if($key === 'in_progress' || $key === 'is_single')
+            if ($key === 'in_progress' || $key === 'is_single')
             {
-                if($val)
+                if ($val)
                     $val = "Yes";
                 else
                     $val = "No";
             }
-            if(is_array($val))
+            if (is_array($val))
             {
                 $out .= "<td>" . static::tablify($val) . "</td>";
             }
