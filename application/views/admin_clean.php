@@ -11,20 +11,14 @@
         <link rel="stylesheet" type="text/css" href="/css/bootstrap-responsive.min.css" />
         <link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css" />
         <link href='http://fonts.googleapis.com/css?family=Droid+Sans' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" type="text/css" href="/css/admin.css" />
+
         <script type="text/javascript" src="//<?php echo RT::COM_SERVER ?>/js/jquery.min.js"></script>
         <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/jquery-ui.min.js"></script>
         <script type="text/javascript" src="//<?php echo RT::COM_SERVER ?>/js/knockout.js"></script>
         <script type="text/javascript" src="//<?php echo RT::COM_SERVER ?>/js/knockout.mapping-latest.js"></script>
         <script type="text/javascript" src="/js/growl.js"></script>
-        <style type="text/css">
-            *{font-family: 'Droid Sans', sans-serif important; border-radius: 1px !important;}body{background-image:url('/images/subtle_stripes.png')}.white{background:#fff;border:1px solid #eee;position:relative}.content-area{padding:10px;box-shadow:1px 1px 1px #ddd inset;border-radius:2px;margin-top: 10px;}
-            #leftFixedBar{position:fixed;background-color:#fff;height:100%;top:0px;width:70px;left:0;bottom:0;border-right:1px solid #bbb;}
-            #leftFixedBar > ul > li > a{display:block;text-align: center;margin:1px auto;}
-            #leftFixedBar > ul > li{margin:1px auto;}
-            #leftFixedBar > ul > li.active > a{margin-right:-1px}
-            .inline > div {display:inline-block;vertical-align: middle; padding:2px;}
-            .navbar-menu{position:relative;top:0;right:0;left:0;margin-bottom:10px;}
-        </style>
+        <script type="text/javascript" src="/js/admin.js"></script>
     </head>
     <body>
         <div id="leftFixedBar">
@@ -37,7 +31,7 @@
         <div class="container-fluid clearfix" style="border-left:1px solid #eee;margin-left:71px">
             <div class="row-fluid clearfix">
                 <div class="span12" style="margin-top:10px">
-                    <div class="row-fluid" id="clean" data-bind="visible: app.isUser">
+                    <div class="row-fluid" id="clean" data-bind="visible: visible">
                         <div class="span12">
                             <div class="white content-area">
                                 <div class="navbar navbar-menu">
@@ -55,7 +49,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row-fluid" id="jobs" data-bind="visible: app.isJob">
+                    <div class="row-fluid" id="jobs" data-bind="visible: visible">
                         <div class="span12">
                             <div class="white content-area">
                                 <div class="navbar navbar-menu">
@@ -119,7 +113,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row-fluid" id="logs" data-bind="visible: app.isLog">
+                    <div class="row-fluid" id="logs" data-bind="visible: visible">
                         <div class="span12">
                             <div class="white content-area">
                                 <div class="navbar navbar-menu">
@@ -168,228 +162,4 @@
             </div>
         </div>
     </body>
-    <script type="text/javascript">
-        var queue = null;
-        function App() {
-            var self = this, h = window.location.hash;
-            self.hash = ko.observable(h);
-            self.isUser = ko.computed(function() {
-                return self.hash() === '#clean';
-            });
-            self.isJob = ko.computed(function() {
-                return self.hash() === '#jobs';
-            });
-            self.isLog = ko.computed(function() {
-                return self.hash() === '#logs';
-            });
-            window.onhashchange = function() {
-                self.hash(location.hash);
-                console.log(self.hash())
-            }
-        }
-        function Clean(a) {
-            this.app = a;
-            this.isResetting = ko.observable(!1);
-            this.isDeleting = ko.observable(!1);
-            this.userField = ko.observable(null);
-            this.deleteUser = function() {
-                var t = this;
-                return t.userField() && !t.isDeleting() && $.ajax({
-                    url: '/admin/deleteuser/',
-                    type: 'post',
-                    data: {search: t.userField()},
-                    beforeSend: function() {
-                        t.isDeleting(!0);
-                    }
-                })
-                        .done(function(r) {
-                    $.bootstrapGrowl("User deleted!");
-                })
-                        .always(function() {
-                    return t.isDeleting(!1) && t.userField(null);
-                }) || false;
-            };
-            this.resetUser = function() {
-                var t = this;
-                return t.userField() && !t.isResetting() && $.ajax({
-                    url: '/admin/resetuser/',
-                    type: 'post',
-                    data: {search: t.userField()},
-                    beforeSend: function() {
-                        t.isResetting(!0);
-                    }
-                })
-                        .done(function(r) {
-                    $.bootstrapGrowl("User reset!");
-                })
-                        .always(function() {
-                    return t.isResetting(!1) && t.userField(null);
-                }) || false;
-            };
-        }
-
-        function Jobs(a) {
-            var c = $('.collapse'), t = c.find('table'), self = this;
-            self.app = a;
-            self.limit = ko.observable(10);
-            self.page = ko.observable(1);
-            self.dataRows = ko.observableArray([]);
-            self.totalRows = ko.observable(0);
-            self.isLoading = ko.observable(false);
-            self.isRunningEmail = ko.observable(false);
-            self.isRefreshing = ko.observable(false);
-            self.load = function() {
-                return self.isLoading(true) && $.get("/admin/jobs", {
-                    limit: self.limit(),
-                    skip: self.page() * self.limit(),
-                    page: self.page()
-                }).done(function(r) {
-                    var arr = ko.mapping.fromJS(r.data);
-                    self.dataRows(GetObs(arr));
-                    self.totalRows(r.total);
-
-                }).always(function() {
-                    return self.isLoading(false)
-                });
-            }
-            self.trash = function(d) {
-                return $.post('/admin/deletejob/' + d._id(), function() {
-                    return self.load();
-                });
-            };
-            self.hide = function(d) {
-                $('#' + d._id()).slideToggle('fast');
-            }
-            self.toggleTable = function(d, e) {
-                e.stopPropagation();
-                $(e.currentTarget).find("table").slideToggle();
-            }
-            self.reQueueJobs = function() {
-                return $.get('/admin/resetjobs', self.refreshJobs);
-            }
-            self.refreshJobs = function(v) {
-                var queue = setTimeout(self.refreshJobs, 3e3);
-
-                self.isRefreshing() && self.load().always(queue) || clearTimeout(queue);
-            };
-            self.refresh = function(d, e){
-                return self.isRefreshing(!self.isRefreshing());
-            }
-            self.reloop = function() {
-                queue = setTimeout(self.reloop, 3e3);
-
-                return self.isRefreshing() && self.load().always(queue) || clearTimeout(queue);
-            }
-            self.isRefreshing.subscribe(self.reloop)
-            self.runEmail = function(){
-                self.isRunningEmail(true);
-                $.get('http://queue.jjpc.net/email').always(function(){self.isRunningEmail(false);})
-            };
-        }
-
-        function Logs(a) {
-            var self = this;
-            self.app = a;
-            self.limit = ko.observable(10);
-            self.page = ko.observable(1);
-            self.dataRows = ko.observableArray([]);
-            self.totalRows = ko.observable(0);
-            self.isLoading = ko.observable(false);
-            self.isRefreshing = ko.observable(false);
-            self.load = function() {
-                return self.isLoading(true) && $.get("/admin/logs", {
-                    limit: self.limit(),
-                    skip: self.page() * self.limit(),
-                    page: self.page()
-                }).done(function(r) {
-                    var arr = ko.mapping.fromJS(r.data);
-                    self.dataRows(GetObs(arr));
-                    self.totalRows(r.total);
-
-                }).always(function() {
-                    return self.isLoading(false)
-                });
-            }
-            self.deleteAll = function() {
-                return $.post('/admin/deletealllogs/', function() {
-                    return self.load();
-                });
-            };
-            self.refresh = function(d, e){
-                return self.isRefreshing(!self.isRefreshing());
-            }
-            self.reloop = function() {
-                queue = setTimeout(self.reloop, 3e3);
-
-                return self.isRefreshing() && self.load() || clearTimeout(queue);
-            };
-            self.isRefreshing.subscribe(self.reloop);
-            self.hide = function(d) {
-                    $('#' + d._id()).slideToggle('fast');
-                }
-            self.trash = function(d) {
-                return $.post('/admin/deletelog/' + d._id(), function() {
-                    return self.load();
-                });
-            };
-        }
-        ;
-
-        function Log(data) {
-            return {
-                _id: ko.observable(data._id),
-                body: ko.observable(data.body),
-                time: ko.observable(data.time)
-            };
-        }
-        ;
-
-        jQuery(document).ready(function($) {
-            /**
-             * Leftbar
-             *
-             */
-            var app = new App;
-            ko.applyBindings(app, document.getElementById('leftFixedBar'));
-
-            /**
-             * User(s)
-             */
-            ko.applyBindings(new Clean(app), document.getElementById('clean'));
-
-            /**
-             * Jobs
-             */
-            var jobs = new Jobs(app);
-            ko.applyBindings(jobs, document.getElementById('jobs'));
-            jobs.load();
-
-            /**
-             * Used in the Jobs view to shrink initial table created by PHP
-             * (with JSON data).
-             *
-             * @type string css class for collapsible tables
-             * @todo can be improved. Server side logic best implemented locally
-             * */
-            var t = $('.collapse').find('table');
-            t && t.exists() && t.hide();
-
-
-            /**
-             * Logs
-             */
-            var logs = new Logs(app);
-            ko.applyBindings(logs, document.getElementById('logs'));
-            logs.load();
-        });
-        ko.observableArray.fn["pushAll"] = function(items) {
-            this.push.apply(this, items);
-        };
-        GetObs = function(p) {
-            return ko.isObservable(p) ? p() : p;
-        }
-        $.fn.exists = function() {
-            return this.length !== 0;
-        }
-    </script>
 </html>

@@ -1,14 +1,12 @@
-<?php
-
-defined('SYSPATH') or die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');
 
 /**
- * Description of clean
+ * Description of admin
  *
  * @author Jason Nathan
  * @category RealtAsia
  * @package RT_Controller
- * @subpackage Clean
+ * @subpackage Admin
  * @version 1.0
  * @copyright 2012 Realtasia Pte Ltd
  */
@@ -113,6 +111,7 @@ class Controller_Admin extends Controller {
             $user->set('counts.posts', 0);
             $user->set('likers', array());
             $user->set('subscribers', array());
+            $user->save();
             Collection::factory('post')->remove([
                 'user._id' => $user->_id,
                 'type'  => ['$in' => [
@@ -122,7 +121,7 @@ class Controller_Admin extends Controller {
             Collection::factory('comment')->remove([
                 'user._id' => $user->_id
             ]);
-            $user->save();
+
         }
     }
 
@@ -178,50 +177,4 @@ class Controller_Admin extends Controller {
 
         return $c ? $c : null;
     }
-
-    protected static function tablify(array $arr)
-    {
-        $out = "<table class='table table-condensed' style='background-color:#f5f5f5;'>";
-        if (\Arr::get($arr, '_id'))
-            $out .= "<tr><th colspan='2' style='text-align:center;color:#555'>" . \Arr::get($arr, '_id') . "</th></tr>";
-
-        foreach ($arr as $key => $val)
-        {
-            $out .= "<tr data-bind='click:toggleTable' class='collapse'><td style='max-width:100px;cursor:pointer;padding:0'><div class='label' style='padding:8px 5px;display:block;text-align:right'>" . $key . "</div></td>";
-            if ($key === 'status')
-            {
-                switch ($val)
-                {
-                    case 0: $val = '<span style="padding:5px;" class="alert-success">Success</span>';
-                        break;
-                    case 1: $val = '<span style="padding:5px;" class="alert">Pending</span>';
-                        break;
-                    case 2: $val = '<span style="padding:5px;" class="alert-error">Failed</span>';
-                        break;
-                }
-            }
-            if ($key === 'in_progress' || $key === 'is_single')
-            {
-                if ($val)
-                    $val = "Yes";
-                else
-                    $val = "No";
-            }
-            if (is_array($val))
-            {
-                $out .= "<td>" . static::tablify($val) . "</td>";
-            }
-            else
-            {
-                $out .= "<td>" . $val . "</td>";
-            }
-
-            $out .= "</tr>";
-        }
-
-        $out .= "</table>";
-
-        return $out;
-    }
-
 }
