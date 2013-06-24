@@ -81,7 +81,8 @@ if (isset($_SERVER['KOHANA_ENV']))
 Kohana::init([
     'base_url' => '/',
     'index_file' => '',
-    //'caching' => 'true',
+    'profile'  => false,
+    'caching' => true
 ]);
 /**
  * Attach the file write to logging. Multiple writers are supported.

@@ -1608,29 +1608,29 @@ class Controller_User extends Controller_Resource {
         $lib               = Document::factory('page');
         $lib->current_user = $user;
         $lib->create($library);
-        if ($lib)
-        {
-            $uploads             = [
-                'name'    => 'Private Uploads',
-                'excerpt' => 'This is your default private album',
-                'message' => 'This is your default private album',
-                'privacy' => ['is' => 'PRIVATE'],
-                'user'    => ['_id'  => $user->_id, 'name' => $user->name],
-                'page'    => ['_id'  => $lib->_id, 'name' => $lib->name, 'type' => 'library']
-            ];
-            $album               = Document::factory('post');
-            $album->current_user = $user;
-            $album->create_album($uploads);
-            $album->uri          = '/post?id=' . (string) $album->_id;
-            $album->save();
-            if ($album)
-            {
-                // create a new ticker for this user's
-                Ticker::factory($album)->create_once($user->_id, 2);
-                static::creator_interactions($album->_id, 'post');
-                $user->library = ['_id'  => $lib->_id, 'name' => $lib->name, 'uri'  => $lib->uri];
-            }
-        }
+//        if ($lib)
+//        {
+//            $uploads             = [
+//                'name'    => 'Private Uploads',
+//                'excerpt' => 'This is your default private album',
+//                'message' => 'This is your default private album',
+//                'privacy' => ['is' => 'PRIVATE'],
+//                'user'    => ['_id'  => $user->_id, 'name' => $user->name],
+//                'page'    => ['_id'  => $lib->_id, 'name' => $lib->name, 'type' => 'library']
+//            ];
+//            $album               = Document::factory('post');
+//            $album->current_user = $user;
+//            $album->create_album($uploads);
+//            $album->uri          = '/post?id=' . (string) $album->_id;
+//            $album->save();
+//            if ($album)
+//            {
+//                // create a new ticker for this user's
+//                Ticker::factory($album)->create_once($user->_id, 2);
+//                static::creator_interactions($album->_id, 'post');
+//                $user->library = ['_id'  => $lib->_id, 'name' => $lib->name, 'uri'  => $lib->uri];
+//            }
+//        }
 
         $user->keywords = $user->extract_keywords($user->as_array());
         $user->save();
