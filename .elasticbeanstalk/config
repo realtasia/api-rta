@@ -1,0 +1,6 @@
+[global]
+ApplicationName=API-RTA
+DevToolsEndpoint=git.elasticbeanstalk.ap-southeast-1.amazonaws.com
+EnvironmentName=realtasia-api-env
+Region=ap-southeast-1
+AwsCredentialFile=/home/jason/.elasticbeanstalk/aws_credential_file
