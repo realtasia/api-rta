@@ -321,7 +321,7 @@ class Controller_Post extends Controller_Resource {
         }
 
         // set up all needed documents
-        $post = Document::factory('post');
+        $post    = Document::factory('post');
         $summary = null;
 
         //if there is an post id.
@@ -351,7 +351,7 @@ class Controller_Post extends Controller_Resource {
             'to._id'   => $in, 'user._id' => $in
         ]);
 
-        $fields = ['name' => 1, 'uri'  => 1, '_id' => 1];
+        $fields = ['name' => 1, 'uri'  => 1, '_id'  => 1];
         // load both users in question
         $from->load(null, $fields);
         $to->load(null, $fields);
@@ -371,9 +371,9 @@ class Controller_Post extends Controller_Resource {
 
         $params = static::format(static::$params);
 
-        foreach([$to, $from, $post] as $v)
+        foreach ([$to, $from, $post] as $v)
         {
-            if(is_array($v) && isset($v['_id']))
+            if (is_array($v) && isset($v['_id']))
                 $v['_id'] = Document::check_id($v['_id']);
         }
 
@@ -389,7 +389,7 @@ class Controller_Post extends Controller_Resource {
         ];
 
         $c = Document::factory('comment', null, static::$user_id)
-             ->create_message($message);
+          ->create_message($message);
 
         if ($c)
         {
@@ -405,7 +405,7 @@ class Controller_Post extends Controller_Resource {
             $conv->save();
 
             Debug::log(Job::add($conv->_id, 'post', static::$user_id)
-              ->private_message($c->_id));
+                ->private_message($c->_id));
 
             return $this->data($c);
         }
@@ -1575,6 +1575,8 @@ class Controller_Post extends Controller_Resource {
      */
     protected static function extract_links($text)
     {
+        $text = urldecode($text);
+
         /**
          *  $validTlds is an associative array mapping valid TLDs to the value true.
          *  Since the set of valid TLDs is not static, this array should be updated
@@ -1687,19 +1689,27 @@ class Controller_Post extends Controller_Resource {
         $text = trim(Security::xss_clean(Arr::get($params, 'message')));
         if ($text)
         {
+            // remove extra line breaks
+            $text     = preg_replace("/(\n){3,}/", "\n\n", trim($text));
+            // forgot the difference, just doing it again. Carriage return in windows?
+            $text     = preg_replace("/(\r\n){3,}/", "\r\n\r\n", trim($text));
+
+            // in either case above, this will still match
             $original = $chunks   = explode("\n", $text);
+
+            // if there's a link, this wouldn't be empty.
             $link     = Arr::get($params['link'], $type);
 
             foreach ($chunks as $key => $t)
             {
-                if (mb_strlen($t) >= 1)
+                if (mb_strlen($t) > 0 || !empty($t))
                 {
                     $chunks[$key] = trim(Text::wrap($t, $len));
                 }
             }
 
             // after all the wrapping, more line breaks occur. join & split again
-            // for accuracy
+            // for accuracy in counting lines
             $chunks = explode("\n", implode("\n", $chunks));
 
             // if this is a link-type post, the excerpt is shorter
@@ -1733,7 +1743,7 @@ class Controller_Post extends Controller_Resource {
             }
 
             $params['message'] = nl2br(static::extract_links(trim($message)));
-            $params['excerpt'] = static::extract_links(trim($excerpt));
+            $params['excerpt'] = nl2br(static::extract_links(trim($excerpt)));
         }
 
         return $params;
@@ -1764,7 +1774,7 @@ class Controller_Post extends Controller_Resource {
      * @param array $attachments
      * @param MongoID $post_id
      * @return int
-     */
+
     protected static function _attachments_for_listings(array $attachments)
     {
         $ids     = [];
@@ -1793,7 +1803,7 @@ class Controller_Post extends Controller_Resource {
               '$set' => ['listing_id' => $post->_id]
             ], ['multiple' => true]);
     }
-
+     */
     protected static function listing_keywords($params)
     {
         if (\Arr::get($params, 'showAddress') === false)
