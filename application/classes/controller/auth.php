@@ -1,4 +1,6 @@
-<?php defined('SYSPATH') or die('No direct script access.');
+<?php
+
+defined('SYSPATH') or die('No direct script access.');
 
 /**
  * This controller :
@@ -23,6 +25,7 @@
  * @copyright 2012 Realtasia Pte Ltd
  */
 class Controller_Auth extends Controller_Abstract {
+
     public static $auth;
     public static $error;
     public static $success;
@@ -86,19 +89,19 @@ class Controller_Auth extends Controller_Abstract {
         unset($check['_id']);
 
         // return state if available
-        if(isset($params['state']))
+        if (isset($params['state']))
         {
             $check['state'] = $params['state'];
         }
 
-        if(static::is_error($check))
+        if (static::is_error($check))
         {
             return $this->error($check);
         }
         else
         {
             static::$current_session = $check;
-            if(isset($params['password']))
+            if (isset($params['password']))
                 unset($params['password']);
             return $this->data(['success' => $params]);
         }
@@ -123,19 +126,17 @@ class Controller_Auth extends Controller_Abstract {
         unset($check['_id']);
 
         // state parameter.
-        if(isset($params['state']))
+        if (isset($params['state']))
         {
             $check['state'] = $params['state'];
         }
-        if(static::is_error($check))
+        if (static::is_error($check))
         {
             return $this->error($check);
         }
-        else
-        {
-            static::$current_session = $check;
-            return $this->data(['success' => 1]);
-        }
+
+        static::$current_session = $check;
+        return $this->data(['success' => 1]);
         //return static::is_error($check) ? $this->error($check) : $this->data($check);
     }
 
@@ -149,6 +150,7 @@ class Controller_Auth extends Controller_Abstract {
     {
         $post = $this->request->post();
         $get  = $this->request->query();
+        $log  = array();
         if (empty($post) && empty($get))
         {
             Debug::log('invalid called because request params are empty');
@@ -156,17 +158,25 @@ class Controller_Auth extends Controller_Abstract {
         }
 
         static::$params = empty($post) ? $get : $post;
+        $grant_type   = (bool) \Arr::get(static::$params, 'grant_type');
+        $redirect_uri = (bool) \Arr::get(static::$params, 'redirect_uri');
+        $client_id    = (bool) \Arr::get(static::$params, 'client_id');
+        $username     = (bool) \Arr::get(static::$params, 'username');
+        $password     = (bool) \Arr::get(static::$params, 'password');
 
 
         switch (true)
         {
-            case!isset(static::$params['grant_type']) || empty(static::$params['grant_type']):
-            case!isset(static::$params['redirect_uri']) || empty(static::$params['redirect_uri']):
-            case!isset(static::$params['client_id']) || empty(static::$params['client_id']):
-            case static::$params['grant_type'] === 'password' && (!isset(static::$params['username']) || empty(static::$params['username'])):
-            case static::$params['grant_type'] === 'password' && (!isset(static::$params['password']) || empty(static::$params['password'])):
-                Debug::log('invalid request invoked in check headers [params not checking out]');
-                return $this->error('invalid_request [params not checking out]');
+            case!$grant_type:
+                $log[] = '[empty grant type]';
+            case!$redirect_uri:
+                $log[] = '[no redirect uri]';
+            case!$client_id:
+                $log[] = '[no client id]';
+            case ($grant_type === 'password') && !($username OR $password):
+                $log[] = '[no username or password]';
+                Debug::log('Invalid Request invoked in check headers' . implode(" ", $log));
+                return $this->error('invalid_request');
         }
 
         return static::$params;
