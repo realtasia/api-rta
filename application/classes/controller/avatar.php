@@ -17,7 +17,7 @@ class Controller_Avatar extends Controller {
      * A simple method that retrieves a user by id, checks for an existing avatar or redirects to the default
      * after checking user gender.
      *
-     * @return Response $response
+     * @return Response The response headers
      */
     public function action_index()
     {
@@ -36,7 +36,6 @@ class Controller_Avatar extends Controller {
             return $this->response->headers([
                 'X-Accel-Redirect' => $url . str_replace($id, "$id/$size", $u['avatar'])
             ]);
-            return;
         }
 
         //echo $b . ucfirst(substr($u['info']['gender'], 0, 1)) . $size . '.png';

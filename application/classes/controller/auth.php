@@ -160,6 +160,7 @@ class Controller_Auth extends Controller_Abstract {
         static::$params = empty($post) ? $get : $post;
         $grant_type   = (bool) \Arr::get(static::$params, 'grant_type');
         $redirect_uri = (bool) \Arr::get(static::$params, 'redirect_uri');
+        $user_agent   = (bool) \Arr::get(static::$params, 'user_agent');
         $client_id    = (bool) \Arr::get(static::$params, 'client_id');
         $username     = (bool) \Arr::get(static::$params, 'username');
         $password     = (bool) \Arr::get(static::$params, 'password');
@@ -173,8 +174,10 @@ class Controller_Auth extends Controller_Abstract {
                 $log[] = '[no redirect uri]';
             case!$client_id:
                 $log[] = '[no client id]';
-            case ($grant_type === 'password') && !($username OR $password):
-                $log[] = '[no username or password]';
+            case ($grant_type === 'client_credentials') && !$user_agent:
+                $log[] = '[no user_agent in client authentication request]';
+            case ($grant_type === 'password') && !($username OR $password OR $user_agent):
+                $log[] = '[no username, password or user_agent in login request]';
                 Debug::log('Invalid Request invoked in check headers' . implode(" ", $log));
                 return $this->error('invalid_request');
         }
