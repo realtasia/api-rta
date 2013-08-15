@@ -614,14 +614,12 @@ class Controller_User extends Controller_Resource {
         static::$params['type'] = 'album';
         static::$params['user_id'] = $id;
 
-        if (static::logged_in_is_id($id))
+        // admin sees everything
+        if (static::logged_in_is_id($id) || parent::has_role('admin'))
         {
             $albums = Collection::factory('post')->search(static::$params, static::$user_id);
         }
 
-        // admin sees everything
-        if (parent::has_role('admin'))
-            $albums = Collection::factory('post')->search(static::$params, static::$user_id);
 
         if (parent::is_client() || parent::logged_in())
         {
@@ -641,7 +639,6 @@ class Controller_User extends Controller_Resource {
 
     protected function generate_qrcode(\QRcode $qr, $values)
     {
-
         $id = $this->request->param('id');
         $f  = ['name', 'info', 'email', 'settings.privacy', 'avatar'];
         $u  = Document::factory('user', $id);

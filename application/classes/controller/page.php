@@ -1,4 +1,6 @@
-<?php defined('SYSPATH') or die('No direct script access.');
+<?php
+
+defined('SYSPATH') or die('No direct script access.');
 ini_set("max_execution_time", 0);
 ini_set('memory_limit', '2000M');
 
@@ -19,6 +21,7 @@ ini_set('memory_limit', '2000M');
  *
  */
 class Controller_Page extends Controller_Resource {
+
 //class Controller_Page extends Controller {
 
 
@@ -75,7 +78,7 @@ class Controller_Page extends Controller_Resource {
         return $this->error('invalid_request');
     }
 
-    /**************************************************************************
+    /*     * ************************************************************************
      * Public Connections
      * *********************************************************************** */
 
@@ -88,8 +91,8 @@ class Controller_Page extends Controller_Resource {
         static::$params['object_type'] = 'page';
 
         $data = Document::factory('interaction')
-                ->collection()
-                ->likers(static::$params);
+          ->collection()
+          ->likers(static::$params);
 
         return $this->data($data);
     }
@@ -103,8 +106,8 @@ class Controller_Page extends Controller_Resource {
         static::$params['object_type'] = 'page';
 
         $data = Document::factory('interaction')
-                ->collection()
-                ->subscribers(static::$params);
+          ->collection()
+          ->subscribers(static::$params);
 
         return $this->data($data);
     }
@@ -136,7 +139,7 @@ class Controller_Page extends Controller_Resource {
                 // requested user and logged in user must be the same or must be admin
                 if (static::logged_in_is_id($id) || parent::has_role('admin'))
                     return $this->data(
-                                    $posts->listings(static::$params, static::$user_id)
+                        $posts->listings(static::$params, static::$user_id)
                     );
 
                 // clients only see 'active' (public) posts
@@ -147,7 +150,7 @@ class Controller_Page extends Controller_Resource {
                 // need a client or user token.
                 if (parent::is_client() || parent::logged_in())
                     return $this->data(
-                                    $posts->listings(static::$params, static::$user_id)
+                        $posts->listings(static::$params, static::$user_id)
                     );
 
                 // oops. zip token.
@@ -192,7 +195,7 @@ class Controller_Page extends Controller_Resource {
             case 'trashed':
                 if (static::logged_in_is_id($id) || parent::has_role('admin'))
                     return $this->data(
-                                    $posts->testimonials(static::$params, static::$user_id)
+                        $posts->testimonials(static::$params, static::$user_id)
                     );
 
                 // clients only see 'active' (public) posts
@@ -203,7 +206,7 @@ class Controller_Page extends Controller_Resource {
                 // need a client or user token.
                 if (parent::is_client() || parent::logged_in())
                     return $this->data(
-                                    $posts->testimonials(static::$params, static::$user_id)
+                        $posts->testimonials(static::$params, static::$user_id)
                     );
 
                 // oops. zip token.
@@ -224,7 +227,7 @@ class Controller_Page extends Controller_Resource {
             $user = static::$model;
             $user->load($this->request->param('id'), ['settings' => 1]);
             $this->data(
-                    $user->stringify($user->as_array()['settings']['privacy'])
+              $user->stringify($user->as_array()['settings']['privacy'])
             );
         }
         else
@@ -338,89 +341,72 @@ class Controller_Page extends Controller_Resource {
     public function action_locationkeyword()
     {
         $s = $this->request->query('s');
-        if(!$s)
+        if (!$s)
             return $this->error('invalid_request');
 
         $q = [
-            'keywords' => new MongoRegex("/^$s/"),
-            'type' => 'location',
-            'status' => 'active',
-            'privacy.is' => 'PUBLIC',
+            'keywords' => new MongoRegex("/^" . strtolower($s) . "/"),
+            'child'    => ['$ne' => null]
+          //'type'       => 'location',
+          //'status'     => 'active',
+          //'privacy.is' => 'PUBLIC',
         ];
 
         // in case we are in an estate, limiting will be best
-        if(Arr::get(static::$params, 'object_id'))
+        if ($estate = \Arr::get(static::$params, 'object_name'))
         {
-            $q['parent._id'] = new MongoID(static::$params['object_id']);
+            $q = [ 'estate' => urldecode($estate)] + $q;
+            //$q['parent._id'] = new MongoID(static::$params['object_id']);
         }
 
-        $s = strtolower($s);
+        $s       = strtolower($s);
         $results = [];
+        file_put_contents('debug.html', print_r($q, true));
+        $cursor  = (array) Collection::factory('singpost')->distinct('keywords', $q);
 
-        $cursor = Collection::factory('page')
-                ->find($q)
-                ->fields(['keywords'])
-                ->limit(50);
-        while($cursor->hasNext())
+        foreach ($cursor as $value)
         {
-            $k = $cursor->getNext()->keywords;
-
-            foreach($k as $value)
+            if (strpos($value, $s) !== false)
             {
-                if(strpos($value, $s) !== false)
-                {
-                    $results [] = ucwords($value);
-                }
+                $results [] = ucwords($value);
             }
         }
-
-        $data = array_values(array_unique($results));
-        if(count($data) > 15)
+        if (count($results) > 15)
         {
-            $data = array_slice($data, 0, 15);
+            $results = array_slice($results, 0, 15);
         }
 
-        return $this->data($data);
+        return $this->data($results);
     }
 
     public function action_companykeyword()
     {
         $s = $this->request->query('s');
-        if(!$s)
+        if (!$s)
             return $this->error('invalid_request');
 
-        $s = strtolower($s);
         $results = [];
 
-        $cursor = Collection::factory('page')
-                ->find([
-                    'keywords' => new MongoRegex("/^$s/"),
-                    'type' => 'company',
-                    'status' => 'active',
-                    'privacy.is' => 'PUBLIC',
-                ])
-                ->fields(['keywords'])
-                ->limit(50);
-        while($cursor->hasNext())
-        {
-            $k = $cursor->getNext()->keywords;
+        $cursor = (array) Collection::factory('page')->distinct('keywords', [
+              'keywords'   => new MongoRegex("/^".strtolower($s)."/"),
+              'type'       => 'company',
+              'status'     => 'active',
+              'privacy.is' => 'PUBLIC',
+        ]);
 
-            foreach($k as $value)
+        foreach ($cursor as $value)
+        {
+            if (strpos($value, $s) !== false)
             {
-                if(strpos($value, $s) !== false)
-                {
-                    $results [] = ucwords($value);
-                }
+                $results [] = ucwords($value);
             }
         }
-
-        $data = array_values(array_unique($results));
-        if(count($data) > 15)
+        if (count($results) > 15)
         {
-            $data = array_slice($data, 0, 15);
+            $results = array_slice($data, 0, 15);
         }
 
-        return $this->data($data);
+        return $this->data($results);
     }
 
     /*     * ************************************************************************
@@ -459,10 +445,25 @@ class Controller_Page extends Controller_Resource {
         return parent::interact('unsubscribe', 'page');
     }
 
-
     public function action_search()
     {
-        if(parent::logged_in())
+
+        $s = \Arr::get(static::$params, 's');
+
+        if ($s)
+        {
+            unset(static::$params['s']);
+            $cursor = Collection::factory('singpost')
+              ->distinct('child._id', [
+                'child'    => ['$ne' => null],
+                'keywords' => new MongoRegex("/^" . strtolower($s) . "/")
+            ]);
+
+            if (!empty($cursor))
+                static::$params['include_ids'] = $cursor;
+        }
+
+        if (parent::logged_in())
             $pages = Collection::factory('page')->search(static::$params, static::$user_id);
         else
             $pages = Collection::factory('page')->search(static::$params);
@@ -472,7 +473,7 @@ class Controller_Page extends Controller_Resource {
 
     public static function valid($page, $field, Validation $v)
     {
-        if(!$page)
+        if (!$page)
             return true;
 
         $id = is_array($page) ? $page['_id'] : $page;
@@ -481,30 +482,29 @@ class Controller_Page extends Controller_Resource {
         return Document::factory('page', $id)->load(['_id' => $id], ['_id' => 1]) ? true : $v->error($field, 'Not a Valid Page', $u);
     }
 
-    /** ************************************************************************
+    /**     * ***********************************************************************
      * TestPad methods
      * *********************************************************************** */
-
     public function action_standard()
     {
         $pages  = Mongo_collection::factory('singpost');
         $mysqli = new mysqli('localhost', 'root', NULL, 'test');
-        $json = [];
+        $json   = [];
         $result = $mysqli->query('SELECT DISTINCT project FROM `condominiums` ORDER BY project ASC');
-        while ($each    = $result->fetch_row())
+        while ($each   = $result->fetch_row())
         {
             $json[] = $this->format($each[0]);
         }
 
         $query = [
-            'address' => ['$nin' => ['Condominium', 'Apartment', 'HDB', 'PO Box', 'Window Delivery', 'Locked Bag']],
-            'building' => ['$not'   => new MongoRegex('/school|swimming|station|temple|church|complex|centre|camp|hospital|clinic|shop|library|college|stadium|car.park|exchange|depot|commission|polyclinic|mosque|masjid|association|interchange|aia.|industrial|office|kindergarden|mrt|lrt|sports|waterworks|hall|brickwork|tldm|brigade|defence|eating|food|shopping|post|police|fire|safety|club|hotel|motel|assembly|cargo|airport|airbase|cinema|ministry|government|parliment|health|driving|technology|ctr|kindergarten|breweries|materials|amphitheatre|storage|factory|warehouse|institute|logistics|hospice|center|innovation|aquarium|lagoon|sport|theatres|theatre|techpark|flight|terminal|operations|operation|embassy|amusement|flatted|general|chij|npc|convent|cathedral|aviation|academy|chapel|prison|methodist|metal|works|synagogue|pte.ltd|resort|store|megastore|distripark|hub|dhl|bank|barrack|enterprise|fraser|division|aged|disabled|hostel|hostels|ite|marine|sewage|works|motors|child|maintenance|dormitory|shipyard|naval|nursery|sewer|buddhist|taxi|old age|old people|home for|supply|chemical|islamiah|majlis|logit|homes for|academy|arts|museum|university|polytechnic|ntuc|restaurant|outward|bank|nursing|refuse|tuas|medical|plant|mission|indstrl|society|zoological|red.cross|automative|engineering|instrument|design|customs|leisure|publications|delivery/i')],
-            'street' => ['$not'   => new MongoRegex('/tuas/i')],
-            'estate' => ['$ne' => NULL],
+            'address'  => ['$nin' => ['Condominium', 'Apartment', 'HDB', 'PO Box', 'Window Delivery', 'Locked Bag']],
+            'building' => ['$not' => new MongoRegex('/school|swimming|station|temple|church|complex|centre|camp|hospital|clinic|shop|library|college|stadium|car.park|exchange|depot|commission|polyclinic|mosque|masjid|association|interchange|aia.|industrial|office|kindergarden|mrt|lrt|sports|waterworks|hall|brickwork|tldm|brigade|defence|eating|food|shopping|post|police|fire|safety|club|hotel|motel|assembly|cargo|airport|airbase|cinema|ministry|government|parliment|health|driving|technology|ctr|kindergarten|breweries|materials|amphitheatre|storage|factory|warehouse|institute|logistics|hospice|center|innovation|aquarium|lagoon|sport|theatres|theatre|techpark|flight|terminal|operations|operation|embassy|amusement|flatted|general|chij|npc|convent|cathedral|aviation|academy|chapel|prison|methodist|metal|works|synagogue|pte.ltd|resort|store|megastore|distripark|hub|dhl|bank|barrack|enterprise|fraser|division|aged|disabled|hostel|hostels|ite|marine|sewage|works|motors|child|maintenance|dormitory|shipyard|naval|nursery|sewer|buddhist|taxi|old age|old people|home for|supply|chemical|islamiah|majlis|logit|homes for|academy|arts|museum|university|polytechnic|ntuc|restaurant|outward|bank|nursing|refuse|tuas|medical|plant|mission|indstrl|society|zoological|red.cross|automative|engineering|instrument|design|customs|leisure|publications|delivery/i')],
+            'street'   => ['$not' => new MongoRegex('/tuas/i')],
+            'estate'   => ['$ne' => NULL],
         ];
 
         $cursor = $pages->find($query);
-        $row = [];
+        $row    = [];
 
         $i = 0;
         while ($cursor->hasNext())

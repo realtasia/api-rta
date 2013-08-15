@@ -180,7 +180,6 @@ class Controller_Locations extends Controller_Resource {
             ];
             $new['subtype']       = $subtype;
             $new['name']          = $name;
-            $new['sector']        = (array) Arr::get($data, 'sectors', []);
             $new['property_type'] = Arr::get($data, 'property_type', []);
             $new['content']       = Arr::get($data, 'content');
             $new['type']          = 'location';
@@ -544,6 +543,7 @@ class Controller_Locations extends Controller_Resource {
                 {
                     case 'NULL':
                         $r['child._id'] = NULL;
+                        $r['keywords'] = 'nolocation';
                         break;
                     case 'NOT NULL':
                         $r['child._id'] = ['$ne' => NULL];
@@ -621,6 +621,4 @@ class Controller_Locations extends Controller_Resource {
 //            var_dump(['name' => $c['name'], 'parent' => $c['parent']]);
 //        }
     }
-
 }
-?>

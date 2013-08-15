@@ -467,7 +467,7 @@ class Controller_Post extends Controller_Resource {
     public function action_likers()
     {
         static::$params['object_id'] = $this->request->param('id');
-        static::$params['object_type'] = 'comment';
+        static::$params['object_type'] = 'post';
 
         $data = Document::factory('interaction')
           ->collection()
@@ -525,7 +525,7 @@ class Controller_Post extends Controller_Resource {
     {
         $id = $this->request->param('id');
 
-        $q = Arr::merge(static::$params, ['type'    => 'attachment', 'page_id' => $id]);
+        $q = Arr::merge(static::$params, ['type' => 'attachment', 'page_id' => $id, 'sort' => 'newest']);
 
         return $this->data(Collection::factory('post')->search($q, static::$user_id));
     }

@@ -1,4 +1,7 @@
-<?php defined('SYSPATH') or die('No direct script access.');
+<?php
+
+defined('SYSPATH') or die('No direct script access.');
+
 /**
  * Description of corrections
  *
@@ -11,20 +14,37 @@
  */
 class Controller_Corrections extends Controller {
 
+    public function action_totalads()
+    {
+        $total  = 0;
+        $cursor = Collection::factory('page')->find(['type' => 'location']);
+        while ($cursor->hasNext())
+        {
+            $row = $cursor->getNext();
+            $s   = Collection::factory('singpost')->find(['child.name' => $row->name]);
+            if($s->hasNext())
+                fwrite(STDOUT, "This location {$row->name}:  has ".count($s)." addresses\n");
+//            if($c > $total)
+//            {
+//                $total = $c;
+//            }
+        }
+    }
+
     public function action_pages()
     {
         $cursor = Collection::factory('page')->find();
 
         while ($cursor->hasNext())
         {
-            $row = $cursor->getNext();
+            $row      = $cursor->getNext();
             $keywords = [];
 
-            if($row->type === 'location' && $row->subtype !== 'Estate')
+            if ($row->type === 'location' && $row->subtype !== 'Estate')
             {
-                $s = Collection::factory('singpost');
-                $q = ['child.name' => $row->name];
-                $streets = $s->distinct('street', $q);
+                $s        = Collection::factory('singpost');
+                $q        = ['child.name' => $row->name];
+                $streets  = $s->distinct('street', $q);
                 $s->reset();
                 $keywords = array_merge($keywords, $streets);
             }
@@ -32,12 +52,12 @@ class Controller_Corrections extends Controller {
             $keywords[] = $row->name;
 
             $parent_name = Arr::get($row->parent, 'name');
-            if(isset($row->property_type))
+            if (isset($row->property_type))
             {
                 $keywords[] = $row->property_type;
             }
 
-            if($parent_name)
+            if ($parent_name)
             {
                 $keywords[] = $parent_name;
             }
@@ -61,13 +81,13 @@ class Controller_Corrections extends Controller {
 
     public function action_postal()
     {
-        $cursor = Collection::factory('singpost')->find();
+        $cursor   = Collection::factory('singpost')->find();
         $keywords = [];
 
         while ($cursor->hasNext())
         {
             $row = $cursor->getNext();
-            $a = $row->as_array();
+            $a   = $row->as_array();
 
             $keywords[] = \Arr::get($a, 'building');
             $keywords[] = \Arr::get($a, 'estate');
@@ -83,7 +103,7 @@ class Controller_Corrections extends Controller {
             $row->set('keywords', $keywords);
             $row->save();
             fwrite(STDOUT, "Adding the following to {$row->_id}: \n");
-            fwrite(STDOUT, print_r($keywords, true) . "\n\n\n");
+            fwrite(STDOUT, implode(", ", $keywords) . "\n\n\n");
             $keywords = [];
         }
     }
@@ -92,18 +112,18 @@ class Controller_Corrections extends Controller {
     {
         Collection::factory('page')->remove(['_id' => new MongoID('50ed26deb90fb8c817000049')]);
         $return = [];
-        $cursor = Collection::factory('page')->find(['type' => 'location','subtype' => 'Estate', 'name' => new MongoRegex("/^Jurong West/")])
-                ->fields(['name']);
-        while($cursor->hasNext())
+        $cursor = Collection::factory('page')->find(['type'    => 'location', 'subtype' => 'Estate', 'name'    => new MongoRegex("/^Jurong West/")])
+          ->fields(['name']);
+        while ($cursor->hasNext())
         {
-            $estate = $cursor->getNext();
+            $estate   = $cursor->getNext();
             $children = Collection::factory('page')->find([
-                'type' => 'location', 'parent._id' => $estate->_id
-            ])->fields(['name', 'parent.name']);
+                  'type'       => 'location', 'parent._id' => $estate->_id
+              ])->fields(['name', 'parent.name']);
 
-            $return[(string)$estate->_id]['name'] = $estate->name;
-            $return[(string)$estate->_id]['count'] = $children->count();
-            $return[(string)$estate->_id]['children'] = $children->as_array(false);
+            $return[(string) $estate->_id]['name']     = $estate->name;
+            $return[(string) $estate->_id]['count']    = $children->count();
+            $return[(string) $estate->_id]['children'] = $children->as_array(false);
         }
 
         echo Debug::vars($return);
@@ -115,14 +135,14 @@ class Controller_Corrections extends Controller {
         $user = Document::factory('user', '5106694e6c01992d14000011');
         $user->load();
         $lib  = Document::factory('page', $user->library['_id']);
-        $del = Collection::factory('page')->remove_safe([
+        $del  = Collection::factory('page')->remove_safe([
 //            'user._id' => null,
             'type' => null,
 //            '$or' => [
 //                ['name' => ['$nin' => ['Profile Pictures', 'Private Uploads']]],
 //                ['page.name' => '']
 //            ]
-        ], ['multiple' => true]);
+          ], ['multiple' => true]);
         print_r($del);
         $lib->set('counts.albums.public', 1);
         $lib->save();
@@ -136,4 +156,5 @@ class Controller_Corrections extends Controller {
         $name = $this->request->query('id');
         print_r($name);
     }
+
 }
