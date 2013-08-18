@@ -134,7 +134,7 @@ class Controller_Singpost extends Controller {
         }
         catch (MongoException $e)
         {
-            fwrite(STDOUT, "Processed Record Successfully: {$e->getMessage()}\r\n");
+            fwrite(STDOUT, "Processed Record Failed: {$e->getMessage()}\r\n");
         }
 
         //echo "<br />";

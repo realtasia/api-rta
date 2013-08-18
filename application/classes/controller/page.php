@@ -345,23 +345,19 @@ class Controller_Page extends Controller_Resource {
             return $this->error('invalid_request');
 
         $q = [
+            'estate'   => ['$ne' => null],
             'keywords' => new MongoRegex("/^" . strtolower($s) . "/"),
             'child'    => ['$ne' => null]
-          //'type'       => 'location',
-          //'status'     => 'active',
-          //'privacy.is' => 'PUBLIC',
         ];
 
         // in case we are in an estate, limiting will be best
         if ($estate = \Arr::get(static::$params, 'object_name'))
         {
-            $q = [ 'estate' => urldecode($estate)] + $q;
-            //$q['parent._id'] = new MongoID(static::$params['object_id']);
+            $q['estate'] = urldecode($estate);
         }
 
         $s       = strtolower($s);
         $results = [];
-        file_put_contents('debug.html', print_r($q, true));
         $cursor  = (array) Collection::factory('singpost')->distinct('keywords', $q);
 
         foreach ($cursor as $value)
@@ -388,7 +384,7 @@ class Controller_Page extends Controller_Resource {
         $results = [];
 
         $cursor = (array) Collection::factory('page')->distinct('keywords', [
-              'keywords'   => new MongoRegex("/^".strtolower($s)."/"),
+              'keywords'   => new MongoRegex("/^" . strtolower($s) . "/"),
               'type'       => 'company',
               'status'     => 'active',
               'privacy.is' => 'PUBLIC',
@@ -453,14 +449,20 @@ class Controller_Page extends Controller_Resource {
         if ($s)
         {
             unset(static::$params['s']);
-            $cursor = Collection::factory('singpost')
-              ->distinct('child._id', [
-                'child'    => ['$ne' => null],
-                'keywords' => new MongoRegex("/^" . strtolower($s) . "/")
-            ]);
+            $c = Collection::factory('singpost')
+              ->find([
+                  'estate'    => ['$ne' => null],
+                  'keywords' => new MongoRegex("/^" . strtolower($s) . "/"),
+                  'child'    => ['$ne' => null],
+              ])
+              ->fields(['child'])
+              ->limit(50);
 
-            if (!empty($cursor))
-                static::$params['include_ids'] = $cursor;
+            while($c->hasNext())
+            {
+                static::$params['include_ids'][] = $c->getNext()->child['_id'];
+            }
+
         }
 
         if (parent::logged_in())
