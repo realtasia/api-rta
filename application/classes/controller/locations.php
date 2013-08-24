@@ -19,7 +19,7 @@ class Controller_Locations extends Controller_Resource {
 //class Controller_Locations extends Controller {
 
     public static $stray_statuses = [
-        'SUCCESS', 'INVALID', 'REVIEW'
+        'SUCCESS', 'INVALID', 'REVIEW', 'NEW'
     ];
 
     /**
@@ -41,7 +41,10 @@ class Controller_Locations extends Controller_Resource {
 
 
         if ($st->hasNext())
-            return $this->data($st->getNext()->as_array());
+        {
+            $d = $st->getNext();
+            return $this->data($d->stringify($d->as_array()));
+        }
     }
 
     /**
@@ -75,18 +78,18 @@ class Controller_Locations extends Controller_Resource {
      */
     public function action_updatestray($doc = false)
     {
-        $p        = $this->request->post();
-        $id       = \Arr::get($p, '_id');
-        $type     = \Arr::get($p, 'type');
+        $p      = $this->request->post();
+        $id     = \Arr::get($p, 'id');
+        $status = \Arr::get($p, 'status');
 
         // has to be valid status
-        if(!in_array($type, static::$stray_statuses))
-          return $this->error('invalid_request');
+        if (!in_array($status, static::$stray_statuses))
+            return $this->error('invalid_request');
 
         $comments = \Arr::get($p, 'message');
         $stray    = Document::factory('strayproject', $id);
 
-        $stray->status  = $type;
+        $stray->status  = $status;
         $stray->message = $comments;
         $stray->save();
 
@@ -144,7 +147,7 @@ class Controller_Locations extends Controller_Resource {
         {
             $return['total'] = count($cursor);
             $row             = $cursor->getNext();
-            $return['data']  = $row->as_array();
+            $return['data']  = $row->stringify($row->as_array());
             $return['ids'][] = (string) $row->_id;
 
             if (strtolower($row->building) === strtolower($name))
@@ -322,9 +325,8 @@ class Controller_Locations extends Controller_Resource {
         $new     = [];
         $u       = (object) $this->get_user();
         $ids     = $this->request->post('ids');
-        $strayID = $this->request->post('strayID');
         $data    = $this->request->post('data');
-        $data    = array_map("trim", array_map("strip_tags", array_filter($data)));
+        $data    = array_map("trim", array_map("strip_tags", array_filter((array)$data)));
         $estate  = Arr::get($data, 'estate');
         $name    = Arr::get($data, 'name');
         $subtype = Arr::get($data, 'subtype');
@@ -382,9 +384,6 @@ class Controller_Locations extends Controller_Resource {
         // the child location name to the keywords sub-document.
         if ($l->loaded())
         {
-            if ($strayID)
-                $strayDoc = $this->action_updatestray(true);
-
             Collection::factory('singpost')->update_safe(
               ['_id' => ['$in' => array_map('Document::check_id', $ids)]], [
                 '$set'      => [
@@ -402,7 +401,6 @@ class Controller_Locations extends Controller_Resource {
 
             return $this->data([
                   'location'       => $l->as_array(),
-                  'stray'          => $strayDoc->as_array(),
                   'postal_updated' => count($ids)
             ]);
         }
