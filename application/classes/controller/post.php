@@ -1,6 +1,4 @@
-<?php
-
-defined('SYSPATH') or die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');
 
 /**
  * Post is one of RTA's core controllers. It handles all functionality for post types. Albums,
@@ -441,9 +439,9 @@ class Controller_Post extends Controller_Resource {
         }
     }
 
-    /*     * ************************************************************************
+    /* *************************************************************************
      * Public Connections
-     * *********************************************************************** */
+     * ************************************************************************/
 
     /**
      * Retrieves users who like this post. <code>
@@ -1575,7 +1573,11 @@ class Controller_Post extends Controller_Resource {
      */
     protected static function extract_links($text)
     {
-        $text = urldecode($text);
+        /**
+         * @update 22 Aug 2013, I think this line might be the cuplrit for
+         * causing havoc with '&amp;' in text.
+         */
+        //$text = urldecode($text);
 
         /**
          *  $validTlds is an associative array mapping valid TLDs to the value true.

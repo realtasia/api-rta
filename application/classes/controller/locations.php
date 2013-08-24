@@ -1,4 +1,6 @@
-<?php defined('SYSPATH') or die('No direct script access.');
+<?php
+
+defined('SYSPATH') or die('No direct script access.');
 ini_set("max_execution_time", 0);
 ini_set('memory_limit', '2000M');
 
@@ -10,50 +12,204 @@ ini_set('memory_limit', '2000M');
  * @package RT_Controller
  * @subpackage Locations
  * @version 1.0
- * @copyright 2012 Realtasia Pte Ltd
+ * @copyright Copyright (c) 2012 Realtasia Pte Ltd
  */
 class Controller_Locations extends Controller_Resource {
 
 //class Controller_Locations extends Controller {
 
+    public static $stray_statuses = [
+        'SUCCESS', 'INVALID', 'REVIEW'
+    ];
+
+    /**
+     * Gets an unprocessed entry in straylocations. Retrieval is related to the
+     * 'skip' query given...
+     *
+     *
+     * @return /Response with JSON data
+     */
+    public function action_getstray()
+    {
+        $skip   = $this->request->query('skip');
+        $status = $this->request->query('status');
+
+        $st = Collection::factory('strayproject')
+          ->find(['status' => $status ? $status : 'NEW'])
+          ->skip($skip ? $skip : 0)
+          ->sort_asc('_id');
+
+
+        if ($st->hasNext())
+            return $this->data($st->getNext()->as_array());
+    }
+
+    /**
+     * Returns the total number of unprocessed 'would-be' locations.
+     *
+     *
+     * @return /Response with JSON data
+     */
+    public function action_countstrays()
+    {
+        $status = $this->request->query('status');
+
+        $st = Collection::factory('strayproject')
+          ->count(['status' => $status ? $status : 'NEW']);
+        //return $this->data([]);
+
+        return $this->data(['total' => $st]);
+
+        //if($st->hasNext())
+        $this->response->headers("Content-Type", "application/json");
+        $this->response->body(json_encode(['total' => $st]));
+    }
+
+    /**
+     * A method for updating the status of a stray location. Added the $doc
+     * param so this method can be used by other methods.Updates status of stray
+     * and adds possible comments.
+     *
+     * @param Boolean $doc return Mongo_Document or Response
+     * @return type
+     */
+    public function action_updatestray($doc = false)
+    {
+        $p        = $this->request->post();
+        $id       = \Arr::get($p, '_id');
+        $type     = \Arr::get($p, 'type');
+
+        // has to be valid status
+        if(!in_array($type, static::$stray_statuses))
+          return $this->error('invalid_request');
+
+        $comments = \Arr::get($p, 'message');
+        $stray    = Document::factory('strayproject', $id);
+
+        $stray->status  = $type;
+        $stray->message = $comments;
+        $stray->save();
+
+        return $doc ? $stray : $this->data([
+              'status' => 'success',
+              'data'   => $stray->as_array()
+        ]);
+    }
+
+    /**
+     * Similar to another method. More robust???
+     *
+     * @see self::action_search()
+     * @return /Response with JSON data
+     */
+    public function action_searchsingpost()
+    {
+        $s      = Collection::factory('singpost');
+        $name   = $this->request->query('name');
+        $text   = static::format($name);
+        ;
+        $street = $this->request->query('street');
+        $postal = $this->request->query('postal');
+        $or     = [];
+        $return = [
+            'namefound'   => false,
+            'streetfound' => false,
+            'postalfound' => false,
+            'total'       => 0,
+            'data'        => null,
+        ];
+
+        if (is_array($text))
+        {
+            $text = array_map('strtolower', $text);
+            $or[] = ['keywords' => ['$in' => $text]];
+        }
+
+        if ($name)
+            $or[] = ['keywords' => strtolower($name)];
+
+
+        if ($street)
+            $or[] = static::parse_street($street);
+
+        if ($postal)
+            $or[]   = ['keywords' => strtolower($postal)];
+        //return $this->data($or);
+        $cursor = $s->find(['$or' => array_filter($or)]);
+
+        $return['data']      = (object) [];
+        $return['debugData'] = ['$or' => array_filter($or)];
+
+        if ($cursor->hasNext())
+        {
+            $return['total'] = count($cursor);
+            $row             = $cursor->getNext();
+            $return['data']  = $row->as_array();
+            $return['ids'][] = (string) $row->_id;
+
+            if (strtolower($row->building) === strtolower($name))
+                $return['namefound'] = true;
+
+            if (strtolower($row->number) . ' ' . strtolower($row->street) === strtolower($street))
+                $return['streetfound'] = true;
+
+            if (strtolower($row->postal) === strtolower($postal))
+                $return['postalfound'] = true;
+        }
+
+        while ($cursor->hasNext())
+        {
+            $return['ids'][] = (string) $cursor->getNext()->_id;
+        }
+
+        return $this->data($return);
+    }
+
+    /**
+     * Retrieves a list of unique estates served by the current request query
+     *
+     *
+     * @return /Response with JSON data
+     */
     public function action_estates()
     {
         $id = ucwords(strtolower($this->request->query('term')));
         $e  = Document::factory('singpost')->collection()->distinct('estate', [
             'estate' => new MongoRegex("/^$id/")
-                ]);
+        ]);
         return $this->data($e);
     }
 
-    public function action_child()
-    {
-        $id = ucfirst($this->request->query('term'));
-        $e  = Document::factory('singpost')->collection()->distinct('child', [
-            '$or' => [
-                ['child.name' => new MongoRegex("/^" . $id . "/")],
-                ['child' => new MongoRegex("/^" . $id . "/")]
-            ]
-                ]);
-        return $this->data($e);
-    }
-
+    /**
+     * Retrieves a list of unique building names served by the current request query
+     *
+     *
+     * @return /Response with JSON data
+     */
     public function action_building()
     {
-        $id = strtoupper($this->request->query('term'));
-        $e  = Document::factory('singpost')->collection()->distinct('building', [
-            'building' => new MongoRegex("/^$id/")
-                ]);
+        $term = strtoupper($this->request->query('term'));
+        $e    = Document::factory('singpost')->collection()->distinct('building', [
+            'building' => new MongoRegex("/^" . $term . "/")
+        ]);
         return $this->data($e);
     }
 
+    /**
+     * returns json string of results retrieved from the request query params
+     * given
+     *
+     * @uses \Controller_locations::query()
+     * @return /Response with JSON data
+     */
     public function action_search()
     {
         $query = $this->query();
         $row   = [];
         $e     = Document::factory('singpost');
         $c     = $e->collection()
-                ->collection()
-                ->find($query);
+          ->collection()
+          ->find($query);
         while ($c->hasNext())
         {
             $rows[] = $e->stringify($c->getNext());
@@ -61,41 +217,39 @@ class Controller_Locations extends Controller_Resource {
         return $this->data($rows);
     }
 
-    public function action_createestates()
-    {
-        $r      = [];
-        $id     = ucwords(strtolower($this->request->query('term')));
-        $e      = array_filter(Document::factory('singpost')->collection()->distinct('estate'));
-        $p      = Document::factory('page');
-        $u      = (object) $this->get_user();
-        $params = ['subtype' => 'estate', 'type'    => 'location', 'user'    => ['_id'  => $u->_id, 'name' => $u->name]];
-
-        foreach ($e as $estate)
-        {
-            $params['name'] = $estate;
-            $p->clear();
-            $r[]            = $p->create($params)->as_array();
-        }
-        return $this->data($r);
-    }
-
+    /**
+     * 3 step process that updates or creates new estates by sector
+     *  1. updates singpost documents with an estate name in the given sector.
+     *  2. Fetches or creates the actual estate location in the 'pages' collection
+     *  3. Retrieves any existing child location ids from those
+     *     present in the updated singpost entries and then updates the
+     *     respective 'parent' fields to reflect the estate in 2.
+     *
+     * needs a $_POST with the following:[
+     *   **estate  => 'name', ** // name of estate,
+     *   **sector  => 'sector', ** // two digit sctor code (first 23 digits of postal code)
+     * ]
+     *
+     *
+     * @return /Response with JSON data
+     */
     public function action_modifyestate()
     {
-        $u         = (object) $this->get_user();
-        $children  = null;
-        $estate    = trim($this->request->post('estate'));
-        $sector    = trim($this->request->post('sector'));
+        $u        = (object) $this->get_user();
+        $children = null;
+        $estate   = trim($this->request->post('estate'));
+        $sector   = trim($this->request->post('sector'));
 
         Collection::factory('singpost')->update_safe(
-                ['postal' => new MongoRegex("/^$sector/")], ['$set' => ['estate' => $estate]], ['multiple' => true]
+          ['postal' => new MongoRegex("/^$sector/")], ['$set' => ['estate' => $estate]], ['multiple' => true]
         );
 
-        $new = Document::factory('page');
-        $load = $new->load(['name' => $estate, 'type' => 'location', 'subtype' => 'Estate']);
+        $new  = Document::factory('page');
+        $load = $new->load(['name'    => $estate, 'type'    => 'location', 'subtype' => 'Estate']);
 
-        if(!$load)
+        if (!$load)
         {
-            $new          = $new->create([
+            $new = $new->create([
                 'subtype' => 'Estate',
                 'type'    => 'location',
                 'user'    => ['_id'  => Document::check_id($u->_id), 'name' => $u->name],
@@ -106,33 +260,32 @@ class Controller_Locations extends Controller_Resource {
             $new->load();
         }
 
-        if($new->loaded())
+        if ($new->loaded())
         {
-            $uids = [];
+            $uids       = [];
             $updatekids = Collection::factory('singpost')->find(['postal' => new MongoRegex("/^$sector/")]);
-            while($updatekids->hasNext())
+            while ($updatekids->hasNext())
             {
-                $c = $updatekids->getNext();
+                $c   = $updatekids->getNext();
                 $cid = Arr::get($c->child, '_id');
-                if($cid)
+                if ($cid)
                 {
                     $uids[] = $cid;
                 }
-
             }
 
             $children = Collection::factory('page')->update_safe(['_id' => ['$in' => $uids]], [
-            '$unset' => ['oldestate' => 1],
-            '$set'   => [
-                'sector' => $sector,
-                'parent' => [
-                    '_id'  => $new->_id,
-                    'name' => $new->name,
-                    'uri'  => $new->uri,
-                    'type' => 'location',
-            ]]], ['multiple' => true]);
+                '$unset' => ['oldestate' => 1],
+                '$set'   => [
+                    'sector' => $sector,
+                    'parent' => [
+                        '_id'  => $new->_id,
+                        'name' => $new->name,
+                        'uri'  => $new->uri,
+                        'type' => 'location',
+                    ]]], ['multiple' => true]);
 
-            if($children)
+            if ($children)
             {
                 $old_count = Arr::get($new->counts, 'locations', 0);
                 $new_count = (int) $children + (int) $old_count;
@@ -142,19 +295,36 @@ class Controller_Locations extends Controller_Resource {
         }
 
         return $this->data([
-            'children'  => $children,
-            'newcount'  => $new_count,
-            'newestate' => $new->as_array()
+              'children'  => $children,
+              'newcount'  => $new_count,
+              'newestate' => $new->as_array()
         ]);
     }
 
+    /**
+     * This method creates a new location and updates singpost collection with
+     * the newly created location id.
+     *
+     * needs a $_POST with the following:[
+     *   'ids   => [], //of singpost document ids to update
+     *   'data' => [
+     *      **estate  => 'name', ** // name of estate
+     *      **name    => 'name', ** // the name of the new location
+     *      **subtype => 'name', ** // the location subtype 'private-apartments' etc
+     *   ]
+     * ]
+     *
+     * @params $_POST array()
+     * @return /Response with JSON data
+     */
     public function action_createlocation()
     {
         $new     = [];
         $u       = (object) $this->get_user();
         $ids     = $this->request->post('ids');
+        $strayID = $this->request->post('strayID');
         $data    = $this->request->post('data');
-        $data    = array_filter($data);
+        $data    = array_map("trim", array_map("strip_tags", array_filter($data)));
         $estate  = Arr::get($data, 'estate');
         $name    = Arr::get($data, 'name');
         $subtype = Arr::get($data, 'subtype');
@@ -165,258 +335,88 @@ class Controller_Locations extends Controller_Resource {
         // retrieve the given estate from the db or throw error if not found
         $e = Document::factory('page');
 
-        if (!$e->load(['name' => $estate, 'type' => 'location']))
+        if (!$e->load(['type' => 'location', 'name' => $estate]))
             return $this->error('invalid_request');
 
+        // extract the parent subdocument.
+        $parent = \Arr::extract($e->as_array(), ['_id', 'name', 'uri', 'type']);
+
+        // a new location model
         $l = Document::factory('page');
-        if (!$l->load(['name' => $name]))
+
+        // we check if an existing location exists, safety measure. Ideally I
+        // would check against 'keywords', but there is no telling how many false
+        // positives there might be. Text entry just cannot be predicted.
+        if (!$l->load(['type' => 'location', 'name' => $name]))
         {
             // populate location data
-            $new['parent']        = [
-                '_id'  => $e->_id,
-                'name' => $e->name,
-                'uri'  => $e->uri,
-                'type' => 'location',
-            ];
+            $new['parent']        = $parent;
             $new['subtype']       = $subtype;
             $new['name']          = $name;
-            $new['property_type'] = Arr::get($data, 'property_type', []);
+            $new['property_type'] = Arr::get($data, 'property_type');
             $new['content']       = Arr::get($data, 'content');
             $new['type']          = 'location';
             $new['user']          = ['_id'  => Document::check_id($u->_id), 'name' => $u->name];
 
-            // load new values
-            $location = Document::factory('page');
-
+            //return $this->data($new);
             // save
-            if ($location->create($new))
+            if ($l->create($new))
             {
+                // estate will need an up-count
                 $e->inc('counts.locations');
                 $e->save();
-                // update singpost table
-                Collection::factory('singpost')->update_safe(
-                        ['_id' => ['$in' => Arr::map('Document::check_id', $ids)]], ['$set' => [
-                        'type'  => Arr::get($data, 'property_type'),
-                        'child' => [
-                            '_id'  => $location->_id,
-                            'name' => $location->name,
-                            'uri'  => $location->uri,
-                    ]]], ['multiple' => true]
-                );
-                //return $location;
             }
         }
         else
         {
             $l->name          = $name;
             $l->subtype       = $subtype;
-            $l->property_type = Arr::get($data, 'property_type', []);
+            $l->property_type = Arr::get($data, 'property_type');
             $l->content       = Arr::get($data, 'content');
-            $l->parent        = [
-                '_id'  => $e->_id,
-                'name' => $e->name,
-                'uri'  => $e->uri,
-                'type' => 'location',
-            ];
-
+            $l->parent        = $parent;
+            //return $this->data($l->as_array());
             $l->save();
+        }
+        !$l->loaded() && $l->load();
+        // update singpost table with the newly created child location and add
+        // the child location name to the keywords sub-document.
+        if ($l->loaded())
+        {
+            if ($strayID)
+                $strayDoc = $this->action_updatestray(true);
 
             Collection::factory('singpost')->update_safe(
-                    ['_id' => ['$in' => Arr::map('Document::check_id', $ids)]], ['$set' => [
+              ['_id' => ['$in' => array_map('Document::check_id', $ids)]], [
+                '$set'      => [
+                    'type'  => $subtype,
                     'child' => [
                         '_id'  => $l->_id,
                         'name' => $l->name,
                         'uri'  => $l->uri,
-                ]]], ['multiple' => true]
+                    ]
+                ],
+                '$addToSet' => [
+                    'keywords' => strtolower($l->name)
+                ]], ['multiple' => true]
             );
+
+            return $this->data([
+                  'location'       => $l->as_array(),
+                  'stray'          => $strayDoc->as_array(),
+                  'postal_updated' => count($ids)
+            ]);
         }
         //return false;
-        //return $this->data(['success' => true]);
-        return $this->data(Arr::merge($ids, ['estate' => $estate]));
+        return $this->error('invalid_request');
     }
 
-    public function action_csv()
-    {
-        $e        = Document::factory('page');
-        $location = Document::factory('page');
-        $json     = fopen("notfound.json", "w");
-        $nf       = [];
-        // load new values
-
-        if (($handle = fopen("condos.csv", "r")) !== FALSE)
-        {
-            while (($data = fgetcsv($handle, 1000, ",")) !== FALSE)
-            {
-                $name = mb_substr($data[0], 0, mb_strlen($data[0]) - 1);
-                $type = $data[2];
-                $f    = static::findBuilding($name, true);
-                if ($f)
-                {
-                    // check if child exists
-                    if (!(Arr::get((array) $f['child'], '_id') instanceof MongoID))
-                    {
-                        // no child, get estate or return error
-                        if (!$e->load(['name' => $f['estate'], 'type' => 'location']))
-                        {
-                            echo Debug::vars(['Estate Not Found' => $f['child']]);
-                            return;
-                        }
-
-
-
-                        $property_type        = $f['address'] === 'Walkup' ? $f['address'] . ' ' . $type : $type;
-                        // populate location data
-                        $new['parent']        = [
-                            '_id'  => $e->_id,
-                            'name' => $e->name,
-                            'uri'  => $e->uri,
-                            'type' => 'location',
-                        ];
-                        $new['subtype']       = 'Private Apartments';
-                        $new['name']          = ucwords(strtolower($name));
-                        $new['sector']        = substr($f['postal'], 0, 2);
-                        $new['property_type'] = $property_type;
-                        $new['content']       = Arr::get($data, 'content');
-                        $new['type']          = 'location';
-                        $new['user']          = ['_id'  => new MongoID('50b7620ab90fb8e884000009'), 'name' => 'Jason Nathan'];
-                        if ($location->create($new))
-                        {
-                            $e->inc('counts.locations');
-                            $e->save();
-                            // update singpost table
-                            $update = Collection::factory('singpost')->update_safe(
-                                    static::findBuilding($name), ['$set' => [
-                                    'child' => [
-                                        '_id'  => $location->_id,
-                                        'name' => $location->name,
-                                        'uri'  => $location->uri,
-                                ]]], ['multiple' => true]
-                            );
-                            echo Debug::vars(Arr::merge($location->as_array(), (array) $update));
-                        }
-                        $e->clear();
-                        $location->clear();
-                    }
-                    else
-                    {
-                        echo Debug::vars(['Child Exists' => $name]);
-                    }
-                }
-                else
-                {
-                    $nf[] = $name;
-                }
-            }
-            fwrite($json, json_encode($nf));
-            fclose($handle);
-        }
-    }
-
-    public function action_json()
-    {
-        $found    = $total    = 0;
-        $e        = Document::factory('page');
-        $location = Document::factory('page');
-        $file     = json_decode(file_get_contents("notfound.json"));
-        $json     = fopen("notfound.json", "w");
-        $nf       = [];
-        // load new values
-        foreach ($file as $name)
-        {
-            //echo Debug::vars(static::findBuilding($name));
-            $total++;
-            $type = $data[2];
-            $f    = static::findBuilding($name, true);
-            if ($f)
-            {
-                $found++;
-                // check if child exists
-                if (!(Arr::get((array) $f['child'], '_id') instanceof MongoID))
-                {
-                    // no child, get estate or return error
-                    if (!$e->load(['name' => $f['estate'], 'type' => 'location']))
-                    {
-                        echo Debug::vars(['Estate Not Found' => $f['child']]);
-                        return;
-                    }
-
-                    $property_type        = $f['address'] === 'Walkup' ? $f['address'] . ' ' . $type : $type;
-                    // populate location data
-                    $new['parent']        = [
-                        '_id'  => $e->_id,
-                        'name' => $e->name,
-                        'uri'  => $e->uri,
-                        'type' => 'location',
-                    ];
-                    $new['subtype']       = 'Private Apartments';
-                    $new['name']          = ucwords(strtolower($name));
-                    $new['sector']        = substr($f['postal'], 0, 2);
-                    $new['property_type'] = $property_type;
-                    $new['content']       = Arr::get($data, 'content');
-                    $new['type']          = 'location';
-                    $new['user']          = ['_id'  => new MongoID('50b7620ab90fb8e884000009'), 'name' => 'Jason Nathan'];
-                    if ($location->create($new))
-                    {
-                        $e->inc('counts.locations');
-                        $e->save();
-                        // update singpost table
-                        $update = Collection::factory('singpost')->update_safe(
-                                static::findBuilding($name), ['$set' => [
-                                'child' => [
-                                    '_id'  => $location->_id,
-                                    'name' => $location->name,
-                                    'uri'  => $location->uri,
-                            ]]], ['multiple' => true]
-                        );
-                        echo Debug::vars(Arr::merge($location->as_array(), (array) $update));
-                    }
-                    $e->clear();
-                    $location->clear();
-                }
-                else
-                {
-                    echo Debug::vars(['Child Exists' => $name]);
-                    unset($name);
-                }
-            }
-            else
-            {
-                $nf[] = $name;
-            }
-        }
-        fwrite($json, json_encode(array_filter($nf)));
-        echo Debug::vars([
-            'total' => $total,
-            'found' => $found,
-        ]);
-    }
-
-    public function action_lostandfound()
-    {
-        $found  = $total  = 0;
-        $mysqli = new mysqli('127.0.0.1', 'root', '', 'test');
-        $json   = json_decode(file_get_contents("notfound.json"));
-
-        foreach ($json as $name)
-        {
-            $total++;
-            $query  = "SELECT * FROM `condominiums` WHERE `Project` RLIKE '" . $mysqli->real_escape_string($name) . "' ";
-            $result = $mysqli->query($query) or die($mysqli->error . __LINE__);
-            if ($result->num_rows > 0)
-            {
-                $found++;
-                while ($row = $result->fetch_assoc())
-                {
-                    echo Debug::vars(Arr::merge($row, ['NAME' => $name]));
-                }
-            }
-        }
-        echo Debug::vars([
-            'total' => $total,
-            'found' => $found,
-        ]);
-    }
-
+    /**
+     * Splits a keyword into as many forms as queriable to return better results
+     *
+     * @param string $text
+     * @param boolean $result
+     * @return mixed \Mongo_Cursor of an executed query or a query array
+     */
     public static function findBuilding($text, $result = false)
     {
         $text     = static::format($text);
@@ -424,16 +424,12 @@ class Controller_Locations extends Controller_Resource {
 
         if (is_array($text))
         {
-            $r1 = new MongoRegex("/^" . $text[0] . "/");
-            $r2 = new MongoRegex("/^" . $text[1] . "/");
-            $r3 = new MongoRegex("/^" . ucwords(strtolower($text[0])) . "/");
-            $r4 = new MongoRegex("/^" . ucwords(strtolower($text[1])) . "/");
+            $r1 = new MongoRegex("/^" . ucwords(strtolower($text[0])) . "/");
+            $r2 = new MongoRegex("/^" . ucwords(strtolower($text[1])) . "/");
             $q  = [
                 '$or' => [
-                    ['building' => $r1],
-                    ['building' => $r2],
-                    ['other_name' => $r3],
-                    ['other_name' => $r4],
+                    ['keywords' => $r1],
+                    ['keywords' => $r2]
                 ]
             ];
             return $result ? $singpost->collection()->findOne($q) : $q;
@@ -443,31 +439,33 @@ class Controller_Locations extends Controller_Resource {
         $r2 = new MongoRegex("/^" . ucwords(strtolower($text)) . "/");
         $q  = [
             '$or' => [
-                ['building' => $r1],
-                ['other_name' => $r2],
+                ['keywords' => $r1],
+                ['keywords' => $r2],
             ]
         ];
         return $result ? $singpost->collection()->findOne($q) : $q;
     }
 
+    /**
+     * A simple utility that
+     *  1. converts "project@place" to "project @ place"
+     *  2. converts "project, the" to an array for use as an '$in' mongo query
+     *     ['the', 'project'].
+     *     (the keywords subdoc has "the" as one of it's values)
+     *
+     * @param string $text
+     * @return mixed array | string
+     */
     public static function format($text)
     {
 
-//        $parts = explode(' ', $text);
-//
-//        foreach ($parts as $k => $part)
-//        {
-////            if ($part === 'AT')
-////            {
-////                $parts[$k] = '@';
-////            }
-//
-//            if (is_numeric($part))
-//            {
-//                unset($parts[$k]);
-//            }
-//        }
-//        $text = trim(implode(' ', $parts));
+        $parts = explode('@', $text);
+        if (!empty($parts))
+        {
+            $parts = array_map('trim', $parts);
+            $parts = array_map('strtolower', $parts);
+            $text  = implode(" ", $parts);
+        }
 
         if (strpos($text, 'THE ') === 0)
         {
@@ -475,86 +473,53 @@ class Controller_Locations extends Controller_Resource {
                 trim(substr($text, 4, strlen($text))), $text
             ];
         }
-        echo Debug::vars($text);
+        //echo Debug::vars($text);
         return $text;
     }
 
+    /**
+     * This method parses through query parameters and returns an organised
+     * query array for use with mongodb. It ensures an index order on multikey
+     * indexes created on the Singpost collection - where possible.
+     * index is {estate, child, keywords}
+     *
+     * @return array a MongoDB compatible query
+     */
     public function query()
     {
-        $r = [];
-        $q = array_filter($this->request->query());
+        // the return array
+        $r = array();
+        // remove all empty values recursively
+        $q = array_map('array_filter', $this->request->query());
 
         foreach ($q as $k => $v)
         {
-            if (empty($v))
-                unset($q[$k]);
-
             if (in_array($k, ['estate']))
             {
-                switch ($v)
-                {
-                    case 'NULL':
-                        $r[$k] = NULL;
-                        break;
-                    case 'NOT NULL':
-                        $r[$k] = ['$ne' => NULL];
-                        break;
-                    default:
-                        $r[$k] = new MongoRegex("/^" . ucwords(strtolower($v)) . "/");
-                        break;
-                }
-            }
-
-            if (in_array($k, ['property_type']))
-            {
-                switch ($v)
-                {
-                    case 'NULL':
-                        $r['type'] = NULL;
-                        break;
-                    case 'NOT NULL':
-                        $r['type'] = ['$ne' => NULL];
-                        break;
-                    default:
-                        $r['type'] = new MongoRegex("/^" . ucwords(strtolower($v)) . "/");
-                        break;
-                }
-            }
-
-            if ($k === 'building')
-            {
-                switch ($v)
-                {
-                    case 'NULL':
-                        $r[$k] = NULL;
-                        break;
-                    case 'NOT NULL':
-                        $r[$k] = ['$ne' => NULL];
-                        break;
-                    default:
-                        $r[$k] = new MongoRegex("/^" . strtoupper($v) . "/");
-                        break;
-                }
+                $r[$k] = static::_parse_string_search($v, 'self::ucwords');
             }
 
             if ($k === 'child')
             {
-                switch ($v)
-                {
-                    case 'NULL':
-                        $r['child._id'] = NULL;
-                        $r['keywords'] = 'nolocation';
-                        break;
-                    case 'NOT NULL':
-                        $r['child._id'] = ['$ne' => NULL];
-                        break;
-                    default:
-                        $r['$or']       = [
-                            ['child.name' => new MongoRegex("/^" . strtoupper($v) . "/")],
-                            ['child' => new MongoRegex("/^" . $v . "/")]
-                        ];
-                        break;
-                }
+                $child = self::_parse_null_string($v);
+
+                if (is_string($child))
+                    $r['$or']       = [
+                        ['child.name' => new MongoRegex("/^" . strtoupper($v) . "/")],
+                        ['child' => new MongoRegex("/^" . $v . "/")]
+                    ];
+                else
+                    $r['child._id'] = $child;
+            }
+
+            if (in_array($k, ['property_type']))
+            {
+                $r['type'] = static::_parse_string_search($v, 'self::ucwords');
+            }
+
+            if ($k === 'building')
+            {
+                $r[$k] = static::_parse_string_search($v, 'strtoupper');
             }
         }
 
@@ -570,15 +535,25 @@ class Controller_Locations extends Controller_Resource {
 
         if (isset($q['s']))
         {
-
-            $r['$or'] = [
+            $keywords = [
                 ['building' => new MongoRegex("/^" . strtoupper($q['s']) . "/")],
                 ['child.name' => new MongoRegex("/^" . ucwords(strtolower($q['s'])) . "/")],
                 ['child' => new MongoRegex("/^" . ucwords(strtolower($q['s'])) . "/")]
             ];
+
+
+            if (isset($r['$or']) && is_array($r['or']))
+            {
+                $r['$or'] = \Arr::merge($r['$or'], $keywords);
+            }
+            else
+            {
+                $r['$or'] = $keywords;
+            }
+
             if (strpos($q['s'], ','))
             {
-                $r['$or'][] = ['postal' => ['$in' => explode(',', $q['s'])]];
+                $r['$or'][] = ['postal' => ['$in' => array_map("trim", explode(',', $q['s']))]];
             }
             else
             {
@@ -586,39 +561,107 @@ class Controller_Locations extends Controller_Resource {
             }
         }
 
-        return $r;
+        return array_map('array_filter', $r);
     }
 
-    public function action_correct()
+    /** A simple utility that parses & processes "NULL" & "NOT NULL" string values
+     * Also applies a callback filter to the text when supplied with one. Finally
+     * returns a valid MongoDB query based on the supplied text. Also handles
+     * regular text.
+     *
+     * @param string $value
+     * @param Callable $filter the callback function to apply to the text
+     * @return \MongoRegex
+     */
+    protected static function _parse_string_search($value, $filter = null)
     {
-        return $this->data(Collection::factory('page')->correct3());
+        $v = self::_parse_null_string(strtoupper($value));
+
+        //if null or an array, this was a "NULL"/"NOT NULL" type string. nothing
+        // left to do.
+        if (is_null($v) || is_array($v))
+            return $v;
+
+        // sometimes, specific query fields need special processing like ucwords
+        if (is_callable($filter))
+            $v = $filter($v);
+
+        return new MongoRegex("/^" . $v . "/");
     }
 
-    public function action_orphans()
+    /**
+     * Does most of the heavy lifting for the method above.
+     *
+     * @param String $value
+     * @return mixed null|Array|String $value
+     */
+    protected static function _parse_null_string($value)
     {
-        $ids = [];
-        echo "<pre>";
-        $estates = Collection::factory('page')->find([
-            'type' => 'location', 'subtype' => 'Estate'
-        ], ['_id' => 1]);
+        $v = strtoupper($value);
+        if ($v === "NULL")
+            return null;
 
-        while($estates->hasNext())
+        if ($v === "NOT NULL")
+            return ['$ne' => NULL];
+
+        return $value;
+    }
+
+    /**
+     * Another utility. To cut typing and to allow use as callable function.
+     *
+     * @param String $v
+     * @return String
+     */
+    public static function ucwords($v)
+    {
+        return ucwords(strtolower($v));
+    }
+
+    /**
+     * Some address sources for properties have addresses ranges. e.g.
+     * "1 - 50 example road". Since this is not ideal for a query in SingPost db
+     * (singpost is one address per document), this method returns an array
+     * for use in and '$in' operator, splitting the above addresses into individual
+     * items if such an address was provided.
+     *
+     * @param String $text
+     * @return Array Mongo Query
+     */
+    protected function parse_street($text)
+    {
+        // check if this address has the deciding '-'
+        if (strpos($text, '-') !== false)
         {
-            $e = $estates->getNext();
-            $ids[] = Document::check_id($e->_id);
+            // we have a match. first explode
+            $explode1 = array_map("trim", explode("-", $text));
+
+            // check if second block starts with a number
+            if (is_numeric(substr($explode1[1], 0, 1)))
+            {
+                //explode again, whitespace this time.
+                $explode2 = array_map("trim", explode(" ", $explode1[1]));
+
+                //start a range
+                $range = range((int) $explode1[0], (int) $explode2[0]);
+
+                // remove the number from the second part
+                unset($explode2[0]);
+
+                // combine the remaining words to form the street name.
+                $street = strtolower(trim(implode(" ", $explode2)));
+
+                foreach ($range as $k => $r)
+                {
+                    // build the query "1 example road", "2 example road" etc
+                    $in[] = "$k $street";
+                }
+                // return the $in query
+                return ['keywords' => ['$in' => $in]];
+            }
         }
-
-        $ids = array_filter($ids);
-
-        $children = Collection::factory('page')->remove_safe([
-            'type' => 'location', 'parent._id' => ['$nin' => $ids], 'subtype' => ['$ne' => 'Estate']
-        ], ['multiple' => true]);
-        echo Debug::vars($children);
-
-//        while($children->hasNext())
-//        {
-//            $c= $children->getNext()->as_array();
-//            var_dump(['name' => $c['name'], 'parent' => $c['parent']]);
-//        }
+        // regular address, just return.
+        return ['keywords' => strtolower($text)];
     }
+
 }
