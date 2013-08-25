@@ -349,7 +349,7 @@ class Controller_Locations extends Controller_Resource {
         // we check if an existing location exists, safety measure. Ideally I
         // would check against 'keywords', but there is no telling how many false
         // positives there might be. Text entry just cannot be predicted.
-        if (!$l->load(['type' => 'location', 'name' => $name]))
+        if (!$l->load(['type' => 'location', 'name' => static::ucwords($name)]))
         {
             // populate location data
             $new['parent']        = $parent;
@@ -406,6 +406,18 @@ class Controller_Locations extends Controller_Resource {
         }
         //return false;
         return $this->error('invalid_request');
+    }
+
+    public function action_fetchlocation()
+    {
+        $name = $this->request->query('name');
+        if($name)
+        {
+            $d = Document::factory('page', ['name' => static::ucwords($name)]);
+            if($d->load())
+                return $this->data($d->stringify($d->as_array()));
+        }
+        return $this->data([]);
     }
 
     /**

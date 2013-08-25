@@ -43,9 +43,6 @@ class Controller_Page extends Controller_Resource {
      * *********************************************************************** */
 
     /**
-     * Fetch a private GET action or fail if there is one and no method for it
-     * Or fetch a post by id.
-     * Check if there is a logged in user
      * Fetch requested post and check relation to logged_in user
      *
      * GET post
