@@ -1908,10 +1908,8 @@ class Controller_User extends Controller_Resource {
                 $telephone = SMS::valid($s);
                 $keyword   = new MongoRegex("/^$s/");
                 $query     = [
-                    ['username' => $keyword],
-                    ['email' => $keyword],
+                    ['keywords' => $keyword],
                     ['company.name' => new MongoRegex('/^' . strtoupper($s) . '/')],
-                    ['name' => new MongoRegex("/^" . ucfirst($s) . "/")],
                 ];
                 if ($telephone)
                 {
@@ -1928,6 +1926,7 @@ class Controller_User extends Controller_Resource {
                 while ($c->hasNext())
                 {
                     $row                = $c->getNext();
+                    $row->is_admin(true);
                     $return[$t]['cl'][] = $row->stringify($row->as_array());
                 }
             }
