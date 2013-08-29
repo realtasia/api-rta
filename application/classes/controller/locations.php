@@ -55,13 +55,14 @@ class Controller_Locations extends Controller_Resource {
      */
     public function action_countstrays()
     {
-        $status = $this->request->query('status');
+        $return = array();
 
-        $st = Collection::factory('strayproject')
-          ->count(['status' => $status ? $status : 'NEW']);
-        //return $this->data([]);
+        foreach(static::$stray_statuses as $filter)
+        {
+            $return[$filter] = Collection::factory('strayproject')->count(['status' => $filter]);
+        }
 
-        return $this->data(['total' => $st]);
+        return $this->data($return);
 
         //if($st->hasNext())
         $this->response->headers("Content-Type", "application/json");

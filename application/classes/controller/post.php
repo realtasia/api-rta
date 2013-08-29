@@ -261,7 +261,7 @@ class Controller_Post extends Controller_Resource {
      */
     public function action_comment()
     {
-        $params           = static::format(static::$params, 66, 100);
+        $params           = static::format(static::$params, 60, 100);
         $params['type']   = 'comment';
         $params['status'] = static::$params['status'];
         $params['user']   = static::$params['user'];
