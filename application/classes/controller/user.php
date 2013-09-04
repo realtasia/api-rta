@@ -1,16 +1,14 @@
-<?php
-
-defined('SYSPATH') or die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');
 
 /**
  * Description of user
  *
  * @author Jason Nathan
- * @category RealtAsia
- * @package RT_Controller
+ * @package RealtAsia API
  * @subpackage User
+ * @category Controllers
  * @version 1.0
- * @copyright 2012 Realtasia Pte Ltd
+ * @copyright 2010-2013 Realtasia Pte Ltd
  * @uses Oauth2_Resource
  *
  */
@@ -33,7 +31,7 @@ class Controller_User extends Controller_Resource {
     private static $valid_user_actions        = [
         'create_social_login', 'password_reset', 'update_social_login', 'is_unique',
         'update_avatar', 'update_info', 'send_sms', 'validate_password',
-        'update_settings'
+        'update_settings', 'regenerate_qrcode'
     ];
 
     /**
@@ -637,52 +635,6 @@ class Controller_User extends Controller_Resource {
         return $this->error('invalid_request');
     }
 
-    protected function generate_qrcode(\QRcode $qr, $values)
-    {
-        $id = $this->request->param('id');
-        $f  = ['name', 'info', 'email', 'settings.privacy', 'avatar'];
-        $u  = Document::factory('user', $id);
-        if ($u->load(null, array_fill_keys(array_reverse($f), 1)))
-        {
-            $privacy = Privacy::factory($u);
-            $values  = $u->stringify($u->as_array());
-
-            switch (true)
-            {
-                case $privacy->is === 'PUBLIC': break;
-            }
-
-            foreach ($values as $key => $value)
-            {
-                switch ($key)
-                {
-                    case 'name': $qr->fullName($value);
-                        break;
-                    case 'gender': $qr->gender($value);
-                        break;
-                    case 'designation': $qr->title($value);
-                        break;
-                    case 'role': $qr->role($value);
-                        break;
-                    case 'company': $qr->company($value);
-                        break;
-                    case 'birthday': $qr->birthday($value);
-                        break;
-                    case 'mobile': $qr->mobile($value);
-                        $qr->sms($value);
-                        break;
-                    case 'email': $qr->email($value);
-                        break;
-                    case 'avatar': $qr->photo($value);
-                        break;
-                    case 'uri': $qr->url($value);
-                        break;
-                    case 'info': break;
-                }
-            }
-        }
-    }
-
     /*     * ************************************************************************
      * Public Actions
      * *********************************************************************** */
@@ -1168,9 +1120,8 @@ class Controller_User extends Controller_Resource {
                             foreach ($value as $label => $val)
                             {
                                 if (empty($val))
-                                {
                                     unset($value[$label]);
-                                }
+
                                 if (is_array($val))
                                 {
                                     foreach ($val as $l => $v)
@@ -1190,7 +1141,7 @@ class Controller_User extends Controller_Resource {
                     }
                     else
                     {
-                        // set to null so as to filter
+                        // set to null so array_filter can work its magic later
                         static::$params[$key] = is_array($value) ? (array) $value : null;
                     }
                     break;
@@ -1216,14 +1167,12 @@ class Controller_User extends Controller_Resource {
             {
                 $v['value'] = trim($v['value']);
                 if (empty($v['value']))
-                {
                     unset($edu[$k]);
-                }
+
                 $v['date'] = trim($v['date']);
                 if (empty($v['date']) || !is_numeric($v['date']))
-                {
                     unset($edu[$k]);
-                }
+
             }
         }
         static::$params['info']['education'] = array_filter($edu);
@@ -1265,7 +1214,7 @@ class Controller_User extends Controller_Resource {
     }
 
     /**
-     * Update a user's privacuy settings.
+     * Update a user's privacy/notification settings.
      *
      * @return boolean
      */
@@ -1568,6 +1517,31 @@ class Controller_User extends Controller_Resource {
         return;
     }
 
+
+    protected function regenerate_qrcode()
+    {
+        $id = $this->request->param('id');
+        $fields = \Arr::get(static::$params, 'vcard', array());
+        $v_fields = ['mobile', 'birthday', 'email', 'company', 'designation', 'uri', 'avatar', 'about'];
+
+        if(!empty($fields))
+        {
+            foreach($fields as $f)
+            {
+                if(!in_array($f, $v_fields))
+                {
+                    return $this->error('access_denied');
+                }
+            }
+            $u = Document::factory('user', $id)->set('vcard', $fields);
+            $u->save();
+            return $this->data(['html' => $this->_generate_qrcode(QRCode::factory(), $u)->get()]);
+        }
+
+        return $this->fail();
+
+    }
+
     /*     * ************************************************************************
      * Public STATIC Utility Methods
      * *********************************************************************** */
@@ -1586,9 +1560,9 @@ class Controller_User extends Controller_Resource {
         return Document::factory('user', $id)->load(['_id' => $id], ['_id' => 1]) ? true : $v->error($field, 'Not a Valid User', $u);
     }
 
-    /*     * ************************************************************************
+    /***************************************************************************
      * Protected STATIC Utility Methods
-     * *********************************************************************** */
+     * ************************************************************************/
 
     protected static function create_user_defaults(Document $user)
     {
@@ -1659,7 +1633,7 @@ class Controller_User extends Controller_Resource {
 //                    case 'avatar': $qr->photo($value);break;
 //                    case 'url': $qr->url($value);break;
 //                    case 'info': break;
-//        $user->set('info.qrcode', $this->generate_qrcode(QRCode::factory(), $user->as_array()));
+        $user->set('info.qrcode', $this->_generate_qrcode(QRCode::factory(), $user)->get());
         return $user->save();
     }
 
@@ -1698,6 +1672,12 @@ class Controller_User extends Controller_Resource {
 
         return $email->send();
     }
+
+    protected static function ucfirst($str)
+    {
+        return ucfirst(strtolower($str));
+    }
+
 
     /*     * **********************************************************************************
      * ADMIN FUNCTIONS
@@ -1939,7 +1919,7 @@ class Controller_User extends Controller_Resource {
 
     }
 
-    /*     * **********************************************************************************
+    /* EXTRACTION METHODS ******************************************************
      * Creates proper keys for validation. Because params (for Mongo) can include
      * sub arrays. But Kohana & Community decided that it should not validate
      * sub arrays. I see their point, but I still think they're full of shit.
@@ -1948,7 +1928,7 @@ class Controller_User extends Controller_Resource {
      *
      * @param array $array
      * @return array
-     * *********************************************************************************** */
+     * *************************************************************************/
 
     protected static function extract_privacy_values($array)
     {
@@ -2013,11 +1993,7 @@ class Controller_User extends Controller_Resource {
 
         return Arr::merge($return, $array);
     }
-
-    protected static function ucfirst($str)
-    {
-        return ucfirst(strtolower($str));
-    }
+    /* END OF EXTRACTION METHODS **********************************************/
 
     protected function create_admin_user($user)
     {
@@ -2033,4 +2009,65 @@ class Controller_User extends Controller_Resource {
         }
     }
 
+    /**
+     * This method actually populates the QRCode object and returns it.
+     * It uses information from the vcard array stored in the user object if it
+     * is available
+     *
+     * @param \QRcode $qr
+     * @param Document $user the user model.
+     * @return \QRcode|null
+     */
+    protected function _generate_qrcode(\QRcode $qr, \Document $user)
+    {
+        $f = ['name', 'info', 'email', 'avatar', 'company', 'designation', 'uri', 'vcard', 'message'];
+        if ($user->load(null, array_fill_keys(array_reverse($f), 1)))
+        {
+            $values = $user->stringify($user->as_array());
+
+            // this next two fields are publicly viewable.
+            $qr->fullName(\Arr::get($values, 'name'));
+            $qr->gender(\Arr::path($values, 'info.gender'));
+
+            // retrieve the vcard selections;
+            $vcard = \Arr::get($values, 'vcard', []);
+            if (!empty($vcard))
+            {
+                foreach ($vcard as $field)
+                {
+                    switch ($field)
+                    {
+                        case 'mobile':
+                            $m = SMS::valid(Arr::path($values, 'info.telephone.mobile'));
+                            $qr->mobile($m);
+                            break;
+                        case 'birthday':
+                            $qr->birthday(date("Ymmdd", Arr::path($values, 'info.birthday', 0)));
+                            break;
+                        case 'email':
+                            $qr->email(Arr::get($values, 'email'));
+                            break;
+                        case 'company':
+                            $qr->company(Arr::path($values, 'company.name'));
+                            break;
+                        case 'designation':
+                            $qr->title(Arr::get($values, 'designation'));
+                            break;
+                        case 'uri':
+                            $qr->url(RT::APP_SERVER . Arr::get($values, 'uri'));
+                            break;
+                        case 'avatar':
+                            $qr->photo('http://'.Arr::get($values, 'avatar'));
+                            break;
+                        case 'about':
+                            $qr->note(Arr::get($values, 'message'));
+                            break;
+                    }
+                }
+                $qr->finish();
+            }
+        }
+
+        return $qr;
+    }
 }

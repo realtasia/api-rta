@@ -344,7 +344,7 @@ class Controller_Page extends Controller_Resource {
         $q = [
             'estate'   => ['$ne' => null],
             'keywords' => new MongoRegex("/^" . strtolower($s) . "/"),
-            'child'    => ['$ne' => null]
+            'child._id'    => ['$exists' => true]
         ];
 
         // in case we are in an estate, limiting will be best
@@ -450,16 +450,16 @@ class Controller_Page extends Controller_Resource {
               ->find([
                   'estate'    => ['$ne' => null],
                   'keywords' => new MongoRegex("/^" . strtolower($s) . "/"),
-                  'child'    => ['$ne' => null],
+                  'child._id'    => ['$exists' => true],
               ])
               ->fields(['child'])
               ->limit(50);
 
             while($c->hasNext())
             {
-                static::$params['include_ids'][] = $c->getNext()->child['_id'];
+                static::$params['include_ids'][] = \Arr::get($c->getNext()->child, '_id');
             }
-
+            //return $this->data(static::$params['include_ids']);
         }
 
         if (parent::logged_in())

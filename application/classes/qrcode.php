@@ -8,9 +8,9 @@
  * @package RT_Helpers
  * @subpackage QRCode
  * @version 1.1
- * @desc Compatible to vCard 4.0 or higher.
- * @copyright (c) 2012, Pierre-Henry Soria. All Rights Reserved.
+ * @copyright        (c) 2012, Pierre-Henry Soria. All Rights Reserved.
  * @license          GNU General Public License.
+ * @link              https://github.com/icechen1/cappdme/blob/master/QRCode.class.php
  */
 class QRCode {
 
@@ -221,12 +221,12 @@ class QRCode {
     {
         $bIsImgExt = strtolower(pathinfo($sImgUrl, PATHINFO_EXTENSION)); // Get the file extension.
 
-        if ($bIsImgExt == 'jpeg' || $bIsImgExt == 'jpg' || $bIsImgExt == 'png' || $bIsImgExt == 'gif')
+        if ($bIsImgExt === 'jpeg' || $bIsImgExt === 'jpg' || $bIsImgExt === 'png' || $bIsImgExt === 'gif')
             $sExt = strtoupper($bIsImgExt);
         else
             throw new InvalidArgumentException('Invalid format Image!');
 
-        $this->_sData .= 'PHOTO;VALUE=URL;TYPE=' . $sExt . ':' . $sImgUrl . "\n";
+        $this->_sData .= "PHOTO;$sExt;ENCODING=BASE64:" . base64_encode(file_get_contents($sImgUrl)) . "\n";
         return $this;
     }
 
@@ -263,7 +263,7 @@ class QRCode {
      */
     public function mobile($sMobile)
     {
-        $this->_sData .= 'TEL;TYPE=cell' . $sMobile . "\n";
+        $this->_sData .= 'TEL;TYPE=cell:' . $sMobile . "\n";
         return $this;
     }
 
@@ -339,6 +339,11 @@ class QRCode {
      */
     public function finish()
     {
+
+        $this->_sData .= "TZ:Asia/Singapore\n";
+        $this->_sData .= 'REV:' . date("N", time()) ."\n";
+        $this->_sData .= "PROFILE:VCARD\n";
+        $this->_sData .= "KIND:individual\n";
         $this->_sData .= 'END:VCARD';
         return $this;
     }
@@ -354,7 +359,7 @@ class QRCode {
     public function get($iSize = 150, $sECLevel = 'L', $iMargin = 1)
     {
         $this->_sData = urlencode($this->_sData);
-        return RT::API_SERVER_URL . $iSize . 'x' . $iSize . '&amp;cht=qr&amp;chld=' . $sECLevel . '|' . $iMargin . '&amp;chl=' . $this->_sData;
+        return static::API_URL . $iSize . 'x' . $iSize . '&cht=qr&chld=' . $sECLevel . '|' . $iMargin . '&chl=' . $this->_sData;
     }
 
     /**
@@ -366,5 +371,4 @@ class QRCode {
     {
         echo '<p class="center"><img src="' . $this->get() . '" alt="QR Code" /></p>';
     }
-
 }

@@ -164,7 +164,7 @@ class Controller_Comment extends Controller_Resource {
     public function action_get()
     {
         $defaults = [
-           'limit' => 2, 'skip' => 0, 'type' => 'comment', 'sort' => -1,
+           'limit' => 2, 'skip' => 0, 'type' => 'comment', 'sort' => 1,
            'post_id' => $this->request->param('id'), 'include_ids' => NULL,
            'status' => 'active'
         ];
