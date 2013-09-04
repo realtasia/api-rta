@@ -1,6 +1,5 @@
-<?php
+<?php defined('SYSPATH') OR die('No direct access allowed.');
 
-defined('SYSPATH') OR die('No direct access allowed.');
 return [
     'credentials' => [
 
