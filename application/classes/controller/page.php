@@ -445,21 +445,34 @@ class Controller_Page extends Controller_Resource {
 
         if ($s)
         {
-            unset(static::$params['s']);
+            $include_ids = array();
+            //unset(static::$params['s']);
             $c = Collection::factory('singpost')
               ->find([
                   'estate'    => ['$ne' => null],
-                  'keywords' => new MongoRegex("/^" . strtolower($s) . "/"),
-                  'child._id'    => ['$exists' => true],
+                  'keywords'  => new MongoRegex("/^" . strtolower($s) . "/"),
+                  'child._id' => ['$exists' => true]
               ])
               ->fields(['child'])
               ->limit(50);
 
             while($c->hasNext())
             {
-                static::$params['include_ids'][] = \Arr::get($c->getNext()->child, '_id');
+                $child = (string) \Arr::get($c->getNext()->child, '_id');
+
+                if(!in_array($child, $include_ids))
+                {
+                    $include_ids[] = \Arr::get($c->getNext()->child, '_id');
+                }
+
             }
-            //return $this->data(static::$params['include_ids']);
+
+            if(count(array_filter($include_ids)) === 0)
+            {
+                return $this->data([]);
+            }
+
+            static::$params['include_ids'] = $include_ids;
         }
 
         if (parent::logged_in())
