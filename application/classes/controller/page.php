@@ -462,7 +462,7 @@ class Controller_Page extends Controller_Resource {
 
                 if(!in_array($child, $include_ids))
                 {
-                    $include_ids[] = \Arr::get($c->getNext()->child, '_id');
+                    $include_ids[] = $child;
                 }
 
             }
