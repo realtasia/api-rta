@@ -346,10 +346,10 @@ class Controller_Post extends Controller_Resource {
         ];
         // query to find conversation
         $conv = Collection::factory('post')->find([
-            'to._id'   => $in, 'user._id' => $in
+            'type' => 'conversation', 'to._id'   => $in, 'user._id' => $in
         ]);
 
-        $fields = ['name' => 1, 'uri'  => 1, '_id'  => 1];
+        $fields = ['name' => 1, 'uri'  => 1, '_id'  => 1, 'username' => 1];
         // load both users in question
         $from->load(null, $fields);
         $to->load(null, $fields);
@@ -357,9 +357,24 @@ class Controller_Post extends Controller_Resource {
         // check if we have a conversation, if not create one
         if (!$conv->hasNext())
         {
+            $t = $to->as_array();
+            $f = $from->as_array();
+            /**
+             * A user who wants to create a new message will search for a receipient.
+             * Normally, a receipient search will return results for public profiles
+             * However, a receipient who has uber-private settings can still
+             * appear in the results if a previous conversation exists.
+             * For this reason, I create a keywords array for each conversation
+             * so that such receipients show up in a search.
+             *
+             */
+            $k = array_map('strtolower', \Arr::extract($t, ['name', 'username']));
+            $k = array_merge($k, array_map('strtolower', \Arr::extract($f, ['name', 'username'])));
+
             $conv = $this->create_conversation([
                 'to'   => $to->as_array(),
                 'user' => $from->as_array(),
+                'keywords' => array_values(array_filter($k))
             ]);
         }
         else

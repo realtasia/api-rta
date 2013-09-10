@@ -16,7 +16,7 @@ class Controller_User extends Controller_Resource {
 
     private static $valid_client_get_actions  = [
         'has_social_login', 'is_unique', 'get', 'search', 'get_by_mobile',
-        'get_company', 'get_session', 'get_user_updates'
+        'get_company', 'get_session', 'get_user_updates', 'search_message_receipient'
     ];
     private static $valid_client_post_actions = [
         'registration', 'save_details', 'activate', 'send_sms', 'send_email',
@@ -813,7 +813,7 @@ class Controller_User extends Controller_Resource {
         $r = [];
         $v = strtoupper(static::$params['term']);
         $p = Document::factory('page')->collection();
-        $p->ensureIndex(['name' => 1]);
+        //$p->ensureIndex(['name' => 1]);
         $c = $p->find(['name' => new MongoRegex("/^$v/")])
           ->fields(['_id'  => 1, 'name' => 1, 'uri'  => 1])
           ->limit(5);
@@ -1518,28 +1518,60 @@ class Controller_User extends Controller_Resource {
     }
 
 
-    protected function regenerate_qrcode()
+    protected function search_message_receipient()
     {
-        $id = $this->request->param('id');
-        $fields = \Arr::get(static::$params, 'vcard', array());
-        $v_fields = ['mobile', 'birthday', 'email', 'company', 'designation', 'uri', 'avatar', 'about'];
+        $s  = $this->request->query('s');
+        $id = Document::check_id($this->request->param('id'));
+        $return = $ids = array();
 
-        if(!empty($fields))
+        // Existing conversation Search
+        $cons = Collection::factory('post')->find([
+            'type' => 'conversation', 'to._id'   => $id, 'user._id' => $id,
+            'keywords' => new MongoRegex("/^" . strtolower($s) . "/")
+        ])->fields(['to' => 1, 'user' => 1]);
+
+            //$row           = $c->getNext();
+            //$d             = $row->stringify($row->as_array());
+            //$data['label'] = $d["name"];
+            //$data['value'] = ['_id'  => $d["_id"], 'name' => $d['name'], 'uri'  => $d['uri']];
+            //$r[]           = $data;
+
+        while($cons->hasNext())
         {
-            foreach($fields as $f)
-            {
-                if(!in_array($f, $v_fields))
-                {
-                    return $this->error('access_denied');
-                }
-            }
-            $u = Document::factory('user', $id)->set('vcard', $fields);
-            $u->save();
-            return $this->data(['html' => $this->_generate_qrcode(QRCode::factory(), $u)->get()]);
+            $existing = $cons->getNext();
+            $existing = $existing->stringify($existing->as_array());
+            $to = \Arr::path($existing, 'to._id');
+            $id = (string) $id;
+
+            $toAdd = $id === $to ? \Arr::get($existing, 'user') : \Arr::get($existing, 'to');
+            $data['label'] = (string) \Arr::get($toAdd, 'name');
+            $data['value'] = $toAdd;
+            $return[] = $data;
+            $ids[] = (string) \Arr::get($toAdd, '_id');
         }
 
-        return $this->fail();
 
+        // Public profiles search
+        $users = Collection::factory('user')->find([
+            'status' => 'active',
+            'settings.privacy.is' => 'PUBLIC',
+            'keywords' => new MongoRegex("/^" . strtolower($s) . "/"),
+            'settings.privacy.messages.is' => 'PUBLIC'
+        ])->fields(['name' => 1, 'uri'  => 1, '_id'  => 1, 'username' => 1]);
+
+        while($users->hasNext())
+        {
+            $user = $users->getNext();
+            $user_id = (string) $user->_id;
+            if(!in_array($user_id, $ids) && (string) $id !== $user_id)
+            {
+                $data['label'] = (string) $user->name;
+                $data['value'] = $user->stringify($user->as_array());
+                $return[] = $data;
+            }
+        }
+
+        return $this->data($return);
     }
 
     /*     * ************************************************************************
@@ -1604,36 +1636,6 @@ class Controller_User extends Controller_Resource {
 //        }
 
         $user->keywords = $user->extract_keywords($user->as_array());
-        $user->save();
-
-//        $u = $user->as_array();
-//        $u['gender'] = strtoupper(substr(Arr::get($u['info'], 'gender'), 0, 1));
-//        $u['birthday'] = date('c', $u['info']['birthday']);
-//        $u['mobile'] = $u['info']['telephone']['mobile'];
-//        $u['email'] = $u['email'];
-//        $u = $user->as_array();
-//        switch(true)
-//        {
-//            case ($u['roles'][0] === 'admin'): $u['role'] = 'Realt Staff'; break;
-//            case ($u['roles'][0] === 'agent'): $u['role'] = 'Realt Agent'; break;
-//            case ($u['roles'][0] === 'user'): $u['role'] = 'Realt User'; break;
-//            case !empty($u['company']):
-//                $u['company'] = Arr::get($u['company'], 'name', false);
-//                $u['title'] = Arr::get($u, 'designation', false);
-//                break;
-//        }
-//                    case 'name': $qr->fullName($value);break;
-//                    case 'gender': $qr->gender($value);break;
-//                    case 'title': $qr->title($value);break;
-//                    case 'role': $qr->role($value);break;
-//                    case 'company': $qr->company($value);break;
-//                    case 'birthday': $qr->birthday($value);break;
-//                    case 'mobile': $qr->mobile($value);$qr->sms($value);break;
-//                    case 'email': $qr->email($value);break;
-//                    case 'avatar': $qr->photo($value);break;
-//                    case 'url': $qr->url($value);break;
-//                    case 'info': break;
-        $user->set('info.qrcode', $this->_generate_qrcode(QRCode::factory(), $user)->get());
         return $user->save();
     }
 
