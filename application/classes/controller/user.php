@@ -328,19 +328,24 @@ class Controller_User extends Controller_Resource {
         $id     = $this->request->param('id');
         $return = [];
 
+        $defaults = Arr::overwrite([
+           'limit' => 10, 'skip' => 0
+        ], static::$params);
+
         $params   = [
             'status'           => 'active',
             '$or'              => [
                 ['to._id' => Document::check_id(static::$user_id)],
                 ['user._id' => Document::check_id(static::$user_id)],
             ],
-            'conversation._id' => Document::check_id($id), 'type'             => 'message'
+            'conversation._id' => Document::check_id($id),
+            'type'             => 'message'
         ];
         //return $this->data($params);
         $messages = Collection::factory('comment', null, static::$user_id)
           ->find($params)
-          ->limit(\Arr::get(static::$params, 'limit', 11))
-          ->skip(\Arr::get(static::$params, 'skip', 0))
+          ->limit(\Arr::get($defaults, 'limit', 10))
+          ->skip(\Arr::get($defaults, 'skip', 0))
           ->sort_asc('_id');
 
         while ($messages->hasNext())
@@ -852,6 +857,65 @@ class Controller_User extends Controller_Resource {
         //return $this->data($this->request->param('id'));
         return $this->data($d->stringify($r->as_array()));
     }
+
+    protected function search_message_receipient()
+    {
+        $s  = $this->request->query('s');
+        $id = Document::check_id($this->request->param('id'));
+        $return = $ids = array();
+
+        // Existing conversation Search
+        $cons = Collection::factory('post')->find([
+            'type' => 'conversation', '$or' => [
+                ['to._id'   => $id], ['user._id' => $id]
+            ],
+            'keywords' => new MongoRegex("/^" . strtolower($s) . "/")
+        ])->fields(['to' => 1, 'user' => 1]);
+
+            //$row           = $c->getNext();
+            //$d             = $row->stringify($row->as_array());
+            //$data['label'] = $d["name"];
+            //$data['value'] = ['_id'  => $d["_id"], 'name' => $d['name'], 'uri'  => $d['uri']];
+            //$r[]           = $data;
+
+        while($cons->hasNext())
+        {
+            $existing = $cons->getNext();
+            $existing = $existing->stringify($existing->as_array());
+            $to = (string) \Arr::path($existing, 'to._id');
+            $id = (string) $id;
+
+            $toAdd = $id === $to ? \Arr::get($existing, 'user') : \Arr::get($existing, 'to');
+            $data['label'] = (string) \Arr::get($toAdd, 'name') . "<small class='muted pull-right'>Has existing Message</small>";
+            $data['value'] = $toAdd;
+            $return[] = $data;
+            $ids[] = (string) \Arr::get($toAdd, '_id');
+        }
+
+
+        // Public profiles search
+        $users = Collection::factory('user')->find([
+            'status' => 'active',
+            'settings.privacy.is' => 'PUBLIC',
+            'keywords' => new MongoRegex("/^" . strtolower($s) . "/"),
+            'settings.privacy.messages.is' => 'PUBLIC'
+        ])->fields(['name' => 1, 'uri'  => 1, '_id'  => 1, 'username' => 1])->slaveOkay();
+
+        while($users->hasNext())
+        {
+            $user = $users->getNext();
+            $user_id = (string) $user->_id;
+            if(!in_array($user_id, $ids) && (string) $id !== $user_id)
+            {
+                $data['label'] = (string) $user->name . "<small class='muted pull-right'>New Message</small>";
+                $data['value'] = $user->stringify($user->as_array());
+                $return[] = $data;
+            }
+        }
+
+        return $this->data($return);
+    }
+
 
     /**
      * Checks if a user has an authenticated social login session and returns it.
@@ -1515,63 +1579,6 @@ class Controller_User extends Controller_Resource {
 
         $this->user_email(['email' => $to, 'name'  => $name], $subject, $message);
         return;
-    }
-
-
-    protected function search_message_receipient()
-    {
-        $s  = $this->request->query('s');
-        $id = Document::check_id($this->request->param('id'));
-        $return = $ids = array();
-
-        // Existing conversation Search
-        $cons = Collection::factory('post')->find([
-            'type' => 'conversation', 'to._id'   => $id, 'user._id' => $id,
-            'keywords' => new MongoRegex("/^" . strtolower($s) . "/")
-        ])->fields(['to' => 1, 'user' => 1]);
-
-            //$row           = $c->getNext();
-            //$d             = $row->stringify($row->as_array());
-            //$data['label'] = $d["name"];
-            //$data['value'] = ['_id'  => $d["_id"], 'name' => $d['name'], 'uri'  => $d['uri']];
-            //$r[]           = $data;
-
-        while($cons->hasNext())
-        {
-            $existing = $cons->getNext();
-            $existing = $existing->stringify($existing->as_array());
-            $to = \Arr::path($existing, 'to._id');
-            $id = (string) $id;
-
-            $toAdd = $id === $to ? \Arr::get($existing, 'user') : \Arr::get($existing, 'to');
-            $data['label'] = (string) \Arr::get($toAdd, 'name');
-            $data['value'] = $toAdd;
-            $return[] = $data;
-            $ids[] = (string) \Arr::get($toAdd, '_id');
-        }
-
-
-        // Public profiles search
-        $users = Collection::factory('user')->find([
-            'status' => 'active',
-            'settings.privacy.is' => 'PUBLIC',
-            'keywords' => new MongoRegex("/^" . strtolower($s) . "/"),
-            'settings.privacy.messages.is' => 'PUBLIC'
-        ])->fields(['name' => 1, 'uri'  => 1, '_id'  => 1, 'username' => 1]);
-
-        while($users->hasNext())
-        {
-            $user = $users->getNext();
-            $user_id = (string) $user->_id;
-            if(!in_array($user_id, $ids) && (string) $id !== $user_id)
-            {
-                $data['label'] = (string) $user->name;
-                $data['value'] = $user->stringify($user->as_array());
-                $return[] = $data;
-            }
-        }
-
-        return $this->data($return);
     }
 
     /*     * ************************************************************************

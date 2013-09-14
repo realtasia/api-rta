@@ -23,10 +23,12 @@ class Controller_Listing extends Controller_Post{
         $cursor = Collection::factory('singpost')
                 ->find([
                     'estate' => ['$ne' => null],
+                    'child._id' => ['$exists' => true],
                     'keywords' => new MongoRegex("/^".strtolower($s)."/")
                     ])
                 ->fields(['keywords', 'estate', 'child', 'number', 'postal', 'street'])
-                ->limit(50);
+                ->limit(50)
+                ->slaveOkay();
 
         while($cursor->hasNext())
         {
@@ -58,14 +60,14 @@ class Controller_Listing extends Controller_Post{
 
         return $this->data($data);
     }
-    
+
     public function action_attachments()
     {
         $data = [];
         $ids = \Arr::map('Document::check_id', \Arr::get(static::$params, '_ids', []));
-        
+
         $attachments = Collection::factory('post')->find(['_id' => ['$in' => $ids]]);
-        
+
         while($attachments->hasNext())
         {
             $a = $attachments->getNext();
@@ -73,19 +75,19 @@ class Controller_Listing extends Controller_Post{
             {
                 $a->current_user = (array) $this->get_user();
             }
-            
+
             $data[] = $a->stringify($a->as_array());
         }
-        
+
         return $this->data($data);
     }
-    
+
     public function action_search()
     {
         if(parent::logged_in())
-            $listings = Collection::factory('post')->search(static::$params, static::$user_id);
+            $listings = Collection::factory('post')->search(static::$params, static::$user_id)->slaveOkay();
         else
-            $listings = Collection::factory('post')->search(static::$params);
+            $listings = Collection::factory('post')->search(static::$params)->slaveOkay();
 
         return $this->data($pages);
     }

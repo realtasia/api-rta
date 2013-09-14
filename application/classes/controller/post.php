@@ -320,12 +320,13 @@ class Controller_Post extends Controller_Resource {
 
         // set up all needed documents
         $post    = Document::factory('post');
+        $post_id = \Arr::get(static::$params, 'post_id');
         $summary = null;
 
         //if there is an post id.
-        if ($this->request->param('id'))
+        if ($post_id)
         {
-            $post->load($this->request->param('id'), [
+            $post->load($post_id, [
                 'page'    => 1,
                 'listing' => 1,
                 'type'    => 1,
@@ -333,7 +334,8 @@ class Controller_Post extends Controller_Resource {
                 'uri'     => 1
             ]);
             // make the summary
-            $summary = static::construct_message_summary($post);
+            if($post->loaded())
+                $summary = static::construct_message_summary($post);
         }
 
         $from = Document::factory('user', static::$user_id);
@@ -355,34 +357,16 @@ class Controller_Post extends Controller_Resource {
         $to->load(null, $fields);
 
         // check if we have a conversation, if not create one
-        if (!$conv->hasNext())
-        {
-            $t = $to->as_array();
-            $f = $from->as_array();
-            /**
-             * A user who wants to create a new message will search for a receipient.
-             * Normally, a receipient search will return results for public profiles
-             * However, a receipient who has uber-private settings can still
-             * appear in the results if a previous conversation exists.
-             * For this reason, I create a keywords array for each conversation
-             * so that such receipients show up in a search.
-             *
-             */
-            $k = array_map('strtolower', \Arr::extract($t, ['name', 'username']));
-            $k = array_merge($k, array_map('strtolower', \Arr::extract($f, ['name', 'username'])));
-
-            $conv = $this->create_conversation([
-                'to'   => $to->as_array(),
-                'user' => $from->as_array(),
-                'keywords' => array_values(array_filter($k))
-            ]);
-        }
-        else
+        if ($conv->hasNext())
         {
             $conv = $conv->getNext();
         }
+        else
+        {
+            $conv = $this->create_conversation(['to' => $to->as_array(),'user' => $from->as_array()]);
+        }
 
-        $params = static::format(static::$params);
+        $params = static::format(static::$params, 57);
 
         foreach ([$to, $from, $post] as $v)
         {
@@ -390,16 +374,24 @@ class Controller_Post extends Controller_Resource {
                 $v['_id'] = Document::check_id($v['_id']);
         }
 
+        $excerpt = \Arr::get($params, 'excerpt');
+
         $message = [
             'to'           => $to->as_array(),
             'user'         => $from->as_array(),
-            'post'         => $post->as_array(),
             'status'       => 'active',
             'conversation' => [ '_id' => Document::check_id($conv->_id)],
             'message'      => \Arr::get($params, 'message'),
-            'excerpt'      => \Arr::get($params, 'excerpt'),
-            'summary'      => $summary
+            'excerpt'      => str_replace('<br>', "\n", $excerpt)
         ];
+
+        // if this conversation was about a post
+        if($post_id)
+        {
+            $message['post'] = $post->as_array();
+            $message['summary'] = $summary;
+        }
+
 
         $c = Document::factory('comment', null, static::$user_id)
           ->create_message($message);
@@ -409,18 +401,39 @@ class Controller_Post extends Controller_Resource {
             $to->inc('counts.newMessages');
             $to->save();
             $from->save();
+            /**
+             * A user who wants to create a new message will search for a receipient.
+             * Normally, a receipient search will return results for public profiles
+             * However, a receipient who has uber-private settings can still
+             * appear in the results if a previous conversation exists.
+             * For this reason, I create a keywords array for each conversation
+             * so that such receipients are first searched within conversations.
+             *
+             */
 
+            $t = $to->as_array();
+            $f = $from->as_array();
+            foreach(['name', 'username'] as $key)
+            {
+                $k[] = \Arr::get($t, $key);
+                $k[] = \Arr::get($f, $key);
+            }
+
+            $conv->set('keywords', array_map('strtolower', array_filter($k)));
             $conv->set('unread', $to->_id);
             $conv->set('lastMessage', $from->as_array());
             $conv->set('message', $c->message);
-            $conv->set('excerpt', $c->excerpt);
+            $conv->set('excerpt', str_replace('<br>', "\n", $excerpt));
             $conv->inc('counts.messages');
             $conv->save();
 
             Debug::log(Job::add($conv->_id, 'post', static::$user_id)
                 ->private_message($c->_id));
 
-            return $this->data($c);
+            return $this->data([
+                'conversation' => $conv->stringify($conv->as_array()),
+                'message' =>$c->stringify($c->as_array())
+            ]);
         }
 
         return $this->error('server_error');
@@ -1820,26 +1833,25 @@ class Controller_Post extends Controller_Resource {
               '$set' => ['listing_id' => $post->_id]
             ], ['multiple' => true]);
     }
-     */
+*/
     protected static function listing_keywords($params)
     {
+        $return = array();
         if (\Arr::get($params, 'showAddress') === false)
         {
-            $a = @explode(' ', \Arr::get($params, 'address'));
+            $a = explode(' ', \Arr::get($params, 'address', ''));
             if (!empty($a))
             {
                 unset($a[0]);
-                $params['address'] = implode(' ', $a);
+                $return[] = implode(' ', $a);
             }
         }
 
-        $params['subtype'] = \Arr::path($params, 'page.subtype');
-        $params['name']    = \Arr::path($params, 'page.name');
-        $params['parent']  = \Arr::path($params, 'page_parent.name');
+        $return[] = \Arr::path($params, 'page.subtype');
+        $return[]    = \Arr::path($params, 'page.name');
+        $return[]  = \Arr::path($params, 'page_parent.name');
 
-        return \Arr::map('strtolower', \Arr::extract($params, [
-                'address', 'subtype', 'name', 'parent'
-        ]));
+        return array_map('strtolower', $return);
     }
 
 }

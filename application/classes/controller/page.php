@@ -1,6 +1,4 @@
-<?php
-
-defined('SYSPATH') or die('No direct script access.');
+<?php defined('SYSPATH') or die('No direct script access.');
 ini_set("max_execution_time", 0);
 ini_set('memory_limit', '2000M');
 
@@ -355,7 +353,7 @@ class Controller_Page extends Controller_Resource {
 
         $s       = strtolower($s);
         $results = [];
-        $cursor  = (array) Collection::factory('singpost')->distinct('keywords', $q);
+        $cursor  = (array) Collection::factory('singpost')->distinct('keywords', $q)->slaveOkay();
 
         foreach ($cursor as $value)
         {
@@ -385,7 +383,7 @@ class Controller_Page extends Controller_Resource {
               'type'       => 'company',
               'status'     => 'active',
               'privacy.is' => 'PUBLIC',
-        ]);
+        ])->slaveOkay();
 
         foreach ($cursor as $value)
         {
@@ -407,7 +405,7 @@ class Controller_Page extends Controller_Resource {
      * *********************************************************************** */
 
     /**
-     * Performs a like on the given post
+     * Performs a like on the given page
      */
     public function action_like()
     {
@@ -415,7 +413,7 @@ class Controller_Page extends Controller_Resource {
     }
 
     /**
-     * Performs an unlike on the given post
+     * Performs an unlike on the given page
      */
     public function action_unlike()
     {
@@ -423,7 +421,7 @@ class Controller_Page extends Controller_Resource {
     }
 
     /**
-     * Performs a subscribe on the given post
+     * Performs a subscribe on the given page
      */
     public function action_subscribe()
     {
@@ -431,7 +429,7 @@ class Controller_Page extends Controller_Resource {
     }
 
     /**
-     * Performs an unsubscribe on the given post
+     * Performs an unsubscribe on the given page
      */
     public function action_unsubscribe()
     {
@@ -454,7 +452,7 @@ class Controller_Page extends Controller_Resource {
                   'child._id' => ['$exists' => true]
               ])
               ->fields(['child'])
-              ->limit(50);
+              ->limit(50)->slaveOkay();
 
             while($c->hasNext())
             {
@@ -499,7 +497,7 @@ class Controller_Page extends Controller_Resource {
      * *********************************************************************** */
     public function action_standard()
     {
-        $pages  = Mongo_collection::factory('singpost');
+        $pages  = Mongo_collection::factory('singpost')->slaveOkay();
         $mysqli = new mysqli('localhost', 'root', NULL, 'test');
         $json   = [];
         $result = $mysqli->query('SELECT DISTINCT project FROM `condominiums` ORDER BY project ASC');
