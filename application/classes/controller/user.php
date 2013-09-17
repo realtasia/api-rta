@@ -967,6 +967,7 @@ class Controller_User extends Controller_Resource {
           ->rule('last_name', 'alpha')
           ->rule('last_name', 'not_empty')
           ->rule('username', 'not_empty')
+          ->rule('username', 'Controller_User::username_valid', [':value', ':field', ':validation'])
           ->rule('info.gender', 'in_array', [':value', ['male', 'female']])
           ->rule('info.telephone.mobile', 'not_empty')
           ->rule('password', 'not_empty')
@@ -978,6 +979,13 @@ class Controller_User extends Controller_Resource {
             // validation rules for a agents.
             $validation->rule('company', 'is_array')
               ->rule('license', 'not_empty');
+        }
+
+        if(isset(static::$params['username']))
+        {
+            // check if a username exists. Extra security.
+            if (static::$model->get(static::$params['username']))
+                $validation->error('username', Kohana::message ('user/registration', 'username' . 'username_not_available'));
         }
 
         if ($validation->check())
@@ -992,7 +1000,7 @@ class Controller_User extends Controller_Resource {
             {
                 static::$params['info']['telephone']['mobile'] = SMS::valid($n);
             }
-            $m = isset(static::$params['_id']) ? Document::factory('user', static::$params['_id']) : Document::factory('user');
+            $m = Document::factory('user', \Arr::get($params, '_id'));
             if ($u = $m->create(static::$params))
             {
                 static::create_user_defaults($u);
@@ -1022,7 +1030,7 @@ class Controller_User extends Controller_Resource {
     }
 
     /**
-     * This is supplementary to registration. Performed by an auto sumission
+     * This is supplementary to registration. Performed by an auto submission
      * client side to save the user type and possibly his corporate details.
      */
     protected function save_details()
@@ -1067,33 +1075,28 @@ class Controller_User extends Controller_Resource {
 
     /**
      * Performs a password reset. Front-end app must authenticate user first
-     * using a API sms call
+     * using a API sms call.
+     *
      */
     protected function password_reset()
     {
         $id    = $this->request->param('id');
         $model = static::$model;
+        $old = \Arr::get(static::$params, 'old_password');
+        $new_pass = \Arr::get(static::$params, 'new_password');
 
-        if (!isset(static::$params['old_password']) || empty(static::$params['old_password']))
-        {
-            $old = static::$params['old_password'];
-        }
-
-        if (!isset(static::$params['new_password']) || empty(static::$params['new_password']))
+        if (!$new_pass)
             return $this->error('access_denied');
 
         if ($old)
         {
             if ($old === static::$params['new_password'])
-            {
                 return $this->fail('user/generic', 'same_password');
-            }
+
             $model->load($id, ['password' => 1]);
 
             if ($model::hash($old) !== $model->password)
-            {
                 return $this->fail('user/generic', 'wrong_password');
-            }
         }
 
         $user = $model->update_password(static::$params['new_password'], $id);
@@ -1130,6 +1133,7 @@ class Controller_User extends Controller_Resource {
           ->rule('last_name', 'alpha')
           ->rule('last_name', 'not_empty')
           ->rule('username', 'not_empty')
+          ->rule('username', 'Controller_User::username_valid', [':value', ':field', ':validation'])
           ->rule('uri', 'not_empty')
           ->rule('info.gender', 'in_array', [':value', ['male', 'female']])
           ->rule('info.telephone.mobile', 'not_empty')
@@ -1208,6 +1212,10 @@ class Controller_User extends Controller_Resource {
                         // set to null so array_filter can work its magic later
                         static::$params[$key] = is_array($value) ? (array) $value : null;
                     }
+                    break;
+                case 'username' :
+                    static::$params['uri'] = "/" . static::$params[$key];
+                    static::$params[$key] = strtolower(static::$params[$key]);
                     break;
             }
         }
@@ -1588,8 +1596,10 @@ class Controller_User extends Controller_Resource {
     /**
      * A check to validate a user
      *
-     * @param string|MongoID $id
-     * @return boolean
+     * @param mixed $u the user Object, Array, String (id) or MongoID.
+     * @param string $field the validator must return error with this $field prop.
+     * @param Validation $v The validation object.
+     * @return bool|Validation true if valid or the Validation object if not
      */
     public static function valid($u, $field, Validation $v)
     {
@@ -1597,6 +1607,61 @@ class Controller_User extends Controller_Resource {
         $id = is_object($u) && isset($u->_id) ? $u->_id : $u;
 
         return Document::factory('user', $id)->load(['_id' => $id], ['_id' => 1]) ? true : $v->error($field, 'Not a Valid User', $u);
+    }
+
+
+    /**
+     * Validating a username again, micmicking client side validation for extra
+     * security. This is in case of foul play. User decodes the requirements via
+     * HTTP Headers and sends in a CURL request.
+     *
+     * JS
+     * -----
+     *     var splits = v.split("."), valid = true;
+     *     splits = splits.concat(v.split("-"));
+     *     splits = splits.concat(v.split("_"));
+     *     if (!!splits.length) {
+     *         RTC.forEach(splits, function(split) {
+     *             return split.match(RTC.Validation.username.restricted.rule) && valid && (valid = !1);
+     *         });
+     *
+     *         return valid;
+     *     }
+     *
+     * @param mixed $u the user Object, Array, String (id) or MongoID.
+     * @param string $field the validator must return error with this $field prop.
+     * @param Validation $v The validation object.
+     * @return bool|Validation true if valid or the Validation object if not
+     */
+    public static function username_valid($t, $field, Validation $v)
+    {
+        // invalid reqex. Another JS function does this seperately
+        $invalid = "/^[A-Za-z0-9]+(?:[._-][A-Za-z0-9]+)*$/";
+
+        // matches an invalid format e.g. "--username", "user.-name" etc
+        if(!preg_match($invalid, $t))
+            return $v->error($field, 'Your username can be seperated with a dot(.), a hyphen(-) or an underscore(_). e.g. "user-name" or "UserName" is VALID but "username-" or "-username" IS NOT. Please try again.');
+
+        // matches restricted words used
+        $restricted = "/admin|^realtasia|^support|^rta|^customer|^member|^people|^location|^listing|^usernam|^post|^album|^attachment|^comment|^fuck|^moderat|^help|^finance/";
+
+        // explode each divider to check this. In case a restricted word is used
+        // in the middle of the user name.
+        $splits = explode(".", $t);
+        $splits = array_merge($splits, explode("-", $t));
+        $splits = array_filter(array_merge($splits, explode("_", $t)));
+
+        if(empty($splits))
+            $splits = (array) $t;
+
+        // this'll contain each word from first-last, first_last or first.last
+        foreach($splits as $split)
+        {
+            if(preg_match($restricted, $t))
+                return $v->error($field, 'Username contains restricted words.');
+        }
+
+        return true;
     }
 
     /***************************************************************************

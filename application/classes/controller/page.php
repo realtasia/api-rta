@@ -50,7 +50,12 @@ class Controller_Page extends Controller_Resource {
      */
     public function action_index()
     {
-        return $this->data(static::$model->get($this->request->param('id')));
+        $id = $this->request->param('id');
+
+        if(strpos($id, ",") !== false){
+            $id = array_map("trim", explode(",", $id));
+        }
+        return $this->data(static::$model->get($id));
     }
 
     /**
