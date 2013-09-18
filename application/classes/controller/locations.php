@@ -328,6 +328,14 @@ class Controller_Locations extends Controller_Resource {
         $ids     = $this->request->post('ids');
         $data    = $this->request->post('data');
         $data    = array_map("trim", array_map("strip_tags", array_filter((array)$data)));
+        $pt      = Arr::get($data, 'property_type');
+        if(is_array($pt))
+        {
+            if(!empty($pt) && !empty($pt[0]))
+                $pt = $pt[0];
+            else
+                $pt = null;
+        }
         $estate  = Arr::get($data, 'estate');
         $name    = Arr::get($data, 'name');
         $subtype = Arr::get($data, 'subtype');
@@ -374,7 +382,10 @@ class Controller_Locations extends Controller_Resource {
         {
             $l->name          = $name;
             $l->subtype       = $subtype;
-            $l->property_type = Arr::get($data, 'property_type');
+            if($pt)
+            {
+                $l->property_type = $pt;
+            }
             $l->content       = Arr::get($data, 'content');
             $l->parent        = $parent;
             //return $this->data($l->as_array());
@@ -673,6 +684,21 @@ class Controller_Locations extends Controller_Resource {
         }
         // regular address, just return.
         return ['keywords' => strtolower($text)];
+    }
+
+    public function action_updatekeywords()
+    {
+        $c = Collection::factory('page')->find(['type' => 'location']);
+
+        while ($c->hasNext())
+        {
+            $d = $c->getNext();
+            $d->pull("keywords", strtolower(\Arr::get($d->parent, 'name')));
+            $d->save();
+            $ret [] = $d->keywords;
+        }
+
+        return $this->response->body(Debug::vars($ret));
     }
 
 }

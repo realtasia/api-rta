@@ -818,12 +818,18 @@ class Controller_Post extends Controller_Resource {
                     if ($post->status === 'active')
                     {
                         $t = Ticker::factory($post);
-                        Job::add($post->_id, 'post', null)->approve_testimonial($post->user['_id']);
 
-                        $t->update(['user_id' => $post->page['_id']]);
-
+                        // update the logged in user (this testimonial was written for him/her) once.
                         if ($t->update_once(['user_id' => Document::check_id(static::$user_id)]))
                         {
+                            // if the update was successful, that means this was
+                            // not approved before. Add 'congrats, your testimonial was approved'
+                            // update the creator of the post, award him some
+                            // relevancy points
+                            // finally add a new bulk ticker to give this ticker
+                            // document a +1 everywhere else.
+                            Job::add($post->_id, 'post', null)->approve_testimonial($post->user['_id']);
+                            $t->update_once(['user_id' => $post->user['_id']]);
                             Ticker::add($post->_id, 'update');
                         }
                     }
@@ -948,8 +954,10 @@ class Controller_Post extends Controller_Resource {
                 $t = Ticker::factory($post);
                 if ($update)
                 {
+                    // update the original user one time if this post was edited
                     if ($t->update_once(['user_id' => Document::check_id(static::$user_id)], 1))
                     {
+                        // add a master update for all subscribed tickers.
                         Ticker::add($post->_id, 'update');
                     }
                 }
@@ -1287,7 +1295,7 @@ class Controller_Post extends Controller_Resource {
     /**
      * Update a testimonial. Checks if there is an id and calls the create_testimonial
      * method. <code>
-     * POST "/post/update/update_testimonial/{id}"</code>
+     * POST "/post/update/{id}"</code>
      * @see self::create_testimonial
      * @return string JSON encoded array
      */
@@ -1854,4 +1862,17 @@ class Controller_Post extends Controller_Resource {
         return array_map('strtolower', $return);
     }
 
+
+    protected function listing_expiry($params)
+    {
+        $rent     = Date::WEEK * 2;                      // 2 weeks for Rent
+        $sale     = Date::WEEK * 6;                      // 6 weeks for Sale
+        $id       = \Arr::get($params, '_id');           // this is an update?
+        $modified = \Arr::get($params, 'modified');      // last modified
+        $expiry   = \Arr::get($params, 'expiry');        // previous expiry
+        $type     = \Arr::path($params, 'listing.type'); // rent or sale
+        $status   = \Arr::get($params, 'status');        // active or pending
+        // base the expiry on this time
+        $created  = $id ? Document::check_id($id)->getTimestamp() : time();
+    }
 }
