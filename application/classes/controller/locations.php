@@ -14,9 +14,9 @@ ini_set('memory_limit', '2000M');
  * @version 1.0
  * @copyright Copyright (c) 2012 Realtasia Pte Ltd
  */
-class Controller_Locations extends Controller_Resource {
+//class Controller_Locations extends Controller_Resource {
 
-//class Controller_Locations extends Controller {
+class Controller_Locations extends Controller {
 
     public static $stray_statuses = [
         'SUCCESS', 'INVALID', 'REVIEW', 'NEW'
@@ -688,17 +688,16 @@ class Controller_Locations extends Controller_Resource {
 
     public function action_updatekeywords()
     {
-        $c = Collection::factory('page')->find(['type' => 'location']);
+        $c = Collection::factory('page')->find();
 
         while ($c->hasNext())
         {
             $d = $c->getNext();
-            $d->pull("keywords", strtolower(\Arr::get($d->parent, 'name')));
+            $d->addToSet("keywords", strtolower($d->slug));
             $d->save();
             $ret [] = $d->keywords;
         }
 
         return $this->response->body(Debug::vars($ret));
     }
-
 }

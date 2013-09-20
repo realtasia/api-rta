@@ -226,12 +226,9 @@ class Controller_User extends Controller_Resource {
     {
         static::$params['user_id'] = $this->request->param('id');
         static::$params['interaction'] = 'subscribe';
-
         $data = Document::factory('interaction')
           ->collection()
           ->subscriptions(static::$params);
-
-        //return $this->data(static::$params);
         return $this->data($data);
     }
 
@@ -945,7 +942,7 @@ class Controller_User extends Controller_Resource {
         else
             $users = Collection::factory('user')
               ->search(static::$params);
-        //die(Debug::vars(static::$params));
+
         return $this->data($users ? $users : []);
     }
 
