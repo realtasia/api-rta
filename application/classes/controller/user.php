@@ -31,7 +31,7 @@ class Controller_User extends Controller_Resource {
     private static $valid_user_actions        = [
         'create_social_login', 'password_reset', 'update_social_login', 'is_unique',
         'update_avatar', 'update_info', 'send_sms', 'validate_password',
-        'update_settings', 'regenerate_qrcode'
+        'update_settings', 'regenerate_vcard'
     ];
 
     /**
@@ -1283,6 +1283,32 @@ class Controller_User extends Controller_Resource {
     }
 
     /**
+     * Update a user's VCARD fields
+     */
+    protected function regenerate_vcard()
+    {
+        $f = ['mobile', 'birthday', 'email', 'company', 'designation', 'uri', 'about'];
+        $vcard = array_map('trim', array_values(\Arr::get(static::$params, 'vcard', [])));
+
+        foreach($vcard as $key)
+        {
+            if(!in_array($key, $f))
+            {
+                return $this->error('invalid_request');
+            }
+        }
+
+        $user   = Document::factory('user', static::$user_id);
+        $user->vcard = $vcard;
+
+        if($user->save())
+            return $this->data($vcard);
+
+        return $this->error('server_error');
+    }
+
+
+    /**
      * Update a user's privacy/notification settings.
      *
      * @return boolean
@@ -1294,48 +1320,27 @@ class Controller_User extends Controller_Resource {
         //die(print_r($params, true));
         $validation = Validation::factory($params)
 //                ->rule('notifications.email', 'email')
-          ->rule('notifications.likers.own_post', 'not_empty')
           ->rule('notifications.likers.own_post', 'range', [':value', 0, 1])
-          ->rule('notifications.likers.other_posts', 'not_empty')
           ->rule('notifications.likers.other_posts', 'range', [':value', 0, 1])
           ->rule('notifications.likers.profile', 'range', [':value', 0, 1])
-          ->rule('notifications.likers.profile', 'not_empty')
           ->rule('notifications.subscribers.own_post', 'range', [':value', 0, 1])
-          ->rule('notifications.subscribers.own_post', 'not_empty')
           ->rule('notifications.subscribers.other_posts', 'range', [':value', 0, 1])
-          ->rule('notifications.subscribers.other_posts', 'not_empty')
           ->rule('notifications.subscribers.profile', 'range', [':value', 0, 1])
-          ->rule('notifications.subscribers.profile', 'not_empty')
           ->rule('notifications.comments.own_post', 'range', [':value', 0, 1])
-          ->rule('notifications.comments.own_post', 'not_empty')
           ->rule('notifications.comments.other_posts', 'range', [':value', 0, 1])
-          ->rule('notifications.comments.other_posts', 'not_empty')
           ->rule('notifications.mentions', 'range', [':value', 0, 1])
-          ->rule('notifications.mentions', 'not_empty')
           ->rule('notifications.testimonial', 'range', [':value', 0, 1])
-          ->rule('notifications.testimonial', 'not_empty')
           ->rule('notifications.wallpost', 'range', [':value', 0, 1])
-          ->rule('notifications.wallpost', 'not_empty')
           ->rule('notifications.messages', 'range', [':value', 0, 1])
-          ->rule('notifications.messages', 'not_empty')
-          ->rule('notifications.pages', 'not_empty')
           ->rule('notifications.pages', 'in_array', [':value', ['Daily', 'Weekly']])
           ->rule('privacy.is', 'Privacy::valid', [':value', ':field', ':validation'])
-          ->rule('privacy.is', 'not_empty')
           ->rule('privacy.personal.is', 'Privacy::valid', [':value', ':field', ':validation'])
-          ->rule('privacy.personal.is', 'not_empty')
           ->rule('privacy.contacts.is', 'Privacy::valid', [':value', ':field', ':validation'])
-          ->rule('privacy.contacts.is', 'not_empty')
           ->rule('privacy.subscriptions.is', 'Privacy::valid', [':value', ':field', ':validation'])
-          ->rule('privacy.subscriptions.is', 'not_empty')
           ->rule('privacy.messages.is', 'Privacy::valid', [':value', ':field', ':validation'])
-          ->rule('privacy.messages.is', 'not_empty')
           ->rule('privacy.mentions.is', 'Privacy::valid', [':value', ':field', ':validation'])
-          ->rule('privacy.mentions.is', 'not_empty')
           ->rule('privacy.wallposts.others_posts.is', 'Privacy::valid', [':value', ':field', ':validation'])
-          ->rule('privacy.wallposts.others_posts.is', 'not_empty')
-          ->rule('privacy.wallposts.others_posts_visibility.is', 'Privacy::valid', [':value', ':field', ':validation'])
-          ->rule('privacy.wallposts.others_posts_visibility.is', 'not_empty');
+          ->rule('privacy.wallposts.others_posts_visibility.is', 'Privacy::valid', [':value', ':field', ':validation']);
 
 
         if ($validation->check())
@@ -2003,64 +2008,70 @@ class Controller_User extends Controller_Resource {
 
     protected static function extract_privacy_values($array)
     {
-        $return = [];
+        $return = array_flip([
+            'privacy.is', 'privacy.subscriptions.is', 'privacy.contacts.is',
+            'privacy.personal.is', 'privacy.messages.is', 'privacy.mentions.is',
+            'privacy.wallposts.others_posts.is',
+            'privacy.wallposts.others_posts_visibility.is'
+        ]);
 
-        $return['privacy.is']                                   = Arr::path($array, 'privacy.is');
-        $return['privacy.contacts.is']                          = Arr::path($array, 'privacy.contacts.is');
-        $return['privacy.personal.is']                          = Arr::path($array, 'privacy.contacts.is');
-        $return['privacy.subscriptions.is']                     = Arr::path($array, 'privacy.subscriptions.is');
-        $return['privacy.messages.is']                          = Arr::path($array, 'privacy.messages.is');
-        $return['privacy.wallposts.others_posts.is']            = Arr::path($array, 'privacy.wallposts.others_posts.is');
-        $return['privacy.wallposts.others_posts_visibility.is'] = Arr::path($array, 'privacy.wallposts.others_posts_visibility.is');
-        $return['privacy.mentions.is']                          = Arr::path($array, 'privacy.mentions.is');
+        foreach($return as $k => $v)
+        {
+            $return[$k] = Arr::path($array, $k);
+        }
 
         return Arr::merge($return, $array);
     }
 
     protected static function extract_notification_values($array)
     {
-        $return = [];
+        $n = 'notifications';
+        $l = 'likers';
+        $s = 'subscribers';
+        $ow = 'own_post';
+        $ot = 'other_posts';
+        $return = array_flip([
+            "$n.$l.$ow", "$n.$l.$ot", "$n.$l.profile", "$n.$s.$ow", "$n.$s.$ot",
+            "$n.$s.profile", "$n.comments.$ow", "$n.comments.$ot", "$n.mentions",
+            "$n.mentions", "$n.wallpost", "$n.testimonial", "$n.messages",
+            "$n.pages"
+        ]);
 
-        $return['notifications.likers.own_post']         = Arr::path($array, 'notifications.likers.own_post');
-        $return['notifications.likers.other_posts']      = Arr::path($array, 'notifications.likers.other_posts');
-        $return['notifications.likers.profile']          = Arr::path($array, 'notifications.likers.profile');
-        $return['notifications.subscribers.own_post']    = Arr::path($array, 'notifications.subscribers.own_post');
-        $return['notifications.subscribers.other_posts'] = Arr::path($array, 'notifications.subscribers.other_posts');
-        $return['notifications.subscribers.profile']     = Arr::path($array, 'notifications.subscribers.profile');
-        $return['notifications.comments.own_post']       = Arr::path($array, 'notifications.comments.own_post');
-        $return['notifications.comments.other_posts']    = Arr::path($array, 'notifications.comments.other_posts');
-        $return['notifications.mentions']                = Arr::path($array, 'notifications.mentions');
-        $return['notifications.wallpost']                = Arr::path($array, 'notifications.wallpost');
-        $return['notifications.testimonial']             = Arr::path($array, 'notifications.testimonial');
-        $return['notifications.messages']                = Arr::path($array, 'notifications.messages');
-        $return['notifications.pages']                   = Arr::path($array, 'notifications.pages');
+        foreach($return as $k => $v)
+        {
+            $return[$k] = Arr::path($array, $k);
+        }
 
         return Arr::merge($return, $array);
     }
 
     protected static function extract_info_values($array)
     {
-        $return                          = [];
-//        $return['message']           = Arr::get($array, 'aboutme');
-        $return['info.gender']           = Arr::path($array, 'info.gender');
-        $return['info.telephone.mobile'] = Arr::path($array, 'info.telephone.mobile');
-        $return['info.birthday']         = Arr::path($array, 'info.birthday');
-        $return['info.languages']        = Arr::path($array, 'info.languages');
-        $return['info.achievements']     = Arr::path($array, 'info.achievements');
-        $return['info.education']        = Arr::path($array, 'info.education');
-        $return['info.social']           = Arr::path($array, 'info.social');
+        $return = array_flip([
+            'info.gender', 'info.telephone.mobile', 'info.birthday', 'info.social',
+            'info.languages', 'info.achievements', 'info.education',
+        ]);
+
+        foreach($return as $k => $v)
+        {
+            $return[$k] = Arr::path($array, $k);
+        }
 
         return Arr::merge($return, $array);
     }
 
     protected static function extract_registration_values($array)
     {
-        $return = [];
+        $return = array_flip([
+            'info.gender', 'info.telephone.mobile', 'info.birthday'
+        ]);
 
-        $return['roles']                 = [Arr::get($array, 'user_type')];
-        $return['info.gender']           = Arr::path($array, 'info.gender');
-        $return['info.telephone.mobile'] = Arr::path($array, 'info.telephone.mobile');
-        $return['info.birthday']         = Arr::path($array, 'info.birthday');
+        foreach ($return as $k => $v)
+        {
+            $return[$k] = Arr::path($array, $k);
+        }
+
+        $return['roles'] = [Arr::get($array, 'user_type')];
 
         return Arr::merge($return, $array);
     }

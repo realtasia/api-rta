@@ -730,6 +730,7 @@ class Controller_Post extends Controller_Resource {
         $conv = Document::factory('post', $this->request->param('id'));
         $conv->set('unread', null);
         $conv->save();
+        return $this->data(['success' => 1]);
     }
 
     /**
@@ -926,9 +927,9 @@ class Controller_Post extends Controller_Resource {
 
             $params['counts']['attachments'] = count($params['addedMedia']);
 
-            if ($params['status'] === 'active')
+            if (!$update && $params['status'] === 'active')
             {
-                $params['expiry'] = time();
+                $params['expiry'] = $this->listing_expiry($params);
             }
 
             $u                  = (array) $this->get_user();
@@ -941,6 +942,8 @@ class Controller_Post extends Controller_Resource {
             if ($update)
             {
                 $post = Document::factory('post', $update);
+                if(!$post->load())
+                    return $this->error('server_error');
             }
             else
                 $post = static::$model;
@@ -967,8 +970,10 @@ class Controller_Post extends Controller_Resource {
                     Ticker::add($post->_id, 'new');
                 }
                 static::creator_interactions($post->_id, 'post');
-                $post                          = $post->stringify($post->as_array());
-                $post['counts']['subscribers'] = 1;
+                $post = $post->stringify($post->as_array());
+                if(!$update)
+                    $post['counts']['subscribers'] = 1;
+
                 return $this->data($post);
             }
 
@@ -1150,7 +1155,7 @@ class Controller_Post extends Controller_Resource {
         $data     = \Arr::get(static::$params, 'data');
         $user     = (object) $this->get_user();
         $album_id = \Arr::get(static::$params, 'album_id');
-        $debug    = ['album_id' => $album_id];
+        $debug    = ['params' => static::$params];
 
         if ($album_id)
         {
@@ -1197,20 +1202,25 @@ class Controller_Post extends Controller_Resource {
               'subtype'     => '',
               'type'        => 'attachment',
             ], $data);
-        $debug['attachment']      = $args;
-        $fh                       = fopen('debug.html', 'a');
-        fwrite($fh, "<pre>" . print_r($debug, true) . "</pre>");
-        fclose($fh);
         $attachment               = Document::factory('post');
         $attachment->current_user = $user;
+        $fh = fopen('debug.html', 'a');
+        fwrite($fh, print_r($debug, true));
+        //$create = $attachment->create_attachment($args);
+        //fwrite($fh, print_r(['created' => $create], true));
         if ($attachment->create_attachment($args))
         {
             $a->set('picture', $attachment->picture);
             $a->save();
+            // DEBUG
+                fwrite($fh, print_r(['New Document' => $attachment->stringify($attachment->as_array())], true));
+                fclose($fh);
+            // END DEBUG
+
             static::creator_interactions($attachment->_id, 'post');
             return $this->data($attachment->stringify($attachment->as_array()));
         }
-
+                fclose($fh);
         return $this->error('invalid_request');
     }
 
@@ -1867,12 +1877,13 @@ class Controller_Post extends Controller_Resource {
     {
         $rent     = Date::WEEK * 2;                      // 2 weeks for Rent
         $sale     = Date::WEEK * 6;                      // 6 weeks for Sale
-        $id       = \Arr::get($params, '_id');           // this is an update?
-        $modified = \Arr::get($params, 'modified');      // last modified
-        $expiry   = \Arr::get($params, 'expiry');        // previous expiry
+//        $id       = \Arr::get($params, '_id');           // this is an update?
+//        $modified = \Arr::get($params, 'modified');      // last modified
+//        $expiry   = \Arr::get($params, 'expiry');        // previous expiry
         $type     = \Arr::path($params, 'listing.type'); // rent or sale
-        $status   = \Arr::get($params, 'status');        // active or pending
-        // base the expiry on this time
-        $created  = $id ? Document::check_id($id)->getTimestamp() : time();
+//        $status   = \Arr::get($params, 'status');        // active or pending
+//        // base the expiry on this time
+//        $created  = $id ? Document::check_id($id)->getTimestamp() : time();
+        return time() + (strtolower($type) === 'rent') ? $rent : $sale;
     }
 }
