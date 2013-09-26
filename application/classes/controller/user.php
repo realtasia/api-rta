@@ -678,9 +678,9 @@ class Controller_User extends Controller_Resource {
      *
      * @return type
      */
-    public function action_resetUnread()
+    public function action_resetunread()
     {
-        Document::factory('user', static::$user_id)->set('counts.newMessages', 0)->save();
+        Document::factory('user', $this->request->param("id"))->set('counts.newMessages', 0)->save();
         return $this->data(['success' => 1]);
     }
 

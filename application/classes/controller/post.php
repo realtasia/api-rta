@@ -728,7 +728,7 @@ class Controller_Post extends Controller_Resource {
     protected function clear_unread()
     {
         $conv = Document::factory('post', $this->request->param('id'));
-        $conv->set('unread', null);
+        $conv->unread = null;
         $conv->save();
         return $this->data(['success' => 1]);
     }
