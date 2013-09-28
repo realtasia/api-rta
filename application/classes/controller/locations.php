@@ -16,7 +16,7 @@ ini_set('memory_limit', '2000M');
  */
 //class Controller_Locations extends Controller_Resource {
 
-class Controller_Locations extends Controller {
+class Controller_Locations extends Controller_Resource {
 
     public static $stray_statuses = [
         'SUCCESS', 'INVALID', 'REVIEW', 'NEW'
@@ -420,6 +420,11 @@ class Controller_Locations extends Controller {
         return $this->error('invalid_request');
     }
 
+    /**
+     * Simple method to get a location by name
+     *
+     * @return Response
+     */
     public function action_fetchlocation()
     {
         $name = $this->request->query('name');
@@ -433,7 +438,145 @@ class Controller_Locations extends Controller {
     }
 
     /**
+     * This is a scenario where admin edits or changes a location while viewing
+     * a single property.
+     *
+     * 1. Grab the location by id and update.
+     *      - set a job that updates all posts that have this id (cron)
+     * 2. Update all Singpost entries with contains this location id (child._id)
+     * 3. Check if estate has changed. If true:
+     *      - fetch estate location
+     *      - update singpost to rename all estates with this name.
+     *      - update all locations with this fetched location id
+     *
+     * needs a $_POST with the following:[
+     *     estate  => 'name', ** // name of estate
+     *     name    => 'name', ** // the name of the new location
+     *     subtype => 'subtype', ** // the location subtype 'private-apartments' etc
+     *     property_type => 'property_type', ** // the property_type, if available
+     * ]
+     *
+     *
+     * @return /Response with JSON data
+     */
+    public function action_editlocationinline()
+    {
+        $u        = (object) $this->get_user();
+        $children = null;
+        $data = json_decode(\Arr::get(static::$params, 'data'), true);
+        $id = \Arr::get($data, '_id');
+        $parent = \Arr::get($data, 'parent');
+        $singpost = Collection::factory('singpost');
+        $children = Collection::factory('page');
+        $response = [];
+
+        // parent found, means estate name is changed
+        if($parent)
+        {
+            $p_doc = Document::factory('page', \Arr::get($parent, '_id'));
+            $p_doc->load();
+            $oldname = $p_doc->name;
+
+            $name = trim(strip_tags(\Arr::get($parent, 'name')));
+            $slug = URL::title($name);
+            $uri = "/location/estate/" . $slug;
+
+            $p_doc->name = $name;
+            $p_doc->slug = $slug;
+            $p_doc->uri = $uri;
+            $p_doc->addToSet('keywords', $slug);
+            $p_doc->save();
+            $response['parent'] = \Arr::overwrite($parent, array_merge(["uri" => $uri], $p_doc->as_array()));
+
+            // update singapost results;
+            $singpost->update([
+                'estate' => $oldname
+            ], [
+                '$set' => ['estate' => $name],
+                '$addToSet' => ['keywords' => strtolower($name)]
+            ],[
+                'multiple' => true
+            ]);
+
+            $singpost->reset();
+
+            // update all children to reflect new parent name
+            $children->update([
+                'parent._id' => $p_doc->_id
+            ], [
+                '$set' => [
+                    'parent.name' => $name,
+                    'parent.uri' => $uri
+                ],
+                '$addToSet' => ['keywords' => strtolower($p_doc->name)]
+            ],[
+                'multiple' => true
+            ]);
+        }
+
+        // id found update the location and all singpost results
+        if($id)
+        {
+            $c_doc = Document::factory('page', $id);
+            $new_vals = $singpost_vals = [];
+
+            $subtype = \Arr::get($data, 'subtype');
+
+            if(!$subtype || !in_array($subtype, ['Private Apartments', 'Serviced Apartments', 'Private Landed', 'HDB']))
+                return $this->error('invalid_request');
+
+            foreach($data as $k => $v)
+            {
+                switch(true)
+                {
+                    case $k === 'name':
+                        $singpost_vals['name'] = trim(strip_tags($v));
+                        $singpost_vals["slug"] = URL::title($singpost_vals['name']);
+                        $singpost_vals["uri"] = "/location/" . URL::title($subtype) . '/' . $singpost_vals["slug"];
+                        break;
+                    case $k === "subtype":
+                        $new_vals['subtype'] = $subtype;
+                        break;
+                    case $k === "property_type":
+                        $new_vals['property_type'] = $v;
+                        break;
+                }
+            }
+            $c_update = $new_vals + $singpost_vals;
+            foreach($c_update as $p => $v)
+            {
+                $c_doc->{$p} = $v;
+            }
+
+            $c_doc->addToSet('keywords', $singpost_vals["slug"]);
+            //$c_doc->a
+            $c_doc->save();
+            $response += $c_update;
+
+            // update singapost results;
+            $singpost->update([
+                // criteria is _id
+                'child._id' => Document::check_id($id)
+            ], [
+                // new child subdoc
+                '$set' => ['child' => $singpost_vals],
+                // add the child name to the keywords
+                '$addToSet' => ['keywords' => strtolower($singpost_vals["name"])]
+            ],[
+                'multiple' => true
+            ]);
+
+        }
+
+        return !empty($response) ? $this->data($data) : $this->error('invalid_request');
+    }
+
+
+    /**
      * Splits a keyword into as many forms as queriable to return better results
+     *
+     * ObjectId("50ed2599b90fb8c81700003f")
+     * ObjectId("50ed2578b90fb8c81700003e")
      *
      * @param string $text
      * @param boolean $result

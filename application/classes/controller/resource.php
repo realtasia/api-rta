@@ -126,11 +126,7 @@ abstract class Controller_Resource extends Controller_Abstract{
     public function has_role($role)
     {
         $user = $this->get_user();
-        if($user)
-        {
-            return in_array($role, $user->roles);
-        }
-        return false;
+        return $user ? in_array($role, $user->roles) : false;
     }
 
     /**

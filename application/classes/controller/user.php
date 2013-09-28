@@ -855,6 +855,13 @@ class Controller_User extends Controller_Resource {
         return $this->data($d->stringify($r->as_array()));
     }
 
+    /**
+     * Utility to fetch names of people that a user can send a message to
+     * Includes ppl he has had a conversation with (even ones with private profile)
+     * Includes all public profile.
+     *
+     * @return array of users
+     */
     protected function search_message_receipient()
     {
         $s  = $this->request->query('s');

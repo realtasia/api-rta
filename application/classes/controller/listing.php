@@ -27,8 +27,7 @@ class Controller_Listing extends Controller_Post{
                     'keywords' => new MongoRegex("/^".strtolower($s)."/")
                     ])
                 ->fields(['keywords', 'estate', 'child', 'number', 'postal', 'street'])
-                ->limit(50)
-                ->slaveOkay();
+                ->limit(50);
 
         while($cursor->hasNext())
         {

@@ -52,7 +52,8 @@ class Controller_Page extends Controller_Resource {
     {
         $id = $this->request->param('id');
 
-        if(strpos($id, ",") !== false){
+        if (strpos($id, ",") !== false)
+        {
             $id = array_map("trim", explode(",", $id));
         }
         return $this->data(static::$model->get($id));
@@ -249,25 +250,21 @@ class Controller_Page extends Controller_Resource {
      */
     public function action_info()
     {
-        $id = $this->request->param('id');
-        if ($this->is_GET() && (parent::logged_in() || parent::is_client()))
+        $id  = $this->request->param('id');
+        $ret = [];
+        $c   = Collection::factory('singpost')
+          ->find(['child._id' => Document::check_id($id)])
+          ->fields(['number' => 1, 'street' => 1, 'postal' => 1, 'geo'    => 1]);
+
+        while ($c->hasNext())
         {
-            $user = static::$model;
-            $user->load($this->request->param('id'), ['info' => 1]);
-            $this->data($user->stringify($user->as_array()['info']));
+            $row   = $c->getNext();
+            $ret[] = [
+                'address' => ucwords(strtolower("{$row->number} {$row->street} {$row->postal}")),
+                'geo'     => $row->geo
+            ];
         }
-        else
-        {
-            if (static::logged_in_is_id($id))
-            {
-                // update user by his/her specific field
-                if ($this->is_POST())
-                {
-                    $this->update_info(static::$params, $id);
-                }
-                return true;
-            }
-        }
+        return $this->data($ret);
     }
 
     public function action_pictures()
@@ -340,14 +337,15 @@ class Controller_Page extends Controller_Resource {
 
     public function action_locationkeyword()
     {
-        $s = $this->request->query('s');
+        $s = strtolower($this->request->query('s'));
+
         if (!$s)
             return $this->error('invalid_request');
 
         $q = [
-            'estate'   => ['$ne' => null],
-            'keywords' => new MongoRegex("/^" . strtolower($s) . "/"),
-            'child._id'    => ['$exists' => true]
+            'estate'    => ['$ne' => null],
+            'child._id' => ['$exists' => true],
+            'keywords'  => new MongoRegex("/^$s/"),
         ];
 
         // in case we are in an estate, limiting will be best
@@ -355,14 +353,13 @@ class Controller_Page extends Controller_Resource {
         {
             $q['estate'] = urldecode($estate);
         }
-
-        $s       = strtolower($s);
+        //return $this->data($q);
         $results = [];
-        $cursor  = (array) Collection::factory('singpost')->distinct('keywords', $q)->slaveOkay();
-
+        $cursor  = (array) Collection::factory('singpost')->distinct('keywords', $q);
+        //return $this->data($cursor);
         foreach ($cursor as $value)
         {
-            if (strpos($value, $s) !== false)
+            if (strpos($value, $s) !== false && strpos($value, "(") === false && strpos($value, "/") === false)
             {
                 $results [] = ucwords($value);
             }
@@ -388,7 +385,7 @@ class Controller_Page extends Controller_Resource {
               'type'       => 'company',
               'status'     => 'active',
               'privacy.is' => 'PUBLIC',
-        ])->slaveOkay();
+          ]);
 
         foreach ($cursor as $value)
         {
@@ -450,27 +447,26 @@ class Controller_Page extends Controller_Resource {
         {
             $include_ids = array();
             //unset(static::$params['s']);
-            $c = Collection::factory('singpost')
-              ->find([
-                  'estate'    => ['$ne' => null],
-                  'keywords'  => new MongoRegex("/^" . strtolower($s) . "/"),
-                  'child._id' => ['$exists' => true]
-              ])
-              ->fields(['child'])
-              ->limit(50)->slaveOkay();
+            $c           = Collection::factory('singpost')
+                ->find([
+                    'estate'    => ['$ne' => null],
+                    'keywords'  => new MongoRegex("/^" . strtolower($s) . "/"),
+                    'child._id' => ['$exists' => true]
+                ])
+                ->fields(['child'])
+                ->limit(50)->slaveOkay();
 
-            while($c->hasNext())
+            while ($c->hasNext())
             {
                 $child = (string) \Arr::get($c->getNext()->child, '_id');
 
-                if(!in_array($child, $include_ids))
+                if (!in_array($child, $include_ids))
                 {
                     $include_ids[] = $child;
                 }
-
             }
 
-            if(count(array_filter($include_ids)) === 0)
+            if (count(array_filter($include_ids)) === 0)
             {
                 return $this->data([]);
             }
@@ -498,7 +494,7 @@ class Controller_Page extends Controller_Resource {
     }
 
     /**     * ***********************************************************************
-     * TestPad methods
+     * TestPad methods DO NOT DELETE. MOVE INSTEAD IF NEEDED
      * *********************************************************************** */
     public function action_standard()
     {

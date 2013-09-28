@@ -91,6 +91,7 @@ class Controller_Abstract extends Controller {
 
         if(static::$current_session)
         {
+            unset(static::$current_session["user_agent"]);
             $return['session'] = static::$current_session;
         }
 
@@ -135,6 +136,7 @@ class Controller_Abstract extends Controller {
 
         if(static::$current_session)
         {
+            unset(static::$current_session["user_agent"]);
             $this->return->session = [
                 'access_token' => static::$current_session['access_token']
             ];
@@ -192,6 +194,7 @@ class Controller_Abstract extends Controller {
 
         if(static::$current_session)
         {
+            unset(static::$current_session["user_agent"]);
             $this->return->session = static::$current_session;
         }
 

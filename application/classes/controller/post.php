@@ -759,7 +759,7 @@ class Controller_Post extends Controller_Resource {
      * ensures that the default status is pending  unless this is an update. Upon successful creation,
      *   - increases the receipient count for testimonials received.
      *   - increases the writer's count for testimonials written.<code>
-     * POST "/post/update/create_testimonial"</code>
+     * POST "/post/update/"</code>
      * with the following params
      * <code>
      * $defaults = [
@@ -987,7 +987,7 @@ class Controller_Post extends Controller_Resource {
     /**
      * Creates a wallpost. Uses the user controller to validate a page if present. A page parent is optional,
      * but a page is needed so we know where this post was created - in this case it is a user. <code>
-     * POST to "/post/update/create_wallpost"</code>
+     * POST to "/post/update/"</code>
      * with the following params
      * <code>
      * $defaults = [
@@ -1065,7 +1065,7 @@ class Controller_Post extends Controller_Resource {
     /**
      * Creates a regular post. Uses the page controller to validate a page if present. A page parent is optional,
      * but a page is needed so we know where this post was created.  <code>
-     * POST to "/post/update/create_post"</code>
+     * POST to "/post/update/"</code>
      * with the following params
      * <code>
      * $defaults = [
@@ -1140,7 +1140,7 @@ class Controller_Post extends Controller_Resource {
 
     /**
      * Creates an attachment. <code>
-     * POST "/post/update/create_attachment"</code>
+     * POST "/post/update/"</code>
      * with the following params
      * <code>
      * $defaults = [
@@ -1226,7 +1226,7 @@ class Controller_Post extends Controller_Resource {
 
     /**
      * Creates an album. <code>
-     * POST "/post/update/create_album"</code>
+     * POST "/post/update/"</code>
      * with the following params
      * <code>
      * $defaults = [
@@ -1287,7 +1287,7 @@ class Controller_Post extends Controller_Resource {
     /**
      * Update a listing. Checks if there is an id and calls the create_listing
      * method. <code>
-     * POST "/post/update/update_listing/{id}"</code>
+     * POST "/post/update/{id}"</code>
      * @see self::create_listing
      * @return string JSON encoded array
      */
