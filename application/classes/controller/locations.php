@@ -559,7 +559,7 @@ class Controller_Locations extends Controller_Resource {
                 'child._id' => Document::check_id($id)
             ], [
                 // new child subdoc
-                '$set' => ['child' => $singpost_vals],
+                '$set' => ['child' => $singpost_vals + ['_id' => Document::check_id($id)]],
                 // add the child name to the keywords
                 '$addToSet' => ['keywords' => strtolower($singpost_vals["name"])]
             ],[
