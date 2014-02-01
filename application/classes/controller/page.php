@@ -41,7 +41,24 @@ class Controller_Page extends Controller_Resource {
      * *********************************************************************** */
 
     /**
-     * Fetch requested post and check relation to logged_in user
+     * Fetch requested page by slug and check relation to logged_in user
+     *
+     * GET post
+     * Usage: Issue a GET to /page/index/{id}
+     *
+     * @return json data
+     */
+     public function action_getBySlug()
+	 {
+        $id = $this->request->param('id');
+
+
+        return $this->data(static::$model->get_by_slug_or_id($id));
+	 }
+     
+     
+    /**
+     * Fetch requested page and check relation to logged_in user
      *
      * GET post
      * Usage: Issue a GET to /page/index/{id}
@@ -56,7 +73,9 @@ class Controller_Page extends Controller_Resource {
         {
             $id = array_map("trim", explode(",", $id));
         }
+
         return $this->data(static::$model->get($id));
+		//die(json_encode(static::$model->get($id)));
     }
 
     /**
