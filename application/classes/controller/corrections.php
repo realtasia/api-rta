@@ -131,7 +131,7 @@ class Controller_Corrections extends Controller {
 
     public function action_cleanup()
     {
-        //http://static2.realtasia.com.sg/50f81f30d0729dc509000016/40/9a0d765af4214f907dee6d1f9b333729.jpg
+        //http://static.realtasia.com.sg/50f81f30d0729dc509000016/40/9a0d765af4214f907dee6d1f9b333729.jpg
         $user = Document::factory('user', '5106694e6c01992d14000011');
         $user->load();
         $lib  = Document::factory('page', $user->library['_id']);

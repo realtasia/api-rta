@@ -27,7 +27,7 @@
                 <div class="row-fluid">
                     <div class="span12">
                         <div style="border: 1px solid #eee; background:#fefefe;padding:20px;box-shadow:1px 1px 8px #000">
-                            <img src="http://static2.realtasia.com.sg/realtlogo5.png"  style="margin-bottom:10px;">
+                            <img src="http://static.realtasia.com.sg/realtlogo5.png"  style="margin-bottom:10px;">
                             <form class="form">
                                 <h6 style="padding:5px">Username</h6>
                                 <input type="text" class="text span12" name="username" id="username" placeholder="Email/Username">

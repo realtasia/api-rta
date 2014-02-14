@@ -448,7 +448,7 @@ class Controller_Post extends Controller_Resource {
     {
         if (parent::is_POST())
         {
-            $params['message']     = nl2br(Security::xss_clean(static::$params['message']));
+            $params['message']     = nl2br(trim(Security::xss_clean(static::$params['message'])));
             $params['type']        = 'feedback';
             $params['user']        = static::$params['user'];
             $params['environment'] = @json_decode(static::$params['environment'], true);
@@ -456,11 +456,15 @@ class Controller_Post extends Controller_Resource {
             $c = Document::factory('comment', null, static::$user_id)->create_feedback($params);
             if ($c)
             {
-                $pid = Document::check_id($params['post']['_id']);
-                Job::add($pid, 'comment', static::$user_id)->feedback($c->_id);
+                Job::add($c->_id, 'comment', static::$user_id)->feedback($c->_id);
+				$feedback = $c->stringify($c->as_array());
                 // admin user....
-                // Job::add($pid, 'comment', static::$user_id)->feedback($c->_id);
-                return $this->data($c->stringify($c->as_array()));
+				Publish::adminNotify([
+					'message' => 'New feedback received..',
+					'data'	=> $feedback
+				]);
+				
+                return $this->data( $feedback );
             }
 
             return $this->error('server_error');

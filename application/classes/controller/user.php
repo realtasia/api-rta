@@ -1796,7 +1796,12 @@ class Controller_User extends Controller_Resource {
           ->message($view, 'text/html')
           ->to('[REDACTED]', 'RealtAsia Administrators')
           ->from('[REDACTED]', 'SiRyA');
-
+		
+		Publish::adminNotify([
+			'message' => $subject,
+			'data'	=> (array) $message
+		]);
+		
         return $email->send();
     }
 

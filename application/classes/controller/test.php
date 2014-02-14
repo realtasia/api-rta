@@ -544,7 +544,7 @@ class Controller_Test extends Kohana_Controller {
 
     public function action_stagents()
     {
-        $letters = range('U', 'Z');
+        $letters = range('K', 'T');
         //$letters = ['A'];
         foreach ($letters as $letter)
         {
@@ -573,11 +573,11 @@ class Controller_Test extends Kohana_Controller {
 
     public function action_agents()
     {
-        $letters = range('U', 'Z');
-        foreach ($letters as $letter)
-        {
-            $a     = SimpleHTML::str_get_html(gzdecode($this->agent_url($letter)));
-            file_put_contents("agents/$letter-1.html", $a);
+//        $letters = range('A', 'Z');
+//        foreach ($letters as $letter)
+//        {
+            $a     = SimpleHTML::str_get_html($this->agent_url('featured'));
+            file_put_contents("agents/featured-1.html", $a);
             $found = $a->find('.totalfound', 0)->innertext();
             preg_match_all("/\d+/", $found, $find);
             if (count($find[0]) === 2)
@@ -589,13 +589,15 @@ class Controller_Test extends Kohana_Controller {
             {
                 for ($i = 2; $i <= $pages; $i++)
                 {
-                    $a = SimpleHTML::str_get_html(gzdecode($this->agent_url($letter)));
+                    //$a = SimpleHTML::str_get_html(gzdecode($this->agent_url($letter)));
+                    $a = SimpleHTML::str_get_html($this->agent_url('featured', $i));
                     file_put_contents("agents/$letter-$i.html", $a);
+					sleep(1);
                 }
                 sleep(1);
             }
-        }
-        sleep(1);
+//        }
+ //       sleep(1);
     }
 
     public function agent_url($letter, $page = 1)
@@ -603,14 +605,14 @@ class Controller_Test extends Kohana_Controller {
         $request = Request::factory('http://www.iproperty.com.sg/realestate/findanagent.aspx')
                 ->query(array(
                     'ty' => 'al',
-                    'ak' => $letter,
+                    'ak' => null,
                     'rk' => '',
                     'p'  => $page,
                     's'  => 100,
                 ))
                 ->headers(array(
             'Accept'          => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Encoding' => 'gzip, deflate',
+//            'Accept-Encoding' => 'gzip, deflate',
 //            'X-Requested-With' => 'XMLHttpRequest',
             'Accept-Language' => 'en-us,en;q=0.5',
             'Connection'      => 'keep-alive',
@@ -911,66 +913,49 @@ EOD;
         $this->auto_render = false;
     }
 
-    public function reset_users()
+    public function action_resetusers()
     {
-        $coll   = Model::factory('user')->collection;
-        $cursor = $coll->find();
-        $counts = array_merge(Model::$counts, array(
-            'subscriptions' => 0,
-            'testimonials'  => 0,
-            'likes'         => 0,
-            'events'        => 0,
-                ));
-        $subs   = array(
-            'events'       => array(),
-            'testimonials' => array(),
-            'listings'     => array(),
-            'locations'    => array(),
-            'posts'        => array(),
-            'users'        => array(),
-        );
+        $cursor   = Collection::factory('user')->find();
         while ($cursor->hasNext())
         {
             $doc    = $cursor->getNext();
-            $modify = array(
-                '$set'   => array(
-                    'counts'        => $counts,
-                    'subscriptions' => $subs,
-                    'subscribers'   => array(),
-                    'likers'        => array(),
-                    'likes'         => $subs,
-                    'status'        => 'active',
-                    'avatar'        => array('cropped'   => array(), 'uncropped' => array()),
-                    'notifications' => array(
-                        'likers'        => array(
-                            'own_post'    => 1,
-                            'other_posts' => 1,
-                            'profile'     => 1
-                        ),
-                        'subscribers'   => array(
-                            'own_post' => 1,
-                            'profile'  => 1,
-                        ),
-                        'comments'      => array(
-                            'own_post'    => 1,
-                            'other_posts' => 1
-                        ),
-                        'testimonials'  => 1,
-                        'profile_posts' => 1,
-                        'subscriptions' => array(
-                            'locations' => 'weekly',
-                            'profiles'  => 'weekly'
-                        )
-                    )
-                ),
-                '$unset' => array(
-                    'subscriptionsusers' => 1
-                )
-            );
-
-            echo Debug::vars($coll->update(array('_id' => $doc['_id']), $modify, array('safe' => TRUE)));
+			$doc->counts = static::reset_counts($doc->counts);
+			$doc->avatar = null;
+			$doc->likers = array();
+			$doc->subscribers = array();
+			$doc->save();
+			echo Debug::vars($doc->as_array());
         }
     }
+    public function action_resetpages()
+    {
+        $cursor   = Collection::factory('page')->find();
+        while ($cursor->hasNext())
+        {
+            $doc    = $cursor->getNext();
+			$doc->counts = static::reset_counts($doc->counts);
+			$doc->likers = array();
+			$doc->subscribers = array();
+			$doc->save();
+			echo Debug::vars($doc->as_array());
+        }
+    }
+	protected static function reset_counts($array)
+	{
+		foreach($array as $k => $v)
+		{
+			if(is_array($v))
+			{
+				$array[$k] = static::reset_counts($v);
+			}
+			if(is_numeric($v))
+			{
+				$array[$k] = 0;
+			}
+		}
+		
+		return $array;
+	}
 
     public function clear_logs_and_jobs()
     {
