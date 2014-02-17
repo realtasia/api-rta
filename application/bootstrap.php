@@ -108,7 +108,8 @@ Kohana::modules([
     'database'   => MODPATH . 'database',   // Database access
     'image'      => MODPATH . 'image',      // Image manipulation
     'purifier'   => MODPATH . 'purifier',        // Object Relationship Mapping
-    'ticker'     => MODPATH . 'ticker'        // Object Relationship Mapping
+    'ticker'     => MODPATH . 'ticker',        // Object Relationship Mapping
+	'deploy'	   => MODPATH . 'deploy'       
 ]);
 
 Kohana::$log->attach(new Log_Mongo(), [], Log::DEBUG);
