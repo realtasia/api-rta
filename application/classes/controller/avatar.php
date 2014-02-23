@@ -41,7 +41,7 @@ class Controller_Avatar extends Controller {
         //echo $b . ucfirst(substr($u['info']['gender'], 0, 1)) . $size . '.png';
         //return;
         return $this->response->headers([
-            'X-Accel-Redirect' => $b . ucfirst(substr($u['info']['gender'], 0, 1)) . $size . '.png'
+            'X-Accel-Redirect' => "$b" . ucfirst(substr($u['info']['gender'], 0, 1)) . $size . '.png'
         ]);
 
     }

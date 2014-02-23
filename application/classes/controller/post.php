@@ -427,8 +427,8 @@ class Controller_Post extends Controller_Resource {
             $conv->inc('counts.messages');
             $conv->save();
 
-            Debug::log(Job::add($conv->_id, 'post', static::$user_id)
-                ->private_message($c->_id));
+            Job::add($conv->_id, 'post', static::$user_id)
+                ->private_message($c->_id);
 
             return $this->data([
                 'conversation' => $conv->stringify($conv->as_array()),

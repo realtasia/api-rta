@@ -90,7 +90,7 @@ class Controller_User extends Controller_Resource {
                     return $this->{$type}();
                 }
 
-                Debug::log('Access Denied invoked because no admin user or not client');
+                //Debug::log('Access Denied invoked because no admin user or not client');
                 return $this->error('access_denied');
             }
         }
@@ -120,7 +120,7 @@ class Controller_User extends Controller_Resource {
         // no type. we need a type
         if (!$type)
         {
-            Debug::log('Invalid invoked because no request type');
+            //Debug::log('Invalid invoked because no request type');
             return $this->error('invalid_request');
         }
 
@@ -134,7 +134,7 @@ class Controller_User extends Controller_Resource {
                 return $this->{$type}();
             }
 
-            Debug::log('Access Denied invoked because no valid user');
+            //Debug::log('Access Denied invoked because no valid user');
             $valid = false;
         }
 
@@ -146,7 +146,7 @@ class Controller_User extends Controller_Resource {
                 return $this->{$type}();
             }
 
-            Debug::log('Access Denied invoked because no admin user or not client');
+            //Debug::log('Access Denied invoked because no admin user or not client');
             $valid = false;
         }
 
@@ -158,7 +158,7 @@ class Controller_User extends Controller_Resource {
                 return $this->{$type}();
             }
 
-            Debug::log('Access Denied invoked because no admin user or not client');
+            //Debug::log('Access Denied invoked because no admin user or not client');
             $valid = false;
         }
         if (!$valid)
@@ -167,7 +167,7 @@ class Controller_User extends Controller_Resource {
         }
 
         // nope, return an error
-        Debug::log('Invalid invoked request type is not valid');
+        //Debug::log('Invalid invoked request type is not valid');
         return $this->error('invalid_request');
     }
 

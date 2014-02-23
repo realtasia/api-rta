@@ -176,7 +176,7 @@ class Controller_Auth extends Controller_Abstract {
                 $log[] = '[no user_agent in client authentication request]';
             case ($grant_type === 'password') && !($username OR $password OR $user_agent):
                 $log[] = '[no username, password or user_agent in login request]';
-                Debug::log('Invalid Request invoked in check headers' . implode(" ", $log));
+                //Debug::log('Invalid Request invoked in check headers' . implode(" ", $log));
                 return $this->error('invalid_request');
         }
 

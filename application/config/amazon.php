@@ -6,7 +6,7 @@ return [
         'key'    => '[REDACTED]',
         'secret' => '[REDACTED]',
         //'base_url' => 's3.amazonaws.com',
-        'region' => 'ap-southeast-1'
+        'region' => 'us-east-1'
     ],
     'legacySDK'   => [
 
