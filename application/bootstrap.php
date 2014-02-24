@@ -60,10 +60,8 @@ I18n::lang('en-gb');
  * Note: If you supply an invalid environment name, a PHP warning will be thrown
  * saying "Couldn't find constant Kohana::<INVALID_ENV_NAME>"
  */
-if (isset($_SERVER['KOHANA_ENV']))
-{
-    Kohana::$environment = constant('Kohana::' . strtoupper($_SERVER['KOHANA_ENV']));
-}
+Kohana::$environment = ($_SERVER['SERVER_NAME'] === 'api.realtasia.com.sg') ? Kohana::PRODUCTION : Kohana::DEVELOPMENT;
+
 
 /**
  * Initialize Kohana, setting the default options.
@@ -81,8 +79,8 @@ if (isset($_SERVER['KOHANA_ENV']))
 Kohana::init([
     'base_url' => '/',
     'index_file' => '',
-    'profile'  => false,
-    'caching' => true
+    'profile'  => Kohana::$environment === Kohana::PRODUCTION,
+    'caching' => Kohana::$environment === Kohana::PRODUCTION
 ]);
 /**
  * Attach the file write to logging. Multiple writers are supported.
@@ -112,8 +110,14 @@ Kohana::modules([
 	'deploy'	   => MODPATH . 'deploy'       
 ]);
 
-Kohana::$log->attach(new Log_Mongo(), [], Log::DEBUG);
-
+/**
+ * Attach the file write to logging. Multiple writers are supported.
+ */
+Kohana::$log->attach( Kohana::$environment === Kohana::PRODUCTION 
+	? new Log_Mongo() 
+	: new Log_File(APPPATH . 'logs')
+	, array(), new Log_Mongo(), [], Log::DEBUG );
+	
 Route::set('singpost', 'singpost(/<action>(/<id>))')
         ->defaults([
             'controller' => 'singpost',
