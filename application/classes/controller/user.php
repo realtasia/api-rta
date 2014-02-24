@@ -1013,13 +1013,8 @@ class Controller_User extends Controller_Resource {
                   'New User REGISTERED!! Double Woots! Woots!', print_r(static::$params, TRUE)
                 );
                 Job::add($doc_id, $doc_type, $user_id);
-                $this->user_email(
-                  $r, 'We received your submission', Kohana::message('user/info', 'welcome_aboard')
-                );
-
-//                $this->send_sms(
-//                  'Welcome to Realtasia!', $params['info.telephone.mobile']
-//                );
+				
+                $this->sign_up_email($r, 'Welcome to RealtAsia');
 
                 $this->data($u->stringify($u->as_array()));
             }
@@ -1072,6 +1067,77 @@ class Controller_User extends Controller_Resource {
 
         return true;
     }
+
+
+	/**
+	 * This method actually does a few things, so the client should be
+	 * prepared to have the UI blocked while this completes :)
+	 * 
+	 * 1. Activate user with given uid
+	 * 2. Find (and update if found) an agent with given cuid
+	 * 3. Send notification to admin (SMS??) about the details
+	 * 4. Lastly, deliver the last registration packaged email to this agent
+	 * 
+	 */
+	protected function activate()
+	{
+		$params = static::$params;
+		static::$model->load(($params['uid']));
+		
+		static::$model->status = 'active';
+		
+		$billing = [
+			'mode' => \Arr::get($params, 'mode'),
+			'frequency' => 'annual',
+			'amount' => \Arr::get($params, 'mc_gross'),
+			'transaction_id' => \Arr::get($params, 'transaction_id'),
+			'transaction_date' => \Arr::get($params, 'payment_date'),
+			'paid_from' => time(),
+			'paid_to' => time() + Date::YEAR,
+			'payer_email' => \Arr::get($params, 'payer_email'),
+			'plan' => [
+				'name' => \Arr::get($params, 'item_name'),
+				'id'=> \Arr::get($params, 'item_number')
+			]
+		];
+		
+		static::$model->set('settings.billing', $billing);
+		
+		static::$model->save();
+		
+		if($cuid = \Arr::get($params, 'cuid'))
+		{
+			$agent = Document::factory('agent', $cuid);
+			$agent->converted = [
+				'date' => \Arr::get($payment, 'payment_date'),
+				'registered_user' => (string) static::$model->_id
+			];
+			$agent->save();
+		}
+
+	
+        $this->admin_email(
+          'PAYMENT!! TRIPLE Woots! Woots! Woots!', print_r(static::$model->as_array(), TRUE)
+        );
+       
+        $this->send_sms(
+          'We got a payment of: $' . \Arr::get($billing, 'amount') . '!!!', '[REDACTED]'
+        );
+		
+		$user = static::$model->as_array();
+		
+		$this->activate_email([
+			'name' => \Arr::get($user, 'first_name'),
+			'email' => \Arr::get($user, 'email'),
+			'amount' => \Arr::get($billing, 'amount'),
+			'paid_from' => \Arr::get($billing, 'paid_from'),
+			'paid_to' => \Arr::get($billing, 'paid_to'),
+			'transaction_id' => \Arr::get($billing, 'transaction_id'),
+			'plan_name' => \Arr::get($params, 'item_name'),
+		]);				
+	}
+
+
 
     /* *************************************************************************
      * Protected Actions - UPDATES
@@ -1594,8 +1660,8 @@ class Controller_User extends Controller_Resource {
         $name = Arr::get(static::$params, 'name');
 
 
-        $this->user_email(['email' => $to, 'name'  => $name], $subject, $message);
-        return;
+        return $this->user_email(['email' => $to, 'name'  => $name], $subject, $message);
+        ;
     }
 
     /*     * ************************************************************************
@@ -1720,6 +1786,73 @@ class Controller_User extends Controller_Resource {
         return $user->save();
     }
 
+
+    /**
+     * Sends a sign_up email. Normally for registrations purposes.
+     *
+     * @param string $recipient
+     * @param string $subject
+     * @param string $message
+     * @return boolean
+     */
+    protected function sign_up_email($recipient, $subject)
+    {
+    	
+		$view = View::factory('email/signup-email', $recipient);
+
+        $email = Email::factory($subject, strip_tags($view->render()))
+          ->message($view, 'text/html')
+          ->to($recipient['email'], $recipient['name'])
+          ->from('[REDACTED]', 'Realtasia Preview Program');
+
+        return $this->data(['success' => $email->send()]);
+    }
+
+
+	protected function activate_email($params)
+	{
+		$view = View::factory('email/activation-email', $params);
+
+        $email = Email::factory("Welcome to RealtAsia", strip_tags($view->render()))
+          ->message($view, 'text/html')
+          ->to($params['email'], $params['name'])
+          ->from('[REDACTED]', 'Realtasia Preview Program');
+		  
+		  try
+		  {
+		  	$email->send();
+		  }
+		  catch(Exception $e)
+		  {
+			  try
+			  {
+			  	$email->send();
+			  }
+			  catch(Exception $e)
+			  {
+				  try
+				  {
+				  	$email->send();
+				  }
+				  catch(Exception $e)
+				  {
+					  try
+					  {
+					  	$email->send();
+					  }
+					  catch(Exception $e)
+					  {
+					  	
+					  }
+				  }
+			  }
+		  }
+
+        return;
+	}
+
+
+
     /**
      * Sends a user an email. Normally for registrations purposes. The official
      * client can use this too.
@@ -1735,7 +1868,7 @@ class Controller_User extends Controller_Resource {
             'header_plain'  => $subject,
             'message_plain' => $message,
             'message'       => View::factory('emails/content/standard')
-              ->set('content_header', "<h3>$subject</h3>")
+              ->set('receipient', $recipient)
               ->set('content_message', $message)
         ];
 
@@ -1751,9 +1884,38 @@ class Controller_User extends Controller_Resource {
         $email = Email::factory($content['header_plain'], $plainview)
           ->message($view, 'text/html')
           ->to($recipient['email'], $recipient['name'])
-          ->from('[REDACTED]', 'Realtasia Beta Program');
-
-        return $email->send();
+          ->from('[REDACTED]', 'Realtasia Preview Program');
+		  
+		  try
+		  {
+		  	$email->send();
+		  }
+		  catch(Exception $e)
+		  {
+			  try
+			  {
+			  	$email->send();
+			  }
+			  catch(Exception $e)
+			  {
+				  try
+				  {
+				  	$email->send();
+				  }
+				  catch(Exception $e)
+				  {
+					  try
+					  {
+					  	$email->send();
+					  }
+					  catch(Exception $e)
+					  {
+					  	
+					  }
+				  }
+			  }
+		  }
+        return;
     }
 
     protected static function ucfirst($str)
