@@ -1109,7 +1109,7 @@ class Controller_User extends Controller_Resource {
 		{
 			$agent = Document::factory('agent', $cuid);
 			$agent->converted = [
-				'date' => \Arr::get($payment, 'payment_date'),
+				'date' => time(),
 				'registered_user' => (string) static::$model->_id
 			];
 			$agent->save();
