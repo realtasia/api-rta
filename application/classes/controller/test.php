@@ -416,8 +416,8 @@ EOD;
 	
 	public function action_childpagecount()
 	{
-		$cursor   = Collection::factory('page')->find(["subtype" => "Estate"]);
-		$parent_ids = [];
+		$cursor   = Collection::factory('page')->find(["subtype" => "Estate", 'counts.locations' => ['$exists' => true]]);
+		$parent_ids = array();
         while ($cursor->hasNext())
 		{
 			
@@ -425,31 +425,23 @@ EOD;
 			$parent_ids[] = $parent->_id;
 			
 			$total = Collection::factory('page')->find(["parent._id" => $parent->_id])->count();
+			print_r($total);
+			$parent->set('counts.locations', $total);
+			$parent->save();
+			$parent->load();
 			
 			print_r([
 				"Name" => $parent->name,
-				"Children" => $total
+				"Children" => $parent->counts
 			]);
-			
-			$parent->counts["locations"] = $total;
-			print_r($parent->save());
-			
+			;
+				
+		
 			echo "\n";
 			echo "*****************************************************************************";
 			echo "\n";
 		}
-		
-		$cursor   = Collection::factory('page')->find([
-			"type" => "location",
-			"subtype" => [
-				'$ne' => "Estate"
-			],
-			"parent._id" => [
-				'$nin' => $parent_ids
-			]
-		])
-		->count();
-		print_r("$cursor location pages found");
+
 	}
 
     public function clear_logs_and_jobs()
