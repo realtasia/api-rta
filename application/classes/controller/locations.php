@@ -829,6 +829,38 @@ class Controller_Locations extends Controller_Resource {
         return ['keywords' => strtolower($text)];
     }
 
+
+	public function action_fixestates()
+	{
+		$estates = Collection::factory('page')
+		->find([
+			'type' => 'location',
+			'subtype' => 'Estate',
+			
+		]);
+		
+		while($estates->hasNext())
+		{
+			$e = $estates->getNext();
+			$children = Collection::factory('page')
+					->find([
+						'$or' => [
+							['parent._id' => $e->_id],
+							['parent.name' => $e->name]
+						]				
+					])->count();
+					
+					$e->set('counts.locations', $children);
+					$e->save();
+					echo "{$e->name}: " . $e->counts['locations'] . " <br>";
+					echo "$children <br>";
+		
+		}
+		
+		
+	}
+
+
     public function action_updatekeywords()
     {
         $c = Collection::factory('page')->find();

@@ -107,7 +107,7 @@ Kohana::modules([
     'image'      => MODPATH . 'image',      // Image manipulation
     'purifier'   => MODPATH . 'purifier',        // Object Relationship Mapping
     'ticker'     => MODPATH . 'ticker',        // Object Relationship Mapping
-	'deploy'	   => MODPATH . 'deploy'       
+	//'deploy'	   => MODPATH . 'deploy'       
 ]);
 
 /**
