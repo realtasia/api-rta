@@ -432,7 +432,7 @@ EOD;
 			]);
 			
 			$parent->counts["locations"] = $total;
-			$parent->save();
+			print_r($parent->save());
 			
 			echo "\n";
 			echo "*****************************************************************************";
