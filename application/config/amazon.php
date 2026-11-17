@@ -3,10 +3,10 @@
 return [
     'credentials' => [
 
-        'key'    => '[REDACTED]',
-        'secret' => '[REDACTED]',
-        //'base_url' => 's3.amazonaws.com',
-        'region' => 'us-east-1'
+        'key'    => 'synthetic-redacted',
+        'secret' => 'synthetic-redacted',
+        //'base_url' => 'synthetic-redacted',
+        'region' => 'synthetic-redacted'
     ],
     'legacySDK'   => [
 
@@ -14,16 +14,16 @@ return [
          * Amazon Web Services Key. Found in the AWS Security Credentials. You can also pass this value as the first
          * parameter to a service constructor.
          */
-        'AWS_KEY'                        => '[REDACTED]',
+        'AWS_KEY'                        => 'synthetic-redacted',
         /**
          * Amazon Web Services Secret Key. Found in the AWS Security Credentials. You can also pass this value as
          * the second parameter to a service constructor.
          */
-        'AWS_SECRET_KEY'                 => '[REDACTED]',
+        'AWS_SECRET_KEY'                 => 'synthetic-redacted',
         /**
          * Amazon Associates ID
          */
-        'AWS_ASSOC_ID'                   => '',
+        'AWS_ASSOC_ID'                   => 'synthetic-redacted',
         /**
          * The locale you want to search in (chooses the endpoint in AmazonPAS::pas_authenticate)
          */
@@ -32,32 +32,32 @@ return [
          * Amazon Account ID without dashes. Used for identification with Amazon EC2. Found in the AWS Security
          * Credentials.
          */
-        'AWS_ACCOUNT_ID'                 => '236693320325',
+        'AWS_ACCOUNT_ID'                 => 'synthetic-redacted',
         /**
          * Your CanonicalUser ID. Used for setting access control settings in AmazonS3. Found in the AWS Security
          * Credentials.
          */
-        'AWS_CANONICAL_ID'               => 'bc9f082e53608d5d04b2d41b68fe49ad5544cde1e71567e32400917b0fe5c5e2',
+        'AWS_CANONICAL_ID'               => 'synthetic-redacted',
         /**
          * Your CanonicalUser DisplayName. Used for setting access control settings in AmazonS3. Found in the AWS
          * Security Credentials (i.e. "Welcome =>AWS_CANONICAL_NAME").
          */
-        'AWS_CANONICAL_NAME'             => 'caroline gordon',
+        'AWS_CANONICAL_NAME'             => 'synthetic-redacted',
         /**
          * 12-digit serial number taken from the Gemalto device used for Multi-Factor Authentication. Ignore this
          * if you're not using MFA.
          */
-        'AWS_MFA_SERIAL'                 => '',
+        'AWS_MFA_SERIAL'                 => 'synthetic-redacted',
         /**
          * Amazon CloudFront key-pair to use for signing private URLs. Found in the AWS Security Credentials. This
          * can be set programmatically with <AmazonCloudFront::set_keypair_id()>.
          */
-        'AWS_CLOUDFRONT_KEYPAIR_ID'      => '',
+        'AWS_CLOUDFRONT_KEYPAIR_ID'      => 'synthetic-redacted',
         /**
          * The contents of the *.pem private key that matches with the CloudFront key-pair ID. Found in the AWS
          * Security Credentials. This can be set programmatically with <AmazonCloudFront::set_private_key()>.
          */
-        'AWS_CLOUDFRONT_PRIVATE_KEY_PEM' => '',
+        'synthetic-redacted-token' => 'synthetic-redacted',
         /**
          * Set the value to true to enable autoloading for classes not prefixed with "Amazon" or "CF". If enabled,
          * load `sdk.class.php` last to avoid clobbering any other autoloaders.

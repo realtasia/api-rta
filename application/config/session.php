@@ -5,24 +5,24 @@
 
 return array(
     'native' => array(
-        'name' => '_session',
+        'name' => 'synthetic-redacted',
         'lifetime' => 43200,
     ),
     'cookie' => array(
-        'name' => '_c_session',
+        'name' => 'synthetic-redacted',
         'encrypted' => TRUE,
         'lifetime' => 43200,
     ),
     'mongo' => array(
-        'name' => '_m_session',
+        'name' => 'synthetic-redacted',
         'encrypted' => TRUE,
         'lifetime' => 43200,
-        'group' => 'default',
-        'table' => 'sessions',
+        'group' => 'synthetic-redacted',
+        'table' => 'synthetic-redacted',
         'columns' => array(
-            'session_id'  => 'session_id',
-            'last_active' => 'last_active',
-            'contents'    => 'contents'
+            'session_id'  => 'synthetic-redacted',
+            'last_active' => 'synthetic-redacted',
+            'contents'    => 'synthetic-redacted'
         ),
         'gc' => 500,
     ),

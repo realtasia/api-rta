@@ -12,7 +12,7 @@ return array(
 	 * be provided when making OAuth requests.
 	 */
 	'twitter' => array(
-		'key' => 'your consumer key',
-		'secret' => 'your consumer secret'
+		'key' => 'synthetic-redacted',
+		'secret' => 'synthetic-redacted'
 	),
 );

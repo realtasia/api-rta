@@ -25,7 +25,7 @@ class Controller_Test extends Controller {
     public function action_do()
     {
         $client_credentals = [
-            'client_id'    => '123456789',
+            'client_id'    => 'synthetic-redacted',
             'redirect_uri' => 'http://jjpc.net',
             'grant_type'   => 'client_credentials',
         ];
@@ -33,21 +33,21 @@ class Controller_Test extends Controller {
         $token = [
             'request_type' => 'registration',
             'user_type'    => 'admin',
-            'access_token' => '[REDACTED]',
+            'access_token' => 'synthetic-redacted-token',
             'state'        => substr(Security::token(), 0, 5),
         ];
 
         $registration = [
             'status'     => 'active',
-            'first_name' => '[REDACTED]',
-            'last_name'  => '[REDACTED]',
-            'name'       => '[REDACTED]',
+            'first_name' => 'synthetic-redacted',
+            'last_name'  => 'synthetic-redacted',
+            'name'       => 'synthetic-redacted',
             'roles'      => ['admin'],
-            'username'   => '[REDACTED]',
-            'password'   => '[REDACTED]',
+            'username'   => 'synthetic-redacted',
+            'password'   => 'synthetic-redacted',
             'uri'        => '/[REDACTED]',
-            'email'      => '[REDACTED]',
-            'info'       => ['gender'    => 'male', 'telephone' => ['mobile' => '[REDACTED]']],
+            'email'      => 'synthetic-redacted',
+            'info'       => ['gender'    => 'male', 'telephone' => ['mobile' => 'synthetic-redacted']],
         ];
 
         $return = [];
@@ -70,7 +70,7 @@ class Controller_Test extends Controller {
     public function action_activate()
     {
         $token = [
-            'access_token' => '[REDACTED]',
+            'access_token' => 'synthetic-redacted-token',
             'state'        => substr(Security::token(), 0, 5),
         ];
 
@@ -117,12 +117,12 @@ class Controller_Test extends Controller {
                 ->set('content_header', $content_header)
                 ->set('content_message', $content_message . $comment_message)
                 ->render();
-//        $content .= View::factory('emails/content/leftimagecontent')
+//        $content .= View::factory('synthetic-redacted-token')
 //              ->set('content_header', View::factory('emails/header/h4')->set('header', '{content_header} for left image layout'))
 //              ->set('content_message', '{content_message} This can be text, table, or anything you want<br />{content_image_url}')
 //              ->set('content_image_url', '{content_image_url}')
 //              ->render();
-//        $content .= View::factory('emails/content/rightimagecontent')
+//        $content .= View::factory('synthetic-redacted-token')
 //              ->set('content_header', View::factory('emails/header/h4')->set('header', '{content_header} for right image layout'))
 //              ->set('content_message', '{content_message} This can be text, table, or anything you want<br />{content_image_url}')
 //              ->set('content_image_url', '{content_image_url}')
@@ -141,11 +141,11 @@ class Controller_Test extends Controller {
 
         Email::factory('Sample template 2', $plainview)
                 ->message($view, 'text/html')
-                //->to('[REDACTED]', '[REDACTED]')
-                ->to('[REDACTED]', '[REDACTED]')
-                //->to('[REDACTED]', '[REDACTED]')
-                //->to('[REDACTED]', '[REDACTED]')
-                ->from('[REDACTED]', '[REDACTED]')
+                //->to('archive-example@example.invalid', '[REDACTED]')
+                ->to('archive-example@example.invalid', '[REDACTED]')
+                //->to('archive-example@example.invalid', '[REDACTED]')
+                //->to('archive-example@example.invalid', '[REDACTED]')
+                ->from('archive-example@example.invalid', '[REDACTED]')
                 ->send();
 
         //die($view);
@@ -191,7 +191,7 @@ class Controller_Test extends Controller {
     {
         $provider = Provider::forge($provider, array(
                     'id'     => '291017440941918',
-                    'secret' => '[REDACTED]',
+                    'secret' => 'synthetic-redacted',
                 ));
 
         if (!isset($_GET['code']))
@@ -285,7 +285,7 @@ EOD;
         $name    = [
             'first_name'  => ucfirst($numword),
             'middle_name' => $mid,
-            'last_name'   => 'Agent',
+            'last_name'   => 'synthetic-redacted',
         ];
         return [
             'first_name'  => $name['first_name'],
@@ -294,14 +294,14 @@ EOD;
             'name'        => $name['first_name'] . ' ' . $name['last_name'],
             'username'    => $numword . '.user',
             'password'    => $numword,
-            'email'       => '[REDACTED]',
+            'email'       => 'synthetic-redacted',
             'designation' => 'Senior Sales Executive',
             'roles'       => ['agent'],
             'avatar'      => [90 => '/agents/images/' . $i . '.jpg',],
             'uri'         => '/' . $numword . '.user',
             'active'      => time(),
             'info'        => [
-                'telephone' => ['mobile' => '[REDACTED]'],
+                'telephone' => ['mobile' => 'synthetic-redacted'],
                 'birthday'  => mt_rand(378691200, 694224000),
                 'gender'    => $gender[array_rand(range(0, 1), 1)],
             ]
@@ -342,7 +342,7 @@ EOD;
             '$addToSet' => array('roles' => 'admin')
         );
         Model::factory('user')->collection->update(
-                array('email' => '[REDACTED]'), $update);
+                array('email' => 'synthetic-redacted'), $update);
     }
 
     public function reset_pages()
@@ -526,7 +526,7 @@ EOD;
     public function action_password()
     {
         //echo static::hash('121481') . '<br>';
-        echo Document::hash('[REDACTED]') . '<br>';
+        echo Document::hash('+65 0000 0000') . '<br>';
         //51a3141e6c01999b0f0000bd
         //51a313b26c0199990f0000c9
     }

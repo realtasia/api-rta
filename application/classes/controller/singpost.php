@@ -589,7 +589,7 @@ class Controller_Singpost extends Controller {
     }
 
     public $host = 'http://maps.google.com.sg';
-    public $key  = '[REDACTED]';
+    public $key  = 'ARCHIVE_REDACTED';
     public $base_url;
 
     public function geocode($obj_add)

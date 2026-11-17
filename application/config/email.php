@@ -5,7 +5,7 @@ return array(
 	 *
 	 * Valid drivers are: native, sendmail, smtp
 	 */
-	'driver' => 'smtp',
+	'driver' => 'synthetic-redacted',
 
 	/**
 	 * To use secure connections with SMTP, set "port" to 465 instead of 25.
@@ -26,17 +26,17 @@ return array(
 	 * @param   array   smtp: hostname, (username), (password), (port), (encryption)
 	 */
 //	'options' => array(
-//        'hostname' => 'smtp.gmail.com',
-//        'username' => 'admin@realtasia.com',
-//        'password' => '8100493',
+//        'hostname' => 'synthetic-redacted',
+//        'username' => 'synthetic-redacted',
+//        'password' => 'synthetic-redacted',
 //        'port'    => 465,
-//        'encryption' => 'ssl'
+//        'encryption' => 'synthetic-redacted'
 //      )
 	'options' => array(
-         'hostname' => 'email-smtp.us-east-1.amazonaws.com',
-         'username' => '[REDACTED]',
-         'password' => '[REDACTED]',
+         'hostname' => 'synthetic-redacted',
+         'username' => 'synthetic-redacted',
+         'password' => 'synthetic-redacted',
          'port' => 465,
-         'encryption' => 'ssl',
+         'encryption' => 'synthetic-redacted',
       )
 );

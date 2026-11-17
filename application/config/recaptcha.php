@@ -4,6 +4,6 @@
     */
 
 return array(
-  'publickey' => '',
-  'privatekey' => ''
+  'publickey' => 'synthetic-redacted',
+  'privatekey' => 'synthetic-redacted'
 );

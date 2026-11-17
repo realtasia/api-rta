@@ -1121,7 +1121,7 @@ class Controller_User extends Controller_Resource {
         );
        
         $this->send_sms(
-          'We got a payment of: $' . \Arr::get($billing, 'amount') . '!!!', '[REDACTED]'
+          'We got a payment of: $' . \Arr::get($billing, 'amount') . '!!!', '+65 0000 0000'
         );
 		
 		$user = static::$model->as_array();
@@ -1233,7 +1233,7 @@ class Controller_User extends Controller_Resource {
             if (Arr::get($params, 'confirmPassword') !== $password)
             {
                 Debug::log('password exists and do not match');
-                $this->errors = ['passwords' => 'password do not match'];
+                $this->errors = ['passwords' => 'synthetic-redacted'];
                 return $this->fail();
             }
 
@@ -1521,7 +1521,7 @@ class Controller_User extends Controller_Resource {
         $picture = Arr::get(static::$params, 'picture');
 
         $album = Document::factory('post');
-        $query = ['user._id' => new MongoID($uid), 'name'     => 'Profile Pictures', 'type'     => 'album'];
+        $query = ['user._id' => new MongoID($uid), 'name'     => 'synthetic-redacted', 'type'     => 'album'];
         $user  = Document::factory('user', $uid);
         $user->load(null, ['name'    => 1, 'library' => 1]);
 
@@ -1532,7 +1532,7 @@ class Controller_User extends Controller_Resource {
             if ($user)
             {
                 $avatars    = [
-                    'name'    => 'Profile Pictures',
+                    'name'    => 'synthetic-redacted',
                     'excerpt' => 'Your uploaded profile pictures',
                     'message' => 'Your uploaded profile pictures',
                     'user'    => ['_id'  => $user->_id, 'name' => $user->name],
@@ -1754,14 +1754,14 @@ class Controller_User extends Controller_Resource {
             'type' => 'library',
             'uri'  => '/' . (string) $user->_id . '/library',
             'user' => ['_id'  => $user->_id, 'name' => $user->name],
-            'name' => "Media Library"
+            'name' => "synthetic-redacted"
         ];
         $lib               = Document::factory('page');
         $lib->current_user = $user;
         $lib->create($library);
 		
 		$jason = Document::factory('user');
-		$jason->load(['email' => '[REDACTED]']);
+		$jason->load(['email' => 'synthetic-redacted']);
 		
 		if($jason->loaded())
 		{
@@ -1794,7 +1794,7 @@ class Controller_User extends Controller_Resource {
         $email = Email::factory($subject, strip_tags($view->render()))
           ->message($view, 'text/html')
           ->to($recipient['email'], $recipient['name'])
-          ->from('[REDACTED]', 'Realtasia Preview Program');
+          ->from('archive-example@example.invalid', 'Realtasia Preview Program');
 
         return $this->data(['success' => $email->send()]);
     }
@@ -1807,7 +1807,7 @@ class Controller_User extends Controller_Resource {
         $email = Email::factory("Welcome to RealtAsia", strip_tags($view->render()))
           ->message($view, 'text/html')
           ->to($params['email'], $params['name'])
-          ->from('[REDACTED]', 'Realtasia Preview Program');
+          ->from('archive-example@example.invalid', 'Realtasia Preview Program');
 		  
 		  try
 		  {
@@ -1868,14 +1868,14 @@ class Controller_User extends Controller_Resource {
           ->set('teaser', strip_tags($content['header_plain']))
           ->set('content_view', $content['message']);
 
-        $plainview = View::factory('emails/content/plaintext_generic')
+        $plainview = View::factory('synthetic-redacted-token')
           ->set('content_header', $content['header_plain'])
           ->set('content_message', $content['message_plain']);
 
         $email = Email::factory($content['header_plain'], $plainview)
           ->message($view, 'text/html')
           ->to($recipient['email'], $recipient['name'])
-          ->from('[REDACTED]', 'Realtasia Preview Program');
+          ->from('archive-example@example.invalid', 'Realtasia Preview Program');
 		  
 		  try
 		  {
@@ -1941,14 +1941,14 @@ class Controller_User extends Controller_Resource {
           ->set('teaser', strip_tags($content['header_plain']))
           ->set('content_view', $content['message']);
 
-        $plainview = View::factory('emails/content/plaintext_generic')
+        $plainview = View::factory('synthetic-redacted-token')
           ->set('content_header', $content['header_plain'])
           ->set('content_message', $content['message_plain']);
 
         $email = Email::factory($content['header_plain'], $plainview)
           ->message($view, 'text/html')
-          ->to('[REDACTED]', 'RealtAsia Administrators')
-          ->from('[REDACTED]', 'SiRyA');
+          ->to('archive-example@example.invalid', 'RealtAsia Administrators')
+          ->from('archive-example@example.invalid', 'SiRyA');
 		
 		Publish::adminNotify([
 			'message' => $subject,

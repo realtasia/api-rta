@@ -313,7 +313,7 @@ class Controller_Locations extends Controller_Resource {
      *   'ids   => [], //of singpost document ids to update
      *   'data' => [
      *      **estate  => 'name', ** // name of estate
-     *      **name    => 'name', ** // the name of the new location
+     *      **name    => 'synthetic-redacted', ** // the name of the new location
      *      **subtype => 'name', ** // the location subtype 'private-apartments' etc
      *   ]
      * ]
@@ -451,7 +451,7 @@ class Controller_Locations extends Controller_Resource {
      *
      * needs a $_POST with the following:[
      *     estate  => 'name', ** // name of estate
-     *     name    => 'name', ** // the name of the new location
+     *     name    => 'synthetic-redacted', ** // the name of the new location
      *     subtype => 'subtype', ** // the location subtype 'private-apartments' etc
      *     property_type => 'property_type', ** // the property_type, if available
      * ]
@@ -575,8 +575,8 @@ class Controller_Locations extends Controller_Resource {
     /**
      * Splits a keyword into as many forms as queriable to return better results
      *
-     * ObjectId("50ed2599b90fb8c81700003f")
-     * ObjectId("50ed2578b90fb8c81700003e")
+     * ObjectId("50ed2599b90fb8c+65 0000 0000f")
+     * ObjectId("50ed2578b90fb8c+65 0000 0000e")
      *
      * @param string $text
      * @param boolean $result

@@ -104,9 +104,9 @@ class Controller_Testpad extends Controller {
 //        $c->ensureIndex(['number' => 1]);
 //        $c->ensureIndex(['street' => 1]);
 //        $c->ensureIndex(['address' => 1]);
-        //$projects = $c->distinct('building', ['address' => 'Condominium', 'child' => null]);
-        //$projects = $c->update(['child' => ['$ne' => null], 'type' => null, 'address' => 'HDB']);
-        $projects = $c->find(['child' => ['$ne' => null], 'address' => 'HDB']);
+        //$projects = $c->distinct('building', ['address' => 'synthetic-redacted', 'child' => null]);
+        //$projects = $c->update(['child' => ['$ne' => null], 'type' => null, 'address' => 'synthetic-redacted']);
+        $projects = $c->find(['child' => ['$ne' => null], 'address' => 'synthetic-redacted']);
 
         while($projects->hasNext())
         {
@@ -194,7 +194,7 @@ class Controller_Testpad extends Controller {
     public function action_onemap()
     {
         echo "<pre>";
-        $a = 'qo/s2TnSUmfLz+32CvLC4RMVkzEFYjxqyti1KhByvEacEdMWBpCuSSQ+IFRT84QjGPBCuz/cBom8PfSm3GjEsGc8PkdEEOEr';
+        $a = 'synthetic-redacted-token';
         $headers = [
             'Host' => 'www.onemap.sg',
             'Origin' => 'http://www.onemap.sg',
@@ -383,7 +383,7 @@ class Controller_Testpad extends Controller {
             'interested' => 0,
             'rep'        => [
                 'id'   => $two,
-                'name' => 'Chris',
+                'name' => 'synthetic-redacted',
                 'type' => 'website'
             ]
         ];
@@ -400,7 +400,7 @@ class Controller_Testpad extends Controller {
             'interested' => 0,
             'rep'        => [
                 'id'   => $one,
-                'name' => 'Jason',
+                'name' => 'synthetic-redacted',
                 'type' => 'website'
             ]
         ];
@@ -417,7 +417,7 @@ class Controller_Testpad extends Controller {
             'interested' => 0,
             'rep'        => [
                 'id'   => $two,
-                'name' => 'Chris',
+                'name' => 'synthetic-redacted',
                 'type' => 'website'
             ]
         ];
@@ -434,7 +434,7 @@ class Controller_Testpad extends Controller {
             'interested' => 0,
             'rep'        => [
                 'id'   => $one,
-                'name' => 'Jason',
+                'name' => 'synthetic-redacted',
                 'type' => 'website'
             ]
         ];
@@ -451,7 +451,7 @@ class Controller_Testpad extends Controller {
             'interested' => 0,
             'rep'        => [
                 'id'   => $two,
-                'name' => 'Chris',
+                'name' => 'synthetic-redacted',
                 'type' => 'presentation'
             ]
         ];
@@ -468,7 +468,7 @@ class Controller_Testpad extends Controller {
             'interested' => 0,
             'rep'        => [
                 'id'   => $one,
-                'name' => 'Jason',
+                'name' => 'synthetic-redacted',
                 'type' => 'presentation'
             ]
         ];
@@ -485,7 +485,7 @@ class Controller_Testpad extends Controller {
             'interested' => 0,
             'rep'        => [
                 'id'   => $two,
-                'name' => 'Chris',
+                'name' => 'synthetic-redacted',
                 'type' => 'presentation'
             ]
         ];
@@ -502,7 +502,7 @@ class Controller_Testpad extends Controller {
             'interested' => 0,
             'rep'        => [
                 'id'   => $one,
-                'name' => 'Jason',
+                'name' => 'synthetic-redacted',
                 'type' => 'presentation'
             ]
         ];
@@ -537,7 +537,7 @@ class Controller_Testpad extends Controller {
         //print_r($r->getNext()->as_array());
 //        $query = [
 //            'rep' => ['$exists' => true],
-//            'rep.name' => 'Chris'
+//            'rep.name' => 'synthetic-redacted'
 //        ];
 //        echo "<h1>Chris Contacted</h1>";
 //        $r = Collection::factory('test')->find($query)->limit(2)->count(false);
